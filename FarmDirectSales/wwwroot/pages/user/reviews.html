@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的评价 - 本地特色农产品直销系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- 自定义样式 -->
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        .review-card {
+            margin-bottom: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .review-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+        }
+        .star-rating {
+            color: #ffc107;
+        }
+        .tab-content {
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-leaf text-success me-2"></i>农产品直销系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/products.html">产品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/farmers.html">农户展示</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/statistics.html">销售统计</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/about.html">关于我们</a>
+                    </li>
+                </ul>
+                
+                <!-- 未登录状态 -->
+                <div class="d-flex" id="unauthenticated-menu">
+                    <a href="/pages/login.html" class="btn btn-outline-success me-2">登录</a>
+                    <a href="/pages/register.html" class="btn btn-success">注册</a>
+                </div>
+                
+                <!-- 已登录状态 -->
+                <div class="d-none" id="authenticated-menu">
+                    <a href="/pages/cart.html" class="btn btn-outline-success me-2" title="购物车">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <div class="dropdown d-inline-block">
+                        <button class="btn btn-outline-success dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="username">用户名</span>
+                            <span class="badge bg-success ms-1">已登录</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                            <li><a class="dropdown-item" href="/pages/user/profile.html"><i class="fas fa-user me-2"></i>个人中心</a></li>
+                            <li><a class="dropdown-item" href="/pages/user/orders.html"><i class="fas fa-shopping-cart me-2"></i>我的订单</a></li>
+                            <li><a class="dropdown-item active" href="/pages/user/reviews.html"><i class="fas fa-star me-2"></i>我的评价</a></li>
+                            <li id="farmer-menu-item" class="d-none"><a class="dropdown-item" href="/pages/farmer/dashboard.html"><i class="fas fa-tractor me-2"></i>农户中心</a></li>
+                            <li id="admin-menu-item" class="d-none"><a class="dropdown-item" href="/pages/admin/dashboard.html"><i class="fas fa-cogs me-2"></i>管理后台</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container py-5">
+        <h2 class="mb-4">我的评价</h2>
+        
+        <!-- 选项卡 -->
+        <ul class="nav nav-tabs" id="reviewTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="to-review-tab" data-bs-toggle="tab" data-bs-target="#to-review" type="button" role="tab" aria-controls="to-review" aria-selected="true">
+                    待评价 <span class="badge bg-danger" id="to-review-count">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reviewed-tab" data-bs-toggle="tab" data-bs-target="#reviewed" type="button" role="tab" aria-controls="reviewed" aria-selected="false">
+                    已评价 <span class="badge bg-secondary" id="reviewed-count">0</span>
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="reviewTabsContent">
+            <!-- 待评价标签页 -->
+            <div class="tab-pane fade show active" id="to-review" role="tabpanel" aria-labelledby="to-review-tab">
+                <!-- 加载中占位符 -->
+                <div class="text-center py-5" id="to-review-loading">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <p class="mt-2">正在加载待评价订单...</p>
+                </div>
+                
+                <!-- 待评价列表 -->
+                <div id="to-review-list"></div>
+                
+                <!-- 暂无待评价订单提示 -->
+                <div id="no-to-review" class="text-center py-5 d-none">
+                    <i class="fas fa-comment-slash fa-4x text-muted mb-3"></i>
+                    <h4>暂无待评价订单</h4>
+                    <p class="text-muted">您目前没有需要评价的已完成订单</p>
+                </div>
+            </div>
+            
+            <!-- 已评价标签页 -->
+            <div class="tab-pane fade" id="reviewed" role="tabpanel" aria-labelledby="reviewed-tab">
+                <!-- 加载中占位符 -->
+                <div class="text-center py-5" id="reviewed-loading">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <p class="mt-2">正在加载已评价订单...</p>
+                </div>
+                
+                <!-- 已评价列表 -->
+                <div id="reviewed-list"></div>
+                
+                <!-- 暂无已评价订单提示 -->
+                <div id="no-reviewed" class="text-center py-5 d-none">
+                    <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                    <h4>暂无已评价订单</h4>
+                    <p class="text-muted">您还没有对任何商品进行评价</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 评价模态框 -->
+        <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reviewModalLabel">发表评价</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="review-form">
+                            <input type="hidden" id="order-id" name="orderId">
+                            <input type="hidden" id="product-id" name="productId">
+                            
+                            <div class="mb-3">
+                                <label class="form-label">评分</label>
+                                <div class="rating-input">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="rating" id="rating1" value="1">
+                                        <label class="form-check-label" for="rating1">1分</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="rating" id="rating2" value="2">
+                                        <label class="form-check-label" for="rating2">2分</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="rating" id="rating3" value="3" checked>
+                                        <label class="form-check-label" for="rating3">3分</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="rating" id="rating4" value="4">
+                                        <label class="form-check-label" for="rating4">4分</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="rating" id="rating5" value="5">
+                                        <label class="form-check-label" for="rating5">5分</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="content" class="form-label">评价内容</label>
+                                <textarea class="form-control" id="content" name="content" rows="3" placeholder="请分享您对该产品的使用体验..." required></textarea>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="isAnonymous" name="isAnonymous">
+                                <label class="form-check-label" for="isAnonymous">匿名评价</label>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-success" id="submit-review-btn">提交评价</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5>关于我们</h5>
+                    <p class="text-muted">本地特色农产品直销系统，致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收。</p>
+                </div>
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <h5>快速链接</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-decoration-none text-muted">首页</a></li>
+                        <li><a href="/pages/products.html" class="text-decoration-none text-muted">产品列表</a></li>
+                        <li><a href="/pages/farmers.html" class="text-decoration-none text-muted">农户展示</a></li>
+                        <li><a href="/pages/statistics.html" class="text-decoration-none text-muted">销售统计</a></li>
+                        <li><a href="/pages/about.html" class="text-decoration-none text-muted">关于我们</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-3 mb-md-0">
+                    <h5>帮助</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/pages/faq.html" class="text-decoration-none text-muted">常见问题</a></li>
+                        <li><a href="/pages/shipping.html" class="text-decoration-none text-muted">配送政策</a></li>
+                        <li><a href="/pages/return.html" class="text-decoration-none text-muted">退换政策</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>联系我们</h5>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 地址：广东省广州市白云区</li>
+                        <li><i class="fas fa-phone me-2"></i> 电话：123-456-7890</li>
+                        <li><i class="fas fa-envelope me-2"></i> 邮箱：info@farmshop.com</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center text-muted">
+                <small>&copy; 2023 农产品直销系统. 保留所有权利.</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- API 调用 -->
+    <script src="/js/api.js"></script>
+    <!-- 评价模块 -->
+    <script src="/js/reviews.js"></script>
+    
+    <!-- 评价页面逻辑 -->
+    <script>
+        // API基础URL
+        const API_BASE_URL = '/api';
+        
+        // 全局变量
+        let toReviewOrders = [];
+        let reviewedOrders = [];
+        let currentOrderId = null;
+        let currentProductId = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查用户登录状态
+            if (!checkAuthStatus()) {
+                // 未登录跳转到登录页
+                window.location.href = '/pages/login.html?redirect=user/reviews';
+                return;
+            }
+            
+            // 加载待评价和已评价订单
+            loadReviewData();
+            
+            // 设置登出按钮事件
+            document.getElementById('logout-button').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+            
+            // 设置提交评价按钮事件
+            document.getElementById('submit-review-btn').addEventListener('click', submitReview);
+            
+            // 加载时显示正确的标签页
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            if (tab === 'reviewed') {
+                const reviewedTab = new bootstrap.Tab(document.getElementById('reviewed-tab'));
+                reviewedTab.show();
+            }
+        });
+        
+        // 检查用户登录状态
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (token && user && user.userId) {
+                // 已登录
+                document.getElementById('unauthenticated-menu').classList.add('d-none');
+                document.getElementById('authenticated-menu').classList.remove('d-none');
+                
+                // 设置用户名
+                document.getElementById('username').textContent = user.username || '用户';
+                
+                // 根据角色显示不同的菜单项
+                if (user.role === 'farmer') {
+                    document.getElementById('farmer-menu-item').classList.remove('d-none');
+                } else if (user.role === 'admin') {
+                    document.getElementById('admin-menu-item').classList.remove('d-none');
+                }
+                
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/index.html';
+        }
+        
+        // 获取请求头
+        function getHeaders() {
+            const token = localStorage.getItem('token');
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': token ? `Bearer ${token}` : ''
+            };
+        }
+        
+        // 处理API响应
+        async function handleResponse(response) {
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || '请求失败');
+            }
+            return data;
+        }
+        
+        // 加载评价数据
+        async function loadReviewData() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            try {
+                // 显示加载状态
+                document.getElementById('to-review-loading').classList.remove('d-none');
+                document.getElementById('reviewed-loading').classList.remove('d-none');
+                
+                // 调用订单API获取用户的所有订单
+                const response = await fetch(`${API_BASE_URL}/orders/user`, {
+                    method: 'GET',
+                    headers: getHeaders()
+                });
+                
+                const data = await handleResponse(response);
+                
+                if (data.code === 200) {
+                    const orders = data.data || [];
+                    
+                    // 分离待评价和已评价订单
+                    toReviewOrders = orders.filter(order => 
+                        order.status === '已完成' && !order.isReviewed
+                    );
+                    
+                    reviewedOrders = orders.filter(order => 
+                        order.isReviewed
+                    );
+                    
+                    // 更新标签页计数
+                    document.getElementById('to-review-count').textContent = toReviewOrders.length;
+                    document.getElementById('reviewed-count').textContent = reviewedOrders.length;
+                    
+                    // 渲染订单列表
+                    renderToReviewOrders();
+                    renderReviewedOrders();
+                } else {
+                    throw new Error(data.message || '获取订单列表失败');
+                }
+            } catch (error) {
+                console.error('加载评价数据失败:', error);
+                document.getElementById('to-review-list').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        加载数据失败: ${error.message}
+                    </div>
+                `;
+                document.getElementById('reviewed-list').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        加载数据失败: ${error.message}
+                    </div>
+                `;
+            } finally {
+                // 隐藏加载状态
+                document.getElementById('to-review-loading').classList.add('d-none');
+                document.getElementById('reviewed-loading').classList.add('d-none');
+            }
+        }
+        
+        // 渲染待评价订单
+        function renderToReviewOrders() {
+            const container = document.getElementById('to-review-list');
+            
+            if (toReviewOrders.length === 0) {
+                document.getElementById('no-to-review').classList.remove('d-none');
+                container.innerHTML = '';
+                return;
+            }
+            
+            document.getElementById('no-to-review').classList.add('d-none');
+            
+            let html = '';
+            
+            toReviewOrders.forEach(order => {
+                html += `
+                    <div class="card review-card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <img src="${order.product.imageUrl || '/img/placeholder.jpg'}" alt="${order.product.productName}" class="product-img me-3">
+                                        <div>
+                                            <h5 class="mb-1">${order.product.productName}</h5>
+                                            <p class="text-muted mb-0">订单号: ${order.orderId} | 完成时间: ${new Date(order.completeTime).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                    <p class="mb-1">数量: ${order.quantity} | 金额: ¥${order.totalPrice.toFixed(2)}</p>
+                                    <p class="text-muted">农户: ${order.product.farmer.username}</p>
+                                </div>
+                                <div class="col-md-4 text-md-end">
+                                    <button class="btn btn-success" onclick="openReviewModal(${order.orderId}, ${order.productId})">
+                                        <i class="fas fa-comment me-2"></i>发表评价
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // 渲染已评价订单
+        function renderReviewedOrders() {
+            const container = document.getElementById('reviewed-list');
+            
+            if (reviewedOrders.length === 0) {
+                document.getElementById('no-reviewed').classList.remove('d-none');
+                container.innerHTML = '';
+                return;
+            }
+            
+            document.getElementById('no-reviewed').classList.add('d-none');
+            
+            let html = '';
+            
+            reviewedOrders.forEach(order => {
+                // 获取评价信息（真实项目中应该从服务器获取）
+                const reviewInfo = {
+                    rating: 5, // 示例评分
+                    content: '非常满意，下次还会购买！', // 示例内容
+                    createTime: new Date() // 示例时间
+                };
+                
+                // 生成星星评分
+                const stars = Array(5).fill(0).map((_, i) => 
+                    i < reviewInfo.rating 
+                        ? '<i class="fas fa-star"></i>' 
+                        : '<i class="far fa-star"></i>'
+                ).join('');
+                
+                html += `
+                    <div class="card review-card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <img src="${order.product.imageUrl || '/img/placeholder.jpg'}" alt="${order.product.productName}" class="product-img me-3">
+                                        <div>
+                                            <h5 class="mb-1">${order.product.productName}</h5>
+                                            <p class="text-muted mb-0">订单号: ${order.orderId} | 评价时间: ${new Date(reviewInfo.createTime).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                    <div class="star-rating mb-2">
+                                        ${stars}
+                                    </div>
+                                    <p class="mb-0">${reviewInfo.content}</p>
+                                </div>
+                                <div class="col-md-4 text-md-end">
+                                    <a href="/pages/product-detail.html?id=${order.productId}" class="btn btn-outline-success">
+                                        <i class="fas fa-eye me-2"></i>查看商品
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // 打开评价模态框
+        function openReviewModal(orderId, productId) {
+            currentOrderId = orderId;
+            currentProductId = productId;
+            
+            // 设置隐藏字段的值
+            document.getElementById('order-id').value = orderId;
+            document.getElementById('product-id').value = productId;
+            
+            // 重置表单
+            document.getElementById('review-form').reset();
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('reviewModal'));
+            modal.show();
+        }
+        
+        // 提交评价
+        async function submitReview() {
+            if (!currentOrderId || !currentProductId) {
+                alert('未指定订单或产品');
+                return;
+            }
+            
+            const form = document.getElementById('review-form');
+            const formData = new FormData(form);
+            
+            // 获取评分
+            const rating = parseInt(formData.get('rating'));
+            // 获取评价内容
+            const content = formData.get('content');
+            // 是否匿名
+            const isAnonymous = formData.get('isAnonymous') === 'on';
+            
+            if (!content.trim()) {
+                alert('请填写评价内容');
+                return;
+            }
+            
+            // 禁用提交按钮防止重复提交
+            const submitBtn = document.getElementById('submit-review-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>提交中...';
+            
+            try {
+                // 调用评价API（真实项目中应根据实际API实现）
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                const response = await fetch(`${API_BASE_URL}/reviews`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        orderId: currentOrderId,
+                        productId: currentProductId,
+                        userId: user.userId,
+                        rating,
+                        content,
+                        isAnonymous
+                    })
+                });
+                
+                const data = await handleResponse(response);
+                
+                if (data.code === 200) {
+                    alert('评价提交成功');
+                    
+                    // 关闭模态框
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('reviewModal'));
+                    modal.hide();
+                    
+                    // 重新加载评价数据
+                    loadReviewData();
+                } else {
+                    throw new Error(data.message || '提交评价失败');
+                }
+            } catch (error) {
+                console.error('提交评价失败:', error);
+                alert(`提交评价失败: ${error.message}`);
+            } finally {
+                // 恢复提交按钮状态
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '提交评价';
+            }
+        }
+    </script>
+</body>
+</html> 
+ 
+ 

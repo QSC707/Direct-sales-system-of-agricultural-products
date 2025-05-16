@@ -1,0 +1,2085 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FarmDirectSales</name>
+    </assembly>
+    <members>
+        <member name="T:FarmDirectSales.Controllers.AdminController">
+            <summary>
+            管理员控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AdminController.#ctor(FarmDirectSales.Services.IUserService,FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AdminController.GetAllUsers">
+            <summary>
+            获取所有用户列表（仅管理员）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AdminController.GetUsersByRole(System.String)">
+            <summary>
+            按角色获取用户列表（仅管理员）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AdminController.ChangeUserRole(System.Int32,FarmDirectSales.Controllers.ChangeRoleRequest)">
+            <summary>
+            更改用户角色（仅管理员）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AdminController.DeleteUser(System.Int32)">
+            <summary>
+            删除用户（仅管理员）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.ChangeRoleRequest">
+            <summary>
+            更改角色请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ChangeRoleRequest.Role">
+            <summary>
+            新角色
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.AuthController">
+            <summary>
+            认证控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AuthController.#ctor(FarmDirectSales.Services.IUserService)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AuthController.Register(FarmDirectSales.Controllers.RegisterRequest)">
+            <summary>
+            用户注册
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AuthController.Login(FarmDirectSales.Controllers.LoginRequest)">
+            <summary>
+            用户登录
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AuthController.GetUserInfo(System.Int32)">
+            <summary>
+            获取用户信息
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AuthController.UpdateUserInfo(System.Int32,FarmDirectSales.Controllers.UpdateUserRequest)">
+            <summary>
+            更新用户信息
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AuthController.ChangePassword(System.Int32,FarmDirectSales.Controllers.ChangePasswordRequest)">
+            <summary>
+            修改密码
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.RegisterRequest">
+            <summary>
+            注册请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RegisterRequest.Username">
+            <summary>
+            用户名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RegisterRequest.Password">
+            <summary>
+            密码
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RegisterRequest.Role">
+            <summary>
+            用户角色
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.LoginRequest">
+            <summary>
+            登录请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.LoginRequest.Username">
+            <summary>
+            用户名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.LoginRequest.Password">
+            <summary>
+            密码
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.UpdateUserRequest">
+            <summary>
+            更新用户信息请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateUserRequest.Username">
+            <summary>
+            用户名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateUserRequest.Email">
+            <summary>
+            邮箱
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateUserRequest.Phone">
+            <summary>
+            手机号
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.ChangePasswordRequest">
+            <summary>
+            修改密码请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ChangePasswordRequest.OldPassword">
+            <summary>
+            旧密码
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ChangePasswordRequest.NewPassword">
+            <summary>
+            新密码
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.CartController">
+            <summary>
+            购物车控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.CartController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.CartController.GetUserCart(System.Int32)">
+            <summary>
+            获取用户购物车
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.CartController.AddToCart(FarmDirectSales.Controllers.AddToCartRequest)">
+            <summary>
+            添加商品到购物车
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.CartController.UpdateCartItem(System.Int32,FarmDirectSales.Controllers.UpdateCartItemRequest)">
+            <summary>
+            更新购物车项数量
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.CartController.DeleteCartItem(System.Int32,FarmDirectSales.Controllers.DeleteCartItemRequest)">
+            <summary>
+            删除购物车项
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.CartController.ClearCart(System.Int32)">
+            <summary>
+            清空购物车
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.AddToCartRequest">
+            <summary>
+            添加到购物车请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddToCartRequest.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddToCartRequest.ProductId">
+            <summary>
+            产品ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddToCartRequest.Quantity">
+            <summary>
+            数量
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.UpdateCartItemRequest">
+            <summary>
+            更新购物车项请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateCartItemRequest.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateCartItemRequest.Quantity">
+            <summary>
+            数量
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.DeleteCartItemRequest">
+            <summary>
+            删除购物车项请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.DeleteCartItemRequest.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.FarmerController">
+            <summary>
+            农户控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.FarmerController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.FarmerController.GetFarmerInfo(System.Int32)">
+            <summary>
+            获取农户信息
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.FarmerController.GetAllFarmers">
+            <summary>
+            获取所有农户列表
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.FarmerController.GetFarmerProducts(System.Int32)">
+            <summary>
+            获取农户的产品列表
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.FarmerController.GetFarmerOrders(System.Int32)">
+            <summary>
+            获取农户的订单列表
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.LogController">
+            <summary>
+            日志控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.LogController.#ctor(FarmDirectSales.Services.ILogService,FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.LogController.GetUserLogs(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            获取用户日志
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.LogController.GetAllLogs(System.Int32,System.Int32)">
+            <summary>
+            获取所有日志（仅管理员）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.LogController.GetLogsByActionType(System.String,System.Int32,System.Int32)">
+            <summary>
+            根据操作类型查询日志（仅管理员）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.OrderController">
+            <summary>
+            订单管理控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.CreateOrder(FarmDirectSales.Controllers.CreateOrderRequest)">
+            <summary>
+            创建订单
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.GetUserOrders(System.Int32)">
+            <summary>
+            获取用户订单列表
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.GetFarmerOrders(System.Int32)">
+            <summary>
+            获取农户订单列表
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.GetOrder(System.Int32)">
+            <summary>
+            获取订单详情
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.PayOrder(System.Int32,FarmDirectSales.Controllers.PayOrderRequest)">
+            <summary>
+            支付订单
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.ShipOrder(System.Int32,FarmDirectSales.Controllers.ShipOrderRequest)">
+            <summary>
+            发货
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.CompleteOrder(System.Int32,FarmDirectSales.Controllers.CompleteOrderRequest)">
+            <summary>
+            确认收货
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.CancelOrder(System.Int32,FarmDirectSales.Controllers.CancelOrderRequest)">
+            <summary>
+            取消订单
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.CreateOrderRequest">
+            <summary>
+            创建订单请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CreateOrderRequest.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CreateOrderRequest.ProductId">
+            <summary>
+            产品ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CreateOrderRequest.Quantity">
+            <summary>
+            购买数量
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CreateOrderRequest.ShippingAddress">
+            <summary>
+            收货地址
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CreateOrderRequest.ContactPhone">
+            <summary>
+            联系电话
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.PayOrderRequest">
+            <summary>
+            支付订单请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.PayOrderRequest.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.ShipOrderRequest">
+            <summary>
+            发货请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ShipOrderRequest.FarmerId">
+            <summary>
+            农户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.CompleteOrderRequest">
+            <summary>
+            确认收货请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CompleteOrderRequest.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.CancelOrderRequest">
+            <summary>
+            取消订单请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CancelOrderRequest.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.ProductController">
+            <summary>
+            产品管理控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ProductController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ProductController.GetProducts">
+            <summary>
+            获取所有产品
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ProductController.GetProduct(System.Int32)">
+            <summary>
+            获取产品详情
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ProductController.AddProduct(FarmDirectSales.Controllers.AddProductRequest)">
+            <summary>
+            添加产品
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ProductController.UpdateProduct(System.Int32,FarmDirectSales.Controllers.UpdateProductRequest)">
+            <summary>
+            更新产品
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ProductController.DeleteProduct(System.Int32,FarmDirectSales.Controllers.DeleteProductRequest)">
+            <summary>
+            删除产品（软删除）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.AddProductRequest">
+            <summary>
+            添加产品请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.ProductName">
+            <summary>
+            产品名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.Description">
+            <summary>
+            产品描述
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.Price">
+            <summary>
+            产品价格
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.Stock">
+            <summary>
+            库存数量
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.ImageUrl">
+            <summary>
+            产品图片URL
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.FarmerId">
+            <summary>
+            农户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.UpdateProductRequest">
+            <summary>
+            更新产品请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.ProductName">
+            <summary>
+            产品名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.Description">
+            <summary>
+            产品描述
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.Price">
+            <summary>
+            产品价格
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.Stock">
+            <summary>
+            库存数量
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.ImageUrl">
+            <summary>
+            产品图片URL
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.FarmerId">
+            <summary>
+            农户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.DeleteProductRequest">
+            <summary>
+            删除产品请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.DeleteProductRequest.FarmerId">
+            <summary>
+            农户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.ReviewController">
+            <summary>
+            商品评价控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ReviewController.#ctor(FarmDirectSales.Services.IReviewService,FarmDirectSales.Services.ILogService)">
+            <summary>
+            构造函数
+            </summary>
+            <param name="reviewService">评价服务</param>
+            <param name="logService">日志服务</param>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ReviewController.GetProductReviews(System.Int32)">
+            <summary>
+            获取产品的所有评价
+            </summary>
+            <param name="productId">产品ID</param>
+            <returns>评价列表</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ReviewController.GetUserReviews">
+            <summary>
+            获取用户的所有评价
+            </summary>
+            <returns>评价列表</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ReviewController.GetOrderReview(System.Int32)">
+            <summary>
+            获取订单的评价
+            </summary>
+            <param name="orderId">订单ID</param>
+            <returns>评价信息</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ReviewController.AddReview(FarmDirectSales.Models.Review)">
+            <summary>
+            添加产品评价
+            </summary>
+            <param name="review">评价信息</param>
+            <returns>操作结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ReviewController.UpdateReview(System.Int32,FarmDirectSales.Models.Review)">
+            <summary>
+            更新产品评价
+            </summary>
+            <param name="id">评价ID</param>
+            <param name="review">评价信息</param>
+            <returns>操作结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ReviewController.DeleteReview(System.Int32)">
+            <summary>
+            删除产品评价
+            </summary>
+            <param name="id">评价ID</param>
+            <returns>操作结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ReviewController.GetProductRating(System.Int32)">
+            <summary>
+            计算产品平均评分
+            </summary>
+            <param name="productId">产品ID</param>
+            <returns>平均评分</returns>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.StatisticsController">
+            <summary>
+            销售统计分析控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.StatisticsController.#ctor(FarmDirectSales.Services.IStatisticsService,FarmDirectSales.Services.ILogService)">
+            <summary>
+            构造函数
+            </summary>
+            <param name="statisticsService">统计服务</param>
+            <param name="logService">日志服务</param>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.StatisticsController.GetSalesOverview(FarmDirectSales.Models.SalesFilter)">
+            <summary>
+            获取销售总览数据
+            </summary>
+            <param name="filter">筛选条件</param>
+            <returns>销售总览数据</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.StatisticsController.GetDailySalesTrend(FarmDirectSales.Models.SalesFilter)">
+            <summary>
+            获取每日销售趋势
+            </summary>
+            <param name="filter">筛选条件</param>
+            <returns>每日销售趋势数据</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.StatisticsController.GetMonthlySalesTrend(FarmDirectSales.Models.SalesFilter)">
+            <summary>
+            获取每月销售趋势
+            </summary>
+            <param name="filter">筛选条件</param>
+            <returns>每月销售趋势数据</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.StatisticsController.GetTopProducts(FarmDirectSales.Models.SalesFilter,System.Int32)">
+            <summary>
+            获取产品销售排名
+            </summary>
+            <param name="filter">筛选条件</param>
+            <param name="top">返回数量</param>
+            <returns>产品销售排名</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.StatisticsController.GetTopFarmers(FarmDirectSales.Models.SalesFilter,System.Int32)">
+            <summary>
+            获取农户销售排名
+            </summary>
+            <param name="filter">筛选条件</param>
+            <param name="top">返回数量</param>
+            <returns>农户销售排名</returns>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.TraceController">
+            <summary>
+            溯源信息控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.TraceController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.TraceController.GetProductTraces(System.Int32)">
+            <summary>
+            获取产品的溯源信息
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.TraceController.GetTrace(System.Int32)">
+            <summary>
+            获取溯源信息详情
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.TraceController.AddTrace(FarmDirectSales.Controllers.AddTraceRequest)">
+            <summary>
+            添加溯源信息
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.TraceController.UpdateTrace(System.Int32,FarmDirectSales.Controllers.UpdateTraceRequest)">
+            <summary>
+            更新溯源信息
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.TraceController.DeleteTrace(System.Int32,FarmDirectSales.Controllers.DeleteTraceRequest)">
+            <summary>
+            删除溯源信息
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.AddTraceRequest">
+            <summary>
+            添加溯源信息请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddTraceRequest.ProductId">
+            <summary>
+            产品ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddTraceRequest.FarmerId">
+            <summary>
+            农户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddTraceRequest.SourcePlace">
+            <summary>
+            产地信息
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddTraceRequest.PlantingMethod">
+            <summary>
+            种植/养殖方式
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddTraceRequest.PlantingTime">
+            <summary>
+            种植/养殖时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddTraceRequest.HarvestTime">
+            <summary>
+            收获时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddTraceRequest.QualityLevel">
+            <summary>
+            质量等级
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddTraceRequest.IsOrganic">
+            <summary>
+            是否有机认证
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddTraceRequest.AdditionalInfo">
+            <summary>
+            附加信息
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.UpdateTraceRequest">
+            <summary>
+            更新溯源信息请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateTraceRequest.FarmerId">
+            <summary>
+            农户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateTraceRequest.SourcePlace">
+            <summary>
+            产地信息
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateTraceRequest.PlantingMethod">
+            <summary>
+            种植/养殖方式
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateTraceRequest.PlantingTime">
+            <summary>
+            种植/养殖时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateTraceRequest.HarvestTime">
+            <summary>
+            收获时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateTraceRequest.QualityLevel">
+            <summary>
+            质量等级
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateTraceRequest.IsOrganic">
+            <summary>
+            是否有机认证
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateTraceRequest.AdditionalInfo">
+            <summary>
+            附加信息
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.DeleteTraceRequest">
+            <summary>
+            删除溯源信息请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.DeleteTraceRequest.FarmerId">
+            <summary>
+            农户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.UploadController">
+            <summary>
+            文件上传控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UploadController.#ctor(FarmDirectSales.Services.IUploadService,FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UploadController.UploadSingleFile(Microsoft.AspNetCore.Http.IFormFile,System.Nullable{System.Int32})">
+            <summary>
+            上传单个文件
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UploadController.UploadMultipleFiles(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Nullable{System.Int32})">
+            <summary>
+            上传多个文件
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UploadController.GetProductUploads(System.Int32)">
+            <summary>
+            获取产品图片列表
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UploadController.DeleteUpload(System.Int32)">
+            <summary>
+            删除上传的文件
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Data.ApplicationDbContext">
+            <summary>
+            应用程序数据库上下文
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Data.ApplicationDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{FarmDirectSales.Data.ApplicationDbContext})">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.Users">
+            <summary>
+            用户表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.Products">
+            <summary>
+            产品表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.Orders">
+            <summary>
+            订单表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.Traces">
+            <summary>
+            溯源表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.Logs">
+            <summary>
+            日志表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.Uploads">
+            <summary>
+            上传文件表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.Reviews">
+            <summary>
+            商品评价表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.CartItems">
+            <summary>
+            购物车项表
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Data.ApplicationDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>
+            模型创建
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Middlewares.JwtMiddleware">
+            <summary>
+            JWT认证中间件
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Middlewares.JwtMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Middlewares.JwtMiddleware.Invoke(Microsoft.AspNetCore.Http.HttpContext,FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            中间件处理方法
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Middlewares.JwtMiddleware.AttachUserToContext(Microsoft.AspNetCore.Http.HttpContext,FarmDirectSales.Data.ApplicationDbContext,System.String)">
+            <summary>
+            将用户信息附加到上下文
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Middlewares.LoggingMiddleware">
+            <summary>
+            日志中间件
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Middlewares.LoggingMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Middlewares.LoggingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            中间件处理方法
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Middlewares.LoggingMiddlewareExtensions">
+            <summary>
+            日志中间件扩展方法
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Middlewares.LoggingMiddlewareExtensions.UseLogging(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            使用日志中间件
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Migrations.InitialMigration">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.InitialMigration.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.InitialMigration.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.InitialMigration.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddTraceTable">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddTraceTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddTraceTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddTraceTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddLogTable">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddLogTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddLogTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddLogTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddUploadModel">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddUploadModel.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddUploadModel.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddUploadModel.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddAverageRatingColumn">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddAverageRatingColumn.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddAverageRatingColumn.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddAverageRatingColumn.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddCartTable">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddCartTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddCartTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddCartTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddUserProfileFields">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddUserProfileFields.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddUserProfileFields.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddUserProfileFields.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Models.CartItem">
+            <summary>
+            购物车项模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.CartItem.CartItemId">
+            <summary>
+            购物车项ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.CartItem.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.CartItem.ProductId">
+            <summary>
+            产品ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.CartItem.Quantity">
+            <summary>
+            数量
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.CartItem.CreateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.CartItem.UpdateTime">
+            <summary>
+            更新时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.CartItem.User">
+            <summary>
+            用户导航属性
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.CartItem.Product">
+            <summary>
+            产品导航属性
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.Log">
+            <summary>
+            日志模型类
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Log.LogId">
+            <summary>
+            日志ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Log.UserId">
+            <summary>
+            用户ID（外键）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Log.ActionType">
+            <summary>
+            操作类型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Log.Description">
+            <summary>
+            操作内容
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Log.IpAddress">
+            <summary>
+            IP地址
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Log.TargetId">
+            <summary>
+            操作对象ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Log.TargetType">
+            <summary>
+            操作对象类型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Log.IsSuccess">
+            <summary>
+            操作状态（成功/失败）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Log.ActionTime">
+            <summary>
+            操作时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Log.User">
+            <summary>
+            用户信息（导航属性）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.Order">
+            <summary>
+            订单模型类
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.OrderId">
+            <summary>
+            订单ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.UserId">
+            <summary>
+            用户ID（外键）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.ProductId">
+            <summary>
+            产品ID（外键）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.Quantity">
+            <summary>
+            购买数量
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.TotalPrice">
+            <summary>
+            订单总价
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.Status">
+            <summary>
+            订单状态（未支付、待发货、已完成）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.CreateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.PayTime">
+            <summary>
+            支付时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.ShipTime">
+            <summary>
+            发货时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.CompleteTime">
+            <summary>
+            完成时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.ShippingAddress">
+            <summary>
+            收货地址
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.ContactPhone">
+            <summary>
+            联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.IsReviewed">
+            <summary>
+            是否已评价
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.User">
+            <summary>
+            用户信息（导航属性）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.Product">
+            <summary>
+            产品信息（导航属性）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.Review">
+            <summary>
+            订单评价（导航属性）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.Product">
+            <summary>
+            产品模型类
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.ProductId">
+            <summary>
+            产品ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.ProductName">
+            <summary>
+            产品名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.Description">
+            <summary>
+            产品描述
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.Price">
+            <summary>
+            产品价格
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.Stock">
+            <summary>
+            库存数量
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.ImageUrl">
+            <summary>
+            产品图片URL
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.FarmerId">
+            <summary>
+            农户ID（外键）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.CreateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.UpdateTime">
+            <summary>
+            更新时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.IsActive">
+            <summary>
+            产品状态（上架/下架）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.AverageRating">
+            <summary>
+            平均评分
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.ReviewCount">
+            <summary>
+            评价数量
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.Farmer">
+            <summary>
+            农户信息（导航属性）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.Orders">
+            <summary>
+            订单列表（导航属性）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.Traces">
+            <summary>
+            溯源信息（导航属性）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.Uploads">
+            <summary>
+            产品图片集合（导航属性）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.Reviews">
+            <summary>
+            商品评价集合（导航属性）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.Review">
+            <summary>
+            商品评价模型类
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Review.ReviewId">
+            <summary>
+            评价ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Review.ProductId">
+            <summary>
+            产品ID（外键）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Review.UserId">
+            <summary>
+            用户ID（外键）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Review.OrderId">
+            <summary>
+            订单ID（外键）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Review.Rating">
+            <summary>
+            评分（1-5）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Review.Content">
+            <summary>
+            评价内容
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Review.IsAnonymous">
+            <summary>
+            是否匿名评价
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Review.CreateTime">
+            <summary>
+            评价时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Review.Product">
+            <summary>
+            关联产品（导航属性）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Review.User">
+            <summary>
+            关联用户（导航属性）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Review.Order">
+            <summary>
+            关联订单（导航属性）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.SalesOverview">
+            <summary>
+            销售总览数据
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesOverview.TotalOrders">
+            <summary>
+            总订单数
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesOverview.TotalSales">
+            <summary>
+            总销售额
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesOverview.TotalQuantity">
+            <summary>
+            总销售量
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesOverview.AverageOrderValue">
+            <summary>
+            平均订单价值
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.SalesTrend">
+            <summary>
+            销售趋势数据
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesTrend.Period">
+            <summary>
+            时间段（日期或月份）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesTrend.Sales">
+            <summary>
+            销售额
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesTrend.Orders">
+            <summary>
+            订单数
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.ProductSalesRank">
+            <summary>
+            产品销售排名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ProductSalesRank.ProductId">
+            <summary>
+            产品ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ProductSalesRank.ProductName">
+            <summary>
+            产品名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ProductSalesRank.Sales">
+            <summary>
+            销售额
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ProductSalesRank.Quantity">
+            <summary>
+            销售量
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.FarmerSalesRank">
+            <summary>
+            农户销售排名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerSalesRank.FarmerId">
+            <summary>
+            农户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerSalesRank.FarmerName">
+            <summary>
+            农户名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerSalesRank.Sales">
+            <summary>
+            销售额
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerSalesRank.Quantity">
+            <summary>
+            销售量
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerSalesRank.ProductCount">
+            <summary>
+            产品数量
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.SalesFilter">
+            <summary>
+            销售数据筛选条件
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesFilter.StartDate">
+            <summary>
+            开始日期
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesFilter.EndDate">
+            <summary>
+            结束日期
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesFilter.ProductId">
+            <summary>
+            产品ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesFilter.FarmerId">
+            <summary>
+            农户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.Trace">
+            <summary>
+            溯源信息模型类
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Trace.TraceId">
+            <summary>
+            溯源ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Trace.ProductId">
+            <summary>
+            产品ID（外键）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Trace.SourcePlace">
+            <summary>
+            产地信息
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Trace.PlantingMethod">
+            <summary>
+            种植/养殖方式
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Trace.PlantingTime">
+            <summary>
+            种植/养殖时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Trace.HarvestTime">
+            <summary>
+            收获时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Trace.QualityLevel">
+            <summary>
+            质量等级
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Trace.IsOrganic">
+            <summary>
+            是否有机认证
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Trace.CreateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Trace.UpdateTime">
+            <summary>
+            更新时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Trace.AdditionalInfo">
+            <summary>
+            附加信息
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Trace.Product">
+            <summary>
+            关联产品
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.Upload">
+            <summary>
+            图片上传模型类
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Upload.UploadId">
+            <summary>
+            上传ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Upload.FilePath">
+            <summary>
+            文件路径
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Upload.FileName">
+            <summary>
+            文件名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Upload.FileType">
+            <summary>
+            文件类型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Upload.FileSize">
+            <summary>
+            文件大小（字节）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Upload.ProductId">
+            <summary>
+            关联产品ID（外键）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Upload.UploadTime">
+            <summary>
+            上传时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Upload.Product">
+            <summary>
+            关联产品（导航属性）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.User">
+            <summary>
+            用户模型类
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.User.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.User.Username">
+            <summary>
+            用户名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.User.Password">
+            <summary>
+            密码（加密存储）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.User.Role">
+            <summary>
+            用户角色（普通用户/农户/管理员）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.User.Email">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.User.Phone">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.User.CreateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.User.LastLoginTime">
+            <summary>
+            最后登录时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.User.Products">
+            <summary>
+            用户发布的产品列表（仅当用户是农户时有效）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.User.Orders">
+            <summary>
+            用户下的订单列表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.User.Logs">
+            <summary>
+            用户操作日志
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.User.Reviews">
+            <summary>
+            用户发表的评价
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Services.ILogService">
+            <summary>
+            日志服务接口
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.ILogService.LogAction(System.Nullable{System.Int32},System.String,System.String,System.String,System.Nullable{System.Int32},System.String,System.Boolean)">
+            <summary>
+            记录操作日志
+            </summary>
+            <param name="userId">用户ID</param>
+            <param name="actionType">操作类型</param>
+            <param name="description">操作描述</param>
+            <param name="ipAddress">IP地址</param>
+            <param name="targetId">操作对象ID</param>
+            <param name="targetType">操作对象类型</param>
+            <param name="isSuccess">是否成功</param>
+            <returns>日志ID</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.ILogService.GetUserLogs(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            获取用户日志
+            </summary>
+            <param name="userId">用户ID</param>
+            <returns>日志列表</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.ILogService.GetAllLogs(System.Int32,System.Int32)">
+            <summary>
+            获取所有日志
+            </summary>
+            <param name="pageSize">每页数量</param>
+            <param name="pageIndex">页码</param>
+            <returns>日志列表</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.ILogService.GetLogsByActionType(System.String,System.Int32,System.Int32)">
+            <summary>
+            根据操作类型查询日志
+            </summary>
+            <param name="actionType">操作类型</param>
+            <param name="pageSize">每页数量</param>
+            <param name="pageIndex">页码</param>
+            <returns>日志列表</returns>
+        </member>
+        <member name="T:FarmDirectSales.Services.IReviewService">
+            <summary>
+            商品评价服务接口
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.IReviewService.GetProductReviewsAsync(System.Int32)">
+            <summary>
+            获取产品的所有评价
+            </summary>
+            <param name="productId">产品ID</param>
+            <returns>评价列表</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IReviewService.GetUserReviewsAsync(System.Int32)">
+            <summary>
+            获取用户的所有评价
+            </summary>
+            <param name="userId">用户ID</param>
+            <returns>评价列表</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IReviewService.GetOrderReviewAsync(System.Int32)">
+            <summary>
+            获取订单的评价
+            </summary>
+            <param name="orderId">订单ID</param>
+            <returns>评价信息</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IReviewService.AddReviewAsync(FarmDirectSales.Models.Review)">
+            <summary>
+            添加产品评价
+            </summary>
+            <param name="review">评价信息</param>
+            <returns>操作结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IReviewService.UpdateReviewAsync(FarmDirectSales.Models.Review)">
+            <summary>
+            更新产品评价
+            </summary>
+            <param name="review">评价信息</param>
+            <returns>操作结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IReviewService.DeleteReviewAsync(System.Int32)">
+            <summary>
+            删除产品评价
+            </summary>
+            <param name="reviewId">评价ID</param>
+            <returns>操作结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IReviewService.CalculateAverageRatingAsync(System.Int32)">
+            <summary>
+            计算产品平均评分
+            </summary>
+            <param name="productId">产品ID</param>
+            <returns>平均评分</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IReviewService.IsOrderReviewedAsync(System.Int32)">
+            <summary>
+            检查用户是否已评价订单
+            </summary>
+            <param name="orderId">订单ID</param>
+            <returns>是否已评价</returns>
+        </member>
+        <member name="T:FarmDirectSales.Services.IStatisticsService">
+            <summary>
+            销售统计服务接口
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.IStatisticsService.GetSalesOverviewAsync(FarmDirectSales.Models.SalesFilter)">
+            <summary>
+            获取销售总览数据
+            </summary>
+            <param name="filter">筛选条件</param>
+            <returns>销售总览数据</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IStatisticsService.GetDailySalesTrendAsync(FarmDirectSales.Models.SalesFilter)">
+            <summary>
+            获取销售趋势数据（日）
+            </summary>
+            <param name="filter">筛选条件</param>
+            <returns>每日销售趋势数据</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IStatisticsService.GetMonthlySalesTrendAsync(FarmDirectSales.Models.SalesFilter)">
+            <summary>
+            获取销售趋势数据（月）
+            </summary>
+            <param name="filter">筛选条件</param>
+            <returns>每月销售趋势数据</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IStatisticsService.GetTopProductsAsync(FarmDirectSales.Models.SalesFilter,System.Int32)">
+            <summary>
+            获取产品销售排名
+            </summary>
+            <param name="filter">筛选条件</param>
+            <param name="top">返回数量</param>
+            <returns>产品销售排名</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IStatisticsService.GetTopFarmersAsync(FarmDirectSales.Models.SalesFilter,System.Int32)">
+            <summary>
+            获取农户销售排名
+            </summary>
+            <param name="filter">筛选条件</param>
+            <param name="top">返回数量</param>
+            <returns>农户销售排名</returns>
+        </member>
+        <member name="T:FarmDirectSales.Services.IUploadService">
+            <summary>
+            文件上传服务接口
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.IUploadService.UploadFileAsync(Microsoft.AspNetCore.Http.IFormFile,System.Nullable{System.Int32})">
+            <summary>
+            上传单个文件
+            </summary>
+            <param name="file">上传的文件</param>
+            <param name="productId">关联的产品ID</param>
+            <returns>上传文件信息</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IUploadService.UploadFilesAsync(System.Collections.Generic.IEnumerable{Microsoft.AspNetCore.Http.IFormFile},System.Nullable{System.Int32})">
+            <summary>
+            上传多个文件
+            </summary>
+            <param name="files">上传的文件集合</param>
+            <param name="productId">关联的产品ID</param>
+            <returns>上传文件信息集合</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IUploadService.GetProductUploadsAsync(System.Int32)">
+            <summary>
+            获取产品图片列表
+            </summary>
+            <param name="productId">产品ID</param>
+            <returns>图片列表</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.IUploadService.DeleteUploadAsync(System.Int32)">
+            <summary>
+            删除上传的文件
+            </summary>
+            <param name="uploadId">上传ID</param>
+            <returns>是否删除成功</returns>
+        </member>
+        <member name="T:FarmDirectSales.Services.IUserService">
+            <summary>
+            用户服务接口
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.IUserService.RegisterAsync(System.String,System.String,System.String)">
+            <summary>
+            用户注册
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.IUserService.LoginAsync(System.String,System.String)">
+            <summary>
+            用户登录
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.IUserService.GetUserByIdAsync(System.Int32)">
+            <summary>
+            获取用户信息
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.IUserService.UpdateUserAsync(FarmDirectSales.Models.User)">
+            <summary>
+            更新用户信息
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.IUserService.DeleteUserAsync(System.Int32)">
+            <summary>
+            删除用户
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.IUserService.ValidatePasswordAsync(System.Int32,System.String)">
+            <summary>
+            验证用户密码
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.IUserService.ChangePasswordAsync(System.Int32,System.String)">
+            <summary>
+            修改用户密码
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Services.LogService">
+            <summary>
+            日志服务实现
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.LogService.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.LogService.LogAction(System.Nullable{System.Int32},System.String,System.String,System.String,System.Nullable{System.Int32},System.String,System.Boolean)">
+            <summary>
+            记录操作日志
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.LogService.GetUserLogs(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            获取用户日志
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.LogService.GetAllLogs(System.Int32,System.Int32)">
+            <summary>
+            获取所有日志
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.LogService.GetLogsByActionType(System.String,System.Int32,System.Int32)">
+            <summary>
+            根据操作类型查询日志
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Services.ReviewService">
+            <summary>
+            商品评价服务实现
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.ReviewService.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+            <param name="context">数据库上下文</param>
+        </member>
+        <member name="M:FarmDirectSales.Services.ReviewService.GetProductReviewsAsync(System.Int32)">
+            <summary>
+            获取产品的所有评价
+            </summary>
+            <param name="productId">产品ID</param>
+            <returns>评价列表</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.ReviewService.GetUserReviewsAsync(System.Int32)">
+            <summary>
+            获取用户的所有评价
+            </summary>
+            <param name="userId">用户ID</param>
+            <returns>评价列表</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.ReviewService.GetOrderReviewAsync(System.Int32)">
+            <summary>
+            获取订单的评价
+            </summary>
+            <param name="orderId">订单ID</param>
+            <returns>评价信息</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.ReviewService.AddReviewAsync(FarmDirectSales.Models.Review)">
+            <summary>
+            添加产品评价
+            </summary>
+            <param name="review">评价信息</param>
+            <returns>操作结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.ReviewService.UpdateReviewAsync(FarmDirectSales.Models.Review)">
+            <summary>
+            更新产品评价
+            </summary>
+            <param name="review">评价信息</param>
+            <returns>操作结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.ReviewService.DeleteReviewAsync(System.Int32)">
+            <summary>
+            删除产品评价
+            </summary>
+            <param name="reviewId">评价ID</param>
+            <returns>操作结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.ReviewService.CalculateAverageRatingAsync(System.Int32)">
+            <summary>
+            计算产品平均评分
+            </summary>
+            <param name="productId">产品ID</param>
+            <returns>平均评分</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.ReviewService.IsOrderReviewedAsync(System.Int32)">
+            <summary>
+            检查用户是否已评价订单
+            </summary>
+            <param name="orderId">订单ID</param>
+            <returns>是否已评价</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.ReviewService.UpdateProductRatingAsync(System.Int32)">
+            <summary>
+            更新产品评分
+            </summary>
+            <param name="productId">产品ID</param>
+        </member>
+        <member name="T:FarmDirectSales.Services.StatisticsService">
+            <summary>
+            销售统计服务实现
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.StatisticsService.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+            <param name="context">数据库上下文</param>
+        </member>
+        <member name="M:FarmDirectSales.Services.StatisticsService.GetSalesOverviewAsync(FarmDirectSales.Models.SalesFilter)">
+            <summary>
+            获取销售总览数据
+            </summary>
+            <param name="filter">筛选条件</param>
+            <returns>销售总览数据</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.StatisticsService.GetDailySalesTrendAsync(FarmDirectSales.Models.SalesFilter)">
+            <summary>
+            获取销售趋势数据（日）
+            </summary>
+            <param name="filter">筛选条件</param>
+            <returns>每日销售趋势数据</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.StatisticsService.GetMonthlySalesTrendAsync(FarmDirectSales.Models.SalesFilter)">
+            <summary>
+            获取销售趋势数据（月）
+            </summary>
+            <param name="filter">筛选条件</param>
+            <returns>每月销售趋势数据</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.StatisticsService.GetTopProductsAsync(FarmDirectSales.Models.SalesFilter,System.Int32)">
+            <summary>
+            获取产品销售排名
+            </summary>
+            <param name="filter">筛选条件</param>
+            <param name="top">返回数量</param>
+            <returns>产品销售排名</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.StatisticsService.GetTopFarmersAsync(FarmDirectSales.Models.SalesFilter,System.Int32)">
+            <summary>
+            获取农户销售排名
+            </summary>
+            <param name="filter">筛选条件</param>
+            <param name="top">返回数量</param>
+            <returns>农户销售排名</returns>
+        </member>
+        <member name="M:FarmDirectSales.Services.StatisticsService.GetFilteredOrdersQuery(FarmDirectSales.Models.SalesFilter)">
+            <summary>
+            根据筛选条件获取订单查询
+            </summary>
+            <param name="filter">筛选条件</param>
+            <returns>订单查询</returns>
+        </member>
+        <member name="T:FarmDirectSales.Services.UploadService">
+            <summary>
+            文件上传服务实现
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UploadService.#ctor(FarmDirectSales.Data.ApplicationDbContext,Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Logging.ILogger{FarmDirectSales.Services.UploadService})">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UploadService.UploadFileAsync(Microsoft.AspNetCore.Http.IFormFile,System.Nullable{System.Int32})">
+            <summary>
+            上传单个文件
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UploadService.UploadFilesAsync(System.Collections.Generic.IEnumerable{Microsoft.AspNetCore.Http.IFormFile},System.Nullable{System.Int32})">
+            <summary>
+            上传多个文件
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UploadService.GetProductUploadsAsync(System.Int32)">
+            <summary>
+            获取产品图片列表
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UploadService.DeleteUploadAsync(System.Int32)">
+            <summary>
+            删除上传的文件
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Services.UserService">
+            <summary>
+            用户服务实现类
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UserService.#ctor(FarmDirectSales.Data.ApplicationDbContext,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UserService.RegisterAsync(System.String,System.String,System.String)">
+            <summary>
+            用户注册
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UserService.LoginAsync(System.String,System.String)">
+            <summary>
+            用户登录
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UserService.GetUserByIdAsync(System.Int32)">
+            <summary>
+            获取用户信息
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UserService.UpdateUserAsync(FarmDirectSales.Models.User)">
+            <summary>
+            更新用户信息
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UserService.DeleteUserAsync(System.Int32)">
+            <summary>
+            删除用户
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UserService.HashPassword(System.String)">
+            <summary>
+            密码加密
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UserService.GenerateJwtToken(FarmDirectSales.Models.User)">
+            <summary>
+            生成JWT令牌
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UserService.ValidatePasswordAsync(System.Int32,System.String)">
+            <summary>
+            验证用户密码
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UserService.ChangePasswordAsync(System.Int32,System.String)">
+            <summary>
+            修改用户密码
+            </summary>
+        </member>
+    </members>
+</doc>

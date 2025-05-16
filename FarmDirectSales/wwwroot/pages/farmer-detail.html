@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>农户详情 - 本地特色农产品直销系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- 自定义样式 -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-leaf text-success me-2"></i>农产品直销系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/products.html">产品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/pages/farmers.html">农户展示</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/about.html">关于我们</a>
+                    </li>
+                </ul>
+                
+                <!-- 未登录状态 -->
+                <div class="d-flex" id="unauthenticated-menu">
+                    <a href="/pages/login.html" class="btn btn-outline-success me-2">登录</a>
+                    <a href="/pages/register.html" class="btn btn-success">注册</a>
+                </div>
+                
+                <!-- 已登录状态 -->
+                <div class="d-none" id="authenticated-menu">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-success dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="username">用户名</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                            <li><a class="dropdown-item" href="/pages/user/profile.html"><i class="fas fa-user me-2"></i>个人中心</a></li>
+                            <li><a class="dropdown-item" href="/pages/user/orders.html"><i class="fas fa-shopping-cart me-2"></i>我的订单</a></li>
+                            <li><a class="dropdown-item" href="/pages/user/reviews.html"><i class="fas fa-star me-2"></i>我的评价</a></li>
+                            <li id="farmer-menu-item" class="d-none"><a class="dropdown-item" href="/pages/farmer/dashboard.html"><i class="fas fa-tractor me-2"></i>农户中心</a></li>
+                            <li id="admin-menu-item" class="d-none"><a class="dropdown-item" href="/pages/admin/dashboard.html"><i class="fas fa-cogs me-2"></i>管理后台</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container py-5">
+        <!-- 加载状态 -->
+        <div class="text-center" id="loading">
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+            <p class="mt-2">正在加载农户信息...</p>
+        </div>
+        
+        <!-- 农户详情内容 -->
+        <div class="d-none" id="farmer-detail">
+            <!-- 返回按钮 -->
+            <div class="mb-4">
+                <a href="/pages/farmers.html" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>返回农户列表
+                </a>
+            </div>
+            
+            <!-- 农户基本信息 -->
+            <div class="row mb-5">
+                <div class="col-md-5">
+                    <img id="farmer-image" src="" alt="农户图片" class="img-fluid rounded shadow-sm" style="max-height: 300px; object-fit: cover; width: 100%;">
+                </div>
+                <div class="col-md-7">
+                    <h1 id="farmer-name" class="mb-3"></h1>
+                    <div class="mb-3 text-warning">
+                        <span id="farmer-rating-stars"></span>
+                        <span id="farmer-rating" class="ms-2"></span>
+                        <small class="text-muted">(<span id="farmer-review-count"></span>条评价)</small>
+                    </div>
+                    <div class="mb-3">
+                        <span class="badge bg-success me-2" id="farmer-category"></span>
+                        <span class="badge bg-light text-dark me-2" id="farmer-region"></span>
+                        <span class="badge bg-light text-dark" id="farmer-product-count"></span>
+                    </div>
+                    <p class="mb-3">
+                        <strong>经营人：</strong><span id="farmer-owner"></span>
+                    </p>
+                    <h5 class="mt-4 mb-3">农户简介</h5>
+                    <p id="farmer-description" class="text-muted"></p>
+                </div>
+            </div>
+            
+            <!-- 农户产品列表 -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h3 class="mb-4">农户产品 <span class="badge bg-success" id="farmer-product-count-title"></span></h3>
+                    <div class="row g-4" id="farmer-products">
+                        <!-- 产品卡片将通过 JavaScript 动态加载 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 农户介绍 -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h3 class="card-title mb-4">种植/养殖理念</h3>
+                            <p>我们始终坚持"绿色、健康、安全"的种植理念，采用传统农耕与现代科技相结合的方式，最大限度地减少农药化肥的使用，保证产品的天然品质。</p>
+                            
+                            <h5 class="mt-4 mb-3">生产环境</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>我们的基地位于远离城市污染的山区，这里空气清新，水质优良，土壤肥沃，是种植优质农产品的理想场所。我们还建立了完整的水源保护系统和土壤改良计划，确保长期可持续发展。</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="ratio ratio-16x9">
+                                        <iframe src="https://www.youtube.com/embed/ScMzIvxBSi4" title="生产环境视频" allowfullscreen></iframe>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h5 class="mt-4 mb-3">质量控制</h5>
+                            <p>我们建立了严格的质量控制体系，从土壤测试、种苗/种畜选择、生长环境监控到产品采收和包装，每个环节都有标准化流程和检验标准，确保将最优质的产品送到消费者手中。</p>
+                            
+                            <h5 class="mt-4 mb-3">资质认证</h5>
+                            <div class="row gx-3 gy-2">
+                                <div class="col-auto">
+                                    <span class="badge bg-success p-2">有机认证</span>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge bg-success p-2">绿色食品认证</span>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge bg-success p-2">无公害农产品认证</span>
+                                </div>
+                                <div class="col-auto">
+                                    <span class="badge bg-success p-2">地理标志保护产品</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 农户评价 -->
+            <div class="row">
+                <div class="col-12">
+                    <h3 class="mb-4">用户评价 <span class="badge bg-success" id="farmer-review-count-title"></span></h3>
+                    
+                    <!-- 评价列表 -->
+                    <div id="reviews-container">
+                        <!-- 评价将通过 JavaScript 动态加载 -->
+                    </div>
+                    
+                    <!-- 分页 -->
+                    <div class="mt-4">
+                        <nav aria-label="评价分页">
+                            <ul class="pagination justify-content-center" id="reviews-pagination">
+                                <!-- 分页将通过 JavaScript 动态生成 -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5>关于我们</h5>
+                    <p class="text-muted">本地特色农产品直销系统，致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收。</p>
+                </div>
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <h5>快速链接</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-decoration-none text-muted">首页</a></li>
+                        <li><a href="/pages/products.html" class="text-decoration-none text-muted">产品列表</a></li>
+                        <li><a href="/pages/farmers.html" class="text-decoration-none text-muted">农户展示</a></li>
+                        <li><a href="/pages/about.html" class="text-decoration-none text-muted">关于我们</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-3 mb-md-0">
+                    <h5>帮助</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/pages/faq.html" class="text-decoration-none text-muted">常见问题</a></li>
+                        <li><a href="/pages/shipping.html" class="text-decoration-none text-muted">配送政策</a></li>
+                        <li><a href="/pages/return.html" class="text-decoration-none text-muted">退换政策</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>联系我们</h5>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 地址：广东省广州市白云区</li>
+                        <li><i class="fas fa-phone me-2"></i> 电话：123-456-7890</li>
+                        <li><i class="fas fa-envelope me-2"></i> 邮箱：info@farmshop.com</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center text-muted">
+                <small>&copy; 2023 农产品直销系统. 保留所有权利.</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- API 调用 -->
+    <script src="/js/api.js"></script>
+    
+    <!-- 页面逻辑 -->
+    <script>
+        // 获取URL参数
+        function getUrlParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // 模拟农户数据（实际应从API获取）
+        const farmersData = [
+            {
+                id: 1,
+                name: '绿野农场',
+                owner: '张三',
+                region: '广东',
+                category: '蔬菜',
+                description: '专注有机蔬菜种植20年，坚持生态农业理念。我们的农场位于远离城市污染的山区，采用纯天然农耕方法，确保产品绿色健康。',
+                imageUrl: 'https://source.unsplash.com/500x300/?farm',
+                rating: 4.8,
+                reviewCount: 125,
+                productCount: 15
+            },
+            {
+                id: 2,
+                name: '阳光果园',
+                owner: '李四',
+                region: '广东',
+                category: '水果',
+                description: '精心培育各类水果，品质卓越，口感一流。我们的果园种植多种时令水果，全年供应不同品种，保证新鲜直达您家。',
+                imageUrl: 'https://source.unsplash.com/500x300/?orchard',
+                rating: 4.6,
+                reviewCount: 98,
+                productCount: 12
+            },
+            {
+                id: 3,
+                name: '山林土特产',
+                owner: '王五',
+                region: '广西',
+                category: '特产',
+                description: '深山野趣，带来纯天然农家特产，品味自然的馈赠。我们的特产来自深山老林，保留了传统工艺和原汁原味。',
+                imageUrl: 'https://source.unsplash.com/500x300/?mountains',
+                rating: 4.9,
+                reviewCount: 75,
+                productCount: 8
+            },
+            {
+                id: 4,
+                name: '鲜美家禽',
+                owner: '赵六',
+                region: '云南',
+                category: '家禽',
+                description: '生态散养家禽，安全健康，肉质鲜美。我们的家禽采用传统方式放养，吃天然粮食，不使用激素和抗生素。',
+                imageUrl: 'https://source.unsplash.com/500x300/?poultry',
+                rating: 4.7,
+                reviewCount: 112,
+                productCount: 6
+            }
+        ];
+        
+        // 模拟农户产品数据
+        const productsData = [
+            {
+                id: 101,
+                farmerId: 1,
+                name: '有机生菜',
+                price: 6.8,
+                imageUrl: 'https://source.unsplash.com/300x200/?lettuce',
+                rating: 4.7,
+                reviewCount: 43,
+                description: '新鲜采摘的有机生菜，无农药，口感清脆'
+            },
+            {
+                id: 102,
+                farmerId: 1,
+                name: '西红柿',
+                price: 8.5,
+                imageUrl: 'https://source.unsplash.com/300x200/?tomato',
+                rating: 4.9,
+                reviewCount: 56,
+                description: '阳光充足下生长的西红柿，酸甜可口'
+            },
+            {
+                id: 103,
+                farmerId: 1,
+                name: '青椒',
+                price: 5.2,
+                imageUrl: 'https://source.unsplash.com/300x200/?pepper',
+                rating: 4.6,
+                reviewCount: 38,
+                description: '清脆可口的青椒，色泽翠绿，口感鲜美'
+            },
+            {
+                id: 104,
+                farmerId: 1,
+                name: '胡萝卜',
+                price: 4.8,
+                imageUrl: 'https://source.unsplash.com/300x200/?carrot',
+                rating: 4.8,
+                reviewCount: 49,
+                description: '富含胡萝卜素的健康蔬菜，甜脆可口'
+            },
+            {
+                id: 201,
+                farmerId: 2,
+                name: '红富士苹果',
+                price: 12.8,
+                imageUrl: 'https://source.unsplash.com/300x200/?apple',
+                rating: 4.7,
+                reviewCount: 65,
+                description: '皮薄肉厚，香甜多汁的优质苹果'
+            },
+            {
+                id: 202,
+                farmerId: 2,
+                name: '砂糖橘',
+                price: 15.9,
+                imageUrl: 'https://source.unsplash.com/300x200/?orange',
+                rating: 4.9,
+                reviewCount: 72,
+                description: '酸甜适口，皮薄多汁的新鲜橘子'
+            },
+            {
+                id: 301,
+                farmerId: 3,
+                name: '山茶油',
+                price: 88,
+                imageUrl: 'https://source.unsplash.com/300x200/?oil',
+                rating: 4.9,
+                reviewCount: 32,
+                description: '纯天然压榨的山茶油，清香醇厚'
+            },
+            {
+                id: 401,
+                farmerId: 4,
+                name: '土鸡蛋',
+                price: 35,
+                imageUrl: 'https://source.unsplash.com/300x200/?eggs',
+                rating: 4.8,
+                reviewCount: 47,
+                description: '散养土鸡下的新鲜鸡蛋，蛋黄饱满'
+            }
+        ];
+        
+        // 模拟评价数据
+        const reviewsData = [
+            {
+                id: 1001,
+                farmerId: 1,
+                userName: '王小明',
+                rating: 5,
+                content: '产品非常新鲜，服务也很好，物流速度快，第二天就收到了。蔬菜品质很高，吃起来很香甜。',
+                time: '2023-10-15'
+            },
+            {
+                id: 1002,
+                farmerId: 1,
+                userName: '李丽',
+                rating: 4,
+                content: '蔬菜很不错，比超市的新鲜多了，就是包装略简陋，建议改进一下。',
+                time: '2023-10-12'
+            },
+            {
+                id: 1003,
+                farmerId: 1,
+                userName: '张华',
+                rating: 5,
+                content: '一直在这家买蔬菜，品质特别好，而且价格合理，是健康生活的好选择。',
+                time: '2023-10-08'
+            },
+            {
+                id: 1004,
+                farmerId: 1,
+                userName: '刘芳',
+                rating: 5,
+                content: '非常满意，蔬菜新鲜无农药残留，吃着很放心。农场主很用心，会持续关注。',
+                time: '2023-10-05'
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查用户登录状态
+            checkAuthStatus();
+            
+            // 设置登出按钮事件
+            document.getElementById('logout-button').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+            
+            // 加载农户详情
+            const farmerId = parseInt(getUrlParam('id'));
+            if (farmerId) {
+                loadFarmerDetail(farmerId);
+            } else {
+                // 没有找到ID参数，显示错误消息并返回列表
+                alert('未找到农户信息');
+                window.location.href = '/pages/farmers.html';
+            }
+        });
+        
+        // 检查用户登录状态
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            let user = null;
+            try {
+                user = JSON.parse(localStorage.getItem('user') || '{}');
+            } catch (e) {
+                console.error('解析user数据失败', e);
+                localStorage.removeItem('user'); // 清除错误的数据
+                user = {};
+            }
+            
+            if (token && user && user.userId) {
+                // 调试信息
+                if (window.location.hostname === 'localhost') {
+                    console.log('登录状态', {token: token.substring(0, 10) + '...', user});
+                }
+                
+                // 已登录
+                document.getElementById('unauthenticated-menu').classList.add('d-none');
+                document.getElementById('authenticated-menu').classList.remove('d-none');
+                
+                // 设置用户名
+                document.getElementById('username').textContent = user.username || '用户';
+                
+                // 根据角色显示不同的菜单项
+                if (user.role === 'farmer') {
+                    document.getElementById('farmer-menu-item').classList.remove('d-none');
+                } else if (user.role === 'admin') {
+                    document.getElementById('admin-menu-item').classList.remove('d-none');
+                }
+            } else {
+                // 调试信息
+                if (window.location.hostname === 'localhost') {
+                    console.log('未登录', {token, user});
+                }
+                
+                // 未登录
+                document.getElementById('unauthenticated-menu').classList.remove('d-none');
+                document.getElementById('authenticated-menu').classList.add('d-none');
+            }
+        }
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/index.html';
+        }
+        
+        // 加载农户详情
+        function loadFarmerDetail(farmerId) {
+            // 显示加载状态
+            document.getElementById('loading').classList.remove('d-none');
+            document.getElementById('farmer-detail').classList.add('d-none');
+            
+            // 模拟网络延迟
+            setTimeout(() => {
+                // 查找农户信息
+                const farmer = farmersData.find(f => f.id === farmerId);
+                
+                if (!farmer) {
+                    alert('未找到农户信息');
+                    window.location.href = '/pages/farmers.html';
+                    return;
+                }
+                
+                // 填充农户基本信息
+                document.getElementById('farmer-image').src = farmer.imageUrl;
+                document.getElementById('farmer-image').alt = farmer.name;
+                document.getElementById('farmer-name').textContent = farmer.name;
+                document.getElementById('farmer-rating').textContent = farmer.rating.toFixed(1);
+                document.getElementById('farmer-rating-stars').innerHTML = '★'.repeat(Math.floor(farmer.rating)) + '☆'.repeat(5 - Math.floor(farmer.rating));
+                document.getElementById('farmer-review-count').textContent = farmer.reviewCount;
+                document.getElementById('farmer-review-count-title').textContent = farmer.reviewCount + ' 条评价';
+                document.getElementById('farmer-category').textContent = farmer.category + '种植';
+                document.getElementById('farmer-region').textContent = farmer.region + '地区';
+                document.getElementById('farmer-product-count').textContent = farmer.productCount + ' 种产品';
+                document.getElementById('farmer-product-count-title').textContent = farmer.productCount + ' 种产品';
+                document.getElementById('farmer-owner').textContent = farmer.owner;
+                document.getElementById('farmer-description').textContent = farmer.description;
+                
+                // 加载农户产品
+                loadFarmerProducts(farmerId);
+                
+                // 加载农户评价
+                loadFarmerReviews(farmerId);
+                
+                // 隐藏加载状态，显示详情
+                document.getElementById('loading').classList.add('d-none');
+                document.getElementById('farmer-detail').classList.remove('d-none');
+            }, 500);
+        }
+        
+        // 加载农户产品
+        function loadFarmerProducts(farmerId) {
+            // 筛选该农户的产品
+            const products = productsData.filter(p => p.farmerId === farmerId);
+            
+            const container = document.getElementById('farmer-products');
+            container.innerHTML = '';
+            
+            if (products.length === 0) {
+                container.innerHTML = '<div class="col-12 text-center text-muted">暂无产品信息</div>';
+                return;
+            }
+            
+            // 添加产品卡片
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'col-lg-3 col-md-4 col-sm-6';
+                productCard.innerHTML = `
+                    <div class="card h-100 shadow-sm">
+                        <img src="${product.imageUrl}" class="card-img-top" alt="${product.name}" style="height: 150px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.name}</h5>
+                            <div class="mb-2 text-warning">
+                                ${'★'.repeat(Math.floor(product.rating))}${'☆'.repeat(5 - Math.floor(product.rating))}
+                                <small class="text-muted">(${product.reviewCount})</small>
+                            </div>
+                            <p class="card-text text-truncate">${product.description}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-danger fw-bold">￥${product.price.toFixed(2)}</span>
+                                <a href="/pages/product-detail.html?id=${product.id}" class="btn btn-sm btn-outline-success">查看详情</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(productCard);
+            });
+        }
+        
+        // 加载农户评价
+        function loadFarmerReviews(farmerId) {
+            // 筛选该农户的评价
+            const reviews = reviewsData.filter(r => r.farmerId === farmerId);
+            
+            const container = document.getElementById('reviews-container');
+            container.innerHTML = '';
+            
+            if (reviews.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted">暂无评价信息</div>';
+                return;
+            }
+            
+            // 添加评价卡片
+            reviews.forEach(review => {
+                const reviewCard = document.createElement('div');
+                reviewCard.className = 'card mb-3 border-0 shadow-sm';
+                reviewCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-0">${review.userName}</h5>
+                            <small class="text-muted">${review.time}</small>
+                        </div>
+                        <div class="text-warning mb-2">
+                            ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+                        </div>
+                        <p class="card-text">${review.content}</p>
+                    </div>
+                `;
+                container.appendChild(reviewCard);
+            });
+        }
+    </script>
+</body>
+</html> 
+ 
+ 

@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品详情 - 本地特色农产品直销系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- 自定义样式 -->
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        /* 购物车通知框动画 */
+        #cart-notification {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            min-width: 300px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        #cart-notification.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .product-img {
+            max-height: 400px;
+            object-fit: cover;
+        }
+        
+        /* 产品信息标签页样式 */
+        #productInfoTabs .nav-link {
+            border: none;
+            border-radius: 0;
+            padding: 12px 15px;
+            font-weight: 500;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        #productInfoTabs .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-bottom: 3px solid #fff;
+        }
+        
+        #productInfoTabs .nav-link:not(.active):hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab-content {
+            padding: 25px;
+        }
+        
+        .bg-success-light {
+            background-color: rgba(25, 135, 84, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-leaf text-success me-2"></i>农产品直销系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/pages/products.html">产品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/farmers.html">农户展示</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/about.html">关于我们</a>
+                    </li>
+                </ul>
+                
+                <!-- 未登录状态 -->
+                <div class="d-flex" id="unauthenticated-menu">
+                    <a href="/pages/login.html" class="btn btn-outline-success me-2">登录</a>
+                    <a href="/pages/register.html" class="btn btn-success">注册</a>
+                </div>
+                
+                <!-- 已登录状态 -->
+                <div class="d-none" id="authenticated-menu">
+                    <a href="/pages/cart.html" class="btn btn-outline-success me-2" title="购物车">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <div class="dropdown d-inline-block">
+                        <button class="btn btn-outline-success dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="username">用户名</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                            <li><a class="dropdown-item" href="/pages/user/profile.html"><i class="fas fa-user me-2"></i>个人中心</a></li>
+                            <li><a class="dropdown-item" href="/pages/user/orders.html"><i class="fas fa-shopping-cart me-2"></i>我的订单</a></li>
+                            <li><a class="dropdown-item" href="/pages/user/reviews.html"><i class="fas fa-star me-2"></i>我的评价</a></li>
+                            <li id="farmer-menu-item" class="d-none"><a class="dropdown-item" href="/pages/farmer/dashboard.html"><i class="fas fa-tractor me-2"></i>农户中心</a></li>
+                            <li id="admin-menu-item" class="d-none"><a class="dropdown-item" href="/pages/admin/dashboard.html"><i class="fas fa-cogs me-2"></i>管理后台</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container py-5">
+        <!-- 添加成功提示框 -->
+        <div id="cart-notification" class="alert alert-success d-none" role="alert">
+            <i class="fas fa-check-circle me-2"></i> <span id="cart-notification-text">商品已成功添加到购物车！</span>
+            <a href="/pages/cart.html" class="alert-link ms-2">查看购物车</a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div class="row" id="product-detail-container">
+            <!-- 商品加载中 -->
+            <div class="col-12 text-center">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+                <p>正在加载产品信息...</p>
+            </div>
+        </div>
+        
+        <!-- 产品评价区域 -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <!-- 使用导航标签页代替原来的弹窗按钮 -->
+                    <div class="card-header bg-success p-0">
+                        <ul class="nav nav-tabs nav-fill card-header-tabs" id="productInfoTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active text-white" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews-content" type="button" role="tab" aria-controls="reviews-content" aria-selected="true">
+                                    <i class="fas fa-star me-1"></i> 客户评价
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-white" id="farmer-tab" data-bs-toggle="tab" data-bs-target="#farmer-content" type="button" role="tab" aria-controls="farmer-content" aria-selected="false">
+                                    <i class="fas fa-user-alt me-1"></i> 农户信息
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link text-white" id="trace-tab" data-bs-toggle="tab" data-bs-target="#trace-content" type="button" role="tab" aria-controls="trace-content" aria-selected="false">
+                                    <i class="fas fa-seedling me-1"></i> 溯源信息
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="productInfoTabsContent">
+                            <!-- 客户评价内容 -->
+                            <div class="tab-pane fade show active" id="reviews-content" role="tabpanel" aria-labelledby="reviews-tab">
+                                <div id="product-reviews">
+                                    <!-- 评价将通过JS加载 -->
+                                    <div class="text-center">
+                                        <div class="spinner-border text-success" role="status">
+                                            <span class="visually-hidden">加载中...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 评价提示 -->
+                                <div class="mt-4 alert alert-info" id="review-info">
+                                    <i class="fas fa-info-circle me-2"></i> 
+                                    <span>订单完成后可在"我的订单"中对已购买的商品进行评价</span>
+                                </div>
+                            </div>
+                            
+                            <!-- 农户信息内容 -->
+                            <div class="tab-pane fade" id="farmer-content" role="tabpanel" aria-labelledby="farmer-tab">
+                                <div id="farmer-info-content">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-success" role="status">
+                                            <span class="visually-hidden">加载中...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-end mt-3">
+                                    <a href="#" id="viewFarmerPageLink" class="btn btn-success">
+                                        <i class="fas fa-external-link-alt me-1"></i> 查看农户主页
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- 溯源信息内容 -->
+                            <div class="tab-pane fade" id="trace-content" role="tabpanel" aria-labelledby="trace-tab">
+                                <div id="trace-info-content">
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border text-success" role="status">
+                                            <span class="visually-hidden">加载中...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 相关产品推荐 -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3 class="mb-4">相关产品推荐</h3>
+                <div class="row g-4" id="related-products">
+                    <!-- 相关产品将通过JS加载 -->
+                    <div class="col-12 text-center">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5>关于我们</h5>
+                    <p class="text-muted">本地特色农产品直销系统，致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收。</p>
+                </div>
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <h5>快速链接</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-decoration-none text-muted">首页</a></li>
+                        <li><a href="/pages/products.html" class="text-decoration-none text-muted">产品列表</a></li>
+                        <li><a href="/pages/farmers.html" class="text-decoration-none text-muted">农户展示</a></li>
+                        <li><a href="/pages/about.html" class="text-decoration-none text-muted">关于我们</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-3 mb-md-0">
+                    <h5>帮助</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/pages/faq.html" class="text-decoration-none text-muted">常见问题</a></li>
+                        <li><a href="/pages/shipping.html" class="text-decoration-none text-muted">配送政策</a></li>
+                        <li><a href="/pages/return.html" class="text-decoration-none text-muted">退换政策</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>联系我们</h5>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 地址：广东省广州市白云区</li>
+                        <li><i class="fas fa-phone me-2"></i> 电话：123-456-7890</li>
+                        <li><i class="fas fa-envelope me-2"></i> 邮箱：info@farmshop.com</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center text-muted">
+                <small>&copy; 2023 农产品直销系统. 保留所有权利.</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- API 调用 -->
+    <script src="/js/api.js"></script>
+    <!-- 评价模块 -->
+    <script src="/js/reviews.js"></script>
+    
+    <!-- 产品详情页面逻辑 -->
+    <script>
+        let currentProduct = null;
+        let currentProductId = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取URL参数中的产品ID
+            const urlParams = new URLSearchParams(window.location.search);
+            currentProductId = urlParams.get('id');
+            
+            if (!currentProductId) {
+                document.getElementById('product-detail-container').innerHTML = '<div class="col-12 text-center"><div class="alert alert-danger">未指定产品ID，请从产品列表选择一个产品。</div></div>';
+                return;
+            }
+            
+            // 检查用户登录状态
+            checkAuthStatus();
+            
+            // 加载产品详情
+            loadProductDetail(currentProductId);
+            
+            // 加载产品评价
+            reviewsModule.loadProductReviews(currentProductId, 'product-reviews');
+            
+            // 加载相关产品
+            loadRelatedProducts(currentProductId);
+            
+            // 设置登出按钮事件
+            document.getElementById('logout-button').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+            
+            // 初始化Bootstrap通知框关闭功能
+            document.querySelectorAll('.alert .btn-close').forEach(closeButton => {
+                closeButton.addEventListener('click', function() {
+                    const alert = this.closest('.alert');
+                    alert.classList.remove('show');
+                    
+                    // 延迟添加d-none类，允许淡出动画完成
+                    setTimeout(() => {
+                        alert.classList.add('d-none');
+                    }, 150);
+                });
+            });
+        });
+        
+        // 检查用户登录状态
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (token && user && user.userId) {
+                // 已登录
+                document.getElementById('unauthenticated-menu').classList.add('d-none');
+                document.getElementById('authenticated-menu').classList.remove('d-none');
+                
+                // 设置用户名
+                document.getElementById('username').textContent = user.username || '用户';
+                
+                // 根据角色显示不同的菜单项
+                if (user.role === 'farmer') {
+                    document.getElementById('farmer-menu-item').classList.remove('d-none');
+                } else if (user.role === 'admin') {
+                    document.getElementById('admin-menu-item').classList.remove('d-none');
+                }
+            } else {
+                // 未登录
+                document.getElementById('unauthenticated-menu').classList.remove('d-none');
+                document.getElementById('authenticated-menu').classList.add('d-none');
+            }
+        }
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/index.html';
+        }
+        
+        // 加载产品详情
+        async function loadProductDetail(productId) {
+            try {
+                const container = document.getElementById('product-detail-container');
+                
+                // 请求产品数据
+                const response = await api.products.getById(productId);
+                const product = response.data;
+                currentProduct = product;
+                
+                if (!product) {
+                    container.innerHTML = '<div class="col-12 text-center"><div class="alert alert-danger">找不到该产品信息。</div></div>';
+                    return;
+                }
+                
+                // 更新页面标题
+                document.title = `${product.productName} - 本地特色农产品直销系统`;
+                
+                // 创建产品详情HTML
+                const html = `
+                    <div class="col-md-6 mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <img src="${product.imageUrl || '/img/placeholder.jpg'}" class="card-img-top" alt="${product.productName}" style="height: 400px; object-fit: cover;">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h2 class="mb-3">${product.productName}</h2>
+                        <div class="mb-3">
+                            <span class="badge bg-success">农户：${product.farmer?.username || '未知'}</span>
+                            <span class="badge bg-secondary ms-2">库存：${product.stock} 件</span>
+                            ${product.avgRating ? `<span class="badge bg-warning text-dark ms-2">评分：${product.avgRating.toFixed(1)}分</span>` : ''}
+                        </div>
+                        <div class="mb-4">
+                            <h3 class="text-danger">￥${product.price.toFixed(2)}</h3>
+                        </div>
+                        <div class="mb-4">
+                            <h5>产品描述：</h5>
+                            <p>${product.description}</p>
+                        </div>
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center">
+                                <button type="button" class="btn btn-sm btn-outline-secondary me-2" onclick="decreaseQuantity()">-</button>
+                                <input type="number" id="quantity" class="form-control form-control-sm text-center" style="width: 60px;" value="1" min="1" max="${product.stock}">
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="increaseQuantity()">+</button>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2 d-md-block">
+                            <button id="add-to-cart-btn" class="btn btn-success btn-lg me-md-2">
+                                <i class="fas fa-shopping-cart me-2"></i>加入购物车
+                            </button>
+                            <button id="buy-now-btn" class="btn btn-outline-success btn-lg">
+                                <i class="fas fa-bolt me-2"></i>立即购买
+                            </button>
+                        </div>
+                        
+                        <!-- 服务信息 -->
+                        <div class="mt-4">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-truck text-success me-2"></i>
+                                <span class="small fw-bold">全场满99元包邮 | 当日16点前下单，次日可送达</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-shield-alt text-success me-2"></i>
+                                <span class="small">正品保障 | 7天无理由退换 | 假一赔十</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-leaf text-success me-2"></i>
+                                <span class="small">绿色有机认证 | 源头直采 | 当季现摘</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                container.innerHTML = html;
+                
+                // 设置按钮事件
+                document.getElementById('add-to-cart-btn').addEventListener('click', addToCart);
+                document.getElementById('buy-now-btn').addEventListener('click', buyNow);
+                
+                // 初始化农户信息标签页内容
+                const farmerInfoContent = document.getElementById('farmer-info-content');
+                if (product.farmer) {
+                    const farmerInfo = `
+                        <div class="text-center mb-4">
+                            <img src="${product.farmer.avatarUrl || '/img/farmer-placeholder.jpg'}" alt="${product.farmer.username}" 
+                                class="rounded-circle img-thumbnail" style="width: 120px; height: 120px; object-fit: cover;">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="fas fa-user text-success me-2"></i>农户名称</h6>
+                                <p>${product.farmer.username}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="fas fa-map-marker-alt text-success me-2"></i>所在地区</h6>
+                                <p>${product.farmer.location || '未提供'}</p>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <h6><i class="fas fa-info-circle text-success me-2"></i>农户简介</h6>
+                                <p>${product.farmer.description || '暂无描述信息'}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="fas fa-phone text-success me-2"></i>联系电话</h6>
+                                <p>${product.farmer.phone || '未提供'}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="far fa-calendar-alt text-success me-2"></i>加入时间</h6>
+                                <p>${product.farmer.createTime ? new Date(product.farmer.createTime).toLocaleDateString() : '未知'}</p>
+                            </div>
+                        </div>
+                    `;
+                    farmerInfoContent.innerHTML = farmerInfo;
+                    
+                    // 设置农户主页链接
+                    const viewFarmerPageLink = document.getElementById('viewFarmerPageLink');
+                    viewFarmerPageLink.href = `/pages/farmer-detail.html?id=${product.farmer.userId}`;
+                } else {
+                    farmerInfoContent.innerHTML = '<div class="alert alert-warning">无法获取农户信息</div>';
+                }
+                
+                // 初始化溯源信息标签页内容
+                const traceInfoContent = document.getElementById('trace-info-content');
+                if (product.traceInfo) {
+                    const traceInfo = `
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="fas fa-map-marker-alt text-success me-2"></i>产地</h6>
+                                <p>${product.traceInfo.source || '未提供'}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="fas fa-calendar-day text-success me-2"></i>生产日期</h6>
+                                <p>${product.traceInfo.productionDate ? new Date(product.traceInfo.productionDate).toLocaleDateString() : '未提供'}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="fas fa-hourglass-half text-success me-2"></i>保质期</h6>
+                                <p>${product.traceInfo.shelfLife || '未提供'}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="fas fa-certificate text-success me-2"></i>认证情况</h6>
+                                <p>${product.traceInfo.certification || '未提供'}</p>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <h6><i class="fas fa-seedling text-success me-2"></i>种植/养殖方式</h6>
+                                <p>${product.traceInfo.farmingMethod || '未提供'}</p>
+                            </div>
+                            <div class="col-12">
+                                <h6><i class="fas fa-info-circle text-success me-2"></i>详细描述</h6>
+                                <p>${product.traceInfo.description || '暂无更多溯源信息'}</p>
+                            </div>
+                        </div>
+                    `;
+                    traceInfoContent.innerHTML = traceInfo;
+                } else {
+                    traceInfoContent.innerHTML = '<div class="alert alert-warning">暂无溯源信息</div>';
+                }
+                
+                // 添加导航标签页的样式设置
+                document.querySelectorAll('#productInfoTabs .nav-link').forEach(tab => {
+                    tab.addEventListener('mouseover', function() {
+                        if (!this.classList.contains('active')) {
+                            this.classList.add('bg-success-light');
+                        }
+                    });
+                    
+                    tab.addEventListener('mouseout', function() {
+                        this.classList.remove('bg-success-light');
+                    });
+                });
+            } catch (error) {
+                console.error('加载产品详情失败:', error);
+                document.getElementById('product-detail-container').innerHTML = `<div class="col-12 text-center"><div class="alert alert-danger">加载产品失败: ${error.message}</div></div>`;
+            }
+        }
+        
+        // 增加购买数量
+        function increaseQuantity() {
+            const quantityInput = document.getElementById('quantity');
+            const currentValue = parseInt(quantityInput.value);
+            const maxValue = parseInt(quantityInput.max);
+            
+            if (currentValue < maxValue) {
+                quantityInput.value = currentValue + 1;
+            }
+        }
+        
+        // 减少购买数量
+        function decreaseQuantity() {
+            const quantityInput = document.getElementById('quantity');
+            const currentValue = parseInt(quantityInput.value);
+            
+            if (currentValue > 1) {
+                quantityInput.value = currentValue - 1;
+            }
+        }
+        
+        // 加入购物车
+        let addToCartTimeout = null; // 添加一个变量来跟踪定时器
+        
+        function addToCart() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('请先登录!');
+                window.location.href = '/pages/login.html';
+                return;
+            }
+            
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const addToCartBtn = document.getElementById('add-to-cart-btn');
+            
+            // 禁用按钮防止重复点击
+            addToCartBtn.disabled = true;
+            
+            // 调用购物车API
+            api.cart.addToCart(currentProductId, quantity)
+                .then(response => {
+                    console.log('添加购物车成功', response);
+                    
+                    // 显示顶部成功提示
+                    const notification = document.getElementById('cart-notification');
+                    const notificationText = document.getElementById('cart-notification-text');
+                    
+                    // 根据数量设置提示文本
+                    notificationText.textContent = `已成功添加 ${quantity} 件商品到购物车！`;
+                    
+                    // 显示提示
+                    notification.classList.remove('d-none');
+                    setTimeout(() => {
+                        notification.classList.add('show');
+                    }, 10);
+                    
+                    // 清除之前的定时器
+                    if (addToCartTimeout) {
+                        clearTimeout(addToCartTimeout);
+                    }
+                    
+                    // 设置定时器自动关闭提示
+                    addToCartTimeout = setTimeout(() => {
+                        notification.classList.remove('show');
+                        
+                        // 延迟添加d-none类，允许淡出动画完成
+                        setTimeout(() => {
+                            notification.classList.add('d-none');
+                        }, 300);
+                        
+                        addToCartTimeout = null;
+                    }, 500);
+                    
+                    // 恢复按钮状态
+                    addToCartBtn.disabled = false;
+                })
+                .catch(error => {
+                    console.error('添加购物车失败', error);
+                    alert(`添加购物车失败: ${error.message}`);
+                    
+                    // 恢复按钮状态
+                    addToCartBtn.disabled = false;
+                });
+        }
+        
+        // 立即购买
+        function buyNow() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('请先登录!');
+                window.location.href = '/pages/login.html';
+                return;
+            }
+            
+            const quantity = parseInt(document.getElementById('quantity').value);
+            
+            // 禁用按钮防止重复点击
+            const buyNowBtn = document.getElementById('buy-now-btn');
+            buyNowBtn.disabled = true;
+            
+            // 显示加载状态
+            const originalBuyNowText = buyNowBtn.innerHTML;
+            buyNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>处理中...';
+            
+            // 显示提示消息
+            const notification = document.getElementById('cart-notification');
+            const notificationText = document.getElementById('cart-notification-text');
+            notificationText.textContent = '正在添加到购物车并跳转...';
+            notification.classList.remove('d-none');
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // 先添加到购物车，然后跳转到结算页面
+            api.cart.addToCart(currentProductId, quantity)
+                .then(response => {
+                    // 短暂延迟后跳转，让用户看到提示
+                    setTimeout(() => {
+                        window.location.href = '/pages/cart.html';
+                    }, 500);
+                })
+                .catch(error => {
+                    console.error('添加购物车失败', error);
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.classList.add('d-none');
+                    }, 300);
+                    alert(`添加购物车失败: ${error.message}`);
+                    
+                    // 恢复按钮状态
+                    buyNowBtn.disabled = false;
+                    buyNowBtn.innerHTML = originalBuyNowText;
+                });
+        }
+        
+        // 加载相关产品
+        async function loadRelatedProducts(productId) {
+            try {
+                const container = document.getElementById('related-products');
+                
+                // 请求全部产品数据
+                const response = await api.products.getAll();
+                const allProducts = response.data || [];
+                
+                // 排除当前产品，并只保留最多4个相关产品
+                const relatedProducts = allProducts
+                    .filter(p => p.productId != productId)
+                    .slice(0, 4);
+                
+                if (relatedProducts.length === 0) {
+                    container.innerHTML = '<div class="col-12 text-center">暂无相关产品推荐</div>';
+                    return;
+                }
+                
+                // 生成相关产品卡片HTML
+                let html = '';
+                
+                relatedProducts.forEach(product => {
+                    html += `
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card product-card h-100">
+                                <img src="${product.imageUrl || '/img/placeholder.jpg'}" class="card-img-top product-img" alt="${product.productName}">
+                                <div class="card-body">
+                                    <h5 class="card-title">${product.productName}</h5>
+                                    <p class="card-text text-truncate">${product.description}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-danger fw-bold">￥${product.price.toFixed(2)}</span>
+                                        <a href="/pages/product-detail.html?id=${product.productId}" class="btn btn-sm btn-outline-success">查看详情</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('加载相关产品失败:', error);
+                document.getElementById('related-products').innerHTML = '<div class="col-12 text-center text-danger">加载相关产品失败</div>';
+            }
+        }
+    </script>
+</body>
+</html> 
+ 
+ 

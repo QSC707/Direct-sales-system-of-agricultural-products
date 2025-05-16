@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品列表 - 本地特色农产品直销系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- 自定义样式 -->
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        .product-card {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-leaf text-success me-2"></i>农产品直销系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/pages/products.html">产品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/farmers.html">农户展示</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/about.html">关于我们</a>
+                    </li>
+                </ul>
+                
+                <!-- 未登录状态 -->
+                <div class="d-flex" id="unauthenticated-menu">
+                    <a href="/pages/login.html" class="btn btn-outline-success me-2">登录</a>
+                    <a href="/pages/register.html" class="btn btn-success">注册</a>
+                </div>
+                
+                <!-- 已登录状态 -->
+                <div class="d-none" id="authenticated-menu">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-success dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="username">用户名</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                            <li><a class="dropdown-item" href="/pages/user/profile.html"><i class="fas fa-user me-2"></i>个人中心</a></li>
+                            <li><a class="dropdown-item" href="/pages/user/orders.html"><i class="fas fa-shopping-cart me-2"></i>我的订单</a></li>
+                            <li><a class="dropdown-item" href="/pages/user/reviews.html"><i class="fas fa-star me-2"></i>我的评价</a></li>
+                            <li id="farmer-menu-item" class="d-none"><a class="dropdown-item" href="/pages/farmer/dashboard.html"><i class="fas fa-tractor me-2"></i>农户中心</a></li>
+                            <li id="admin-menu-item" class="d-none"><a class="dropdown-item" href="/pages/admin/dashboard.html"><i class="fas fa-cogs me-2"></i>管理后台</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container py-5">
+        <!-- 搜索和筛选 -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="search-input" placeholder="搜索产品名称、描述..." aria-label="搜索产品">
+                    <button class="btn btn-success" type="button" id="search-button">
+                        <i class="fas fa-search me-1"></i> 搜索
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex justify-content-end">
+                    <select class="form-select me-2" id="category-filter">
+                        <option value="">所有分类</option>
+                        <option value="蔬菜">蔬菜</option>
+                        <option value="水果">水果</option>
+                        <option value="禽蛋肉类">禽蛋肉类</option>
+                        <option value="特产">农家特产</option>
+                    </select>
+                    <select class="form-select" id="sort-order">
+                        <option value="default">默认排序</option>
+                        <option value="price-asc">价格从低到高</option>
+                        <option value="price-desc">价格从高到低</option>
+                        <option value="rating-desc">评分从高到低</option>
+                        <option value="newest">最新上架</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 产品列表 -->
+        <div class="row g-4" id="product-list">
+            <!-- 加载中 -->
+            <div class="col-12 text-center py-5" id="loading">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+                <p class="mt-2">正在加载产品列表...</p>
+            </div>
+            
+            <!-- 无产品提示 -->
+            <div class="col-12 text-center py-5 d-none" id="no-products">
+                <i class="fas fa-seedling fa-3x text-muted mb-3"></i>
+                <h4>暂无产品</h4>
+                <p class="text-muted">我们正在努力丰富产品列表，请稍后再来查看</p>
+            </div>
+        </div>
+        
+        <!-- 分页 -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <nav aria-label="产品列表分页" id="pagination-container" class="d-none">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">上一页</a>
+                        </li>
+                        <li class="page-item active" aria-current="page">
+                            <a class="page-link" href="#">1</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">2</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">3</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">下一页</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5>关于我们</h5>
+                    <p class="text-muted">本地特色农产品直销系统，致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收。</p>
+                </div>
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <h5>快速链接</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-decoration-none text-muted">首页</a></li>
+                        <li><a href="/pages/products.html" class="text-decoration-none text-muted">产品列表</a></li>
+                        <li><a href="/pages/farmers.html" class="text-decoration-none text-muted">农户展示</a></li>
+                        <li><a href="/pages/about.html" class="text-decoration-none text-muted">关于我们</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-3 mb-md-0">
+                    <h5>帮助</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/pages/faq.html" class="text-decoration-none text-muted">常见问题</a></li>
+                        <li><a href="/pages/shipping.html" class="text-decoration-none text-muted">配送政策</a></li>
+                        <li><a href="/pages/return.html" class="text-decoration-none text-muted">退换政策</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>联系我们</h5>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 地址：广东省广州市白云区</li>
+                        <li><i class="fas fa-phone me-2"></i> 电话：123-456-7890</li>
+                        <li><i class="fas fa-envelope me-2"></i> 邮箱：info@farmshop.com</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center text-muted">
+                <small>&copy; 2023 农产品直销系统. 保留所有权利.</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- API 调用 -->
+    <script src="/js/api.js"></script>
+    
+    <!-- 产品列表页逻辑 -->
+    <script>
+        // 全局变量
+        let allProducts = [];
+        let filteredProducts = [];
+        let currentPage = 1;
+        const productsPerPage = 12;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查用户登录状态
+            checkAuthStatus();
+            
+            // 加载产品列表
+            loadProducts();
+            
+            // 为各个交互元素添加事件，确保进行元素存在性检查
+            const searchButton = document.getElementById('search-button');
+            if (searchButton) {
+                searchButton.addEventListener('click', function() {
+                    filterProducts();
+                });
+            }
+            
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function(e) {
+                    if (e.key === 'Enter') {
+                        filterProducts();
+                    }
+                });
+            }
+            
+            const categoryFilter = document.getElementById('category-filter');
+            if (categoryFilter) {
+                categoryFilter.addEventListener('change', function() {
+                    filterProducts();
+                });
+            }
+            
+            const sortOrder = document.getElementById('sort-order');
+            if (sortOrder) {
+                sortOrder.addEventListener('change', function() {
+                    filterProducts();
+                });
+            }
+            
+            const logoutButton = document.getElementById('logout-button');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logout();
+                });
+            }
+        });
+        
+        // 检查用户登录状态
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            let user = null;
+            try {
+                user = JSON.parse(localStorage.getItem('user') || '{}');
+            } catch (e) {
+                console.error('解析user数据失败', e);
+                localStorage.removeItem('user'); // 清除错误的数据
+                user = {};
+            }
+            
+            if (token && user && user.userId) {
+                // 调试信息
+                if (window.location.hostname === 'localhost') {
+                    console.log('登录状态', {token: token.substring(0, 10) + '...', user});
+                }
+                
+                // 已登录
+                document.getElementById('unauthenticated-menu').classList.add('d-none');
+                document.getElementById('authenticated-menu').classList.remove('d-none');
+                
+                // 设置用户名
+                document.getElementById('username').textContent = user.username || '用户';
+                
+                // 根据角色显示不同的菜单项
+                if (user.role === 'farmer') {
+                    document.getElementById('farmer-menu-item').classList.remove('d-none');
+                } else if (user.role === 'admin') {
+                    document.getElementById('admin-menu-item').classList.remove('d-none');
+                }
+            } else {
+                // 调试信息
+                if (window.location.hostname === 'localhost') {
+                    console.log('未登录', {token, user});
+                }
+                
+                // 未登录
+                document.getElementById('unauthenticated-menu').classList.remove('d-none');
+                document.getElementById('authenticated-menu').classList.add('d-none');
+            }
+        }
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/index.html';
+        }
+        
+        // 加载产品列表
+        async function loadProducts() {
+            try {
+                const loadingElement = document.getElementById('loading');
+                const noProductsElement = document.getElementById('no-products');
+                
+                if (loadingElement) loadingElement.classList.remove('d-none');
+                if (noProductsElement) noProductsElement.classList.add('d-none');
+                
+                // 获取筛选参数 - 使用正确的元素ID
+                const categoryElement = document.getElementById('category-filter');
+                const searchInputElement = document.getElementById('search-input');
+                const sortOrderElement = document.getElementById('sort-order');
+                
+                const category = categoryElement ? categoryElement.value : '';
+                const keyword = searchInputElement ? searchInputElement.value : '';
+                const sortBy = sortOrderElement ? sortOrderElement.value : 'default';
+                
+                // 调用产品API
+                const response = await api.products.getAll();
+                let products = response.data || [];
+                
+                // 应用筛选器
+                if (category) {
+                    products = products.filter(p => p.category === category);
+                }
+                
+                if (keyword) {
+                    const keywordLower = keyword.toLowerCase();
+                    products = products.filter(p => 
+                        p.productName.toLowerCase().includes(keywordLower) || 
+                        p.description.toLowerCase().includes(keywordLower) ||
+                        p.categoryName?.toLowerCase().includes(keywordLower)
+                    );
+                }
+                
+                // 保存所有产品数据
+                allProducts = products;
+                filteredProducts = [...allProducts];
+                
+                // 显示产品
+                displayProducts(allProducts);
+                
+                // 隐藏加载提示
+                if (loadingElement) loadingElement.classList.add('d-none');
+                
+            } catch (error) {
+                console.error('加载产品列表失败:', error);
+                const productListElement = document.getElementById('product-list');
+                if (productListElement) {
+                    productListElement.innerHTML = '<div class="col-12 text-center text-danger">加载产品失败，请稍后再试</div>';
+                }
+                
+                const loadingElement = document.getElementById('loading');
+                if (loadingElement) loadingElement.classList.add('d-none');
+            }
+        }
+        
+        // 过滤产品
+        function filterProducts() {
+            const searchInputElement = document.getElementById('search-input');
+            const categoryFilterElement = document.getElementById('category-filter');
+            const sortOrderElement = document.getElementById('sort-order');
+            
+            const searchTerm = searchInputElement ? searchInputElement.value.toLowerCase() : '';
+            const category = categoryFilterElement ? categoryFilterElement.value : '';
+            const sortOrder = sortOrderElement ? sortOrderElement.value : 'default';
+            
+            // 应用过滤条件
+            filteredProducts = allProducts.filter(product => {
+                // 搜索词过滤
+                const matchSearch = !searchTerm || 
+                    product.productName.toLowerCase().includes(searchTerm) || 
+                    (product.description && product.description.toLowerCase().includes(searchTerm));
+                
+                // 分类过滤
+                const matchCategory = !category || 
+                    (product.category && product.category === category) ||
+                    (!product.category && category === '');
+                
+                return matchSearch && matchCategory;
+            });
+            
+            // 应用排序
+            sortProducts(sortOrder);
+            
+            // 重置分页
+            currentPage = 1;
+            
+            // 显示过滤后的产品
+            displayProducts(filteredProducts);
+        }
+        
+        // 排序产品
+        function sortProducts(sortOrder) {
+            switch(sortOrder) {
+                case 'price-asc':
+                    filteredProducts.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-desc':
+                    filteredProducts.sort((a, b) => b.price - a.price);
+                    break;
+                case 'rating-desc':
+                    filteredProducts.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
+                    break;
+                case 'newest':
+                    filteredProducts.sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
+                    break;
+                default:
+                    // 默认排序，不变
+                    break;
+            }
+        }
+        
+        // 显示产品
+        function displayProducts(products) {
+            const productsContainer = document.getElementById('product-list');
+            const paginationContainer = document.getElementById('pagination-container');
+            const noProductsElement = document.getElementById('no-products');
+            
+            if (!productsContainer) return;
+            
+            // 如果没有产品，显示提示信息
+            if (products.length === 0) {
+                productsContainer.innerHTML = '';
+                
+                if (noProductsElement) {
+                    noProductsElement.classList.remove('d-none');
+                } else {
+                    productsContainer.innerHTML = '<div class="col-12 text-center"><p>没有找到匹配的产品</p></div>';
+                }
+                
+                if (paginationContainer) {
+                    paginationContainer.classList.add('d-none');
+                }
+                return;
+            }
+            
+            // 隐藏无产品提示
+            if (noProductsElement) {
+                noProductsElement.classList.add('d-none');
+            }
+            
+            // 计算分页
+            const totalPages = Math.ceil(products.length / productsPerPage);
+            const startIndex = (currentPage - 1) * productsPerPage;
+            const endIndex = Math.min(startIndex + productsPerPage, products.length);
+            const currentProducts = products.slice(startIndex, endIndex);
+            
+            // 生成产品卡片HTML
+            let productsHtml = '';
+            
+            currentProducts.forEach(product => {
+                productsHtml += `
+                    <div class="col-lg-3 col-md-4 col-6">
+                        <div class="card product-card h-100" onclick="window.location.href='/pages/product-detail.html?id=${product.productId}'">
+                            <img src="${product.imageUrl || '/img/placeholder.jpg'}" class="card-img-top product-img" alt="${product.productName}" style="height: 180px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.productName}</h5>
+                                <p class="card-text text-truncate">${product.description || '暂无描述'}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-danger fw-bold">￥${product.price.toFixed(2)}</span>
+                                    <span class="text-muted small">
+                                        ${product.averageRating ? 
+                                            `<i class="fas fa-star text-warning"></i> ${product.averageRating.toFixed(1)}` : 
+                                            '暂无评分'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            productsContainer.innerHTML = productsHtml;
+            
+            // 更新分页
+            if (paginationContainer) {
+                updatePagination(totalPages);
+            }
+        }
+        
+        // 更新分页
+        function updatePagination(totalPages) {
+            const paginationContainer = document.getElementById('pagination-container');
+            
+            if (!paginationContainer) return;
+            
+            if (totalPages <= 1) {
+                paginationContainer.classList.add('d-none');
+                return;
+            }
+            
+            paginationContainer.classList.remove('d-none');
+            
+            const paginationList = paginationContainer.querySelector('ul');
+            if (!paginationList) return;
+            
+            let paginationHtml = `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="上一页">上一页</a>
+                </li>
+            `;
+            
+            // 显示的页码范围
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            // 生成页码
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `;
+            }
+            
+            paginationHtml += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="下一页">下一页</a>
+                </li>
+            `;
+            
+            paginationList.innerHTML = paginationHtml;
+            
+            // 为页码添加点击事件
+            const pageLinks = paginationContainer.querySelectorAll('.page-link');
+            pageLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    if (this.parentElement.classList.contains('disabled')) {
+                        return;
+                    }
+                    
+                    const pageNumber = parseInt(this.getAttribute('data-page'));
+                    currentPage = pageNumber;
+                    displayProducts(filteredProducts);
+                    
+                    // 滚动到页面顶部
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            });
+        }
+    </script>
+</body>
+</html> 
+ 
+ 

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户登录 - 本地特色农产品直销系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- 自定义样式 -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-leaf text-success me-2"></i>农产品直销系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/products.html">产品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/farmers.html">农户展示</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/statistics.html">销售统计</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/about.html">关于我们</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>用户登录</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-danger d-none" id="login-error">
+                            登录失败，请检查用户名和密码。
+                        </div>
+                        
+                        <form id="login-form">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">用户名</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">密码</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="toggle-password">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                <label class="form-check-label" for="remember">记住我</label>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-sign-in-alt me-2"></i>登录
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- 测试用户快速登录 -->
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between">
+                                <button onclick="quickLogin('user', '123456')" class="btn btn-outline-primary">
+                                    <i class="fas fa-user me-1"></i>用户登录
+                                </button>
+                                <button onclick="quickLogin('farmer1', '123456')" class="btn btn-outline-success">
+                                    <i class="fas fa-tractor me-1"></i>农户登录
+                                </button>
+                                <button onclick="quickLogin('admin', '123456')" class="btn btn-outline-danger">
+                                    <i class="fas fa-user-shield me-1"></i>管理员登录
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 text-center">
+                            <p>还没有账号？ <a href="/pages/register.html" class="text-success">立即注册</a></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 登录方式 -->
+                <div class="card mt-4 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">快速登录方式</h5>
+                        <div class="row mt-3 text-center">
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100" disabled>
+                                    <i class="fab fa-weixin fa-lg me-2"></i>微信
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100" disabled>
+                                    <i class="fab fa-qq fa-lg me-2"></i>QQ
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-outline-secondary w-100" disabled>
+                                    <i class="fas fa-mobile-alt fa-lg me-2"></i>手机
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5>关于我们</h5>
+                    <p class="text-muted">本地特色农产品直销系统，致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收。</p>
+                </div>
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <h5>快速链接</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-decoration-none text-muted">首页</a></li>
+                        <li><a href="/pages/products.html" class="text-decoration-none text-muted">产品列表</a></li>
+                        <li><a href="/pages/farmers.html" class="text-decoration-none text-muted">农户展示</a></li>
+                        <li><a href="/pages/statistics.html" class="text-decoration-none text-muted">销售统计</a></li>
+                        <li><a href="/pages/about.html" class="text-decoration-none text-muted">关于我们</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-3 mb-md-0">
+                    <h5>帮助</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/pages/faq.html" class="text-decoration-none text-muted">常见问题</a></li>
+                        <li><a href="/pages/shipping.html" class="text-decoration-none text-muted">配送政策</a></li>
+                        <li><a href="/pages/return.html" class="text-decoration-none text-muted">退换政策</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>联系我们</h5>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 地址：广东省广州市白云区</li>
+                        <li><i class="fas fa-phone me-2"></i> 电话：123-456-7890</li>
+                        <li><i class="fas fa-envelope me-2"></i> 邮箱：info@farmshop.com</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center text-muted">
+                <small>&copy; 2023 农产品直销系统. 保留所有权利.</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- API 调用 -->
+    <script src="/js/api.js"></script>
+
+    <!-- 登录页逻辑 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 登录表单提交
+            document.getElementById('login-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                login();
+            });
+            
+            // 切换密码可见性
+            document.getElementById('toggle-password').addEventListener('click', function() {
+                const passwordInput = document.getElementById('password');
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+            
+            // 处理URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const reason = urlParams.get('reason');
+            
+            // 检查是否因用户名修改而重定向过来
+            if (reason === 'username_changed') {
+                // 从会话存储中获取新用户名
+                const pendingUsername = sessionStorage.getItem('pendingUsername');
+                if (pendingUsername) {
+                    // 自动填充用户名
+                    document.getElementById('username').value = pendingUsername;
+                    // 显示提示信息
+                    showMessage('您的用户名已更改，请使用新用户名登录', 'info');
+                    // 清除会话存储的临时数据
+                    sessionStorage.removeItem('pendingUsername');
+                }
+            }
+        });
+        
+        // 登录功能
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+            
+            if (!username || !password) {
+                showError('请输入用户名和密码');
+                return;
+            }
+            
+            try {
+                document.getElementById('login-form').classList.add('was-validated');
+                
+                // 显示加载中
+                const submitBtn = document.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>登录中...';
+                submitBtn.disabled = true;
+                
+                const response = await api.auth.login(username, password);
+                
+                if (response.code === 200) {
+                    console.log('登录成功，服务器返回数据:', response.data);
+                    
+                    // 验证返回数据完整性
+                    if (!response.data || !response.data.token || !response.data.userId) {
+                        console.error('服务器返回的用户数据不完整:', response.data);
+                        showError('登录失败，服务器返回数据不完整');
+                        
+                        // 重置按钮状态
+                        submitBtn.innerHTML = originalBtnText;
+                        submitBtn.disabled = false;
+                        return;
+                    }
+                    
+                    // 保存登录状态和token
+                    localStorage.setItem('token', response.data.token);
+                    
+                    // 保存用户信息对象
+                    const userData = {
+                        userId: response.data.userId,
+                        username: response.data.username || username,
+                        role: response.data.role || 'user',
+                        email: response.data.email || null,
+                        phone: response.data.phone || null
+                    };
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    
+                    // 记住登录状态（如果选择了记住我）
+                    if (remember) {
+                        localStorage.setItem('rememberLogin', 'true');
+                    }
+                    
+                    // 打印登录信息（调试用）
+                    api.printLoginInfo();
+                    
+                    // 显示成功信息
+                    showMessage('登录成功，正在跳转...', 'success');
+                    
+                    // 延迟一下再跳转，确保数据已经存储
+                    setTimeout(() => {
+                        // 重定向到首页或之前的页面
+                        const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/index.html';
+                        window.location.href = redirectUrl;
+                    }, 800);
+                } else {
+                    showError(response.message || '登录失败');
+                    
+                    // 重置按钮状态
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('登录过程中出错:', error);
+                showError(error.message || '登录时发生错误');
+                
+                // 重置按钮状态
+                const submitBtn = document.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>登录';
+                submitBtn.disabled = false;
+            }
+        }
+        
+        // 显示错误信息
+        function showError(message) {
+            showMessage(message, 'danger');
+        }
+        
+        // 显示消息提示
+        function showMessage(message, type = 'danger') {
+            const errorElement = document.getElementById('login-error');
+            errorElement.textContent = message;
+            errorElement.classList.remove('d-none', 'alert-danger', 'alert-success', 'alert-info', 'alert-warning');
+            errorElement.classList.add(`alert-${type}`);
+            
+            // 5秒后自动隐藏非成功消息
+            if (type !== 'success') {
+                setTimeout(() => {
+                    errorElement.classList.add('d-none');
+                }, 5000);
+            }
+        }
+
+        // 快速登录功能
+        function quickLogin(username, password) {
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+            login();
+        }
+    </script>
+</body>
+</html> 
+ 
