@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户注册 - 本地特色农产品直销系统</title>
+    <title>注册 - 本地特色农产品直销系统</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -11,10 +11,162 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <!-- 自定义样式 -->
     <link href="/css/style.css" rel="stylesheet">
+    <style>
+        .register-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .register-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .register-header i {
+            font-size: 3rem;
+            color: #198754;
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+        }
+        
+        .form-text {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        
+        .btn-success {
+            padding: 0.75rem 2rem;
+        }
+        
+        .verification-code-group {
+            position: relative;
+        }
+        
+        .verification-code-btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        
+        .role-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .role-option {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .role-option:hover {
+            border-color: #198754;
+            background-color: rgba(25, 135, 84, 0.05);
+        }
+        
+        .role-option.selected {
+            border-color: #198754;
+            background-color: rgba(25, 135, 84, 0.1);
+        }
+        
+        .role-option i {
+            font-size: 2rem;
+            color: #198754;
+            margin-bottom: 0.5rem;
+        }
+        
+        .role-option h5 {
+            margin-bottom: 0.5rem;
+            color: #212529;
+        }
+        
+        .role-option p {
+            color: #6c757d;
+            font-size: 0.875rem;
+            margin-bottom: 0;
+        }
+        
+        .verification-step {
+            display: none;
+        }
+        
+        .verification-step.active {
+            display: block;
+        }
+        
+        .verification-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .verification-progress::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #dee2e6;
+            z-index: 1;
+        }
+        
+        .progress-step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #fff;
+            border: 2px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .progress-step.active {
+            background-color: #198754;
+            border-color: #198754;
+            color: #fff;
+        }
+        
+        .progress-step.completed {
+            background-color: #198754;
+            border-color: #198754;
+            color: #fff;
+        }
+        
+        .progress-label {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 0.5rem;
+            white-space: nowrap;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+    </style>
 </head>
 <body>
     <!-- 导航栏 -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="/index.html">
                 <i class="fas fa-leaf text-success me-2"></i>农产品直销系统
@@ -34,175 +186,153 @@
                         <a class="nav-link" href="/pages/farmers.html">农户展示</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="/pages/statistics.html">销售统计</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/pages/about.html">关于我们</a>
                     </li>
                 </ul>
+                <div class="d-flex">
+                    <a href="/pages/login.html" class="btn btn-outline-success me-2">登录</a>
+                    <a href="/pages/register.html" class="btn btn-success">注册</a>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- 主要内容 -->
     <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow">
-                    <div class="card-header bg-success text-white">
-                        <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>用户注册</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-danger d-none" id="register-error"></div>
-                        <div class="alert alert-success d-none" id="register-success">
-                            注册成功！正在跳转到登录页面...
+        <div class="register-container">
+            <div class="register-header">
+                <i class="fas fa-user-plus"></i>
+                <h2>创建新账号</h2>
+                <p class="text-muted">加入我们，开启农产品直销之旅</p>
+            </div>
+            
+            <!-- 注册进度 -->
+            <div class="verification-progress mb-4">
+                <div class="progress-step active">
+                    <span>1</span>
+                    <div class="progress-label">基本信息</div>
+                </div>
+                <div class="progress-step">
+                    <span>2</span>
+                    <div class="progress-label">手机验证</div>
+                </div>
+                <div class="progress-step">
+                    <span>3</span>
+                    <div class="progress-label">完成注册</div>
+                </div>
+            </div>
+            
+            <!-- 第一步：基本信息 -->
+            <div class="verification-step active" id="step1">
+                <form id="register-form" class="needs-validation" novalidate>
+                    <div class="mb-4">
+                        <h5 class="mb-3">选择您的身份</h5>
+                        <div class="role-selector">
+                            <div class="role-option" data-role="customer">
+                                <i class="fas fa-shopping-cart"></i>
+                                <h5>消费者</h5>
+                                <p>购买农产品</p>
+                            </div>
+                            <div class="role-option" data-role="farmer">
+                                <i class="fas fa-tractor"></i>
+                                <h5>农户</h5>
+                                <p>销售农产品</p>
+                            </div>
                         </div>
-                        
-                        <form id="register-form">
-                            <!-- 角色选择 -->
-                            <div class="mb-4">
-                                <label class="form-label">注册身份</label>
-                                <div class="d-flex">
-                                    <div class="form-check me-4">
-                                        <input class="form-check-input" type="radio" name="role" id="role-customer" value="customer" checked>
-                                        <label class="form-check-label" for="role-customer">普通用户</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="role" id="role-farmer" value="farmer">
-                                        <label class="form-check-label" for="role-farmer">农户</label>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- 用户信息 -->
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="username" class="form-label">用户名 <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="username" name="username" required>
-                                    <div class="form-text">用户名长度为3-20个字符，只能包含字母、数字和下划线</div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="email" class="form-label">电子邮箱 <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="email" name="email" required>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="password" class="form-label">密码 <span class="text-danger">*</span></label>
-                                    <input type="password" class="form-control" id="password" name="password" required>
-                                    <div class="form-text">密码长度至少6位，包含字母和数字</div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="confirmPassword" class="form-label">确认密码 <span class="text-danger">*</span></label>
-                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="phone" class="form-label">手机号码 <span class="text-danger">*</span></label>
-                                    <input type="tel" class="form-control" id="phone" name="phone" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="address" class="form-label">地址</label>
-                                    <input type="text" class="form-control" id="address" name="address">
-                                </div>
-                            </div>
-                            
-                            <!-- 农户特有信息，默认隐藏 -->
-                            <div id="farmer-fields" class="d-none">
-                                <hr>
-                                <h5>农户信息</h5>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="farmName" class="form-label">农场/农户名称</label>
-                                        <input type="text" class="form-control" id="farmName" name="farmName">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="farmType" class="form-label">农场类型</label>
-                                        <select class="form-select" id="farmType" name="farmType">
-                                            <option value="">请选择...</option>
-                                            <option value="vegetable">蔬菜种植</option>
-                                            <option value="fruit">水果种植</option>
-                                            <option value="livestock">畜牧养殖</option>
-                                            <option value="poultry">家禽养殖</option>
-                                            <option value="other">其他</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="farmDescription" class="form-label">农场简介</label>
-                                    <textarea class="form-control" id="farmDescription" name="farmDescription" rows="3"></textarea>
-                                </div>
-                            </div>
-                            
-                            <!-- 协议同意 -->
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="agreement" name="agreement" required>
-                                <label class="form-check-label" for="agreement">
-                                    我已阅读并同意 <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">《用户协议》</a> 和 <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">《隐私政策》</a>
-                                </label>
-                            </div>
-                            
-                            <div class="d-grid mt-4">
-                                <button type="submit" class="btn btn-success btn-lg">
-                                    <i class="fas fa-user-plus me-2"></i>注册
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="username" class="form-label">用户名 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                            <div class="form-text">用户名长度为3-20个字符，只能包含字母、数字和下划线</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">电子邮箱</label>
+                            <input type="email" class="form-control" id="email" name="email">
+                            <div class="form-text">用于接收订单通知和重要消息（选填）</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="password" class="form-label">密码 <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <div class="form-text">密码长度至少6位，包含字母和数字</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="confirmPassword" class="form-label">确认密码 <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">手机号码 <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="phone" name="phone" required>
+                            <div class="form-text">用于接收订单通知</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <button type="submit" class="btn btn-success">
+                            注册 <i class="fas fa-user-plus ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- 第二步：手机验证 -->
+            <div class="verification-step" id="step2">
+                <div class="text-center mb-4">
+                    <i class="fas fa-mobile-alt text-success" style="font-size: 3rem;"></i>
+                    <h4 class="mt-3">验证手机号码</h4>
+                    <p class="text-muted">请输入发送到您手机号码的验证码</p>
+                </div>
+                
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">手机号码</label>
+                            <input type="tel" class="form-control" id="verify-phone" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="verify-code" class="form-label">验证码</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="verify-code" required>
+                                <button class="btn btn-outline-success" type="button" id="resend-code-btn">
+                                    重新发送
                                 </button>
                             </div>
-                        </form>
+                        </div>
                         
-                        <div class="mt-4 text-center">
-                            <p>已有账号？ <a href="/pages/login.html" class="text-success">立即登录</a></p>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between mt-4">
+                            <button type="button" class="btn btn-outline-secondary" id="prev-step-btn">
+                                <i class="fas fa-arrow-left me-2"></i> 上一步
+                            </button>
+                            <button type="button" class="btn btn-success" id="verify-code-btn">
+                                验证 <i class="fas fa-check ms-2"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- 条款模态框 -->
-    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="termsModalLabel">用户协议</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>欢迎使用本地特色农产品直销系统。请仔细阅读以下条款，使用本网站即表示您同意以下条款。</p>
-                    <h6>1. 总则</h6>
-                    <p>1.1 本条款是您与本地特色农产品直销系统（以下简称"本系统"）之间的协议，由您和本系统共同遵守。</p>
-                    <p>1.2 使用本系统即表示您已经仔细阅读并完全接受本协议的所有条款和条件。</p>
-                    <h6>2. 用户注册与帐号安全</h6>
-                    <p>2.1 您可以注册成为本系统的用户，在注册过程中，您需要提供真实、准确的个人信息。</p>
-                    <p>2.2 您应自行保管好您的账号及密码，因账号或密码保管不善而导致的任何损失由您自行承担。</p>
-                    <!-- 更多条款内容... -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 隐私政策模态框 -->
-    <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="privacyModalLabel">隐私政策</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>本地特色农产品直销系统（以下简称"本系统"）非常重视您的隐私保护。本隐私政策阐述了我们如何收集、使用和保护您的个人信息。</p>
-                    <h6>1. 信息收集</h6>
-                    <p>1.1 本系统会收集您主动提供的个人信息，包括但不限于姓名、电子邮件、电话号码、地址等。</p>
-                    <p>1.2 当您使用本系统时，我们会自动收集一些信息，如IP地址、浏览器类型、访问时间等。</p>
-                    <h6>2. 信息使用</h6>
-                    <p>2.1 本系统收集的信息主要用于提供、维护和改进我们的服务，如处理订单、发送通知等。</p>
-                    <p>2.2 本系统不会向第三方出售、出租或交易您的个人信息。</p>
-                    <!-- 更多隐私政策内容... -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            
+            <!-- 第三步：完成注册 -->
+            <div class="verification-step" id="step3">
+                <div class="text-center">
+                    <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    <h4 class="mt-3">注册成功！</h4>
+                    <p class="text-muted">您的账号已创建完成，现在可以开始使用了</p>
+                    
+                    <div class="mt-4">
+                        <a href="/pages/login.html" class="btn btn-success">
+                            立即登录 <i class="fas fa-sign-in-alt ms-2"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -222,6 +352,7 @@
                         <li><a href="/index.html" class="text-decoration-none text-muted">首页</a></li>
                         <li><a href="/pages/products.html" class="text-decoration-none text-muted">产品列表</a></li>
                         <li><a href="/pages/farmers.html" class="text-decoration-none text-muted">农户展示</a></li>
+                        <li><a href="/pages/statistics.html" class="text-decoration-none text-muted">销售统计</a></li>
                         <li><a href="/pages/about.html" class="text-decoration-none text-muted">关于我们</a></li>
                     </ul>
                 </div>
@@ -249,166 +380,148 @@
         </div>
     </footer>
 
+    <!-- Toast提示 -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span id="toast-message">操作成功</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 错误提示 -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span id="error-message">操作失败</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- API 调用 -->
     <script src="/js/api.js"></script>
-
-    <!-- 注册页逻辑 -->
+    
+    <!-- 注册页面逻辑 -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 根据角色显示/隐藏相应字段
-            const roleRadios = document.querySelectorAll('input[name="role"]');
-            roleRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    const farmerFields = document.getElementById('farmer-fields');
-                    if (this.value === 'farmer') {
-                        farmerFields.classList.remove('d-none');
-                    } else {
-                        farmerFields.classList.add('d-none');
-                    }
+            // 初始化Toast
+            const successToast = new bootstrap.Toast(document.getElementById('successToast'));
+            const errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
+            
+            // 角色选择
+            const roleOptions = document.querySelectorAll('.role-option');
+            let selectedRole = 'customer'; // 默认选择消费者
+            
+            roleOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    roleOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedRole = this.dataset.role;
                 });
             });
             
-            // 从URL参数获取角色
-            const urlParams = new URLSearchParams(window.location.search);
-            const roleParam = urlParams.get('role');
-            if (roleParam === 'farmer') {
-                document.getElementById('role-farmer').checked = true;
-                document.getElementById('farmer-fields').classList.remove('d-none');
+            // 默认选中消费者
+            roleOptions[0].classList.add('selected');
+            
+            // 显示成功提示
+            function showToast(message) {
+                document.getElementById('toast-message').textContent = message;
+                successToast.show();
+            }
+            
+            // 显示错误提示
+            function showError(message) {
+                document.getElementById('error-message').textContent = message;
+                errorToast.show();
             }
             
             // 注册表单提交
-            document.getElementById('register-form').addEventListener('submit', function(e) {
+            document.getElementById('register-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const phone = document.getElementById('phone').value;
+                const email = document.getElementById('email').value;
+                
                 // 表单验证
-                if (!validateForm()) {
+                if (!username) {
+                    showError('请输入用户名');
                     return;
                 }
                 
-                register();
+                if (!password) {
+                    showError('请输入密码');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    showError('密码长度不能少于6位');
+                    return;
+                }
+                
+                if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password)) {
+                    showError('密码必须包含字母和数字');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showError('两次输入的密码不一致');
+                    return;
+                }
+                
+                if (!phone) {
+                    showError('请输入手机号码');
+                    return;
+                }
+                
+                if (!/^1[3-9]\d{9}$/.test(phone)) {
+                    showError('请输入正确的手机号码');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username,
+                            password,
+                            role: selectedRole,
+                            phone,
+                            email: email || null
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.code === 200) {
+                        showToast('注册成功');
+                        setTimeout(() => {
+                            window.location.href = '/pages/login.html';
+                        }, 1500);
+                    } else {
+                        throw new Error(data.message || '注册失败');
+                    }
+                } catch (error) {
+                    console.error('注册失败:', error);
+                    showError('注册失败: ' + error.message);
+                }
             });
         });
-        
-        // 表单验证
-        function validateForm() {
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const phone = document.getElementById('phone').value;
-            const agreement = document.getElementById('agreement').checked;
-            
-            // 用户名验证
-            if (!username || username.length < 3 || username.length > 20 || !/^[a-zA-Z0-9_]+$/.test(username)) {
-                showError('用户名长度为3-20个字符，只能包含字母、数字和下划线');
-                return false;
-            }
-            
-            // 邮箱验证
-            if (!email || !/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/.test(email)) {
-                showError('请输入有效的电子邮箱地址');
-                return false;
-            }
-            
-            // 密码验证
-            if (!password || password.length < 6 || !/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password)) {
-                showError('密码长度至少6位，包含字母和数字');
-                return false;
-            }
-            
-            // 确认密码
-            if (password !== confirmPassword) {
-                showError('两次输入的密码不一致');
-                return false;
-            }
-            
-            // 手机号码验证
-            if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
-                showError('请输入有效的手机号码');
-                return false;
-            }
-            
-            // 协议同意
-            if (!agreement) {
-                showError('您必须同意用户协议和隐私政策');
-                return false;
-            }
-            
-            return true;
-        }
-        
-        // 注册功能
-        async function register() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            
-            // 获取角色选择
-            const roleRadios = document.querySelectorAll('input[name="role"]');
-            let role = 'customer'; // 默认角色
-            
-            // 遍历所有角色单选按钮，找到选中的那个
-            for (const radioButton of roleRadios) {
-                if (radioButton.checked) {
-                    role = radioButton.value;
-                    break;
-                }
-            }
-            
-            // 验证输入
-            if (!username || !password || !confirmPassword || !email || !phone) {
-                showError('所有必填字段必须填写');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                showError('两次输入的密码不一致');
-                return;
-            }
-            
-            try {
-                console.log('发送注册数据:', { username, password, role, email, phone });
-                const response = await api.auth.register({
-                    username,
-                    password,
-                    role,
-                    email,
-                    phone
-                });
-                
-                console.log('注册响应:', response);
-                
-                if (response.code === 200) {
-                    // 注册成功，重定向到登录页
-                    alert('注册成功！请登录您的账号。');
-                    window.location.href = '/pages/login.html';
-                } else {
-                    showError(response.message || '注册失败，请稍后再试');
-                }
-            } catch (error) {
-                console.error('注册错误:', error);
-                showError(error.message || '系统错误，请稍后再试');
-            }
-        }
-        
-        // 显示错误信息
-        function showError(message) {
-            const errorElement = document.getElementById('register-error');
-            errorElement.textContent = message;
-            errorElement.classList.remove('d-none');
-            
-            // 滚动到错误信息位置
-            errorElement.scrollIntoView({ behavior: 'smooth' });
-            
-            // 5秒后自动隐藏错误信息
-            setTimeout(() => {
-                errorElement.classList.add('d-none');
-            }, 5000);
-        }
     </script>
 </body>
 </html> 

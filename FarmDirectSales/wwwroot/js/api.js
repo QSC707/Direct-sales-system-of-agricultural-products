@@ -46,7 +46,20 @@ const printLoginInfo = () => {
 
 // 统一处理响应
 const handleResponse = async (response) => {
-    const data = await response.json();
+    // 检查响应是否为空
+    const text = await response.text();
+    if (!text) {
+        throw new Error('服务器返回空响应');
+    }
+    
+    // 尝试解析JSON
+    let data;
+    try {
+        data = JSON.parse(text);
+    } catch (e) {
+        console.error('解析响应JSON失败:', e);
+        throw new Error('服务器返回的数据格式不正确');
+    }
     
     if (!response.ok) {
         if (response.status === 401) {
@@ -166,7 +179,7 @@ const api = {
                     username: userData.username,
                     password: userData.password,
                     role: userData.role,
-                    email: userData.email,
+                    email: userData.email || null,
                     phone: userData.phone
                 })
             });

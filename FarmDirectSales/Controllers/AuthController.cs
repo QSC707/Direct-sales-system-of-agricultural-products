@@ -239,6 +239,7 @@ namespace FarmDirectSales.Controllers
         /// <summary>
         /// 手机号码
         /// </summary>
+        [Required(ErrorMessage = "手机号码不能为空")]
         [Phone(ErrorMessage = "手机号格式不正确")]
         public string? Phone { get; set; }
     }

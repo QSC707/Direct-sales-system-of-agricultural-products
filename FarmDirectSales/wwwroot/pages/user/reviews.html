@@ -31,6 +31,15 @@
         .tab-content {
             padding-top: 20px;
         }
+        .not-login-container {
+            text-align: center;
+            padding: 50px 0;
+        }
+        .not-login-container i {
+            font-size: 4rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -96,62 +105,75 @@
 
     <!-- 主要内容 -->
     <div class="container py-5">
-        <h2 class="mb-4">我的评价</h2>
-        
-        <!-- 选项卡 -->
-        <ul class="nav nav-tabs" id="reviewTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="to-review-tab" data-bs-toggle="tab" data-bs-target="#to-review" type="button" role="tab" aria-controls="to-review" aria-selected="true">
-                    待评价 <span class="badge bg-danger" id="to-review-count">0</span>
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="reviewed-tab" data-bs-toggle="tab" data-bs-target="#reviewed" type="button" role="tab" aria-controls="reviewed" aria-selected="false">
-                    已评价 <span class="badge bg-secondary" id="reviewed-count">0</span>
-                </button>
-            </li>
-        </ul>
-        
-        <div class="tab-content" id="reviewTabsContent">
-            <!-- 待评价标签页 -->
-            <div class="tab-pane fade show active" id="to-review" role="tabpanel" aria-labelledby="to-review-tab">
-                <!-- 加载中占位符 -->
-                <div class="text-center py-5" id="to-review-loading">
-                    <div class="spinner-border text-success" role="status">
-                        <span class="visually-hidden">加载中...</span>
-                    </div>
-                    <p class="mt-2">正在加载待评价订单...</p>
-                </div>
-                
-                <!-- 待评价列表 -->
-                <div id="to-review-list"></div>
-                
-                <!-- 暂无待评价订单提示 -->
-                <div id="no-to-review" class="text-center py-5 d-none">
-                    <i class="fas fa-comment-slash fa-4x text-muted mb-3"></i>
-                    <h4>暂无待评价订单</h4>
-                    <p class="text-muted">您目前没有需要评价的已完成订单</p>
-                </div>
-            </div>
+        <!-- 未登录状态显示 -->
+        <div id="not-login-container" class="not-login-container d-none">
+            <i class="fas fa-user-lock"></i>
+            <h3>请先登录</h3>
+            <p class="text-muted">登录后即可查看您的评价记录</p>
+            <a href="/pages/login.html?redirect=user/reviews" class="btn btn-success mt-3">
+                <i class="fas fa-sign-in-alt me-2"></i>立即登录
+            </a>
+        </div>
+
+        <!-- 已登录状态显示 -->
+        <div id="login-container">
+            <h2 class="mb-4">我的评价</h2>
             
-            <!-- 已评价标签页 -->
-            <div class="tab-pane fade" id="reviewed" role="tabpanel" aria-labelledby="reviewed-tab">
-                <!-- 加载中占位符 -->
-                <div class="text-center py-5" id="reviewed-loading">
-                    <div class="spinner-border text-success" role="status">
-                        <span class="visually-hidden">加载中...</span>
+            <!-- 选项卡 -->
+            <ul class="nav nav-tabs" id="reviewTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="to-review-tab" data-bs-toggle="tab" data-bs-target="#to-review" type="button" role="tab" aria-controls="to-review" aria-selected="true">
+                        待评价 <span class="badge bg-danger" id="to-review-count">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="reviewed-tab" data-bs-toggle="tab" data-bs-target="#reviewed" type="button" role="tab" aria-controls="reviewed" aria-selected="false">
+                        已评价 <span class="badge bg-secondary" id="reviewed-count">0</span>
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="reviewTabsContent">
+                <!-- 待评价标签页 -->
+                <div class="tab-pane fade show active" id="to-review" role="tabpanel" aria-labelledby="to-review-tab">
+                    <!-- 加载中占位符 -->
+                    <div class="text-center py-5" id="to-review-loading">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-2">正在加载待评价订单...</p>
                     </div>
-                    <p class="mt-2">正在加载已评价订单...</p>
+                    
+                    <!-- 待评价列表 -->
+                    <div id="to-review-container"></div>
+                    
+                    <!-- 暂无待评价订单提示 -->
+                    <div id="no-to-review" class="text-center py-5 d-none">
+                        <i class="fas fa-comment-slash fa-4x text-muted mb-3"></i>
+                        <h4>暂无待评价订单</h4>
+                        <p class="text-muted">您目前没有需要评价的已完成订单</p>
+                    </div>
                 </div>
                 
-                <!-- 已评价列表 -->
-                <div id="reviewed-list"></div>
-                
-                <!-- 暂无已评价订单提示 -->
-                <div id="no-reviewed" class="text-center py-5 d-none">
-                    <i class="fas fa-comments fa-4x text-muted mb-3"></i>
-                    <h4>暂无已评价订单</h4>
-                    <p class="text-muted">您还没有对任何商品进行评价</p>
+                <!-- 已评价标签页 -->
+                <div class="tab-pane fade" id="reviewed" role="tabpanel" aria-labelledby="reviewed-tab">
+                    <!-- 加载中占位符 -->
+                    <div class="text-center py-5" id="reviewed-loading">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-2">正在加载已评价订单...</p>
+                    </div>
+                    
+                    <!-- 已评价列表 -->
+                    <div id="reviewed-container"></div>
+                    
+                    <!-- 暂无已评价订单提示 -->
+                    <div id="no-reviewed" class="text-center py-5 d-none">
+                        <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                        <h4>暂无已评价订单</h4>
+                        <p class="text-muted">您还没有对任何商品进行评价</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -174,26 +196,27 @@
                                 <div class="rating-input">
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio" name="rating" id="rating1" value="1">
-                                        <label class="form-check-label" for="rating1">1分</label>
+                                        <label class="form-check-label" for="rating1">1星</label>
                                     </div>
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio" name="rating" id="rating2" value="2">
-                                        <label class="form-check-label" for="rating2">2分</label>
+                                        <label class="form-check-label" for="rating2">2星</label>
                                     </div>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="rating" id="rating3" value="3" checked>
-                                        <label class="form-check-label" for="rating3">3分</label>
+                                        <input class="form-check-input" type="radio" name="rating" id="rating3" value="3">
+                                        <label class="form-check-label" for="rating3">3星</label>
                                     </div>
                                     <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="radio" name="rating" id="rating4" value="4">
-                                        <label class="form-check-label" for="rating4">4分</label>
+                                        <label class="form-check-label" for="rating4">4星</label>
                                     </div>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="rating" id="rating5" value="5">
-                                        <label class="form-check-label" for="rating5">5分</label>
+                                        <input class="form-check-input" type="radio" name="rating" id="rating5" value="5" checked>
+                                        <label class="form-check-label" for="rating5">5星</label>
                                     </div>
                                 </div>
                             </div>
+                            
                             <div class="mb-3">
                                 <label for="content" class="form-label">评价内容</label>
                                 <textarea class="form-control" id="content" name="content" rows="3" placeholder="请分享您对该产品的使用体验..." required></textarea>
@@ -264,9 +287,6 @@
     
     <!-- 评价页面逻辑 -->
     <script>
-        // API基础URL
-        const API_BASE_URL = '/api';
-        
         // 全局变量
         let toReviewOrders = [];
         let reviewedOrders = [];
@@ -276,10 +296,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             // 检查用户登录状态
             if (!checkAuthStatus()) {
-                // 未登录跳转到登录页
-                window.location.href = '/pages/login.html?redirect=user/reviews';
+                showNotLoginState();
                 return;
             }
+            
+            // 显示已登录状态
+            showLoginState();
             
             // 加载待评价和已评价订单
             loadReviewData();
@@ -301,6 +323,18 @@
                 reviewedTab.show();
             }
         });
+        
+        // 显示未登录状态
+        function showNotLoginState() {
+            document.getElementById('not-login-container').classList.remove('d-none');
+            document.getElementById('login-container').classList.add('d-none');
+        }
+        
+        // 显示已登录状态
+        function showLoginState() {
+            document.getElementById('not-login-container').classList.add('d-none');
+            document.getElementById('login-container').classList.remove('d-none');
+        }
         
         // 检查用户登录状态
         function checkAuthStatus() {
@@ -324,6 +358,9 @@
                 
                 return true;
             } else {
+                // 未登录，清除可能存在的无效数据
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
                 return false;
             }
         }
@@ -333,24 +370,6 @@
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             window.location.href = '/index.html';
-        }
-        
-        // 获取请求头
-        function getHeaders() {
-            const token = localStorage.getItem('token');
-            return {
-                'Content-Type': 'application/json',
-                'Authorization': token ? `Bearer ${token}` : ''
-            };
-        }
-        
-        // 处理API响应
-        async function handleResponse(response) {
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || '请求失败');
-            }
-            return data;
         }
         
         // 加载评价数据
@@ -363,7 +382,7 @@
                 document.getElementById('reviewed-loading').classList.remove('d-none');
                 
                 // 调用订单API获取用户的所有订单
-                const response = await fetch(`${API_BASE_URL}/orders/user`, {
+                const response = await fetch(`${API_BASE_URL}/order/user/${user.userId}`, {
                     method: 'GET',
                     headers: getHeaders()
                 });
@@ -379,7 +398,7 @@
                     );
                     
                     reviewedOrders = orders.filter(order => 
-                        order.isReviewed
+                        order.status === '已完成' && order.isReviewed
                     );
                     
                     // 更新标签页计数
@@ -389,23 +408,23 @@
                     // 渲染订单列表
                     renderToReviewOrders();
                     renderReviewedOrders();
+                    
+                    // 如果没有待评价和已评价的订单，显示提示信息
+                    if (toReviewOrders.length === 0 && reviewedOrders.length === 0) {
+                        document.getElementById('to-review-container').innerHTML = 
+                            '<div class="alert alert-info">您还没有可以评价的订单。</div>';
+                        document.getElementById('reviewed-container').innerHTML = 
+                            '<div class="alert alert-info">您还没有已评价的订单。</div>';
+                    }
                 } else {
                     throw new Error(data.message || '获取订单列表失败');
                 }
             } catch (error) {
                 console.error('加载评价数据失败:', error);
-                document.getElementById('to-review-list').innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        加载数据失败: ${error.message}
-                    </div>
-                `;
-                document.getElementById('reviewed-list').innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        加载数据失败: ${error.message}
-                    </div>
-                `;
+                document.getElementById('to-review-container').innerHTML = 
+                    `<div class="alert alert-danger">加载评价数据失败: ${error.message}</div>`;
+                document.getElementById('reviewed-container').innerHTML = 
+                    `<div class="alert alert-danger">加载评价数据失败: ${error.message}</div>`;
             } finally {
                 // 隐藏加载状态
                 document.getElementById('to-review-loading').classList.add('d-none');
@@ -415,105 +434,63 @@
         
         // 渲染待评价订单
         function renderToReviewOrders() {
-            const container = document.getElementById('to-review-list');
+            const container = document.getElementById('to-review-container');
+            if (!container) return;
             
             if (toReviewOrders.length === 0) {
-                document.getElementById('no-to-review').classList.remove('d-none');
-                container.innerHTML = '';
+                container.innerHTML = '<div class="alert alert-info">您没有待评价的订单。</div>';
                 return;
             }
             
-            document.getElementById('no-to-review').classList.add('d-none');
-            
-            let html = '';
-            
+            let html = '<div class="list-group">';
             toReviewOrders.forEach(order => {
                 html += `
-                    <div class="card review-card mb-3">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <img src="${order.product.imageUrl || '/img/placeholder.jpg'}" alt="${order.product.productName}" class="product-img me-3">
-                                        <div>
-                                            <h5 class="mb-1">${order.product.productName}</h5>
-                                            <p class="text-muted mb-0">订单号: ${order.orderId} | 完成时间: ${new Date(order.completeTime).toLocaleDateString()}</p>
-                                        </div>
-                                    </div>
-                                    <p class="mb-1">数量: ${order.quantity} | 金额: ¥${order.totalPrice.toFixed(2)}</p>
-                                    <p class="text-muted">农户: ${order.product.farmer.username}</p>
-                                </div>
-                                <div class="col-md-4 text-md-end">
-                                    <button class="btn btn-success" onclick="openReviewModal(${order.orderId}, ${order.productId})">
-                                        <i class="fas fa-comment me-2"></i>发表评价
-                                    </button>
-                                </div>
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">${order.productName}</h5>
+                                <p class="mb-1">订单号：${order.orderId}</p>
+                                <p class="mb-1">购买时间：${formatDate(order.createTime)}</p>
                             </div>
+                            <button class="btn btn-primary" onclick="openReviewModal(${order.orderId}, ${order.productId})">
+                                评价
+                            </button>
                         </div>
                     </div>
                 `;
             });
-            
+            html += '</div>';
             container.innerHTML = html;
         }
         
         // 渲染已评价订单
         function renderReviewedOrders() {
-            const container = document.getElementById('reviewed-list');
+            const container = document.getElementById('reviewed-container');
+            if (!container) return;
             
             if (reviewedOrders.length === 0) {
-                document.getElementById('no-reviewed').classList.remove('d-none');
-                container.innerHTML = '';
+                container.innerHTML = '<div class="alert alert-info">您还没有已评价的订单。</div>';
                 return;
             }
             
-            document.getElementById('no-reviewed').classList.add('d-none');
-            
-            let html = '';
-            
+            let html = '<div class="list-group">';
             reviewedOrders.forEach(order => {
-                // 获取评价信息（真实项目中应该从服务器获取）
-                const reviewInfo = {
-                    rating: 5, // 示例评分
-                    content: '非常满意，下次还会购买！', // 示例内容
-                    createTime: new Date() // 示例时间
-                };
-                
-                // 生成星星评分
-                const stars = Array(5).fill(0).map((_, i) => 
-                    i < reviewInfo.rating 
-                        ? '<i class="fas fa-star"></i>' 
-                        : '<i class="far fa-star"></i>'
-                ).join('');
-                
                 html += `
-                    <div class="card review-card mb-3">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <img src="${order.product.imageUrl || '/img/placeholder.jpg'}" alt="${order.product.productName}" class="product-img me-3">
-                                        <div>
-                                            <h5 class="mb-1">${order.product.productName}</h5>
-                                            <p class="text-muted mb-0">订单号: ${order.orderId} | 评价时间: ${new Date(reviewInfo.createTime).toLocaleDateString()}</p>
-                                        </div>
-                                    </div>
-                                    <div class="star-rating mb-2">
-                                        ${stars}
-                                    </div>
-                                    <p class="mb-0">${reviewInfo.content}</p>
-                                </div>
-                                <div class="col-md-4 text-md-end">
-                                    <a href="/pages/product-detail.html?id=${order.productId}" class="btn btn-outline-success">
-                                        <i class="fas fa-eye me-2"></i>查看商品
-                                    </a>
-                                </div>
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">${order.productName}</h5>
+                                <p class="mb-1">订单号：${order.orderId}</p>
+                                <p class="mb-1">购买时间：${formatDate(order.createTime)}</p>
+                                <p class="mb-1">评价时间：${formatDate(order.review?.createTime)}</p>
+                                <div class="star-rating">${renderStarRating(order.review?.rating || 0)}</div>
+                                <p class="mb-1">${order.review?.content || ''}</p>
                             </div>
                         </div>
                     </div>
                 `;
             });
-            
+            html += '</div>';
             container.innerHTML = html;
         }
         
@@ -562,7 +539,7 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>提交中...';
             
             try {
-                // 调用评价API（真实项目中应根据实际API实现）
+                // 调用评价API
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 
                 const response = await fetch(`${API_BASE_URL}/reviews`, {

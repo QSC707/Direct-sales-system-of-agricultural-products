@@ -37,12 +37,7 @@ namespace FarmDirectSales.Services
                 throw new Exception("用户名已存在");
             }
 
-            // 验证邮箱和手机号
-            if (string.IsNullOrEmpty(email))
-            {
-                throw new Exception("电子邮箱不能为空");
-            }
-
+            // 验证手机号
             if (string.IsNullOrEmpty(phone))
             {
                 throw new Exception("手机号码不能为空");

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using FarmDirectSales.Data;
 using FarmDirectSales.Models;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FarmDirectSales.Controllers
 {
@@ -105,10 +106,18 @@ namespace FarmDirectSales.Controllers
         /// 获取用户订单列表
         /// </summary>
         [HttpGet("user/{userId}")]
+        [Authorize]
         public async Task<IActionResult> GetUserOrders(int userId)
         {
             try
             {
+                // 验证当前用户是否有权限查看此用户的订单
+                var currentUser = HttpContext.Items["User"] as User;
+                if (currentUser == null || (currentUser.UserId != userId && currentUser.Role != "admin"))
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new { code = 403, message = "无权限查看此用户的订单" });
+                }
+
                 // 检查用户是否存在
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
                 if (user == null)
@@ -119,6 +128,7 @@ namespace FarmDirectSales.Controllers
                 var orders = await _context.Orders
                     .Include(o => o.Product)
                     .ThenInclude(p => p.Farmer)
+                    .Include(o => o.Review)
                     .Where(o => o.UserId == userId)
                     .OrderByDescending(o => o.CreateTime)
                     .ToListAsync();
@@ -151,7 +161,15 @@ namespace FarmDirectSales.Controllers
                         o.ShipTime,
                         o.CompleteTime,
                         o.ShippingAddress,
-                        o.ContactPhone
+                        o.ContactPhone,
+                        isReviewed = o.Review != null,
+                        review = o.Review != null ? new
+                        {
+                            o.Review.Rating,
+                            o.Review.Content,
+                            o.Review.CreateTime,
+                            o.Review.IsAnonymous
+                        } : null
                     })
                 });
             }
