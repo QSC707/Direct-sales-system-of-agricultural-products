@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品管理 - 农产品直销平台</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <script src="../../js/dependencies.js"></script>
+    <script src="../../js/auth.js"></script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.html">农户中心</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">农户首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="products.html">我的产品</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="orders.html">订单管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="statistics.html">销售统计</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown" id="userDropdown" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
+                            <span id="currentUsername">用户</span>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="farm-profile.html">农场资料</a>
+                            <a class="dropdown-item" href="products.html">我的产品</a>
+                            <a class="dropdown-item" href="orders.html">订单管理</a>
+                            <a class="dropdown-item" href="profile.html">个人信息</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="../../index.html">返回网站首页</a>
+                            <a class="dropdown-item" href="#" id="logoutBtn">退出登录</a>
+                        </div>
+                    </li>
+                    <li class="nav-item" id="loginItem">
+                        <a class="nav-link" href="../login.html">登录</a>
+                    </li>
+                    <li class="nav-item" id="registerItem">
+                        <a class="nav-link" href="../register.html">注册</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container my-4">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-3">
+                <div class="list-group">
+                    <a href="farm-profile.html" class="list-group-item list-group-item-action">农场资料</a>
+                    <a href="products.html" class="list-group-item list-group-item-action active">我的产品</a>
+                    <a href="orders.html" class="list-group-item list-group-item-action">订单管理</a>
+                    <a href="statistics.html" class="list-group-item list-group-item-action">销售统计</a>
+                    <a href="profile.html" class="list-group-item list-group-item-action">个人信息</a>
+                </div>
+            </div>
+            
+            <!-- 主要内容 -->
+            <div class="col-md-9">
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">我的产品</h4>
+                        <button class="btn btn-light" data-toggle="modal" data-target="#addProductModal">
+                            <i class="fa fa-plus"></i> 添加产品
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- 产品列表 -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>产品图片</th>
+                                        <th>名称</th>
+                                        <th>价格(元/kg)</th>
+                                        <th>库存(kg)</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productList">
+                                    <!-- 产品列表将通过JS动态加载 -->
+                                    <tr>
+                                        <td colspan="6" class="text-center">正在加载产品...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- 空状态提示 -->
+                        <div id="emptyProducts" class="text-center py-5" style="display: none;">
+                            <img src="../../img/empty-box.png" alt="暂无产品" class="img-fluid mb-3" style="max-width: 120px;">
+                            <h5 class="text-muted">您还没有添加任何产品</h5>
+                            <p class="text-muted">点击"添加产品"按钮开始添加您的第一个产品</p>
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#addProductModal">
+                                添加产品
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加产品模态框 -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="addProductModalLabel">添加新产品</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addProductForm">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="productName">产品名称 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="productName" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="productCategory">产品类别 <span class="text-danger">*</span></label>
+                                <select class="form-control" id="productCategory" required>
+                                    <option value="">请选择类别</option>
+                                    <option value="蔬菜">蔬菜</option>
+                                    <option value="水果">水果</option>
+                                    <option value="谷物">谷物</option>
+                                    <option value="肉类">肉类</option>
+                                    <option value="奶制品">奶制品</option>
+                                    <option value="蛋类">蛋类</option>
+                                    <option value="水产品">水产品</option>
+                                    <option value="干货">干货</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="productPrice">价格(元/kg) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="productPrice" min="0.01" step="0.01" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="productStock">库存(kg) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="productStock" min="0" step="0.1" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productDescription">产品描述</label>
+                            <textarea class="form-control" id="productDescription" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productSpecification">规格说明</label>
+                            <input type="text" class="form-control" id="productSpecification" placeholder="如：5kg/箱">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>产品图片 <span class="text-danger">*</span></label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="productImage" accept="image/*" required>
+                                <label class="custom-file-label" for="productImage">选择文件</label>
+                            </div>
+                            <div class="mt-2">
+                                <img id="imagePreview" src="../../img/no-image.png" alt="产品图片预览" class="img-thumbnail" style="max-width: 200px;">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="isOrganic">
+                                <label class="custom-control-label" for="isOrganic">有机认证</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="harvestDate">收获日期</label>
+                            <input type="date" class="form-control" id="harvestDate">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="shelfLife">保质期(天)</label>
+                            <input type="number" class="form-control" id="shelfLife" min="1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productStatus">状态</label>
+                            <select class="form-control" id="productStatus">
+                                <option value="上架">上架</option>
+                                <option value="下架">下架</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveProductBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 编辑产品模态框 -->
+    <div class="modal fade" id="editProductModal" tabindex="-1" role="dialog" aria-labelledby="editProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editProductModalLabel">编辑产品</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editProductForm">
+                        <input type="hidden" id="editProductId">
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="editProductName">产品名称 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="editProductName" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="editProductCategory">产品类别 <span class="text-danger">*</span></label>
+                                <select class="form-control" id="editProductCategory" required>
+                                    <option value="">请选择类别</option>
+                                    <option value="蔬菜">蔬菜</option>
+                                    <option value="水果">水果</option>
+                                    <option value="谷物">谷物</option>
+                                    <option value="肉类">肉类</option>
+                                    <option value="奶制品">奶制品</option>
+                                    <option value="蛋类">蛋类</option>
+                                    <option value="水产品">水产品</option>
+                                    <option value="干货">干货</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="editProductPrice">价格(元/kg) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="editProductPrice" min="0.01" step="0.01" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="editProductStock">库存(kg) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="editProductStock" min="0" step="0.1" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editProductDescription">产品描述</label>
+                            <textarea class="form-control" id="editProductDescription" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editProductSpecification">规格说明</label>
+                            <input type="text" class="form-control" id="editProductSpecification" placeholder="如：5kg/箱">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>产品图片</label>
+                            <div class="mb-2">
+                                <img id="editImagePreview" src="../../img/no-image.png" alt="产品图片预览" class="img-thumbnail" style="max-width: 200px;">
+                            </div>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="editProductImage" accept="image/*">
+                                <label class="custom-file-label" for="editProductImage">选择新图片</label>
+                            </div>
+                            <small class="form-text text-muted">如不需更换图片请勿上传</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="editIsOrganic">
+                                <label class="custom-control-label" for="editIsOrganic">有机认证</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editHarvestDate">收获日期</label>
+                            <input type="date" class="form-control" id="editHarvestDate">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editShelfLife">保质期(天)</label>
+                            <input type="number" class="form-control" id="editShelfLife" min="1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editProductStatus">状态</label>
+                            <select class="form-control" id="editProductStatus">
+                                <option value="上架">上架</option>
+                                <option value="下架">下架</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="updateProductBtn">更新</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white mt-5 py-3">
+        <div class="container text-center">
+            <p>© 2023 农产品直销平台 版权所有</p>
+        </div>
+    </footer>
+
+    <!-- 自定义JS -->
+    <script>
+        /**
+         * 页面加载完成后执行
+         */
+        $(document).ready(function() {
+            // 检查用户是否登录，并且是农户角色
+            checkLogin(function(user) {
+                if (user && user.role === 'farmer') {
+                    // 显示用户信息
+                    $('#userDropdown').show();
+                    $('#currentUsername').text(user.username);
+                    
+                    // 加载产品数据
+                    loadProducts();
+                } else {
+                    // 如果不是农户，跳转到登录页面
+                    alert('您需要以农户身份登录才能访问此页面');
+                    window.location.href = '../login.html?role=farmer&redirect=' + encodeURIComponent(window.location.href);
+                }
+            });
+            
+            // 产品图片预览
+            $('#productImage').on('change', function() {
+                previewImage(this, '#imagePreview');
+            });
+            
+            // 编辑产品图片预览
+            $('#editProductImage').on('change', function() {
+                previewImage(this, '#editImagePreview');
+            });
+            
+            // 保存新产品
+            $('#saveProductBtn').on('click', function() {
+                if (validateProductForm('add')) {
+                    saveProduct();
+                }
+            });
+            
+            // 更新产品
+            $('#updateProductBtn').on('click', function() {
+                if (validateProductForm('edit')) {
+                    updateProduct();
+                }
+            });
+        });
+        
+        /**
+         * 加载产品列表
+         */
+        function loadProducts() {
+            const token = localStorage.getItem('token');
+            const userId = localStorage.getItem('userId');
+            
+            $.ajax({
+                url: '/api/products/farmer/' + userId,
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                success: function(data) {
+                    renderProductList(data);
+                },
+                error: function(xhr) {
+                    console.error('获取产品列表失败', xhr);
+                    alert('获取产品列表失败: ' + (xhr.responseJSON?.message || xhr.statusText));
+                }
+            });
+        }
+        
+        /**
+         * 渲染产品列表
+         */
+        function renderProductList(products) {
+            const $productList = $('#productList');
+            $productList.empty();
+            
+            if (!products || products.length === 0) {
+                // 显示空状态
+                $('#emptyProducts').show();
+                $productList.append('<tr><td colspan="6" class="text-center">暂无产品数据</td></tr>');
+                return;
+            }
+            
+            // 隐藏空状态
+            $('#emptyProducts').hide();
+            
+            // 渲染产品列表
+            products.forEach(function(product) {
+                const statusClass = product.status === '上架' ? 'badge-success' : 'badge-secondary';
+                
+                const row = `
+                    <tr data-product-id="${product.productId}">
+                        <td>
+                            <img src="${product.imageUrl || '../../img/no-image.png'}" alt="${product.name}" class="img-thumbnail" style="max-width: 60px;">
+                        </td>
+                        <td>${product.name}</td>
+                        <td>${product.price.toFixed(2)}</td>
+                        <td>${product.stock.toFixed(1)}</td>
+                        <td><span class="badge ${statusClass}">${product.status}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary edit-product-btn" data-product-id="${product.productId}">
+                                编辑
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-product-btn" data-product-id="${product.productId}">
+                                删除
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                
+                $productList.append(row);
+            });
+            
+            // 绑定编辑和删除事件
+            $('.edit-product-btn').on('click', function() {
+                const productId = $(this).data('product-id');
+                openEditProductModal(productId);
+            });
+            
+            $('.delete-product-btn').on('click', function() {
+                const productId = $(this).data('product-id');
+                confirmDeleteProduct(productId);
+            });
+        }
+        
+        /**
+         * 打开编辑产品模态框
+         */
+        function openEditProductModal(productId) {
+            const token = localStorage.getItem('token');
+            
+            // 获取产品详情
+            $.ajax({
+                url: '/api/products/' + productId,
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                success: function(product) {
+                    // 填充表单
+                    $('#editProductId').val(product.productId);
+                    $('#editProductName').val(product.name);
+                    $('#editProductCategory').val(product.category);
+                    $('#editProductPrice').val(product.price);
+                    $('#editProductStock').val(product.stock);
+                    $('#editProductDescription').val(product.description);
+                    $('#editProductSpecification').val(product.specification);
+                    $('#editIsOrganic').prop('checked', product.isOrganic);
+                    
+                    if (product.harvestDate) {
+                        $('#editHarvestDate').val(product.harvestDate.substring(0, 10));
+                    }
+                    
+                    $('#editShelfLife').val(product.shelfLife);
+                    $('#editProductStatus').val(product.status);
+                    
+                    // 显示产品图片
+                    if (product.imageUrl) {
+                        $('#editImagePreview').attr('src', product.imageUrl);
+                    } else {
+                        $('#editImagePreview').attr('src', '../../img/no-image.png');
+                    }
+                    
+                    // 打开模态框
+                    $('#editProductModal').modal('show');
+                },
+                error: function(xhr) {
+                    console.error('获取产品详情失败', xhr);
+                    alert('获取产品详情失败: ' + (xhr.responseJSON?.message || xhr.statusText));
+                }
+            });
+        }
+        
+        /**
+         * 确认删除产品
+         */
+        function confirmDeleteProduct(productId) {
+            if (confirm('确定要删除这个产品吗？此操作无法撤销。')) {
+                deleteProduct(productId);
+            }
+        }
+        
+        /**
+         * 删除产品
+         */
+        function deleteProduct(productId) {
+            const token = localStorage.getItem('token');
+            
+            $.ajax({
+                url: '/api/products/' + productId,
+                type: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                success: function() {
+                    alert('产品删除成功');
+                    loadProducts(); // 重新加载产品列表
+                },
+                error: function(xhr) {
+                    console.error('删除产品失败', xhr);
+                    alert('删除产品失败: ' + (xhr.responseJSON?.message || xhr.statusText));
+                }
+            });
+        }
+        
+        /**
+         * 验证产品表单
+         */
+        function validateProductForm(formType) {
+            const prefix = formType === 'edit' ? 'edit' : '';
+            
+            // 获取表单字段
+            const name = $(`#${prefix}ProductName`).val();
+            const category = $(`#${prefix}ProductCategory`).val();
+            const price = $(`#${prefix}ProductPrice`).val();
+            const stock = $(`#${prefix}ProductStock`).val();
+            
+            // 验证必填字段
+            if (!name || !category || !price || !stock) {
+                alert('请填写所有必填字段');
+                return false;
+            }
+            
+            // 验证价格和库存
+            if (parseFloat(price) <= 0) {
+                alert('价格必须大于0');
+                return false;
+            }
+            
+            if (parseFloat(stock) < 0) {
+                alert('库存不能为负数');
+                return false;
+            }
+            
+            // 验证图片（仅在添加时是必须的）
+            if (formType !== 'edit' && !$('#productImage')[0].files[0]) {
+                alert('请上传产品图片');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        /**
+         * 保存新产品
+         */
+        function saveProduct() {
+            const token = localStorage.getItem('token');
+            const userId = localStorage.getItem('userId');
+            
+            // 首先上传图片
+            const imageFile = $('#productImage')[0].files[0];
+            uploadProductImage(imageFile, function(imageUrl) {
+                // 收集产品数据
+                const productData = {
+                    farmerId: parseInt(userId),
+                    name: $('#productName').val(),
+                    category: $('#productCategory').val(),
+                    price: parseFloat($('#productPrice').val()),
+                    stock: parseFloat($('#productStock').val()),
+                    description: $('#productDescription').val(),
+                    specification: $('#productSpecification').val(),
+                    imageUrl: imageUrl,
+                    isOrganic: $('#isOrganic').prop('checked'),
+                    harvestDate: $('#harvestDate').val() || null,
+                    shelfLife: $('#shelfLife').val() ? parseInt($('#shelfLife').val()) : null,
+                    status: $('#productStatus').val()
+                };
+                
+                // 提交产品数据
+                $.ajax({
+                    url: '/api/products',
+                    type: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify(productData),
+                    success: function(data) {
+                        alert('产品添加成功');
+                        $('#addProductModal').modal('hide');
+                        $('#addProductForm')[0].reset(); // 重置表单
+                        $('#imagePreview').attr('src', '../../img/no-image.png'); // 重置图片预览
+                        loadProducts(); // 重新加载产品列表
+                    },
+                    error: function(xhr) {
+                        console.error('添加产品失败', xhr);
+                        alert('添加产品失败: ' + (xhr.responseJSON?.message || xhr.statusText));
+                    }
+                });
+            });
+        }
+        
+        /**
+         * 更新产品
+         */
+        function updateProduct() {
+            const token = localStorage.getItem('token');
+            const productId = $('#editProductId').val();
+            
+            // 检查是否需要上传新图片
+            const imageFile = $('#editProductImage')[0].files[0];
+            
+            if (imageFile) {
+                // 如果有新图片，先上传图片
+                uploadProductImage(imageFile, function(imageUrl) {
+                    submitProductUpdate(productId, token, imageUrl);
+                });
+            } else {
+                // 如果没有新图片，直接更新产品信息
+                submitProductUpdate(productId, token);
+            }
+        }
+        
+        /**
+         * 提交产品更新
+         */
+        function submitProductUpdate(productId, token, imageUrl) {
+            // 收集产品数据
+            const productData = {
+                productId: parseInt(productId),
+                name: $('#editProductName').val(),
+                category: $('#editProductCategory').val(),
+                price: parseFloat($('#editProductPrice').val()),
+                stock: parseFloat($('#editProductStock').val()),
+                description: $('#editProductDescription').val(),
+                specification: $('#editProductSpecification').val(),
+                isOrganic: $('#editIsOrganic').prop('checked'),
+                harvestDate: $('#editHarvestDate').val() || null,
+                shelfLife: $('#editShelfLife').val() ? parseInt($('#editShelfLife').val()) : null,
+                status: $('#editProductStatus').val()
+            };
+            
+            // 如果有新图片URL，则更新
+            if (imageUrl) {
+                productData.imageUrl = imageUrl;
+            }
+            
+            // 提交产品数据
+            $.ajax({
+                url: '/api/products/' + productId,
+                type: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify(productData),
+                success: function(data) {
+                    alert('产品更新成功');
+                    $('#editProductModal').modal('hide');
+                    loadProducts(); // 重新加载产品列表
+                },
+                error: function(xhr) {
+                    console.error('更新产品失败', xhr);
+                    alert('更新产品失败: ' + (xhr.responseJSON?.message || xhr.statusText));
+                }
+            });
+        }
+        
+        /**
+         * 上传产品图片
+         */
+        function uploadProductImage(file, callback) {
+            const token = localStorage.getItem('token');
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            $.ajax({
+                url: '/api/upload/image',
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    callback(data.url);
+                },
+                error: function(xhr) {
+                    console.error('上传图片失败', xhr);
+                    alert('上传图片失败: ' + (xhr.responseJSON?.message || xhr.statusText));
+                }
+            });
+        }
+        
+        /**
+         * 预览图片
+         */
+        function previewImage(input, previewSelector) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $(previewSelector).attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+                $(input).next('.custom-file-label').text(input.files[0].name);
+            }
+        }
+    </script>
+</body>
+</html> 

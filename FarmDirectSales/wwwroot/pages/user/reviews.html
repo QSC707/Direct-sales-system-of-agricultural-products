@@ -117,62 +117,62 @@
 
         <!-- 已登录状态显示 -->
         <div id="login-container">
-            <h2 class="mb-4">我的评价</h2>
-            
-            <!-- 选项卡 -->
-            <ul class="nav nav-tabs" id="reviewTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="to-review-tab" data-bs-toggle="tab" data-bs-target="#to-review" type="button" role="tab" aria-controls="to-review" aria-selected="true">
-                        待评价 <span class="badge bg-danger" id="to-review-count">0</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="reviewed-tab" data-bs-toggle="tab" data-bs-target="#reviewed" type="button" role="tab" aria-controls="reviewed" aria-selected="false">
-                        已评价 <span class="badge bg-secondary" id="reviewed-count">0</span>
-                    </button>
-                </li>
-            </ul>
-            
-            <div class="tab-content" id="reviewTabsContent">
-                <!-- 待评价标签页 -->
-                <div class="tab-pane fade show active" id="to-review" role="tabpanel" aria-labelledby="to-review-tab">
-                    <!-- 加载中占位符 -->
-                    <div class="text-center py-5" id="to-review-loading">
-                        <div class="spinner-border text-success" role="status">
-                            <span class="visually-hidden">加载中...</span>
-                        </div>
-                        <p class="mt-2">正在加载待评价订单...</p>
+        <h2 class="mb-4">我的评价</h2>
+        
+        <!-- 选项卡 -->
+        <ul class="nav nav-tabs" id="reviewTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="to-review-tab" data-bs-toggle="tab" data-bs-target="#to-review" type="button" role="tab" aria-controls="to-review" aria-selected="true">
+                    待评价 <span class="badge bg-danger" id="to-review-count">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reviewed-tab" data-bs-toggle="tab" data-bs-target="#reviewed" type="button" role="tab" aria-controls="reviewed" aria-selected="false">
+                    已评价 <span class="badge bg-secondary" id="reviewed-count">0</span>
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="reviewTabsContent">
+            <!-- 待评价标签页 -->
+            <div class="tab-pane fade show active" id="to-review" role="tabpanel" aria-labelledby="to-review-tab">
+                <!-- 加载中占位符 -->
+                <div class="text-center py-5" id="to-review-loading">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">加载中...</span>
                     </div>
-                    
-                    <!-- 待评价列表 -->
-                    <div id="to-review-container"></div>
-                    
-                    <!-- 暂无待评价订单提示 -->
-                    <div id="no-to-review" class="text-center py-5 d-none">
-                        <i class="fas fa-comment-slash fa-4x text-muted mb-3"></i>
-                        <h4>暂无待评价订单</h4>
-                        <p class="text-muted">您目前没有需要评价的已完成订单</p>
-                    </div>
+                    <p class="mt-2">正在加载待评价订单...</p>
                 </div>
                 
-                <!-- 已评价标签页 -->
-                <div class="tab-pane fade" id="reviewed" role="tabpanel" aria-labelledby="reviewed-tab">
-                    <!-- 加载中占位符 -->
-                    <div class="text-center py-5" id="reviewed-loading">
-                        <div class="spinner-border text-success" role="status">
-                            <span class="visually-hidden">加载中...</span>
-                        </div>
-                        <p class="mt-2">正在加载已评价订单...</p>
+                <!-- 待评价列表 -->
+                    <div id="to-review-container"></div>
+                
+                <!-- 暂无待评价订单提示 -->
+                <div id="no-to-review" class="text-center py-5 d-none">
+                    <i class="fas fa-comment-slash fa-4x text-muted mb-3"></i>
+                    <h4>暂无待评价订单</h4>
+                    <p class="text-muted">您目前没有需要评价的已完成订单</p>
+                </div>
+            </div>
+            
+            <!-- 已评价标签页 -->
+            <div class="tab-pane fade" id="reviewed" role="tabpanel" aria-labelledby="reviewed-tab">
+                <!-- 加载中占位符 -->
+                <div class="text-center py-5" id="reviewed-loading">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">加载中...</span>
                     </div>
-                    
-                    <!-- 已评价列表 -->
+                    <p class="mt-2">正在加载已评价订单...</p>
+                </div>
+                
+                <!-- 已评价列表 -->
                     <div id="reviewed-container"></div>
-                    
-                    <!-- 暂无已评价订单提示 -->
-                    <div id="no-reviewed" class="text-center py-5 d-none">
-                        <i class="fas fa-comments fa-4x text-muted mb-3"></i>
-                        <h4>暂无已评价订单</h4>
-                        <p class="text-muted">您还没有对任何商品进行评价</p>
+                
+                <!-- 暂无已评价订单提示 -->
+                <div id="no-reviewed" class="text-center py-5 d-none">
+                    <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                    <h4>暂无已评价订单</h4>
+                    <p class="text-muted">您还没有对任何商品进行评价</p>
                     </div>
                 </div>
             </div>
@@ -447,7 +447,7 @@
                 html += `
                     <div class="list-group-item">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div>
+                                        <div>
                                 <h5 class="mb-1">${order.productName}</h5>
                                 <p class="mb-1">订单号：${order.orderId}</p>
                                 <p class="mb-1">购买时间：${formatDate(order.createTime)}</p>
@@ -478,7 +478,7 @@
                 html += `
                     <div class="list-group-item">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div>
+                                        <div>
                                 <h5 class="mb-1">${order.productName}</h5>
                                 <p class="mb-1">订单号：${order.orderId}</p>
                                 <p class="mb-1">购买时间：${formatDate(order.createTime)}</p>

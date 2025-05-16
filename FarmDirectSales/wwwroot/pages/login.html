@@ -5,43 +5,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>用户登录 - 本地特色农产品直销系统</title>
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- 自定义样式 -->
-    <link href="/css/style.css" rel="stylesheet">
+    <!-- 首先加载依赖管理器 -->
+    <script src="../js/dependencies.js"></script>
+    
+    <!-- jQuery后加载自定义样式 -->
+    <link href="../css/style.css" rel="stylesheet">
     <style>
+        body {
+            background-color: #f8f9fa;
+            background-image: url('/images/bg-pattern.png');
+            background-repeat: repeat;
+        }
+        
+        .login-container {
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        .login-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, #2E8B57, #52b788);
+            padding: 1.5rem;
+            position: relative;
+        }
+        
+        .login-header h4 {
+            margin: 0;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .login-body {
+            padding: 2.5rem;
+        }
+        
         .role-card {
             cursor: pointer;
             border: 2px solid transparent;
+            border-radius: 12px;
             transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
         }
+        
         .role-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
+        
         .role-card.selected {
             border-color: #198754;
             background-color: rgba(25, 135, 84, 0.1);
             transform: translateY(-5px);
             box-shadow: 0 8px 16px rgba(0,0,0,0.1);
         }
+        
         .role-card.selected .login-icon {
             transform: scale(1.1);
         }
+        
         .login-icon {
             font-size: 2.5rem;
             margin-bottom: 1rem;
             transition: transform 0.3s ease;
         }
+        
         .customer-icon { color: #0d6efd; }
         .farmer-icon { color: #198754; }
         .admin-icon { color: #dc3545; }
         
-        /* 登录按钮过渡效果 */
+        .form-control {
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ced4da;
+            background-color: #f8f9fa;
+        }
+        
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+            border-color: #198754;
+        }
+        
+        .input-group-text {
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+        }
+        
         #login-button {
+            border-radius: 8px;
+            padding: 0.8rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #198754, #52b788);
+            border: none;
             transition: all 0.3s ease;
+        }
+        
+        #login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3);
+        }
+        
+        .register-link {
+            color: #198754;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .register-link:hover {
+            color: #0e6e3a;
+            text-decoration: underline;
         }
         
         /* 错误提示动画 */
@@ -50,8 +129,16 @@
             10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
             20%, 40%, 60%, 80% { transform: translateX(5px); }
         }
+        
         .shake {
             animation: shake 0.8s;
+        }
+        
+        .login-footer {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+            text-align: center;
         }
     </style>
 </head>
@@ -88,27 +175,27 @@
     </nav>
 
     <!-- 主要内容 -->
-    <div class="container py-5">
+    <div class="container login-container">
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow">
-                    <div class="card-header bg-success text-white">
-                        <h4 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>用户登录</h4>
+            <div class="col-lg-8 col-md-10">
+                <div class="card login-card">
+                    <div class="login-header">
+                        <h4 class="text-center"><i class="fas fa-sign-in-alt me-2"></i>欢迎登录</h4>
                     </div>
-                    <div class="card-body">
+                    <div class="login-body">
                         <div class="alert alert-danger d-none" id="login-error">
                             登录失败，请检查用户名和密码。
                         </div>
                         
                         <!-- 角色选择卡片 -->
                         <div class="row mb-4 text-center">
-                            <h5 class="mb-3">请选择您的角色</h5>
+                            <h5 class="mb-3">请选择您的身份</h5>
                             <div class="col-md-4">
                                 <div class="card role-card selected" data-role="customer" onclick="selectRole('customer')">
                                     <div class="card-body">
                                         <i class="fas fa-user login-icon customer-icon"></i>
                                         <h5 class="card-title">消费者</h5>
-                                        <p class="card-text text-muted">购买农产品，享受田间美味</p>
+                                        <p class="card-text text-muted small">购买农产品，享受田间美味</p>
                                     </div>
                                 </div>
                             </div>
@@ -117,7 +204,7 @@
                                     <div class="card-body">
                                         <i class="fas fa-tractor login-icon farmer-icon"></i>
                                         <h5 class="card-title">农户</h5>
-                                        <p class="card-text text-muted">销售农产品，共享丰收喜悦</p>
+                                        <p class="card-text text-muted small">销售农产品，共享丰收喜悦</p>
                                     </div>
                                 </div>
                             </div>
@@ -126,21 +213,21 @@
                                     <div class="card-body">
                                         <i class="fas fa-user-shield login-icon admin-icon"></i>
                                         <h5 class="card-title">管理员</h5>
-                                        <p class="card-text text-muted">系统管理，数据监控</p>
+                                        <p class="card-text text-muted small">系统管理，数据监控</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
                         <form id="login-form">
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label for="username" class="form-label">用户名</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user"></i></span>
                                     <input type="text" class="form-control" id="username" name="username" placeholder="请输入您的用户名" required>
                                 </div>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label for="password" class="form-label">密码</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
@@ -150,119 +237,76 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                                <label class="form-check-label" for="remember">记住我</label>
+                            <div class="mb-4 d-flex justify-content-between align-items-center">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                    <label class="form-check-label" for="remember">记住我</label>
+                                </div>
+                                <a href="#" class="text-success small">忘记密码?</a>
                             </div>
-                            <div class="d-grid">
+                            <div class="d-grid mb-4">
                                 <button type="submit" class="btn btn-success btn-lg" id="login-button">
                                     <i class="fas fa-sign-in-alt me-2"></i>登录
                                 </button>
                             </div>
                         </form>
                         
-                        <!-- 测试用户快速登录 -->
-                        <div class="mt-3">
-                            <h6 class="text-center text-muted mb-2">测试账号快速登录</h6>
-                            <div class="d-flex justify-content-between">
-                                <button onclick="quickLogin('user', '123456')" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-user me-1"></i>消费者
-                                </button>
-                                <button onclick="quickLogin('farmer1', '123456')" class="btn btn-sm btn-outline-success">
-                                    <i class="fas fa-tractor me-1"></i>农户
-                                </button>
-                                <button onclick="quickLogin('admin', '123456')" class="btn btn-sm btn-outline-danger">
-                                    <i class="fas fa-user-shield me-1"></i>管理员
-                                </button>
-                            </div>
-                            
-                            <!-- 管理员账号说明 -->
-                            <div class="mt-2 small text-center text-danger">
-                                <i class="fas fa-info-circle me-1"></i>管理员账号: admin/123456
-                            </div>
+                        <div class="text-center">
+                            <p class="mb-0">还没有账号？ <a href="/pages/register.html" class="register-link">立即注册</a></p>
                         </div>
-                        
-                        <div class="mt-4 text-center">
-                            <p>还没有账号？ <a href="/pages/register.html" class="text-success">立即注册</a></p>
-                        </div>
+                    </div>
+                    <div class="login-footer">
+                        <p class="mb-0 small text-muted">© 2023 农产品直销系统. 保留所有权利.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 页脚 -->
-    <footer class="bg-light py-4 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-3 mb-md-0">
-                    <h5>关于我们</h5>
-                    <p class="text-muted">本地特色农产品直销系统，致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收。</p>
-                </div>
-                <div class="col-md-3 mb-3 mb-md-0">
-                    <h5>快速链接</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="/index.html" class="text-decoration-none text-muted">首页</a></li>
-                        <li><a href="/pages/products.html" class="text-decoration-none text-muted">产品列表</a></li>
-                        <li><a href="/pages/farmers.html" class="text-decoration-none text-muted">农户展示</a></li>
-                        <li><a href="/pages/statistics.html" class="text-decoration-none text-muted">销售统计</a></li>
-                        <li><a href="/pages/about.html" class="text-decoration-none text-muted">关于我们</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-2 mb-3 mb-md-0">
-                    <h5>帮助</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="/pages/faq.html" class="text-decoration-none text-muted">常见问题</a></li>
-                        <li><a href="/pages/shipping.html" class="text-decoration-none text-muted">配送政策</a></li>
-                        <li><a href="/pages/return.html" class="text-decoration-none text-muted">退换政策</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5>联系我们</h5>
-                    <ul class="list-unstyled text-muted">
-                        <li><i class="fas fa-map-marker-alt me-2"></i> 地址：广东省广州市白云区</li>
-                        <li><i class="fas fa-phone me-2"></i> 电话：123-456-7890</li>
-                        <li><i class="fas fa-envelope me-2"></i> 邮箱：info@farmshop.com</li>
-                    </ul>
-                </div>
-            </div>
-            <hr>
-            <div class="text-center text-muted">
-                <small>&copy; 2023 农产品直销系统. 保留所有权利.</small>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- API 调用 -->
     <script src="/js/api.js"></script>
+    <!-- 登录脚本 -->
+    <script src="../js/auth.js"></script>
 
     <!-- 登录页逻辑 -->
     <script>
         // 当前选择的角色
         let currentRole = 'customer';
         
-        document.addEventListener('DOMContentLoaded', function() {
+        // 等待依赖加载完成
+        window.initDependencies(function() {
+            // jQuery已加载，初始化登录页
+            initLoginPage();
+        });
+        
+        /**
+         * 初始化登录页面
+         */
+        function initLoginPage() {
             // 登录表单提交
-            document.getElementById('login-form').addEventListener('submit', function(e) {
+            $('#login-form').on('submit', function(e) {
                 e.preventDefault();
-                login();
+                
+                // 显示加载中状态
+                const loginButton = $('#login-button');
+                const originalText = loginButton.html();
+                loginButton.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>登录中...');
+                loginButton.prop('disabled', true);
+                
+                apiLogin();
             });
             
             // 切换密码可见性
-            document.getElementById('toggle-password').addEventListener('click', function() {
-                const passwordInput = document.getElementById('password');
-                const icon = this.querySelector('i');
+            $('#toggle-password').on('click', function() {
+                const passwordInput = $('#password');
+                const icon = $(this).find('i');
                 
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
+                if (passwordInput.attr('type') === 'password') {
+                    passwordInput.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
                 } else {
-                    passwordInput.type = 'password';
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
+                    passwordInput.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
                 }
             });
             
@@ -270,250 +314,171 @@
             const urlParams = new URLSearchParams(window.location.search);
             const reason = urlParams.get('reason');
             const role = urlParams.get('role');
+            const redirectUrl = urlParams.get('redirect');
             
             // 如果URL中指定了角色，则选择该角色
             if (role && ['customer', 'farmer', 'admin'].includes(role)) {
                 selectRole(role);
-            }
-            
-            // 检查是否因用户名修改而重定向过来
-            if (reason === 'username_changed') {
-                // 从会话存储中获取新用户名
-                const pendingUsername = sessionStorage.getItem('pendingUsername');
-                if (pendingUsername) {
-                    // 自动填充用户名
-                    document.getElementById('username').value = pendingUsername;
-                    // 显示提示信息
-                    showMessage('您的用户名已更改，请使用新用户名登录', 'info');
-                    // 清除会话存储的临时数据
-                    sessionStorage.removeItem('pendingUsername');
+                
+                // 显示提示
+                if (role === 'farmer') {
+                    showMessage('请使用农户账号登录', 'info');
+                } else if (role === 'admin') {
+                    showMessage('请使用管理员账号登录', 'info');
                 }
             }
             
-            // 根据角色设置登录按钮样式
-            updateLoginButton();
-        });
-        
-        // 选择角色
-        function selectRole(role) {
-            // 移除所有卡片的选中状态
-            document.querySelectorAll('.role-card').forEach(card => {
-                card.classList.remove('selected');
-            });
+            // 存储重定向URL（如果存在）
+            if (redirectUrl) {
+                localStorage.setItem('loginRedirect', redirectUrl);
+            }
             
-            // 选中当前角色卡片
-            const selectedCard = document.querySelector(`.role-card[data-role="${role}"]`);
-            if (selectedCard) {
-                selectedCard.classList.add('selected');
-                currentRole = role;
-                
-                // 更新登录按钮样式
-                updateLoginButton();
+            // 检查是否因登录问题重定向过来
+            if (reason === 'auth') {
+                showError('您需要登录后才能访问该页面');
+            } else if (reason === 'role') {
+                showError('您的账号权限不足，无法访问该页面');
+            } else if (reason === 'expired') {
+                showError('登录已过期，请重新登录');
             }
         }
         
-        // 更新登录按钮样式
-        function updateLoginButton() {
-            const loginButton = document.getElementById('login-button');
-            
-            // 移除之前的所有按钮类
-            loginButton.classList.remove('btn-success', 'btn-primary', 'btn-danger');
-            
-            // 根据角色设置按钮样式
-            switch (currentRole) {
-                case 'farmer':
-                    loginButton.classList.add('btn-success');
-                    loginButton.innerHTML = '<i class="fas fa-tractor me-2"></i>农户登录';
-                    break;
-                case 'admin':
-                    loginButton.classList.add('btn-danger');
-                    loginButton.innerHTML = '<i class="fas fa-user-shield me-2"></i>管理员登录';
-                    break;
-                default:
-                    loginButton.classList.add('btn-primary');
-                    loginButton.innerHTML = '<i class="fas fa-user me-2"></i>消费者登录';
-            }
-        }
-        
-        // 登录功能
-        async function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const remember = document.getElementById('remember').checked;
+        /**
+         * 执行登录操作
+         */
+        function apiLogin() {
+            const username = $('#username').val();
+            const password = $('#password').val();
+            const selectedRole = $('.role-card.selected').data('role');
             
             if (!username || !password) {
                 showError('请输入用户名和密码');
+                resetLoginButton();
                 return;
             }
             
-            try {
-                document.getElementById('login-form').classList.add('was-validated');
-                
-                // 显示加载中
-                const submitBtn = document.querySelector('button[type="submit"]');
-                const originalBtnText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>登录中...';
-                submitBtn.disabled = true;
-                
-                const response = await api.auth.login(username, password);
-                
-                if (response.code === 200) {
-                    console.log('登录成功，服务器返回数据:', response.data);
-                    
-                    // 验证返回数据完整性
-                    if (!response.data || !response.data.token || !response.data.userId) {
-                        console.error('服务器返回的用户数据不完整:', response.data);
-                        showError('登录失败，服务器返回数据不完整');
+            console.log('尝试登录:', { username, role: selectedRole });
+            
+            // 调用API登录
+            api.auth.login(username, password)
+                .then(function(response) {
+                    if (response.code === 200) {
+                        const userData = JSON.parse(localStorage.getItem('user') || '{}');
                         
-                        // 重置按钮状态
-                        submitBtn.innerHTML = originalBtnText;
-                        submitBtn.disabled = false;
-                        return;
-                    }
-                    
-                    // 检查用户角色与选择角色是否匹配
-                    if (response.data.role !== currentRole) {
-                        showError(`您选择的是${getRoleDisplayName(currentRole)}登录，但您的账号是${getRoleDisplayName(response.data.role)}角色，请选择正确的角色`);
+                        console.log('登录成功:', userData);
+                        console.log('所选角色:', selectedRole);
+                        console.log('用户实际角色:', userData.role);
                         
-                        // 重置按钮状态
-                        submitBtn.innerHTML = originalBtnText;
-                        submitBtn.disabled = false;
-                        return;
-                    }
-                    
-                    // 保存登录状态和token
-                    localStorage.setItem('token', response.data.token);
-                    
-                    // 保存用户信息对象
-                    const userData = {
-                        userId: response.data.userId,
-                        username: response.data.username || username,
-                        role: response.data.role || 'customer',
-                        email: response.data.email || null,
-                        phone: response.data.phone || null
-                    };
-                    localStorage.setItem('user', JSON.stringify(userData));
-                    
-                    // 记住登录状态（如果选择了记住我）
-                    if (remember) {
-                        localStorage.setItem('rememberLogin', 'true');
-                    }
-                    
-                    // 打印登录信息（调试用）
-                    api.printLoginInfo();
-                    
-                    // 显示成功信息
-                    showMessage(`${getRoleDisplayName(userData.role)}登录成功，正在跳转...`, 'success');
-                    
-                    // 延迟一下再跳转，确保数据已经存储
-                    setTimeout(() => {
-                        // 根据角色重定向到不同页面
-                        let redirectUrl;
-                        switch(userData.role) {
-                            case 'admin':
-                                redirectUrl = '/pages/admin/dashboard.html';
-                                break;
-                            case 'farmer':
-                                redirectUrl = '/pages/farmer/dashboard.html';
-                                break;
-                            default:
-                                // 重定向到首页或之前的页面
-                                redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/index.html';
+                        // 检查角色是否匹配
+                        if (selectedRole && userData.role !== selectedRole) {
+                            if (userData.role === 'farmer' && selectedRole !== 'farmer') {
+                                showError('您是农户账号，请选择"农户"角色进行登录');
+                                selectRole('farmer');
+                                resetLoginButton();
+                                return;
+                            } else if (userData.role === 'admin' && selectedRole !== 'admin') {
+                                showError('您是管理员账号，请选择"管理员"角色进行登录');
+                                selectRole('admin');
+                                resetLoginButton();
+                                return;
+                            } else if (userData.role === 'customer' && selectedRole !== 'customer') {
+                                showError('您是消费者账号，请选择"消费者"角色进行登录');
+                                selectRole('customer');
+                                resetLoginButton();
+                                return;
+                            }
                         }
-                        window.location.href = redirectUrl;
-                    }, 800);
-                } else {
-                    showError(response.message || '登录失败');
-                    
-                    // 重置按钮状态
-                    submitBtn.innerHTML = originalBtnText;
-                    submitBtn.disabled = false;
-                }
-            } catch (error) {
-                console.error('登录过程中出错:', error);
-                showError(error.message || '登录时发生错误');
-                
-                // 重置按钮状态
-                const submitBtn = document.querySelector('button[type="submit"]');
-                submitBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>登录';
-                submitBtn.disabled = false;
+                        
+                        // 获取登录重定向URL（如果存在）
+                        const redirectUrl = localStorage.getItem('loginRedirect');
+                        localStorage.removeItem('loginRedirect'); // 使用后清除
+                        
+                        if (redirectUrl) {
+                            window.location.href = redirectUrl;
+                        } else {
+                            // 根据角色重定向到不同页面
+                            redirectAfterLogin(userData.role);
+                        }
+                    } else {
+                        showError(response.message || '登录失败，请检查用户名和密码');
+                        resetLoginButton();
+                    }
+                })
+                .catch(function(error) {
+                    showError(error.message || '登录失败，请稍后重试');
+                    resetLoginButton();
+                });
+        }
+        
+        /**
+         * 重置登录按钮状态
+         */
+        function resetLoginButton() {
+            const loginButton = $('#login-button');
+            loginButton.html('<i class="fas fa-sign-in-alt me-2"></i>登录');
+            loginButton.prop('disabled', false);
+        }
+        
+        /**
+         * 角色选择
+         */
+        function selectRole(role) {
+            $('.role-card').removeClass('selected');
+            $('.role-card[data-role="' + role + '"]').addClass('selected');
+            currentRole = role;
+            
+            // 根据角色更改登录按钮样式
+            const loginButton = $('#login-button');
+            loginButton.removeClass('btn-primary btn-success btn-danger');
+            
+            if (role === 'farmer') {
+                loginButton.addClass('btn-success');
+            } else if (role === 'admin') {
+                loginButton.addClass('btn-danger');
+            } else {
+                loginButton.addClass('btn-primary');
             }
         }
         
-        // 获取角色显示名称
-        function getRoleDisplayName(role) {
-            switch(role) {
-                case 'admin': return '管理员';
-                case 'farmer': return '农户';
-                default: return '消费者';
-            }
-        }
-        
-        // 显示错误信息
+        /**
+         * 显示错误消息
+         */
         function showError(message) {
-            const errorElement = document.getElementById('login-error');
-            errorElement.textContent = message;
-            errorElement.classList.remove('d-none', 'alert-success', 'alert-info', 'alert-warning');
-            errorElement.classList.add('alert-danger');
-            
-            // 添加抖动动画
-            errorElement.classList.remove('shake');
-            setTimeout(() => {
-                errorElement.classList.add('shake');
-            }, 10);
-            
-            // 5秒后自动隐藏
-            setTimeout(() => {
-                errorElement.classList.add('d-none');
-            }, 5000);
+            const $error = $('#login-error');
+            $error.text(message).removeClass('d-none alert-info alert-warning').addClass('alert-danger');
+            $error.addClass('shake');
+            setTimeout(function() {
+                $error.removeClass('shake');
+            }, 800);
         }
         
-        // 显示消息提示
-        function showMessage(message, type = 'danger') {
-            const errorElement = document.getElementById('login-error');
-            errorElement.textContent = message;
-            errorElement.classList.remove('d-none', 'alert-danger', 'alert-success', 'alert-info', 'alert-warning');
-            errorElement.classList.add(`alert-${type}`);
-            
-            // 添加动画效果（仅限错误消息）
-            if (type === 'danger') {
-                errorElement.classList.remove('shake');
-                setTimeout(() => {
-                    errorElement.classList.add('shake');
-                }, 10);
-            }
-            
-            // 5秒后自动隐藏非成功消息
-            if (type !== 'success') {
-                setTimeout(() => {
-                    errorElement.classList.add('d-none');
-                }, 5000);
-            }
+        /**
+         * 显示一般消息
+         */
+        function showMessage(message, type) {
+            const $error = $('#login-error');
+            $error.text(message).removeClass('d-none alert-danger').addClass('alert-' + type);
         }
-
-        // 快速登录功能
-        function quickLogin(username, password) {
-            document.getElementById('username').value = username;
-            document.getElementById('password').value = password;
+        
+        /**
+         * 登录后重定向到对应页面
+         */
+        function redirectAfterLogin(role) {
+            // 获取当前URL的基础路径
+            const base = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
             
-            // 根据用户名判断角色
-            let role = 'customer';
-            if (username === 'admin') {
-                role = 'admin';
-            } else if (username.startsWith('farmer')) {
-                role = 'farmer';
+            switch (role) {
+                case 'admin':
+                    window.location.href = '/pages/admin/dashboard.html';
+                    break;
+                case 'farmer':
+                    window.location.href = '/pages/farmer/dashboard.html';
+                    break;
+                case 'customer':
+                default:
+                    window.location.href = '/index.html';
+                    break;
             }
-            
-            // 选择对应角色
-            selectRole(role);
-            
-            // 显示提示信息
-            showMessage(`已自动选择${getRoleDisplayName(role)}角色`, 'info');
-            
-            // 延迟执行登录，让用户看到角色已切换
-            setTimeout(() => {
-                login();
-            }, 500);
         }
     </script>
 </body>

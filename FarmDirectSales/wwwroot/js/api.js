@@ -66,7 +66,13 @@ const handleResponse = async (response) => {
             // 未授权，重定向到登录页面
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = '/pages/login.html';
+            
+            // 记录当前页面URL，以便登录后返回
+            const currentPath = window.location.pathname;
+            const redirectUrl = encodeURIComponent(window.location.href);
+            
+            // 重定向到登录页面，并携带重定向参数
+            window.location.href = `/pages/login.html?redirect=${redirectUrl}`;
         }
         
         throw new Error(data.message || '请求失败');

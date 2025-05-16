@@ -222,84 +222,84 @@
                 <div class="progress-step">
                     <span>3</span>
                     <div class="progress-label">完成注册</div>
-                </div>
-            </div>
-            
+                    </div>
+                        </div>
+                        
             <!-- 第一步：基本信息 -->
             <div class="verification-step active" id="step1">
                 <form id="register-form" class="needs-validation" novalidate>
-                    <div class="mb-4">
+                            <div class="mb-4">
                         <h5 class="mb-3">选择您的身份</h5>
                         <div class="role-selector">
                             <div class="role-option" data-role="customer">
                                 <i class="fas fa-shopping-cart"></i>
                                 <h5>消费者</h5>
                                 <p>购买农产品</p>
-                            </div>
+                                    </div>
                             <div class="role-option" data-role="farmer">
                                 <i class="fas fa-tractor"></i>
                                 <h5>农户</h5>
                                 <p>销售农产品</p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="username" class="form-label">用户名 <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="username" name="username" required>
-                            <div class="form-text">用户名长度为3-20个字符，只能包含字母、数字和下划线</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="username" class="form-label">用户名 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="username" name="username" required>
+                                    <div class="form-text">用户名长度为3-20个字符，只能包含字母、数字和下划线</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">电子邮箱</label>
                             <input type="email" class="form-control" id="email" name="email">
                             <div class="form-text">用于接收订单通知和重要消息（选填）</div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="password" class="form-label">密码 <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                            <div class="form-text">密码长度至少6位，包含字母和数字</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="confirmPassword" class="form-label">确认密码 <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="phone" class="form-label">手机号码 <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" id="phone" name="phone" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label">密码 <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                    <div class="form-text">密码长度至少6位，包含字母和数字</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="confirmPassword" class="form-label">确认密码 <span class="text-danger">*</span></label>
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label">手机号码 <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" required>
                             <div class="form-text">用于接收订单通知</div>
-                        </div>
-                    </div>
-                    
+                                </div>
+                            </div>
+                            
                     <!-- 农户特有信息（仅当选择农户角色时显示） -->
-                    <div id="farmer-fields" class="d-none">
+                            <div id="farmer-fields" class="d-none">
                         <hr class="mt-4">
                         <h5 class="mb-3">农场信息（农户必填）</h5>
                         
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
                                 <label for="farmName" class="form-label">农场名称 <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="farmName" name="farmName">
+                                        <input type="text" class="form-control" id="farmName" name="farmName">
                                 <div class="form-text">您的农场或产地名称</div>
-                            </div>
-                            <div class="col-md-6 mb-3">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
                                 <label for="location" class="form-label">农场位置 <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="location" name="location">
                                 <div class="form-text">您的农场或产地所在地区</div>
-                            </div>
-                        </div>
+                                    </div>
+                                </div>
                         
-                        <div class="mb-3">
+                                <div class="mb-3">
                             <label for="description" class="form-label">农场简介</label>
                             <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                             <div class="form-text">描述您的农场特色、历史等信息</div>
-                        </div>
+                                </div>
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -336,8 +336,8 @@
                     <i class="fas fa-mobile-alt text-success" style="font-size: 3rem;"></i>
                     <h4 class="mt-3">验证手机号码</h4>
                     <p class="text-muted">请输入发送到您手机号码的验证码</p>
-                </div>
-                
+                            </div>
+                            
                 <div class="row justify-content-center">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -361,11 +361,11 @@
                             <button type="button" class="btn btn-success" id="verify-code-btn">
                                 验证 <i class="fas fa-check ms-2"></i>
                             </button>
-                        </div>
-                    </div>
                 </div>
             </div>
-            
+        </div>
+    </div>
+
             <!-- 第三步：完成注册 -->
             <div class="verification-step" id="step3">
                 <div class="text-center">
@@ -377,7 +377,7 @@
                         <a href="/pages/login.html" class="btn btn-success">
                             立即登录 <i class="fas fa-sign-in-alt ms-2"></i>
                         </a>
-                    </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -455,7 +455,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- API 调用 -->
     <script src="/js/api.js"></script>
-    
+
     <!-- 注册页面逻辑 -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -522,18 +522,18 @@
                 if (password.length < 6) {
                     showError('密码长度不能少于6位');
                     return;
-                }
-                
+            }
+            
                 if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password)) {
                     showError('密码必须包含字母和数字');
-                    return;
-                }
-                
-                if (password !== confirmPassword) {
-                    showError('两次输入的密码不一致');
-                    return;
-                }
-                
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showError('两次输入的密码不一致');
+                return;
+            }
+            
                 if (!phone) {
                     showError('请输入手机号码');
                     return;
@@ -557,9 +557,9 @@
                     if (!location) {
                         showError('请输入农场位置');
                         return;
-                    }
-                }
-                
+            }
+        }
+        
                 try {
                     // 准备请求数据
                     const requestData = {
@@ -586,7 +586,7 @@
                         },
                         body: JSON.stringify(requestData)
                     });
-                    
+            
                     // 尝试解析响应
                     const responseText = await response.text();
                     let data;
@@ -599,7 +599,7 @@
                     
                     if (data.code === 200) {
                         showToast('注册成功');
-                        setTimeout(() => {
+            setTimeout(() => {
                             window.location.href = '/pages/login.html';
                         }, 1500);
                     } else {
@@ -608,7 +608,7 @@
                 } catch (error) {
                     console.error('注册失败:', error);
                     showError('注册失败: ' + error.message);
-                }
+        }
             });
         });
     </script>
