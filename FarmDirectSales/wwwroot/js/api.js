@@ -131,19 +131,20 @@ const api = {
                         throw new Error('服务器未返回有效的用户ID');
                     }
                     
-                    if (!data.data.username) {
-                        // 使用登录时的用户名，而不是生成临时数据
-                        data.data.username = username;
-                        console.warn('服务器未返回用户名，使用登录时提供的用户名');
-                    }
+                    // 保存登录状态和token
+                    localStorage.setItem('token', data.data.token);
                     
-                    if (!data.data.role) {
-                        // 默认角色，但应该由服务器提供
-                        data.data.role = 'user';
-                        console.warn('服务器未返回用户角色，使用默认角色');
-                    }
+                    // 保存用户信息对象
+                    const userData = {
+                        userId: data.data.userId,
+                        username: data.data.username || username,
+                        role: data.data.role || 'customer',
+                        email: data.data.email,
+                        phone: data.data.phone
+                    };
+                    localStorage.setItem('user', JSON.stringify(userData));
                     
-                    console.log('处理后的用户数据:', data.data);
+                    console.log('保存的用户数据:', userData);
                 }
                 
                 return data;
@@ -155,15 +156,24 @@ const api = {
         
         // 注册
         register: async (userData) => {
+            console.log('注册数据:', userData); // 添加日志
             const response = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(userData)
+                body: JSON.stringify({
+                    username: userData.username,
+                    password: userData.password,
+                    role: userData.role,
+                    email: userData.email,
+                    phone: userData.phone
+                })
             });
             
-            return handleResponse(response);
+            const result = await handleResponse(response);
+            console.log('注册响应:', result); // 添加日志
+            return result;
         }
     },
     

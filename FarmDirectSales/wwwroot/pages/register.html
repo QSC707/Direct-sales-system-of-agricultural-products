@@ -360,8 +360,8 @@
             }
             
             // 验证输入
-            if (!username || !password || !confirmPassword) {
-                showError('所有字段必须填写');
+            if (!username || !password || !confirmPassword || !email || !phone) {
+                showError('所有必填字段必须填写');
                 return;
             }
             
@@ -371,6 +371,7 @@
             }
             
             try {
+                console.log('发送注册数据:', { username, password, role, email, phone });
                 const response = await api.auth.register({
                     username,
                     password,
@@ -378,6 +379,8 @@
                     email,
                     phone
                 });
+                
+                console.log('注册响应:', response);
                 
                 if (response.code === 200) {
                     // 注册成功，重定向到登录页
@@ -388,7 +391,7 @@
                 }
             } catch (error) {
                 console.error('注册错误:', error);
-                showError('系统错误，请稍后再试');
+                showError(error.message || '系统错误，请稍后再试');
             }
         }
         

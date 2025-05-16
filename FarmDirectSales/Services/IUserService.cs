@@ -10,7 +10,7 @@ namespace FarmDirectSales.Services
         /// <summary>
         /// 用户注册
         /// </summary>
-        Task<User> RegisterAsync(string username, string password, string role);
+        Task<User> RegisterAsync(string username, string password, string role, string? email = null, string? phone = null);
 
         /// <summary>
         /// 用户登录

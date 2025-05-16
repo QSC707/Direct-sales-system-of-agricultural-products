@@ -31,7 +31,13 @@ namespace FarmDirectSales.Controllers
         {
             try
             {
-                var user = await _userService.RegisterAsync(request.Username, request.Password, request.Role);
+                var user = await _userService.RegisterAsync(
+                    request.Username, 
+                    request.Password, 
+                    request.Role,
+                    request.Email,
+                    request.Phone
+                );
                 return Ok(new { code = 200, message = "注册成功", data = user });
             }
             catch (Exception ex)
@@ -57,8 +63,8 @@ namespace FarmDirectSales.Controllers
                     data = new { 
                         userId = user.UserId,
                         username = user.Username,
-                        email = user.Email ?? "",
-                        phone = user.Phone ?? "",
+                        email = user.Email,
+                        phone = user.Phone,
                         role = user.Role,
                         token = token 
                     } 
@@ -91,8 +97,8 @@ namespace FarmDirectSales.Controllers
                     data = new {
                         userId = user.UserId,
                         username = user.Username,
-                        email = user.Email ?? "",
-                        phone = user.Phone ?? "",
+                        email = user.Email,
+                        phone = user.Phone,
                         role = user.Role,
                         createTime = user.CreateTime,
                         lastLoginTime = user.LastLoginTime
@@ -140,8 +146,8 @@ namespace FarmDirectSales.Controllers
                     data = new {
                         userId = updatedUser.UserId,
                         username = updatedUser.Username,
-                        email = updatedUser.Email ?? "",
-                        phone = updatedUser.Phone ?? "",
+                        email = updatedUser.Email,
+                        phone = updatedUser.Phone,
                         role = updatedUser.Role
                     }
                 });
@@ -223,6 +229,18 @@ namespace FarmDirectSales.Controllers
         /// </summary>
         [Required(ErrorMessage = "角色不能为空")]
         public string Role { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 电子邮箱
+        /// </summary>
+        [EmailAddress(ErrorMessage = "邮箱格式不正确")]
+        public string? Email { get; set; }
+
+        /// <summary>
+        /// 手机号码
+        /// </summary>
+        [Phone(ErrorMessage = "手机号格式不正确")]
+        public string? Phone { get; set; }
     }
 
     /// <summary>

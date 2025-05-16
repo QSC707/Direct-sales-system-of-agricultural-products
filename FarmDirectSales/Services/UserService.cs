@@ -29,12 +29,23 @@ namespace FarmDirectSales.Services
         /// <summary>
         /// 用户注册
         /// </summary>
-        public async Task<User> RegisterAsync(string username, string password, string role)
+        public async Task<User> RegisterAsync(string username, string password, string role, string? email = null, string? phone = null)
         {
             // 检查用户名是否已存在
             if (await _context.Users.AnyAsync(u => u.Username == username))
             {
                 throw new Exception("用户名已存在");
+            }
+
+            // 验证邮箱和手机号
+            if (string.IsNullOrEmpty(email))
+            {
+                throw new Exception("电子邮箱不能为空");
+            }
+
+            if (string.IsNullOrEmpty(phone))
+            {
+                throw new Exception("手机号码不能为空");
             }
 
             // 创建新用户
@@ -43,13 +54,24 @@ namespace FarmDirectSales.Services
                 Username = username,
                 Password = HashPassword(password),
                 Role = role,
+                Email = email,
+                Phone = phone,
                 CreateTime = DateTime.Now
             };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return user;
+            // 返回不包含密码的用户信息
+            return new User
+            {
+                UserId = user.UserId,
+                Username = user.Username,
+                Email = user.Email,
+                Phone = user.Phone,
+                Role = user.Role,
+                CreateTime = user.CreateTime
+            };
         }
 
         /// <summary>
@@ -70,7 +92,17 @@ namespace FarmDirectSales.Services
             // 生成JWT令牌
             var token = GenerateJwtToken(user);
 
-            return (user, token);
+            // 确保返回完整的用户信息
+            return (new User
+            {
+                UserId = user.UserId,
+                Username = user.Username,
+                Email = user.Email,
+                Phone = user.Phone,
+                Role = user.Role,
+                CreateTime = user.CreateTime,
+                LastLoginTime = user.LastLoginTime
+            }, token);
         }
 
         /// <summary>
@@ -78,7 +110,23 @@ namespace FarmDirectSales.Services
         /// </summary>
         public async Task<User> GetUserByIdAsync(int userId)
         {
-            return await _context.Users.FindAsync(userId);
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return null;
+            }
+
+            // 返回不包含密码的用户信息
+            return new User
+            {
+                UserId = user.UserId,
+                Username = user.Username,
+                Email = user.Email,
+                Phone = user.Phone,
+                Role = user.Role,
+                CreateTime = user.CreateTime,
+                LastLoginTime = user.LastLoginTime
+            };
         }
 
         /// <summary>

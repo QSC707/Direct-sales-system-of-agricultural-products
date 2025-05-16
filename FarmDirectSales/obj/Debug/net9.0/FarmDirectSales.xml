@@ -99,6 +99,16 @@
             用户角色
             </summary>
         </member>
+        <member name="P:FarmDirectSales.Controllers.RegisterRequest.Email">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RegisterRequest.Phone">
+            <summary>
+            手机号码
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.LoginRequest">
             <summary>
             登录请求模型
@@ -1803,7 +1813,7 @@
             用户服务接口
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Services.IUserService.RegisterAsync(System.String,System.String,System.String)">
+        <member name="M:FarmDirectSales.Services.IUserService.RegisterAsync(System.String,System.String,System.String,System.String,System.String)">
             <summary>
             用户注册
             </summary>
@@ -2036,7 +2046,7 @@
             构造函数
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Services.UserService.RegisterAsync(System.String,System.String,System.String)">
+        <member name="M:FarmDirectSales.Services.UserService.RegisterAsync(System.String,System.String,System.String,System.String,System.String)">
             <summary>
             用户注册
             </summary>

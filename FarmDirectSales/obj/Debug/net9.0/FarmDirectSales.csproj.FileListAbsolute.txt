@@ -152,7 +152,6 @@
 /Users/qiyue/Desktop/FCG/NC/FarmDirectSales/bin/Debug/net9.0/FarmDirectSales.xml
 /Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/FarmDirectSales.xml
 /Users/qiyue/Desktop/FCG/NC/FarmDirectSales/bin/Debug/net9.0/FarmDirectSales.staticwebassets.runtime.json
-/Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/compressed/0q5zxy7oqa-fr05w98r0o.gz
 /Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/compressed/l8mpnv1e4i-dg6srp2p8i.gz
 /Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/compressed/10q9hubqsc-ein55ledns.gz
 /Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/compressed/m1pwxhi1xe-syr94aa1ip.gz
@@ -169,5 +168,7 @@
 /Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/compressed/imz5rqb2ir-bzqsxh1k9t.gz
 /Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/compressed/14lk5ttxwx-vg3rpywi99.gz
 /Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/compressed/4nrkru49df-zdsdrtdkqe.gz
-/Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/compressed/lvapgho8a8-9pr5sy6lpc.gz
-/Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/compressed/ze8a6zcoqb-t6rpsm9d0p.gz
+/Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/FarmDirectSales.sourcelink.json
+/Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/compressed/ze8a6zcoqb-15vtwgocum.gz
+/Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/compressed/lvapgho8a8-gjmw10sbwh.gz
+/Users/qiyue/Desktop/FCG/NC/FarmDirectSales/obj/Debug/net9.0/compressed/0q5zxy7oqa-k4uxsk0p90.gz
