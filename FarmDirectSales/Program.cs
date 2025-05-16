@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using FarmDirectSales.Data;
 using FarmDirectSales.Services;
+using FarmDirectSales.Models;
 using FarmDirectSales.Middlewares;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -11,8 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 配置端口：显式设置为5003
-builder.WebHost.UseUrls("http://localhost:5003");
+// 配置端口：显式设置为5004
+builder.WebHost.UseUrls("http://localhost:5004");
 
 // 添加数据库上下文
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -161,6 +162,94 @@ app.MapControllers();
 // 使用日志中间件 - 避免直接注入ILogService
 app.UseLogging();
 
-Console.WriteLine($"应用已启动在: http://localhost:5003");
+// 确保创建管理员账号
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    var logger = services.GetRequiredService<ILogService>();
+    
+    await CreateAdminUserIfNotExists(context, logger);
+}
+
+// 异步创建管理员账号
+async Task CreateAdminUserIfNotExists(ApplicationDbContext context, ILogService logger)
+{
+    try
+    {
+        // 检查是否存在管理员账号
+        if (!context.Users.Any(u => u.Username == "admin"))
+        {
+            // 删除可能存在的错误的管理员账号
+            var existingAdmins = context.Users.Where(u => u.Role == "admin").ToList();
+            foreach (var admin in existingAdmins)
+            {
+                context.Users.Remove(admin);
+            }
+            
+            await context.SaveChangesAsync();
+            
+            // 创建管理员账号
+            var adminPassword = "123456"; // 默认密码
+            var passwordHash = HashPassword(adminPassword);
+            
+            Console.WriteLine($"管理员密码哈希值: {passwordHash}");
+            
+            var adminUser = new User
+            {
+                Username = "admin",
+                Password = passwordHash,
+                Role = "admin",
+                Email = "admin@farmdirectsales.com",
+                Phone = "13800000000",
+                CreateTime = DateTime.Now,
+                LastLoginTime = DateTime.Now
+            };
+            
+            context.Users.Add(adminUser);
+            await context.SaveChangesAsync();
+            
+            await logger.LogAction(
+                adminUser.UserId,         // 用户ID (int?)
+                "系统初始化",             // 操作类型 (string)
+                "创建默认管理员账号",      // 操作描述 (string)
+                "系统",                   // IP地址 (string)
+                adminUser.UserId,         // 操作对象ID (int?)
+                "用户",                   // 操作对象类型 (string?)
+                true                      // 是否成功 (bool)
+            );
+            
+            Console.WriteLine($"已成功创建默认管理员账号 (admin/123456), 用户ID: {adminUser.UserId}");
+        }
+        else
+        {
+            var admin = await context.Users.FirstAsync(u => u.Username == "admin");
+            Console.WriteLine($"管理员账号已存在 ID: {admin.UserId}, 角色: {admin.Role}");
+            
+            // 确保密码正确
+            admin.Password = HashPassword("123456");
+            await context.SaveChangesAsync();
+            
+            Console.WriteLine("已重置管理员密码为 123456");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"创建管理员账号时出错: {ex.Message}");
+        Console.WriteLine($"异常详情: {ex}");
+    }
+}
+
+// 密码哈希函数
+string HashPassword(string password)
+{
+    using (var sha256 = System.Security.Cryptography.SHA256.Create())
+    {
+        var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+        return Convert.ToBase64String(hashedBytes);
+    }
+}
+
+Console.WriteLine($"应用已启动在: http://localhost:5004");
 app.Run(); 
  

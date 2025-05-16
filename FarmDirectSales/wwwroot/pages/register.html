@@ -277,6 +277,51 @@
                         </div>
                     </div>
                     
+                    <!-- 农户特有信息（仅当选择农户角色时显示） -->
+                    <div id="farmer-fields" class="d-none">
+                        <hr class="mt-4">
+                        <h5 class="mb-3">农场信息（农户必填）</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="farmName" class="form-label">农场名称 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="farmName" name="farmName">
+                                <div class="form-text">您的农场或产地名称</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="location" class="form-label">农场位置 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="location" name="location">
+                                <div class="form-text">您的农场或产地所在地区</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">农场简介</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                            <div class="form-text">描述您的农场特色、历史等信息</div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="productCategory" class="form-label">主营产品类别</label>
+                                <select class="form-select" id="productCategory" name="productCategory">
+                                    <option value="">选择类别</option>
+                                    <option value="蔬菜">蔬菜</option>
+                                    <option value="水果">水果</option>
+                                    <option value="谷物">谷物</option>
+                                    <option value="肉类">肉类</option>
+                                    <option value="水产">水产</option>
+                                    <option value="干货">干货</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="licenseNumber" class="form-label">营业执照号</label>
+                                <input type="text" class="form-control" id="licenseNumber" name="licenseNumber">
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                         <button type="submit" class="btn btn-success">
                             注册 <i class="fas fa-user-plus ms-2"></i>
@@ -427,6 +472,14 @@
                     roleOptions.forEach(opt => opt.classList.remove('selected'));
                     this.classList.add('selected');
                     selectedRole = this.dataset.role;
+                    
+                    // 根据角色显示或隐藏农户特有字段
+                    const farmerFields = document.getElementById('farmer-fields');
+                    if (selectedRole === 'farmer') {
+                        farmerFields.classList.remove('d-none');
+                    } else {
+                        farmerFields.classList.add('d-none');
+                    }
                 });
             });
             
@@ -491,22 +544,58 @@
                     return;
                 }
                 
+                // 如果选择了农户角色，验证农户特有字段
+                if (selectedRole === 'farmer') {
+                    const farmName = document.getElementById('farmName').value;
+                    const location = document.getElementById('location').value;
+                    
+                    if (!farmName) {
+                        showError('请输入农场名称');
+                        return;
+                    }
+                    
+                    if (!location) {
+                        showError('请输入农场位置');
+                        return;
+                    }
+                }
+                
                 try {
+                    // 准备请求数据
+                    const requestData = {
+                        username,
+                        password,
+                        role: selectedRole,
+                        phone,
+                        email: email || null
+                    };
+                    
+                    // 如果是农户角色，添加农户特有字段
+                    if (selectedRole === 'farmer') {
+                        requestData.farmName = document.getElementById('farmName').value;
+                        requestData.location = document.getElementById('location').value;
+                        requestData.description = document.getElementById('description').value || null;
+                        requestData.productCategory = document.getElementById('productCategory').value || null;
+                        requestData.licenseNumber = document.getElementById('licenseNumber').value || null;
+                    }
+                    
                     const response = await fetch('/api/auth/register', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({
-                            username,
-                            password,
-                            role: selectedRole,
-                            phone,
-                            email: email || null
-                        })
+                        body: JSON.stringify(requestData)
                     });
                     
-                    const data = await response.json();
+                    // 尝试解析响应
+                    const responseText = await response.text();
+                    let data;
+                    try {
+                        data = JSON.parse(responseText);
+                    } catch (e) {
+                        console.error('解析响应失败:', responseText);
+                        throw new Error('服务器返回格式错误: ' + responseText.substring(0, 100) + '...');
+                    }
                     
                     if (data.code === 200) {
                         showToast('注册成功');

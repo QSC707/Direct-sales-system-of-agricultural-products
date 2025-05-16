@@ -56,6 +56,11 @@ namespace FarmDirectSales.Data
         public DbSet<CartItem> CartItems { get; set; }
 
         /// <summary>
+        /// 农户资料表
+        /// </summary>
+        public DbSet<FarmerProfile> FarmerProfiles { get; set; }
+
+        /// <summary>
         /// 模型创建
         /// </summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -146,6 +151,13 @@ namespace FarmDirectSales.Data
                 .WithMany()
                 .HasForeignKey(c => c.ProductId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // 用户-农户资料关系（一对一）
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.FarmerProfile)
+                .WithOne(f => f.User)
+                .HasForeignKey<FarmerProfile>(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 } 

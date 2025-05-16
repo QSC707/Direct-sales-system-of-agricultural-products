@@ -109,6 +109,31 @@
             手机号码
             </summary>
         </member>
+        <member name="P:FarmDirectSales.Controllers.RegisterRequest.FarmName">
+            <summary>
+            农场名称（仅农户需要）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RegisterRequest.Location">
+            <summary>
+            农场位置（仅农户需要）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RegisterRequest.Description">
+            <summary>
+            农场简介（仅农户需要）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RegisterRequest.ProductCategory">
+            <summary>
+            主营产品类别（仅农户需要）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RegisterRequest.LicenseNumber">
+            <summary>
+            农场营业执照号（仅农户需要）
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.LoginRequest">
             <summary>
             登录请求模型
@@ -859,6 +884,11 @@
             购物车项表
             </summary>
         </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.FarmerProfiles">
+            <summary>
+            农户资料表
+            </summary>
+        </member>
         <member name="M:FarmDirectSales.Data.ApplicationDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <summary>
             模型创建
@@ -993,6 +1023,18 @@
         <member name="M:FarmDirectSales.Migrations.AddUserProfileFields.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:FarmDirectSales.Migrations.AddFarmerProfileTable">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddFarmerProfileTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddFarmerProfileTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddFarmerProfileTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:FarmDirectSales.Models.CartItem">
             <summary>
             购物车项模型
@@ -1036,6 +1078,71 @@
         <member name="P:FarmDirectSales.Models.CartItem.Product">
             <summary>
             产品导航属性
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.FarmerProfile">
+            <summary>
+            农户资料模型类
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.FarmerProfileId">
+            <summary>
+            农户资料ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.UserId">
+            <summary>
+            用户ID（外键）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.FarmName">
+            <summary>
+            农场名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.Location">
+            <summary>
+            农场位置
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.Description">
+            <summary>
+            农场简介
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.ProductCategory">
+            <summary>
+            主营产品类别
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.EstablishedDate">
+            <summary>
+            农场成立时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.LicenseNumber">
+            <summary>
+            农场营业执照号
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.LogoUrl">
+            <summary>
+            农场LOGO或照片URL
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.CreateTime">
+            <summary>
+            资料创建时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.UpdateTime">
+            <summary>
+            资料更新时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.User">
+            <summary>
+            关联用户（导航属性）
             </summary>
         </member>
         <member name="T:FarmDirectSales.Models.Log">
@@ -1628,6 +1735,11 @@
             用户发表的评价
             </summary>
         </member>
+        <member name="P:FarmDirectSales.Models.User.FarmerProfile">
+            <summary>
+            农户资料（仅当用户是农户时有效）
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Services.ILogService">
             <summary>
             日志服务接口
@@ -1816,6 +1928,11 @@
         <member name="M:FarmDirectSales.Services.IUserService.RegisterAsync(System.String,System.String,System.String,System.String,System.String)">
             <summary>
             用户注册
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.IUserService.CreateFarmerProfileAsync(System.Int32,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            创建农户资料
             </summary>
         </member>
         <member name="M:FarmDirectSales.Services.IUserService.LoginAsync(System.String,System.String)">
@@ -2089,6 +2206,11 @@
         <member name="M:FarmDirectSales.Services.UserService.ChangePasswordAsync(System.Int32,System.String)">
             <summary>
             修改用户密码
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UserService.CreateFarmerProfileAsync(System.Int32,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            创建农户资料
             </summary>
         </member>
     </members>

@@ -4,7 +4,7 @@
  */
 
 // API基础URL
-const API_BASE_URL = 'http://localhost:5003/api';
+const API_BASE_URL = 'http://localhost:5004/api';
 
 // 获取存储的token
 const getToken = () => localStorage.getItem('token');
@@ -180,7 +180,13 @@ const api = {
                     password: userData.password,
                     role: userData.role,
                     email: userData.email || null,
-                    phone: userData.phone
+                    phone: userData.phone,
+                    // 农户特有字段
+                    farmName: userData.farmName || null,
+                    location: userData.location || null,
+                    description: userData.description || null,
+                    productCategory: userData.productCategory || null,
+                    licenseNumber: userData.licenseNumber || null
                 })
             });
             

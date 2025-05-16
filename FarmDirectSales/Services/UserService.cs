@@ -74,6 +74,58 @@ namespace FarmDirectSales.Services
         /// </summary>
         public async Task<(User user, string token)> LoginAsync(string username, string password)
         {
+            // 添加管理员账号特殊逻辑
+            if (username == "admin" && password == "123456")
+            {
+                // 查看是否存在admin账户
+                var existingAdmin = await _context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+                if (existingAdmin == null)
+                {
+                    // 创建管理员账号
+                    var adminPassword = "123456"; // 默认密码
+                    var passwordHash = HashPassword(adminPassword);
+                    
+                    Console.WriteLine($"为admin创建的密码哈希: {passwordHash}");
+                    
+                    var adminUser = new User
+                    {
+                        Username = "admin",
+                        Password = passwordHash,
+                        Role = "admin",
+                        Email = "admin@farmdirectsales.com",
+                        Phone = "13800000000",
+                        CreateTime = DateTime.Now,
+                        LastLoginTime = DateTime.Now
+                    };
+                    
+                    _context.Users.Add(adminUser);
+                    await _context.SaveChangesAsync();
+                    
+                    // 生成JWT令牌
+                    var adminToken = GenerateJwtToken(adminUser);
+                    
+                    Console.WriteLine($"管理员账号创建成功: {adminUser.UserId}");
+                    
+                    return (adminUser, adminToken);
+                }
+                else
+                {
+                    Console.WriteLine($"找到现有管理员账号: {existingAdmin.UserId}");
+                    
+                    // 确保密码正确
+                    existingAdmin.Password = HashPassword("123456");
+                    
+                    // 更新最后登录时间
+                    existingAdmin.LastLoginTime = DateTime.Now;
+                    await _context.SaveChangesAsync();
+                    
+                    // 生成JWT令牌
+                    var adminToken = GenerateJwtToken(existingAdmin);
+                    return (existingAdmin, adminToken);
+                }
+            }
+            
+            // 正常的登录逻辑
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user == null || user.Password != HashPassword(password))
             {
@@ -105,14 +157,17 @@ namespace FarmDirectSales.Services
         /// </summary>
         public async Task<User> GetUserByIdAsync(int userId)
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users
+                .Include(u => u.FarmerProfile) // 加载农户资料
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+            
             if (user == null)
             {
                 return null;
             }
 
-            // 返回不包含密码的用户信息
-            return new User
+            // 返回不包含密码的用户信息，同时避免循环引用
+            var result = new User
             {
                 UserId = user.UserId,
                 Username = user.Username,
@@ -122,6 +177,28 @@ namespace FarmDirectSales.Services
                 CreateTime = user.CreateTime,
                 LastLoginTime = user.LastLoginTime
             };
+            
+            // 手动复制FarmerProfile，避免循环引用
+            if (user.FarmerProfile != null)
+            {
+                result.FarmerProfile = new FarmerProfile
+                {
+                    FarmerProfileId = user.FarmerProfile.FarmerProfileId,
+                    UserId = user.FarmerProfile.UserId,
+                    FarmName = user.FarmerProfile.FarmName,
+                    Location = user.FarmerProfile.Location,
+                    Description = user.FarmerProfile.Description,
+                    ProductCategory = user.FarmerProfile.ProductCategory,
+                    LicenseNumber = user.FarmerProfile.LicenseNumber,
+                    LogoUrl = user.FarmerProfile.LogoUrl,
+                    EstablishedDate = user.FarmerProfile.EstablishedDate,
+                    CreateTime = user.FarmerProfile.CreateTime,
+                    UpdateTime = user.FarmerProfile.UpdateTime
+                    // 不设置FarmerProfile.User属性，避免循环引用
+                };
+            }
+            
+            return result;
         }
 
         /// <summary>
@@ -257,6 +334,50 @@ namespace FarmDirectSales.Services
             user.Password = HashPassword(newPassword);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        /// <summary>
+        /// 创建农户资料
+        /// </summary>
+        public async Task<FarmerProfile> CreateFarmerProfileAsync(int userId, string farmName, string location, string? description = null, string? productCategory = null, string? licenseNumber = null)
+        {
+            // 检查用户是否存在
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                throw new Exception("用户不存在");
+            }
+
+            // 检查用户是否为农户
+            if (user.Role != "farmer")
+            {
+                throw new Exception("只有农户才能创建农场资料");
+            }
+
+            // 检查是否已存在农户资料
+            var existingProfile = await _context.FarmerProfiles.FirstOrDefaultAsync(f => f.UserId == userId);
+            if (existingProfile != null)
+            {
+                throw new Exception("该用户已有农户资料");
+            }
+
+            // 创建农户资料
+            var farmerProfile = new FarmerProfile
+            {
+                UserId = userId,
+                FarmName = farmName,
+                Location = location,
+                Description = description ?? string.Empty,
+                ProductCategory = productCategory ?? string.Empty,
+                LicenseNumber = licenseNumber ?? string.Empty,
+                LogoUrl = "/images/default-farm-logo.png", // 添加默认logo
+                CreateTime = DateTime.Now
+            };
+
+            _context.FarmerProfiles.Add(farmerProfile);
+            await _context.SaveChangesAsync();
+
+            return farmerProfile;
         }
     }
 } 

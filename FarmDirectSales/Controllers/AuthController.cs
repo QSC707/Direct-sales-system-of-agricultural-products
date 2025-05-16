@@ -31,6 +31,22 @@ namespace FarmDirectSales.Controllers
         {
             try
             {
+                // 检查请求有效性
+                if (request.Role == "farmer")
+                {
+                    // 验证农户特有字段
+                    if (string.IsNullOrEmpty(request.FarmName))
+                    {
+                        return BadRequest(new { code = 400, message = "农场名称不能为空" });
+                    }
+                    
+                    if (string.IsNullOrEmpty(request.Location))
+                    {
+                        return BadRequest(new { code = 400, message = "农场位置不能为空" });
+                    }
+                }
+
+                // 创建基本用户
                 var user = await _userService.RegisterAsync(
                     request.Username, 
                     request.Password, 
@@ -38,11 +54,74 @@ namespace FarmDirectSales.Controllers
                     request.Email,
                     request.Phone
                 );
-                return Ok(new { code = 200, message = "注册成功", data = user });
+                
+                // 如果是农户身份，创建农户资料
+                if (request.Role == "farmer")
+                {
+                    try
+                    {
+                        await _userService.CreateFarmerProfileAsync(
+                            user.UserId,
+                            request.FarmName ?? string.Empty,
+                            request.Location ?? string.Empty,
+                            request.Description,
+                            request.ProductCategory,
+                            request.LicenseNumber
+                        );
+                        
+                        // 重新获取用户信息，包含农户资料
+                        user = await _userService.GetUserByIdAsync(user.UserId);
+                        
+                        // 创建一个没有循环引用的响应对象
+                        var farmerData = new 
+                        {
+                            userId = user.UserId,
+                            username = user.Username,
+                            email = user.Email,
+                            phone = user.Phone,
+                            role = user.Role,
+                            createTime = user.CreateTime,
+                            farmerProfile = user.FarmerProfile != null ? new 
+                            {
+                                farmName = user.FarmerProfile.FarmName,
+                                location = user.FarmerProfile.Location,
+                                description = user.FarmerProfile.Description,
+                                productCategory = user.FarmerProfile.ProductCategory,
+                                licenseNumber = user.FarmerProfile.LicenseNumber,
+                                logoUrl = user.FarmerProfile.LogoUrl
+                            } : null
+                        };
+                        
+                        return Ok(new { code = 200, message = "注册成功", data = farmerData });
+                    }
+                    catch (Exception farmerEx)
+                    {
+                        // 农户资料创建失败，但用户已创建，记录错误并返回部分成功信息
+                        Console.WriteLine($"农户资料创建失败: {farmerEx.Message}");
+                        return StatusCode(StatusCodes.Status500InternalServerError, 
+                            new { code = 500, message = $"用户创建成功但农户资料创建失败: {farmerEx.Message}", partialData = user });
+                    }
+                }
+                
+                // 为非农户用户创建简单响应对象
+                var userData = new 
+                {
+                    userId = user.UserId,
+                    username = user.Username,
+                    email = user.Email,
+                    phone = user.Phone,
+                    role = user.Role,
+                    createTime = user.CreateTime
+                };
+                
+                return Ok(new { code = 200, message = "注册成功", data = userData });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { code = 400, message = ex.Message });
+                Console.WriteLine($"注册失败: {ex.Message}");
+                Console.WriteLine($"详细错误: {ex}");
+                return StatusCode(StatusCodes.Status500InternalServerError, 
+                    new { code = 500, message = $"注册失败: {ex.Message}" });
             }
         }
 
@@ -242,6 +321,31 @@ namespace FarmDirectSales.Controllers
         [Required(ErrorMessage = "手机号码不能为空")]
         [Phone(ErrorMessage = "手机号格式不正确")]
         public string? Phone { get; set; }
+
+        /// <summary>
+        /// 农场名称（仅农户需要）
+        /// </summary>
+        public string? FarmName { get; set; }
+
+        /// <summary>
+        /// 农场位置（仅农户需要）
+        /// </summary>
+        public string? Location { get; set; }
+
+        /// <summary>
+        /// 农场简介（仅农户需要）
+        /// </summary>
+        public string? Description { get; set; }
+
+        /// <summary>
+        /// 主营产品类别（仅农户需要）
+        /// </summary>
+        public string? ProductCategory { get; set; }
+
+        /// <summary>
+        /// 农场营业执照号（仅农户需要）
+        /// </summary>
+        public string? LicenseNumber { get; set; }
     }
 
     /// <summary>

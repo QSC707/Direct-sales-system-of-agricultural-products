@@ -78,5 +78,10 @@ namespace FarmDirectSales.Models
         /// 用户发表的评价
         /// </summary>
         public virtual ICollection<Review>? Reviews { get; set; }
+
+        /// <summary>
+        /// 农户资料（仅当用户是农户时有效）
+        /// </summary>
+        public virtual FarmerProfile? FarmerProfile { get; set; }
     }
 } 
