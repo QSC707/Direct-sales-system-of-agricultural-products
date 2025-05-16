@@ -1,0 +1,36 @@
+## .NET Core
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+*.vscode
+.vs/
+.idea/
+*.DS_Store
+
+## 其他临时文件
+[Tt]emp/
+[Tt]mp/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.dll
+*.exe
+*.pdb
+*.cache
+
+## ASP.NET Core
+wwwroot/lib/
+wwwroot/uploads/
+appsettings.Development.json
+appsettings.Production.json
+*.log 
