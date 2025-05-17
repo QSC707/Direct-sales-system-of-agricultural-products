@@ -363,8 +363,8 @@
         // 退出登录
         function logout() {
             // 使用auth.js中的统一logout函数实现
-            if (typeof window.logout === 'function') {
-                // 如果auth.js的logout函数已加载，直接调用
+            if (typeof window.logout === 'function' && window.logout !== logout) {
+                // 如果auth.js的logout函数已加载且不是当前函数（避免递归调用）
                 window.logout();
             } else {
                 // 如果auth.js还没加载完，先保存当前角色再跳转

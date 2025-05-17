@@ -11,6 +11,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <!-- 自定义样式 -->
     <link href="/css/style.css" rel="stylesheet">
+    <!-- 引入auth.js -->
+    <script src="/js/auth.js"></script>
     <style>
         .user-info-card {
             border-radius: 15px;
@@ -427,12 +429,12 @@
             // 设置登出按钮事件
             document.getElementById('logout-button').addEventListener('click', function(e) {
                 e.preventDefault();
-                logout();
+                window.logout();
             });
             
             document.getElementById('sidebar-logout-button').addEventListener('click', function(e) {
                 e.preventDefault();
-                logout();
+                window.logout();
             });
             
             // 设置编辑按钮事件
@@ -754,20 +756,18 @@
         // 检查用户登录状态
         function checkAuthStatus() {
             const token = localStorage.getItem('token');
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
             
-            if (token && user && user.userId) {
-                // 已登录
+            if (token) {
+                // 显示已登录菜单
                 document.getElementById('unauthenticated-menu').classList.add('d-none');
                 document.getElementById('authenticated-menu').classList.remove('d-none');
                 
-                // 设置用户名
-                document.getElementById('username').textContent = user.username || '用户';
-                
-                // 根据角色显示不同的菜单项
+                // 检查角色并显示相应的菜单项
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
                 if (user.role === 'farmer') {
                     document.getElementById('farmer-menu-item').classList.remove('d-none');
-                } else if (user.role === 'admin') {
+                }
+                if (user.role === 'admin') {
                     document.getElementById('admin-menu-item').classList.remove('d-none');
                 }
                 
@@ -775,13 +775,6 @@
             } else {
                 return false; // 未登录
             }
-        }
-        
-        // 退出登录
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/index.html';
         }
         
         // 加载用户个人信息
