@@ -6,6 +6,12 @@
     <title>用户管理 - 农产品直销平台</title>
     <link rel="stylesheet" href="../../css/style.css">
     <script src="../../js/dependencies.js"></script>
+    <!-- 引入Axios库 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- API调用相关 -->
+    <script src="../../js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="../../js/axios-config.js"></script>
     <script src="../../js/auth.js"></script>
 </head>
 <body>
@@ -433,26 +439,26 @@
         /**
          * 加载用户列表
          */
-        function loadUsers(page) {
-            const token = localStorage.getItem('token');
-            const keyword = $('#searchKeyword').val();
-            const role = $('#roleFilter').val();
-            
-            $.ajax({
-                url: `/api/users?page=${page}&keyword=${keyword}&role=${role}`,
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(data) {
-                    renderUserList(data.users);
-                    renderPagination(data.totalPages, page);
-                },
-                error: function(xhr) {
-                    console.error('获取用户列表失败', xhr);
-                    alert('获取用户列表失败: ' + (xhr.responseJSON?.message || xhr.statusText));
-                }
-            });
+        async function loadUsers(page) {
+            try {
+                const keyword = $('#searchKeyword').val();
+                const role = $('#roleFilter').val();
+                
+                // 使用Axios发送请求
+                const result = await http.get(`/users`, {
+                    params: {
+                        page,
+                        keyword,
+                        role
+                    }
+                });
+                
+                renderUserList(result.data.users);
+                renderPagination(result.data.totalPages, page);
+            } catch (error) {
+                console.error('获取用户列表失败', error);
+                alert('获取用户列表失败: ' + (error.response?.data?.message || error.message));
+            }
         }
         
         /**
@@ -566,125 +572,109 @@
         /**
          * 打开用户详情模态框
          */
-        function openUserDetailModal(userId) {
-            const token = localStorage.getItem('token');
-            
-            // 获取用户详情
-            $.ajax({
-                url: '/api/users/' + userId,
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(user) {
-                    // 填充基本信息
-                    $('#detailUserId').text(user.userId);
-                    $('#detailUsername').text(user.username);
-                    $('#detailRole').html(getRoleBadge(user.role));
-                    $('#detailEmail').text(user.email || '未设置');
-                    $('#detailPhone').text(user.phone || '未设置');
-                    $('#detailCreateTime').text(formatDate(user.createTime));
-                    $('#detailLastLoginTime').text(user.lastLoginTime ? formatDate(user.lastLoginTime) : '未登录');
-                    
-                    // 如果是农户，显示农场信息
-                    if (user.role === 'farmer' && user.farmerProfile) {
-                        $('#farmerProfileSection').show();
-                        $('#detailFarmName').text(user.farmerProfile.farmName || '未设置');
-                        $('#detailLocation').text(user.farmerProfile.location || '未设置');
-                        $('#detailProductCategory').text(user.farmerProfile.productCategory || '未设置');
-                        $('#detailLicenseNumber').text(user.farmerProfile.licenseNumber || '未设置');
-                        $('#detailEstablishedDate').text(user.farmerProfile.establishedDate ? formatDate(user.farmerProfile.establishedDate) : '未设置');
-                    } else {
-                        $('#farmerProfileSection').hide();
-                    }
-                    
-                    // 加载用户活动
-                    loadUserActivity(userId);
-                    
-                    // 打开模态框
-                    $('#userDetailModal').modal('show');
-                },
-                error: function(xhr) {
-                    console.error('获取用户详情失败', xhr);
-                    alert('获取用户详情失败: ' + (xhr.responseJSON?.message || xhr.statusText));
+        async function openUserDetailModal(userId) {
+            try {
+                // 使用Axios获取用户详情
+                const result = await http.get(`/users/${userId}`);
+                const user = result.data;
+                
+                // 填充基本信息
+                $('#detailUserId').text(user.userId);
+                $('#detailUsername').text(user.username);
+                $('#detailRole').html(getRoleBadge(user.role));
+                $('#detailEmail').text(user.email || '未设置');
+                $('#detailPhone').text(user.phone || '未设置');
+                $('#detailCreateTime').text(formatDate(user.createTime));
+                $('#detailLastLoginTime').text(user.lastLoginTime ? formatDate(user.lastLoginTime) : '未登录');
+                
+                // 如果是农户，显示农场信息
+                if (user.role === 'farmer' && user.farmerProfile) {
+                    $('#farmerProfileSection').show();
+                    $('#detailFarmName').text(user.farmerProfile.farmName || '未设置');
+                    $('#detailLocation').text(user.farmerProfile.location || '未设置');
+                    $('#detailProductCategory').text(user.farmerProfile.productCategory || '未设置');
+                    $('#detailLicenseNumber').text(user.farmerProfile.licenseNumber || '未设置');
+                    $('#detailEstablishedDate').text(user.farmerProfile.establishedDate ? formatDate(user.farmerProfile.establishedDate) : '未设置');
+                } else {
+                    $('#farmerProfileSection').hide();
                 }
-            });
+                
+                // 加载用户活动
+                loadUserActivity(userId);
+                
+                // 打开模态框
+                $('#userDetailModal').modal('show');
+            } catch (error) {
+                console.error('获取用户详情失败', error);
+                alert('获取用户详情失败: ' + (error.response?.data?.message || error.message));
+            }
         }
         
         /**
          * 加载用户活动
          */
-        function loadUserActivity(userId) {
-            const token = localStorage.getItem('token');
-            
-            $.ajax({
-                url: '/api/logs/user/' + userId + '?limit=10',
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(activities) {
-                    const $activityList = $('#userActivityList');
-                    $activityList.empty();
-                    
-                    if (!activities || activities.length === 0) {
-                        $activityList.append('<tr><td colspan="4" class="text-center">暂无活动记录</td></tr>');
-                        return;
+        async function loadUserActivity(userId) {
+            try {
+                // 使用Axios获取用户活动
+                const result = await http.get(`/logs/user/${userId}`, {
+                    params: {
+                        limit: 10
                     }
-                    
-                    activities.forEach(function(activity) {
-                        const row = `
-                            <tr>
-                                <td>${formatDateTime(activity.createTime)}</td>
-                                <td>${activity.actionType}</td>
-                                <td>${activity.actionDescription}</td>
-                                <td>${activity.ipAddress}</td>
-                            </tr>
-                        `;
-                        $activityList.append(row);
-                    });
-                },
-                error: function(xhr) {
-                    console.error('获取用户活动记录失败', xhr);
-                    $('#userActivityList').html('<tr><td colspan="4" class="text-center text-danger">获取活动记录失败</td></tr>');
+                });
+                
+                const activities = result.data;
+                const $activityList = $('#userActivityList');
+                $activityList.empty();
+                
+                if (!activities || activities.length === 0) {
+                    $activityList.append('<tr><td colspan="4" class="text-center">暂无活动记录</td></tr>');
+                    return;
                 }
-            });
+                
+                activities.forEach(function(activity) {
+                    const row = `
+                        <tr>
+                            <td>${formatDateTime(activity.createTime)}</td>
+                            <td>${activity.actionType}</td>
+                            <td>${activity.actionDescription}</td>
+                            <td>${activity.ipAddress}</td>
+                        </tr>
+                    `;
+                    $activityList.append(row);
+                });
+            } catch (error) {
+                console.error('获取用户活动记录失败', error);
+                $('#userActivityList').html('<tr><td colspan="4" class="text-center text-danger">获取活动记录失败</td></tr>');
+            }
         }
         
         /**
          * 打开编辑用户模态框
          */
-        function openEditUserModal(userId) {
-            const token = localStorage.getItem('token');
-            
+        async function openEditUserModal(userId) {
             // 重置表单
             $('#editUserForm')[0].reset();
             $('#passwordFields').hide();
             $('#resetPassword').prop('checked', false);
             
-            // 获取用户信息
-            $.ajax({
-                url: '/api/users/' + userId,
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(user) {
-                    // 填充表单
-                    $('#editUserId').val(user.userId);
-                    $('#editUsername').val(user.username);
-                    $('#editEmail').val(user.email);
-                    $('#editPhone').val(user.phone);
-                    $('#editRole').val(user.role);
-                    
-                    // 打开模态框
-                    $('#editUserModal').modal('show');
-                },
-                error: function(xhr) {
-                    console.error('获取用户信息失败', xhr);
-                    alert('获取用户信息失败: ' + (xhr.responseJSON?.message || xhr.statusText));
-                }
-            });
+            try {
+                // 使用Axios获取用户信息
+                const result = await http.get(`/users/${userId}`);
+                const user = result.data;
+                
+                // 填充表单
+                $('#editUserId').val(user.userId);
+                $('#editUsername').val(user.username);
+                $('#editEmail').val(user.email);
+                $('#editPhone').val(user.phone);
+                $('#editRole').val(user.role);
+                
+                // 打开模态框
+                $('#editUserModal').modal('show');
+            } catch (error) {
+                console.error('获取用户信息失败', error);
+                alert('获取用户信息失败: ' + (error.response?.data?.message || error.message));
+            }
         }
         
         /**
@@ -705,24 +695,16 @@
         /**
          * 删除用户
          */
-        function deleteUser(userId) {
-            const token = localStorage.getItem('token');
-            
-            $.ajax({
-                url: '/api/users/' + userId,
-                type: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function() {
-                    alert('用户删除成功');
-                    loadUsers(1); // 重新加载用户列表
-                },
-                error: function(xhr) {
-                    console.error('删除用户失败', xhr);
-                    alert('删除用户失败: ' + (xhr.responseJSON?.message || xhr.statusText));
-                }
-            });
+        async function deleteUser(userId) {
+            try {
+                // 使用Axios删除用户
+                await http.delete(`/users/${userId}`);
+                alert('用户删除成功');
+                loadUsers(1); // 重新加载用户列表
+            } catch (error) {
+                console.error('删除用户失败', error);
+                alert('删除用户失败: ' + (error.response?.data?.message || error.message));
+            }
         }
         
         /**
@@ -805,9 +787,7 @@
         /**
          * 添加用户
          */
-        function addUser() {
-            const token = localStorage.getItem('token');
-            
+        async function addUser() {
             // 收集表单数据
             const userData = {
                 username: $('#username').val(),
@@ -817,33 +797,24 @@
                 role: $('#role').val()
             };
             
-            // 发送请求
-            $.ajax({
-                url: '/api/users/register',
-                type: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                },
-                data: JSON.stringify(userData),
-                success: function(data) {
-                    alert('用户添加成功');
-                    $('#addUserModal').modal('hide');
-                    $('#addUserForm')[0].reset(); // 重置表单
-                    loadUsers(1); // 重新加载用户列表
-                },
-                error: function(xhr) {
-                    console.error('添加用户失败', xhr);
-                    alert('添加用户失败: ' + (xhr.responseJSON?.message || xhr.statusText));
-                }
-            });
+            try {
+                // 使用Axios发送请求
+                await http.post('/users/register', userData);
+                
+                alert('用户添加成功');
+                $('#addUserModal').modal('hide');
+                $('#addUserForm')[0].reset(); // 重置表单
+                loadUsers(1); // 重新加载用户列表
+            } catch (error) {
+                console.error('添加用户失败', error);
+                alert('添加用户失败: ' + (error.response?.data?.message || error.message));
+            }
         }
         
         /**
          * 更新用户
          */
-        function updateUser() {
-            const token = localStorage.getItem('token');
+        async function updateUser() {
             const userId = $('#editUserId').val();
             
             // 收集表单数据
@@ -859,25 +830,17 @@
                 userData.password = $('#newPassword').val();
             }
             
-            // 发送请求
-            $.ajax({
-                url: '/api/users/' + userId,
-                type: 'PUT',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                },
-                data: JSON.stringify(userData),
-                success: function(data) {
-                    alert('用户更新成功');
-                    $('#editUserModal').modal('hide');
-                    loadUsers(1); // 重新加载用户列表
-                },
-                error: function(xhr) {
-                    console.error('更新用户失败', xhr);
-                    alert('更新用户失败: ' + (xhr.responseJSON?.message || xhr.statusText));
-                }
-            });
+            try {
+                // 使用Axios发送请求
+                await http.put(`/users/${userId}`, userData);
+                
+                alert('用户更新成功');
+                $('#editUserModal').modal('hide');
+                loadUsers(1); // 重新加载用户列表
+            } catch (error) {
+                console.error('更新用户失败', error);
+                alert('更新用户失败: ' + (error.response?.data?.message || error.message));
+            }
         }
         
         /**

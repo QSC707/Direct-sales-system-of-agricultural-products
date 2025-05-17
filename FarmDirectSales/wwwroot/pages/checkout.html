@@ -11,6 +11,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <!-- 自定义样式 -->
     <link href="/css/style.css" rel="stylesheet">
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/js/axios-config.js"></script>
     <style>
         .product-img {
             width: 80px;
@@ -349,7 +352,14 @@
         // 加载购物车数据
         async function loadCartData() {
             try {
-                const response = await api.cart.getCart();
+                // 获取当前用户信息
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (!user.userId) {
+                    throw new Error('用户未登录');
+                }
+                
+                // 使用Axios获取购物车数据
+                const response = await http.get(`/api/cart/user/${user.userId}`);
                 cartData = response.data;
                 
                 if (!cartData || !cartData.items || cartData.items.length === 0) {
@@ -430,10 +440,15 @@
             orderBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 处理中...';
             
             try {
-                // 提交多个订单（购物车中的每个商品一个订单）
+                // 获取当前用户信息
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (!user.userId) {
+                    throw new Error('用户未登录');
+                }
+                
+                // 提交多个订单（购物车中的每个商品一个订单）
                 const orderPromises = cartData.items.map(item => {
-                    return api.orders.create({
+                    return http.post('/api/order', {
                         userId: user.userId,
                         productId: item.product.productId,
                         quantity: item.quantity,
@@ -445,7 +460,7 @@
                 const results = await Promise.all(orderPromises);
                 
                 // 清空购物车
-                await api.cart.clearCart();
+                await http.delete(`/api/cart/clear/${user.userId}`);
                 
                 // 根据支付方式进行不同处理
                 if (paymentMethod === 'online') {

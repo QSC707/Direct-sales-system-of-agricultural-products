@@ -11,6 +11,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <!-- 自定义样式 -->
     <link href="/css/style.css" rel="stylesheet">
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/js/axios-config.js"></script>
     <style>
         /* 购物车通知框动画 */
         #cart-notification {
@@ -302,7 +305,7 @@
             loadProductDetail(currentProductId);
             
             // 加载产品评价
-            reviewsModule.loadProductReviews(currentProductId, 'product-reviews');
+            loadProductReviews(currentProductId);
             
             // 加载相关产品
             loadRelatedProducts(currentProductId);
@@ -365,8 +368,8 @@
             try {
                 const container = document.getElementById('product-detail-container');
                 
-                // 请求产品数据
-                const response = await api.products.getById(productId);
+                // 使用Axios请求产品数据
+                const response = await http.get(`/api/product/${productId}`);
                 const product = response.data;
                 currentProduct = product;
                 
@@ -557,10 +560,17 @@
         // 加入购物车
         let addToCartTimeout = null; // 添加一个变量来跟踪定时器
         
-        function addToCart() {
+        async function addToCart() {
             const token = localStorage.getItem('token');
             if (!token) {
                 alert('请先登录!');
+                window.location.href = '/pages/login.html';
+                return;
+            }
+            
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.userId) {
+                alert('用户信息不完整，请重新登录!');
                 window.location.href = '/pages/login.html';
                 return;
             }
@@ -571,58 +581,64 @@
             // 禁用按钮防止重复点击
             addToCartBtn.disabled = true;
             
-            // 调用购物车API
-            api.cart.addToCart(currentProductId, quantity)
-                .then(response => {
-                    console.log('添加购物车成功', response);
-                    
-                    // 显示顶部成功提示
-                    const notification = document.getElementById('cart-notification');
-                    const notificationText = document.getElementById('cart-notification-text');
-                    
-                    // 根据数量设置提示文本
-                    notificationText.textContent = `已成功添加 ${quantity} 件商品到购物车！`;
-                    
-                    // 显示提示
-                    notification.classList.remove('d-none');
-                    setTimeout(() => {
-                        notification.classList.add('show');
-                    }, 10);
-                    
-                    // 清除之前的定时器
-                    if (addToCartTimeout) {
-                        clearTimeout(addToCartTimeout);
-                    }
-                    
-                    // 设置定时器自动关闭提示
-                    addToCartTimeout = setTimeout(() => {
-                        notification.classList.remove('show');
-                        
-                        // 延迟添加d-none类，允许淡出动画完成
-                        setTimeout(() => {
-                            notification.classList.add('d-none');
-                        }, 300);
-                        
-                        addToCartTimeout = null;
-                    }, 500);
-                    
-                    // 恢复按钮状态
-                    addToCartBtn.disabled = false;
-                })
-                .catch(error => {
-                    console.error('添加购物车失败', error);
-                    alert(`添加购物车失败: ${error.message}`);
-                    
-                    // 恢复按钮状态
-                    addToCartBtn.disabled = false;
+            try {
+                // 调用购物车API
+                await http.post('/api/cart', {
+                    userId: user.userId,
+                    productId: currentProductId,
+                    quantity: quantity
                 });
+                
+                // 显示顶部成功提示
+                const notification = document.getElementById('cart-notification');
+                const notificationText = document.getElementById('cart-notification-text');
+                
+                // 根据数量设置提示文本
+                notificationText.textContent = `已成功添加 ${quantity} 件商品到购物车！`;
+                
+                // 显示提示
+                notification.classList.remove('d-none');
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+                
+                // 清除之前的定时器
+                if (addToCartTimeout) {
+                    clearTimeout(addToCartTimeout);
+                }
+                
+                // 设置定时器自动关闭提示
+                addToCartTimeout = setTimeout(() => {
+                    notification.classList.remove('show');
+                    
+                    // 延迟添加d-none类，允许淡出动画完成
+                    setTimeout(() => {
+                        notification.classList.add('d-none');
+                    }, 300);
+                    
+                    addToCartTimeout = null;
+                }, 500);
+            } catch (error) {
+                console.error('添加购物车失败', error);
+                alert(`添加购物车失败: ${error.message}`);
+            } finally {
+                // 恢复按钮状态
+                addToCartBtn.disabled = false;
+            }
         }
         
         // 立即购买
-        function buyNow() {
+        async function buyNow() {
             const token = localStorage.getItem('token');
             if (!token) {
                 alert('请先登录!');
+                window.location.href = '/pages/login.html';
+                return;
+            }
+            
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.userId) {
+                alert('用户信息不完整，请重新登录!');
                 window.location.href = '/pages/login.html';
                 return;
             }
@@ -637,35 +653,42 @@
             const originalBuyNowText = buyNowBtn.innerHTML;
             buyNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>处理中...';
             
-            // 显示提示消息
-            const notification = document.getElementById('cart-notification');
-            const notificationText = document.getElementById('cart-notification-text');
-            notificationText.textContent = '正在添加到购物车并跳转...';
-            notification.classList.remove('d-none');
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 10);
-            
-            // 先添加到购物车，然后跳转到结算页面
-            api.cart.addToCart(currentProductId, quantity)
-                .then(response => {
-                    // 短暂延迟后跳转，让用户看到提示
-                    setTimeout(() => {
-                        window.location.href = '/pages/cart.html';
-                    }, 500);
-                })
-                .catch(error => {
-                    console.error('添加购物车失败', error);
-                    notification.classList.remove('show');
-                    setTimeout(() => {
-                        notification.classList.add('d-none');
-                    }, 300);
-                    alert(`添加购物车失败: ${error.message}`);
-                    
-                    // 恢复按钮状态
-                    buyNowBtn.disabled = false;
-                    buyNowBtn.innerHTML = originalBuyNowText;
+            try {
+                // 显示提示消息
+                const notification = document.getElementById('cart-notification');
+                const notificationText = document.getElementById('cart-notification-text');
+                notificationText.textContent = '正在添加到购物车并跳转...';
+                notification.classList.remove('d-none');
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+                
+                // 先添加到购物车，然后跳转到结算页面
+                await http.post('/api/cart', {
+                    userId: user.userId,
+                    productId: currentProductId,
+                    quantity: quantity
                 });
+                
+                // 短暂延迟后跳转，让用户看到提示
+                setTimeout(() => {
+                    window.location.href = '/pages/cart.html';
+                }, 500);
+            } catch (error) {
+                console.error('添加购物车失败', error);
+                
+                const notification = document.getElementById('cart-notification');
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.classList.add('d-none');
+                }, 300);
+                
+                alert(`添加购物车失败: ${error.message}`);
+                
+                // 恢复按钮状态
+                buyNowBtn.disabled = false;
+                buyNowBtn.innerHTML = originalBuyNowText;
+            }
         }
         
         // 加载相关产品
@@ -674,7 +697,7 @@
                 const container = document.getElementById('related-products');
                 
                 // 请求全部产品数据
-                const response = await api.products.getAll();
+                const response = await http.get('/api/product');
                 const allProducts = response.data || [];
                 
                 // 排除当前产品，并只保留最多4个相关产品
@@ -713,6 +736,62 @@
                 console.error('加载相关产品失败:', error);
                 document.getElementById('related-products').innerHTML = '<div class="col-12 text-center text-danger">加载相关产品失败</div>';
             }
+        }
+
+        // 在product-detail.html文件中添加加载产品评论的函数
+        async function loadProductReviews(productId) {
+            try {
+                const reviewsContainer = document.getElementById('product-reviews');
+                
+                // 显示加载状态
+                reviewsContainer.innerHTML = '<div class="text-center"><div class="spinner-border text-success" role="status"><span class="visually-hidden">加载中...</span></div></div>';
+                
+                // 修改为正确的API路径
+                const response = await http.get(`/api/review/product/${productId}`);
+                const reviews = response;
+                
+                if (!reviews || reviews.length === 0) {
+                    reviewsContainer.innerHTML = '<div class="alert alert-info">暂无评价，快来写第一条评价吧！</div>';
+                    return;
+                }
+                
+                let reviewsHtml = '';
+                
+                reviews.forEach(review => {
+                    reviewsHtml += `
+                        <div class="review-item mb-4 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="fw-bold">${review.isAnonymous ? '匿名用户' : review.user.username}</span>
+                                    <span class="text-muted ms-2">评价于 ${new Date(review.createTime).toLocaleDateString('zh-CN')}</span>
+                                </div>
+                                <div class="star-rating text-warning">
+                                    ${renderStarRating(review.rating)}
+                                </div>
+                            </div>
+                            <p class="mb-0">${review.content}</p>
+                        </div>
+                    `;
+                });
+                
+                reviewsContainer.innerHTML = reviewsHtml;
+            } catch (error) {
+                console.error('加载评论失败:', error);
+                document.getElementById('product-reviews').innerHTML = `<div class="alert alert-danger">加载评价失败: ${error.message}</div>`;
+            }
+        }
+
+        // 渲染星级评分函数
+        function renderStarRating(rating) {
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= rating) {
+                    starsHtml += '<i class="fas fa-star"></i>';
+                } else {
+                    starsHtml += '<i class="far fa-star"></i>';
+                }
+            }
+            return starsHtml;
         }
     </script>
 </body>

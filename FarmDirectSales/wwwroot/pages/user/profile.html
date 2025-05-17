@@ -11,7 +11,13 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <!-- 自定义样式 -->
     <link href="/css/style.css" rel="stylesheet">
-    <!-- 引入auth.js -->
+    <!-- 引入Axios库 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- API调用相关 -->
+    <script src="/js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="/js/axios-config.js"></script>
+    <!-- 认证相关 -->
     <script src="/js/auth.js"></script>
     <style>
         .user-info-card {
@@ -401,8 +407,6 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- API 调用 -->
-    <script src="/js/api.js"></script>
     
     <!-- 个人中心页面逻辑 -->
     <script>
@@ -555,12 +559,9 @@
                     throw new Error('用户ID不存在');
                 }
                 
-                const response = await fetch(`/api/auth/user/${user.userId}/password`, {
+                const response = await fetch(`${window.API_BASE_URL}/auth/user/${user.userId}/password`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...getHeaders()
-                    },
+                    headers: window.getHeaders(),
                     body: JSON.stringify({
                         oldPassword: currentPassword,
                         newPassword: newPassword
@@ -591,12 +592,9 @@
                     throw new Error('请先设置邮箱');
                 }
                 
-                const response = await fetch('/api/auth/email/verify-code', {
+                const response = await fetch(`${window.API_BASE_URL}/user/email/verify-code`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...getHeaders()
-                    },
+                    headers: window.getHeaders(),
                     body: JSON.stringify({ email })
                 });
                 
@@ -634,12 +632,9 @@
                     throw new Error('请先设置手机号');
                 }
                 
-                const response = await fetch('/api/auth/phone/verify-code', {
+                const response = await fetch(`${window.API_BASE_URL}/user/phone/verify-code`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...getHeaders()
-                    },
+                    headers: window.getHeaders(),
                     body: JSON.stringify({ phone })
                 });
                 
@@ -677,12 +672,9 @@
                     throw new Error('请输入验证码');
                 }
                 
-                const response = await fetch('/api/auth/email/verify', {
+                const response = await fetch(`${window.API_BASE_URL}/user/email/verify`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...getHeaders()
-                    },
+                    headers: window.getHeaders(),
                     body: JSON.stringify({
                         email: currentUser.email,
                         code
@@ -716,12 +708,9 @@
                     throw new Error('请输入验证码');
                 }
                 
-                const response = await fetch('/api/auth/phone/verify', {
+                const response = await fetch(`${window.API_BASE_URL}/user/phone/verify`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...getHeaders()
-                    },
+                    headers: window.getHeaders(),
                     body: JSON.stringify({
                         phone: currentUser.phone,
                         code
@@ -797,9 +786,9 @@
                 
                 // 尝试从服务器获取最新的用户信息
                 try {
-                    const response = await fetch(`/api/auth/user/${user.userId}`, {
+                    const response = await fetch(`${window.API_BASE_URL}/auth/user/${user.userId}`, {
                         method: 'GET',
-                        headers: getHeaders()
+                        headers: window.getHeaders()
                     });
                     
                     const data = await response.json();
@@ -888,12 +877,9 @@
                 
                 try {
                     // 调用API更新用户信息
-                    const response = await fetch(`/api/auth/user/${userId}`, {
+                    const response = await fetch(`${window.API_BASE_URL}/auth/user/${userId}`, {
                         method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...getHeaders()
-                        },
+                        headers: window.getHeaders(),
                         body: JSON.stringify(updateData)
                     });
                     

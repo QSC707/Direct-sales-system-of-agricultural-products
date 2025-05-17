@@ -1,0 +1,15 @@
+{
+  "name": "farmdirectsales",
+  "version": "1.0.0",
+  "description": "## 项目说明 本项目是一个基于ASP.NET Core的农贸直销系统，采用前后端分离架构，提供产品展示、在线订购、订单管理等功能。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.9.0"
+  }
+}

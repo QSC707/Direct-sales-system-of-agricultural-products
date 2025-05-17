@@ -64,9 +64,9 @@ api.statistics = {
     getOverview: async () => {
         try {
             // 实际应调用后端API
-            /* const response = await fetch(`${API_BASE_URL}/statistics/overview`, {
+            /* const response = await fetch(`${window.API_BASE_URL}/statistics/overview`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             return handleResponse(response); */
             
@@ -90,9 +90,9 @@ api.statistics = {
     getTrends: async (period) => {
         try {
             // 实际应调用后端API
-            /* const response = await fetch(`${API_BASE_URL}/statistics/trends?period=${period}`, {
+            /* const response = await fetch(`${window.API_BASE_URL}/statistics/trends?period=${period}`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             return handleResponse(response); */
             
@@ -116,9 +116,9 @@ api.statistics = {
     getRanking: async (sortBy) => {
         try {
             // 实际应调用后端API
-            /* const response = await fetch(`${API_BASE_URL}/statistics/ranking?sortBy=${sortBy}`, {
+            /* const response = await fetch(`${window.API_BASE_URL}/statistics/ranking?sortBy=${sortBy}`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             return handleResponse(response); */
             

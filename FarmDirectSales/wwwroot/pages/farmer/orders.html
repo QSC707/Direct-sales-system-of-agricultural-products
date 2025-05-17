@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="../../css/style.css">
     <script src="../../js/dependencies.js"></script>
     <script src="../../js/auth.js"></script>
+    <!-- 添加Axios引用 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../../js/axios-config.js"></script>
 </head>
 <body>
     <!-- 导航栏 -->
@@ -370,58 +373,66 @@
         /**
          * 加载订单列表
          */
-        function loadOrders(page) {
+        async function loadOrders(page) {
             const status = $('#statusFilter').val();
             const keyword = $('#orderSearch').val();
             
             // 清空列表并显示加载提示
             $('#orderList').html('<tr><td colspan="6" class="text-center">正在加载订单...</td></tr>');
             
-            // 模拟从服务器获取数据，实际应从API获取
-            setTimeout(function() {
-                // 模拟数据
-                const orders = [
-                    {
-                        orderId: 1,
-                        orderNumber: 'ORD-2023-001',
-                        customerName: '张三',
-                        totalAmount: 156.00,
-                        createTime: '2023-10-15 14:30:25',
-                        status: '已完成'
-                    },
-                    {
-                        orderId: 2,
-                        orderNumber: 'ORD-2023-002',
-                        customerName: '李四',
-                        totalAmount: 89.50,
-                        createTime: '2023-10-16 10:15:12',
-                        status: '已发货'
-                    },
-                    {
-                        orderId: 3,
-                        orderNumber: 'ORD-2023-003',
-                        customerName: '王五',
-                        totalAmount: 210.00,
-                        createTime: '2023-10-17 16:45:33',
-                        status: '待发货'
-                    },
-                    {
-                        orderId: 4,
-                        orderNumber: 'ORD-2023-004',
-                        customerName: '赵六',
-                        totalAmount: 75.00,
-                        createTime: '2023-10-18 09:22:41',
-                        status: '待付款'
-                    },
-                    {
-                        orderId: 5,
-                        orderNumber: 'ORD-2023-005',
-                        customerName: '钱七',
-                        totalAmount: 120.50,
-                        createTime: '2023-10-19 11:10:05',
-                        status: '已取消'
-                    }
-                ];
+            try {
+                // 使用Axios从API获取数据
+                // 实际环境应调用API获取真实订单数据
+                // const response = await http.get(`/order/farmer/${user.userId}`);
+                // const orders = response.data;
+                
+                // 模拟数据，待后续实现真实API调用
+                const orders = await new Promise(resolve => {
+                    setTimeout(() => {
+                        resolve([
+                            {
+                                orderId: 1,
+                                orderNumber: 'ORD-2023-001',
+                                customerName: '张三',
+                                totalAmount: 156.00,
+                                createTime: '2023-10-15 14:30:25',
+                                status: '已完成'
+                            },
+                            {
+                                orderId: 2,
+                                orderNumber: 'ORD-2023-002',
+                                customerName: '李四',
+                                totalAmount: 89.50,
+                                createTime: '2023-10-16 10:15:12',
+                                status: '已发货'
+                            },
+                            {
+                                orderId: 3,
+                                orderNumber: 'ORD-2023-003',
+                                customerName: '王五',
+                                totalAmount: 210.00,
+                                createTime: '2023-10-17 16:45:33',
+                                status: '待发货'
+                            },
+                            {
+                                orderId: 4,
+                                orderNumber: 'ORD-2023-004',
+                                customerName: '赵六',
+                                totalAmount: 75.00,
+                                createTime: '2023-10-18 09:22:41',
+                                status: '待付款'
+                            },
+                            {
+                                orderId: 5,
+                                orderNumber: 'ORD-2023-005',
+                                customerName: '钱七',
+                                totalAmount: 120.50,
+                                createTime: '2023-10-19 11:10:05',
+                                status: '已取消'
+                            }
+                        ]);
+                    }, 500);
+                });
                 
                 // 筛选订单
                 let filteredOrders = orders;
@@ -441,7 +452,10 @@
                 
                 // 渲染分页（模拟，实际应根据API返回的总页数）
                 renderPagination(1, 1);
-            }, 500);
+            } catch (error) {
+                console.error('加载订单失败:', error);
+                $('#orderList').html(`<tr><td colspan="6" class="text-center text-danger">加载订单失败: ${error.message}</td></tr>`);
+            }
         }
         
         /**
@@ -542,113 +556,122 @@
         /**
          * 打开订单详情模态框
          */
-        function openOrderDetail(orderId) {
-            // 模拟获取订单详情，实际应从API获取
-            const orderDetail = {
-                orderId: orderId,
-                orderNumber: 'ORD-2023-00' + orderId,
-                createTime: '2023-10-' + (14 + orderId) + ' 14:30:25',
-                status: orderId === 3 ? '待发货' : (orderId === 2 ? '已发货' : '已完成'),
-                paymentMethod: '微信支付',
-                paymentTime: '2023-10-' + (14 + orderId) + ' 14:35:12',
-                customerName: ['张三', '李四', '王五', '赵六', '钱七'][orderId - 1],
-                customerPhone: '138****' + (1000 + orderId),
-                shippingAddress: '广东省广州市天河区珠江新城' + orderId + '号',
-                customerNotes: orderId % 2 === 0 ? '请在周末送货' : '',
-                subtotal: orderId * 50,
-                shippingFee: 10,
-                totalAmount: orderId * 50 + 10,
-                items: [
-                    {
-                        productName: '有机胡萝卜',
-                        price: 15.00,
-                        quantity: orderId,
-                        subtotal: 15.00 * orderId
-                    },
-                    {
-                        productName: '新鲜西红柿',
-                        price: 8.50,
-                        quantity: 2,
-                        subtotal: 8.50 * 2
-                    }
-                ],
-                logistics: orderId === 2 ? {
-                    company: '顺丰速运',
-                    trackingNumber: 'SF' + (1000000 + orderId),
-                    shippingTime: '2023-10-' + (15 + orderId) + ' 09:15:33'
-                } : null
-            };
-            
-            // 填充基本信息
-            $('#detailOrderNumber').text(orderDetail.orderNumber);
-            $('#detailCreateTime').text(orderDetail.createTime);
-            $('#detailStatus').html(getStatusBadge(orderDetail.status));
-            $('#detailPaymentMethod').text(orderDetail.paymentMethod);
-            $('#detailPaymentTime').text(orderDetail.paymentTime);
-            
-            // 填充客户信息
-            $('#detailCustomerName').text(orderDetail.customerName);
-            $('#detailCustomerPhone').text(orderDetail.customerPhone);
-            $('#detailShippingAddress').text(orderDetail.shippingAddress);
-            $('#detailCustomerNotes').text(orderDetail.customerNotes || '无');
-            
-            // 填充订单项目
-            const $orderItemsList = $('#orderItemsList');
-            $orderItemsList.empty();
-            
-            orderDetail.items.forEach(function(item) {
-                const row = `
-                    <tr>
-                        <td>${item.productName}</td>
-                        <td>¥${item.price.toFixed(2)}</td>
-                        <td>${item.quantity}</td>
-                        <td>¥${item.subtotal.toFixed(2)}</td>
-                    </tr>
-                `;
+        async function openOrderDetail(orderId) {
+            try {
+                // 实际环境应从API获取订单详情
+                // const response = await http.get(`/order/${orderId}`);
+                // const orderDetail = response.data;
                 
-                $orderItemsList.append(row);
-            });
-            
-            // 填充金额信息
-            $('#detailSubtotal').text('¥' + orderDetail.subtotal.toFixed(2));
-            $('#detailShippingFee').text('¥' + orderDetail.shippingFee.toFixed(2));
-            $('#detailTotalAmount').text('¥' + orderDetail.totalAmount.toFixed(2));
-            
-            // 显示/隐藏物流信息
-            if (orderDetail.logistics) {
-                $('#noDeliveryInfo').hide();
-                $('#deliveryInfo').show();
+                // 模拟获取订单详情，实际应从API获取
+                const orderDetail = {
+                    orderId: orderId,
+                    orderNumber: 'ORD-2023-00' + orderId,
+                    createTime: '2023-10-' + (14 + orderId) + ' 14:30:25',
+                    status: orderId === 3 ? '待发货' : (orderId === 2 ? '已发货' : '已完成'),
+                    paymentMethod: '微信支付',
+                    paymentTime: '2023-10-' + (14 + orderId) + ' 14:35:12',
+                    customerName: ['张三', '李四', '王五', '赵六', '钱七'][orderId - 1],
+                    customerPhone: '138****' + (1000 + orderId),
+                    shippingAddress: '广东省广州市天河区珠江新城' + orderId + '号',
+                    customerNotes: orderId % 2 === 0 ? '请在周末送货' : '',
+                    subtotal: orderId * 50,
+                    shippingFee: 10,
+                    totalAmount: orderId * 50 + 10,
+                    items: [
+                        {
+                            productName: '有机胡萝卜',
+                            price: 15.00,
+                            quantity: orderId,
+                            subtotal: 15.00 * orderId
+                        },
+                        {
+                            productName: '新鲜西红柿',
+                            price: 8.50,
+                            quantity: 2,
+                            subtotal: 8.50 * 2
+                        }
+                    ],
+                    logistics: orderId === 2 ? {
+                        company: '顺丰速运',
+                        trackingNumber: 'SF' + (1000000 + orderId),
+                        shippingTime: '2023-10-' + (15 + orderId) + ' 09:15:33'
+                    } : null
+                };
                 
-                $('#detailLogisticsCompany').text(orderDetail.logistics.company);
-                $('#detailTrackingNumber').text(orderDetail.logistics.trackingNumber);
-                $('#detailShippingTime').text(orderDetail.logistics.shippingTime);
-            } else {
-                $('#noDeliveryInfo').show();
-                $('#deliveryInfo').hide();
+                // 填充基本信息
+                $('#detailOrderNumber').text(orderDetail.orderNumber);
+                $('#detailCreateTime').text(orderDetail.createTime);
+                $('#detailStatus').html(getStatusBadge(orderDetail.status));
+                $('#detailPaymentMethod').text(orderDetail.paymentMethod);
+                $('#detailPaymentTime').text(orderDetail.paymentTime);
+                
+                // 填充客户信息
+                $('#detailCustomerName').text(orderDetail.customerName);
+                $('#detailCustomerPhone').text(orderDetail.customerPhone);
+                $('#detailShippingAddress').text(orderDetail.shippingAddress);
+                $('#detailCustomerNotes').text(orderDetail.customerNotes || '无');
+                
+                // 填充订单项目
+                const $orderItemsList = $('#orderItemsList');
+                $orderItemsList.empty();
+                
+                orderDetail.items.forEach(function(item) {
+                    const row = `
+                        <tr>
+                            <td>${item.productName}</td>
+                            <td>¥${item.price.toFixed(2)}</td>
+                            <td>${item.quantity}</td>
+                            <td>¥${item.subtotal.toFixed(2)}</td>
+                        </tr>
+                    `;
+                    
+                    $orderItemsList.append(row);
+                });
+                
+                // 填充金额信息
+                $('#detailSubtotal').text('¥' + orderDetail.subtotal.toFixed(2));
+                $('#detailShippingFee').text('¥' + orderDetail.shippingFee.toFixed(2));
+                $('#detailTotalAmount').text('¥' + orderDetail.totalAmount.toFixed(2));
+                
+                // 显示/隐藏物流信息
+                if (orderDetail.logistics) {
+                    $('#noDeliveryInfo').hide();
+                    $('#deliveryInfo').show();
+                    
+                    $('#detailLogisticsCompany').text(orderDetail.logistics.company);
+                    $('#detailTrackingNumber').text(orderDetail.logistics.trackingNumber);
+                    $('#detailShippingTime').text(orderDetail.logistics.shippingTime);
+                } else {
+                    $('#noDeliveryInfo').show();
+                    $('#deliveryInfo').hide();
+                }
+                
+                // 显示/隐藏操作按钮
+                $('#cancelOrderBtn').hide();
+                $('#shipOrderBtn').hide();
+                
+                // 只有待发货状态的订单可以发货
+                if (orderDetail.status === '待发货') {
+                    $('#shipOrderBtn').show().data('order-id', orderId);
+                }
+                
+                // 只有待付款状态的订单可以取消
+                if (orderDetail.status === '待付款') {
+                    $('#cancelOrderBtn').show().data('order-id', orderId);
+                }
+                
+                // 绑定发货按钮点击事件
+                $('#shipOrderBtn').off('click').on('click', function() {
+                    $('#orderDetailModal').modal('hide');
+                    openShipModal($(this).data('order-id'));
+                });
+                
+                // 打开模态框
+                $('#orderDetailModal').modal('show');
+            } catch (error) {
+                console.error('获取订单详情失败:', error);
+                alert(`获取订单详情失败: ${error.message}`);
             }
-            
-            // 显示/隐藏操作按钮
-            $('#cancelOrderBtn').hide();
-            $('#shipOrderBtn').hide();
-            
-            // 只有待发货状态的订单可以发货
-            if (orderDetail.status === '待发货') {
-                $('#shipOrderBtn').show().data('order-id', orderId);
-            }
-            
-            // 只有待付款状态的订单可以取消
-            if (orderDetail.status === '待付款') {
-                $('#cancelOrderBtn').show().data('order-id', orderId);
-            }
-            
-            // 绑定发货按钮点击事件
-            $('#shipOrderBtn').off('click').on('click', function() {
-                $('#orderDetailModal').modal('hide');
-                openShipModal($(this).data('order-id'));
-            });
-            
-            // 打开模态框
-            $('#orderDetailModal').modal('show');
         }
         
         /**
@@ -668,7 +691,7 @@
         /**
          * 订单发货处理
          */
-        function shipOrder() {
+        async function shipOrder() {
             const orderId = $('#shipOrderId').val();
             const logisticsCompany = $('#logisticsCompany').val();
             const trackingNumber = $('#trackingNumber').val();
@@ -688,17 +711,25 @@
                 shippingNotes: shippingNotes
             };
             
-            // 模拟API请求，实际应发送到服务器
-            console.log('发货数据:', shipData);
-            
-            // 关闭模态框
-            $('#shipModal').modal('hide');
-            
-            // 显示成功提示
-            alert('订单已发货');
-            
-            // 重新加载订单列表
-            loadOrders(1);
+            try {
+                // 使用Axios发送请求，实际应调用相关API
+                // await http.put(`/order/${orderId}/ship`, shipData);
+                
+                // 模拟API请求
+                console.log('发货数据:', shipData);
+                
+                // 关闭模态框
+                $('#shipModal').modal('hide');
+                
+                // 显示成功提示
+                alert('订单已发货');
+                
+                // 重新加载订单列表
+                loadOrders(1);
+            } catch (error) {
+                console.error('订单发货失败:', error);
+                alert(`订单发货失败: ${error.message}`);
+            }
         }
         
         /**

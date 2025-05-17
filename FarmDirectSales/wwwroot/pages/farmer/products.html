@@ -6,6 +6,12 @@
     <title>产品管理 - 农产品直销平台</title>
     <link rel="stylesheet" href="../../css/style.css">
     <script src="../../js/dependencies.js"></script>
+    <!-- 引入Axios库 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- API调用相关 -->
+    <script src="../../js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="../../js/axios-config.js"></script>
     <script src="../../js/auth.js"></script>
 </head>
 <body>
@@ -378,24 +384,22 @@
         /**
          * 加载产品列表
          */
-        function loadProducts() {
-            const token = localStorage.getItem('token');
-            const userId = localStorage.getItem('userId');
-            
-            $.ajax({
-                url: '/api/products/farmer/' + userId,
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(data) {
-                    renderProductList(data);
-                },
-                error: function(xhr) {
-                    console.error('获取产品列表失败', xhr);
-                    alert('获取产品列表失败: ' + (xhr.responseJSON?.message || xhr.statusText));
+        async function loadProducts() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const userId = user.userId;
+                
+                if (!userId) {
+                    throw new Error('未找到用户ID');
                 }
-            });
+                
+                // 使用Axios获取农户产品
+                const result = await http.get(`/products/farmer/${userId}`);
+                renderProductList(result.data);
+            } catch (error) {
+                console.error('获取产品列表失败', error);
+                alert('获取产品列表失败: ' + (error.response?.data?.message || error.message));
+            }
         }
         
         /**
@@ -457,49 +461,42 @@
         /**
          * 打开编辑产品模态框
          */
-        function openEditProductModal(productId) {
-            const token = localStorage.getItem('token');
-            
-            // 获取产品详情
-            $.ajax({
-                url: '/api/products/' + productId,
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(product) {
-                    // 填充表单
-                    $('#editProductId').val(product.productId);
-                    $('#editProductName').val(product.name);
-                    $('#editProductCategory').val(product.category);
-                    $('#editProductPrice').val(product.price);
-                    $('#editProductStock').val(product.stock);
-                    $('#editProductDescription').val(product.description);
-                    $('#editProductSpecification').val(product.specification);
-                    $('#editIsOrganic').prop('checked', product.isOrganic);
-                    
-                    if (product.harvestDate) {
-                        $('#editHarvestDate').val(product.harvestDate.substring(0, 10));
-                    }
-                    
-                    $('#editShelfLife').val(product.shelfLife);
-                    $('#editProductStatus').val(product.status);
-                    
-                    // 显示产品图片
-                    if (product.imageUrl) {
-                        $('#editImagePreview').attr('src', product.imageUrl);
-                    } else {
-                        $('#editImagePreview').attr('src', '../../img/no-image.png');
-                    }
-                    
-                    // 打开模态框
-                    $('#editProductModal').modal('show');
-                },
-                error: function(xhr) {
-                    console.error('获取产品详情失败', xhr);
-                    alert('获取产品详情失败: ' + (xhr.responseJSON?.message || xhr.statusText));
+        async function openEditProductModal(productId) {
+            try {
+                // 使用Axios获取产品详情
+                const result = await http.get(`/products/${productId}`);
+                const product = result.data;
+                
+                // 填充表单
+                $('#editProductId').val(product.productId);
+                $('#editProductName').val(product.name);
+                $('#editProductCategory').val(product.category);
+                $('#editProductPrice').val(product.price);
+                $('#editProductStock').val(product.stock);
+                $('#editProductDescription').val(product.description);
+                $('#editProductSpecification').val(product.specification);
+                $('#editIsOrganic').prop('checked', product.isOrganic);
+                
+                if (product.harvestDate) {
+                    $('#editHarvestDate').val(product.harvestDate.substring(0, 10));
                 }
-            });
+                
+                $('#editShelfLife').val(product.shelfLife);
+                $('#editProductStatus').val(product.status);
+                
+                // 显示产品图片
+                if (product.imageUrl) {
+                    $('#editImagePreview').attr('src', product.imageUrl);
+                } else {
+                    $('#editImagePreview').attr('src', '../../img/no-image.png');
+                }
+                
+                // 打开模态框
+                $('#editProductModal').modal('show');
+            } catch (error) {
+                console.error('获取产品详情失败', error);
+                alert('获取产品详情失败: ' + (error.response?.data?.message || error.message));
+            }
         }
         
         /**
@@ -514,24 +511,16 @@
         /**
          * 删除产品
          */
-        function deleteProduct(productId) {
-            const token = localStorage.getItem('token');
-            
-            $.ajax({
-                url: '/api/products/' + productId,
-                type: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function() {
-                    alert('产品删除成功');
-                    loadProducts(); // 重新加载产品列表
-                },
-                error: function(xhr) {
-                    console.error('删除产品失败', xhr);
-                    alert('删除产品失败: ' + (xhr.responseJSON?.message || xhr.statusText));
-                }
-            });
+        async function deleteProduct(productId) {
+            try {
+                // 使用Axios删除产品
+                await http.delete(`/products/${productId}`);
+                alert('产品删除成功');
+                await loadProducts(); // 重新加载产品列表
+            } catch (error) {
+                console.error('删除产品失败', error);
+                alert('删除产品失败: ' + (error.response?.data?.message || error.message));
+            }
         }
         
         /**

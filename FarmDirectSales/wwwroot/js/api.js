@@ -3,14 +3,16 @@
  * 统一管理所有与后端的接口交互
  */
 
-// API基础URL
-const API_BASE_URL = 'http://localhost:5004/api';
+// API基础URL - 使用全局window对象属性，避免重复声明
+if (typeof window.API_BASE_URL === 'undefined') {
+    window.API_BASE_URL = 'http://localhost:5004/api';
+}
 
-// 获取存储的token
-const getToken = () => localStorage.getItem('token');
+// 获取存储的token - 设置为全局函数，避免重复声明
+window.getToken = () => localStorage.getItem('token');
 
-// 统一处理请求头
-const getHeaders = () => {
+// 统一处理请求头 - 设置为全局函数，避免重复声明
+window.getHeaders = () => {
     const headers = {
         'Content-Type': 'application/json'
     };
@@ -23,8 +25,8 @@ const getHeaders = () => {
     return headers;
 };
 
-// 打印登录信息到控制台（调试用）
-const printLoginInfo = () => {
+// 打印登录信息到控制台（调试用）- 设置为全局函数，避免重复声明
+window.printLoginInfo = () => {
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
     console.log('=== 登录信息 ===');
@@ -110,7 +112,7 @@ const resetLoginStatus = () => {
 const api = {
     // 调试功能
     checkLoginStatus,
-    printLoginInfo,
+    printLoginInfo: window.printLoginInfo,
     resetLoginStatus,
     
     // 用户认证相关
@@ -118,7 +120,7 @@ const api = {
         // 登录
         login: async (username, password) => {
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                const response = await fetch(`${window.API_BASE_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -176,7 +178,7 @@ const api = {
         // 注册
         register: async (userData) => {
             console.log('注册数据:', userData); // 添加日志
-            const response = await fetch(`${API_BASE_URL}/auth/register`, {
+            const response = await fetch(`${window.API_BASE_URL}/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -206,9 +208,9 @@ const api = {
     products: {
         // 获取产品列表
         getAll: async () => {
-            const response = await fetch(`${API_BASE_URL}/product`, {
+            const response = await fetch(`${window.API_BASE_URL}/product`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -216,9 +218,9 @@ const api = {
         
         // 获取产品详情
         getById: async (productId) => {
-            const response = await fetch(`${API_BASE_URL}/product/${productId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -226,9 +228,9 @@ const api = {
         
         // 添加产品
         add: async (productData) => {
-            const response = await fetch(`${API_BASE_URL}/product`, {
+            const response = await fetch(`${window.API_BASE_URL}/product`, {
                 method: 'POST',
-                headers: getHeaders(),
+                headers: window.getHeaders(),
                 body: JSON.stringify(productData)
             });
             
@@ -237,9 +239,9 @@ const api = {
         
         // 更新产品
         update: async (productId, productData) => {
-            const response = await fetch(`${API_BASE_URL}/product/${productId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
                 method: 'PUT',
-                headers: getHeaders(),
+                headers: window.getHeaders(),
                 body: JSON.stringify(productData)
             });
             
@@ -248,9 +250,9 @@ const api = {
         
         // 删除产品
         delete: async (productId) => {
-            const response = await fetch(`${API_BASE_URL}/product/${productId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
                 method: 'DELETE',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -266,9 +268,9 @@ const api = {
                 throw new Error('用户未登录');
             }
             
-            const response = await fetch(`${API_BASE_URL}/order/user/${user.userId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/order/user/${user.userId}`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -281,9 +283,9 @@ const api = {
                 throw new Error('用户未登录');
             }
             
-            const response = await fetch(`${API_BASE_URL}/order/farmer/${user.userId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/order/farmer/${user.userId}`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -291,9 +293,9 @@ const api = {
         
         // 创建订单
         create: async (orderData) => {
-            const response = await fetch(`${API_BASE_URL}/order`, {
+            const response = await fetch(`${window.API_BASE_URL}/order`, {
                 method: 'POST',
-                headers: getHeaders(),
+                headers: window.getHeaders(),
                 body: JSON.stringify(orderData)
             });
             
@@ -302,9 +304,9 @@ const api = {
         
         // 获取订单详情
         getById: async (orderId) => {
-            const response = await fetch(`${API_BASE_URL}/order/${orderId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/order/${orderId}`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -317,9 +319,9 @@ const api = {
                 throw new Error('用户未登录');
             }
             
-            const response = await fetch(`${API_BASE_URL}/order/${orderId}/pay`, {
+            const response = await fetch(`${window.API_BASE_URL}/order/${orderId}/pay`, {
                 method: 'PUT',
-                headers: getHeaders(),
+                headers: window.getHeaders(),
                 body: JSON.stringify({ userId: user.userId })
             });
             
@@ -333,9 +335,9 @@ const api = {
                 throw new Error('用户未登录');
             }
             
-            const response = await fetch(`${API_BASE_URL}/order/${orderId}/complete`, {
+            const response = await fetch(`${window.API_BASE_URL}/order/${orderId}/complete`, {
                 method: 'PUT',
-                headers: getHeaders(),
+                headers: window.getHeaders(),
                 body: JSON.stringify({ userId: user.userId })
             });
             
@@ -349,9 +351,9 @@ const api = {
                 throw new Error('用户未登录');
             }
             
-            const response = await fetch(`${API_BASE_URL}/order/${orderId}/cancel`, {
+            const response = await fetch(`${window.API_BASE_URL}/order/${orderId}/cancel`, {
                 method: 'PUT',
-                headers: getHeaders(),
+                headers: window.getHeaders(),
                 body: JSON.stringify({ userId: user.userId })
             });
             
@@ -406,9 +408,9 @@ const api = {
     reviews: {
         // 获取产品评价
         getByProduct: async (productId) => {
-            const response = await fetch(`${API_BASE_URL}/review/product/${productId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/review/product/${productId}`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -416,9 +418,9 @@ const api = {
         
         // 获取用户评价
         getByUser: async () => {
-            const response = await fetch(`${API_BASE_URL}/review/user`, {
+            const response = await fetch(`${window.API_BASE_URL}/review/user`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -426,9 +428,9 @@ const api = {
         
         // 添加评价
         add: async (reviewData) => {
-            const response = await fetch(`${API_BASE_URL}/review`, {
+            const response = await fetch(`${window.API_BASE_URL}/review`, {
                 method: 'POST',
-                headers: getHeaders(),
+                headers: window.getHeaders(),
                 body: JSON.stringify(reviewData)
             });
             
@@ -437,9 +439,9 @@ const api = {
         
         // 更新评价
         update: async (reviewId, reviewData) => {
-            const response = await fetch(`${API_BASE_URL}/review/${reviewId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/review/${reviewId}`, {
                 method: 'PUT',
-                headers: getHeaders(),
+                headers: window.getHeaders(),
                 body: JSON.stringify(reviewData)
             });
             
@@ -448,9 +450,9 @@ const api = {
         
         // 删除评价
         delete: async (reviewId) => {
-            const response = await fetch(`${API_BASE_URL}/review/${reviewId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/review/${reviewId}`, {
                 method: 'DELETE',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -461,9 +463,9 @@ const api = {
     statistics: {
         // 获取总览数据
         getOverview: async () => {
-            const response = await fetch(`${API_BASE_URL}/statistics/overview`, {
+            const response = await fetch(`${window.API_BASE_URL}/statistics/overview`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -471,9 +473,9 @@ const api = {
         
         // 获取销售趋势
         getTrends: async (period) => {
-            const response = await fetch(`${API_BASE_URL}/statistics/trends?period=${period}`, {
+            const response = await fetch(`${window.API_BASE_URL}/statistics/trends?period=${period}`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -481,9 +483,9 @@ const api = {
         
         // 获取销售排名
         getRanking: async (sortBy) => {
-            const response = await fetch(`${API_BASE_URL}/statistics/ranking?sortBy=${sortBy}`, {
+            const response = await fetch(`${window.API_BASE_URL}/statistics/ranking?sortBy=${sortBy}`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -499,9 +501,9 @@ const api = {
                 throw new Error('用户未登录');
             }
             
-            const response = await fetch(`${API_BASE_URL}/cart/user/${user.userId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/cart/user/${user.userId}`, {
                 method: 'GET',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);
@@ -514,9 +516,9 @@ const api = {
                 throw new Error('用户未登录');
             }
             
-            const response = await fetch(`${API_BASE_URL}/cart`, {
+            const response = await fetch(`${window.API_BASE_URL}/cart`, {
                 method: 'POST',
-                headers: getHeaders(),
+                headers: window.getHeaders(),
                 body: JSON.stringify({
                     userId: user.userId,
                     productId,
@@ -534,9 +536,9 @@ const api = {
                 throw new Error('用户未登录');
             }
             
-            const response = await fetch(`${API_BASE_URL}/cart/${cartItemId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/cart/${cartItemId}`, {
                 method: 'PUT',
-                headers: getHeaders(),
+                headers: window.getHeaders(),
                 body: JSON.stringify({
                     userId: user.userId,
                     quantity
@@ -553,9 +555,9 @@ const api = {
                 throw new Error('用户未登录');
             }
             
-            const response = await fetch(`${API_BASE_URL}/cart/${cartItemId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/cart/${cartItemId}`, {
                 method: 'DELETE',
-                headers: getHeaders(),
+                headers: window.getHeaders(),
                 body: JSON.stringify({
                     userId: user.userId
                 })
@@ -571,9 +573,9 @@ const api = {
                 throw new Error('用户未登录');
             }
             
-            const response = await fetch(`${API_BASE_URL}/cart/clear/${user.userId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/cart/clear/${user.userId}`, {
                 method: 'DELETE',
-                headers: getHeaders()
+                headers: window.getHeaders()
             });
             
             return handleResponse(response);

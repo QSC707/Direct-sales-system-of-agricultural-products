@@ -6,6 +6,12 @@
     <title>管理中心 - 农产品直销平台</title>
     <link rel="stylesheet" href="../../css/style.css">
     <script src="../../js/dependencies.js"></script>
+    <!-- 引入Axios库 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- API调用相关 -->
+    <script src="../../js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="../../js/axios-config.js"></script>
     <script src="../../js/auth.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -325,70 +331,63 @@
         /**
          * 加载仪表盘数据
          */
-        function loadDashboardData() {
-            const token = localStorage.getItem('token');
-            
-            // 加载统计数据
-            $.ajax({
-                url: '/api/statistics/summary',
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(data) {
-                    // 更新统计卡片
-                    $('#totalUsers').text(data.totalUsers || 0);
-                    $('#totalFarmers').text(data.totalFarmers || 0);
-                    $('#totalProducts').text(data.totalProducts || 0);
-                    $('#totalOrders').text(data.totalOrders || 0);
-                    
-                    // 绘制销售额图表
-                    if (data.salesData) {
-                        drawSalesChart(data.salesData);
-                    }
-                    
-                    // 绘制产品类别分布图表
-                    if (data.categoryData) {
-                        drawCategoryChart(data.categoryData);
-                    }
-                },
-                error: function(xhr) {
-                    console.error('加载统计数据失败', xhr);
-                    alert('加载统计数据失败: ' + (xhr.responseJSON?.message || xhr.statusText));
+        async function loadDashboardData() {
+            try {
+                // 加载统计数据
+                const result = await http.get('/statistics/summary');
+                const data = result.data;
+                
+                // 更新统计卡片
+                $('#totalUsers').text(data.totalUsers || 0);
+                $('#totalFarmers').text(data.totalFarmers || 0);
+                $('#totalProducts').text(data.totalProducts || 0);
+                $('#totalOrders').text(data.totalOrders || 0);
+                
+                // 绘制销售额图表
+                if (data.salesData) {
+                    drawSalesChart(data.salesData);
                 }
-            });
-            
-            // 加载最近活动
-            $.ajax({
-                url: '/api/logs?limit=10',
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(activities) {
-                    renderRecentActivities(activities);
-                },
-                error: function(xhr) {
-                    console.error('加载活动记录失败', xhr);
-                    $('#recentActivitiesList').html('<tr><td colspan="3" class="text-center text-danger">加载活动记录失败</td></tr>');
+                
+                // 绘制产品类别分布图表
+                if (data.categoryData) {
+                    drawCategoryChart(data.categoryData);
                 }
-            });
+                
+                // 并行加载其他数据
+                loadRecentActivities();
+                loadRecentOrders();
+            } catch (error) {
+                console.error('加载统计数据失败', error);
+                alert('加载统计数据失败: ' + (error.response?.data?.message || error.message));
+            }
             
-            // 加载最新订单
-            $.ajax({
-                url: '/api/orders/recent?limit=10',
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(orders) {
-                    renderRecentOrders(orders);
-                },
-                error: function(xhr) {
-                    console.error('加载订单数据失败', xhr);
-                    $('#recentOrdersList').html('<tr><td colspan="4" class="text-center text-danger">加载订单数据失败</td></tr>');
-                }
-            });
+        }
+        
+        /**
+         * 加载最近活动记录
+         */
+        async function loadRecentActivities() {
+            try {
+                const result = await http.get('/logs', { limit: 10 });
+                renderRecentActivities(result.data);
+            } catch (error) {
+                console.error('加载活动记录失败', error);
+                $('#recentActivitiesList').html('<tr><td colspan="3" class="text-center text-danger">加载活动记录失败</td></tr>');
+            }
+            
+        }
+        
+        /**
+         * 加载最近订单
+         */
+        async function loadRecentOrders() {
+            try {
+                const result = await http.get('/orders/recent', { limit: 10 });
+                renderRecentOrders(result.data);
+            } catch (error) {
+                console.error('加载订单数据失败', error);
+                $('#recentOrdersList').html('<tr><td colspan="4" class="text-center text-danger">加载订单数据失败</td></tr>');
+            }
         }
         
         /**

@@ -11,8 +11,17 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <!-- 自定义样式 -->
     <link href="/css/style.css" rel="stylesheet">
-    <!-- 引入auth.js -->
+    
+    <!-- JS库按正确顺序引入 -->
+    <!-- 首先引入Axios库 -->
+    <script src="/js/lib/axios.min.js"></script>
+    <!-- 然后引入auth.js -->
     <script src="/js/auth.js"></script>
+    <!-- 然后引入API基础配置 -->
+    <script src="/js/api.js"></script>
+    <!-- 最后引入Axios配置 -->
+    <script src="/js/axios-config.js"></script>
+    
     <style>
         .order-card {
             margin-bottom: 20px;
@@ -133,7 +142,7 @@
         </div>
         
         <!-- 订单详情模态框 -->
-        <div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
+        <div class="modal fade" id="orderDetailModal" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -197,8 +206,7 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- API 调用 -->
-    <script src="/js/api.js"></script>
+    <!-- API调用已在头部引入 -->
     
     <!-- 订单页面逻辑 -->
     <script>
@@ -227,9 +235,15 @@
             document.getElementById('confirmReceiptBtn').addEventListener('click', confirmReceipt);
             document.getElementById('cancelOrderBtn').addEventListener('click', cancelOrder);
             
+            // 记录打开模态框的触发元素
+            let lastFocusedElement = null;
+            
             // 监听模态框打开事件
             const orderDetailModal = document.getElementById('orderDetailModal');
             orderDetailModal.addEventListener('show.bs.modal', function (event) {
+                // 保存触发模态框的元素，以便关闭后恢复焦点
+                lastFocusedElement = event.relatedTarget;
+                
                 const button = event.relatedTarget;
                 const orderId = button.getAttribute('data-order-id');
                 currentOrder = parseInt(orderId);
@@ -239,6 +253,20 @@
                 
                 // 根据订单状态显示/隐藏按钮
                 updateModalButtons(findOrderById(currentOrder));
+            });
+            
+            // 监听模态框关闭前的事件，处理焦点问题
+            orderDetailModal.addEventListener('hide.bs.modal', function (event) {
+                // 在模态框关闭前将焦点移开，避免aria-hidden警告
+                document.activeElement.blur();
+            });
+            
+            // 监听模态框完全关闭后的事件
+            orderDetailModal.addEventListener('hidden.bs.modal', function (event) {
+                // 将焦点返回到打开模态框的元素
+                if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+                    lastFocusedElement.focus();
+                }
             });
         });
         
@@ -279,16 +307,11 @@
                     throw new Error('用户ID不存在');
                 }
                 
-                // 调用API获取用户订单
-                const response = await fetch(`${API_BASE_URL}/order/user/${userId}`, {
-                    method: 'GET',
-                    headers: getHeaders()
-                });
+                // 使用Axios通过http接口获取用户订单
+                const result = await http.get(`/order/user/${userId}`);
                 
-                const data = await handleResponse(response);
-                
-                if (data.code === 200) {
-                    userOrders = data.data;
+                if (result.code === 200) {
+                    userOrders = result.data;
                     
                     if (userOrders.length === 0) {
                         // 没有订单
@@ -299,7 +322,7 @@
                         renderOrders(userOrders);
                     }
                 } else {
-                    throw new Error(data.message || '获取订单失败');
+                    throw new Error(result.message || '获取订单失败');
                 }
             } catch (error) {
                 console.error('加载订单失败:', error);
@@ -453,17 +476,13 @@
         // 加载订单详情
         async function loadOrderDetail(orderId) {
             try {
-                const response = await fetch(`${API_BASE_URL}/order/${orderId}`, {
-                    method: 'GET',
-                    headers: getHeaders()
-                });
+                // 使用Axios通过http接口获取订单详情
+                const result = await http.get(`/order/${orderId}`);
                 
-                const data = await handleResponse(response);
-                
-                if (data.code === 200) {
-                    renderOrderDetail(data.data);
+                if (result.code === 200) {
+                    renderOrderDetail(result.data);
                 } else {
-                    throw new Error(data.message || '获取订单详情失败');
+                    throw new Error(result.message || '获取订单详情失败');
                 }
             } catch (error) {
                 console.error('加载订单详情失败:', error);
@@ -650,24 +669,17 @@
             
             try {
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const result = await http.put(`/order/${orderId}/pay`, { userId: user.userId });
                 
-                const response = await fetch(`${API_BASE_URL}/order/${orderId}/pay`, {
-                    method: 'PUT',
-                    headers: getHeaders(),
-                    body: JSON.stringify({ userId: user.userId })
-                });
-                
-                const data = await handleResponse(response);
-                
-                if (data.code === 200) {
+                if (result.code === 200) {
                     alert('支付成功');
                     // 重新加载订单列表
                     loadUserOrders();
                 } else {
-                    throw new Error(data.message || '支付失败');
+                    throw new Error(result.message || '支付失败');
                 }
             } catch (error) {
-                console.error('支付订单失败:', error);
+                console.error('支付失败:', error);
                 alert(`支付失败: ${error.message}`);
             }
         }
@@ -685,27 +697,20 @@
         
         // 直接确认收货
         async function confirmReceiptDirect(orderId) {
-            if (!confirm('确认已收到商品吗？')) {
+            if (!confirm('确定要确认收货吗？确认后订单将完成。')) {
                 return;
             }
             
             try {
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const result = await http.put(`/order/${orderId}/complete`, { userId: user.userId });
                 
-                const response = await fetch(`${API_BASE_URL}/order/${orderId}/complete`, {
-                    method: 'PUT',
-                    headers: getHeaders(),
-                    body: JSON.stringify({ userId: user.userId })
-                });
-                
-                const data = await handleResponse(response);
-                
-                if (data.code === 200) {
+                if (result.code === 200) {
                     alert('确认收货成功');
                     // 重新加载订单列表
                     loadUserOrders();
                 } else {
-                    throw new Error(data.message || '确认收货失败');
+                    throw new Error(result.message || '确认收货失败');
                 }
             } catch (error) {
                 console.error('确认收货失败:', error);
@@ -713,21 +718,24 @@
             }
         }
         
-        // 添加直接取消订单的函数
+        // 取消订单
         async function cancelOrderDirect(orderId) {
             if (!confirm('确定要取消此订单吗？')) {
                 return;
             }
             
             try {
-                const response = await api.orders.cancelOrder(orderId);
+                // 使用Axios通过http接口取消订单
+                const result = await http.put(`/order/${orderId}/cancel`, {
+                    userId: JSON.parse(localStorage.getItem('user') || '{}').userId
+                });
                 
-                if (response.code === 200) {
+                if (result.code === 200) {
                     alert('取消订单成功');
                     // 重新加载订单列表
                     loadUserOrders();
                 } else {
-                    throw new Error(response.message || '取消订单失败');
+                    throw new Error(result.message || '取消订单失败');
                 }
             } catch (error) {
                 console.error('取消订单失败:', error);
@@ -735,8 +743,9 @@
             }
         }
         
-        // 修改模态框取消订单函数
+        // 从订单详情中取消订单
         async function cancelOrder() {
+            const currentOrder = document.getElementById('orderDetailModal').getAttribute('data-current-order');
             if (!currentOrder) return;
             
             if (!confirm('确定要取消此订单吗？')) {
@@ -744,17 +753,19 @@
             }
             
             try {
-                const response = await api.orders.cancelOrder(currentOrder);
+                const result = await http.put(`/order/${currentOrder}/cancel`, {
+                    userId: JSON.parse(localStorage.getItem('user') || '{}').userId
+                });
                 
-                if (response.code === 200) {
+                if (result.code === 200) {
                     alert('取消订单成功');
                     // 关闭模态框
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('orderDetailModal'));
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('orderDetailModal'));
                     modal.hide();
                     // 重新加载订单列表
                     loadUserOrders();
                 } else {
-                    throw new Error(response.message || '取消订单失败');
+                    throw new Error(result.message || '取消订单失败');
                 }
             } catch (error) {
                 console.error('取消订单失败:', error);

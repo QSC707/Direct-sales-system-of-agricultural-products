@@ -6,6 +6,12 @@
     <title>农场资料管理 - 农产品直销平台</title>
     <link rel="stylesheet" href="../../css/style.css">
     <script src="../../js/dependencies.js"></script>
+    <!-- 引入Axios库 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- API调用相关 -->
+    <script src="../../js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="../../js/axios-config.js"></script>
     <script src="../../js/auth.js"></script>
 </head>
 <body>
@@ -196,122 +202,122 @@
         /**
          * 加载农户资料
          */
-        function loadFarmProfile() {
-            const token = localStorage.getItem('token');
-            const userId = localStorage.getItem('userId');
-            
-            $.ajax({
-                url: '/api/users/' + userId,
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                success: function(data) {
-                    // 如果用户有农户资料，则填充表单
-                    if (data.farmerProfile) {
-                        $('#farmName').val(data.farmerProfile.farmName);
-                        $('#location').val(data.farmerProfile.location);
-                        $('#description').val(data.farmerProfile.description);
-                        $('#productCategory').val(data.farmerProfile.productCategory);
-                        $('#licenseNumber').val(data.farmerProfile.licenseNumber);
-                        $('#establishedDate').val(data.farmerProfile.establishedDate ? data.farmerProfile.establishedDate.substring(0, 10) : '');
-                        
-                        // 更新LOGO预览
-                        if (data.farmerProfile.logoUrl) {
-                            $('#logoPreview').attr('src', data.farmerProfile.logoUrl);
-                        }
-                    }
-                },
-                error: function(xhr) {
-                    console.error('获取用户信息失败', xhr);
-                    alert('获取用户信息失败: ' + (xhr.responseJSON?.message || xhr.statusText));
+        async function loadFarmProfile() {
+            try {
+                const userId = JSON.parse(localStorage.getItem('user') || '{}').userId;
+                if (!userId) {
+                    throw new Error('未找到用户ID');
                 }
-            });
+                
+                // 使用Axios通过http接口获取用户信息
+                const result = await http.get(`/users/${userId}`);
+                const data = result.data;
+                
+                // 如果用户有农户资料，则填充表单
+                if (data.farmerProfile) {
+                    $('#farmName').val(data.farmerProfile.farmName);
+                    $('#location').val(data.farmerProfile.location);
+                    $('#description').val(data.farmerProfile.description);
+                    $('#productCategory').val(data.farmerProfile.productCategory);
+                    $('#licenseNumber').val(data.farmerProfile.licenseNumber);
+                    $('#establishedDate').val(data.farmerProfile.establishedDate ? data.farmerProfile.establishedDate.substring(0, 10) : '');
+                    
+                    // 更新LOGO预览
+                    if (data.farmerProfile.logoUrl) {
+                        $('#logoPreview').attr('src', data.farmerProfile.logoUrl);
+                    }
+                }
+            } catch (error) {
+                console.error('获取用户信息失败', error);
+                alert('获取用户信息失败: ' + (error.response?.data?.message || error.message));
+            }
         }
         
         /**
          * 保存农户资料
          */
-        function saveFarmerProfile() {
-            const token = localStorage.getItem('token');
-            const userId = localStorage.getItem('userId');
-            
-            // 收集表单数据
-            const farmData = {
-                farmName: $('#farmName').val(),
-                location: $('#location').val(),
-                description: $('#description').val(),
-                productCategory: $('#productCategory').val(),
-                licenseNumber: $('#licenseNumber').val(),
-                establishedDate: $('#establishedDate').val()
-            };
-            
-            // 首先上传Logo（如果有选择文件）
-            const logoFile = $('#logoUpload')[0].files[0];
-            if (logoFile) {
-                uploadLogo(logoFile, function(logoUrl) {
-                    // 上传Logo成功后，保存农场资料
-                    farmData.logoUrl = logoUrl;
-                    saveProfileData(userId, token, farmData);
-                });
-            } else {
-                // 没有选择新Logo，直接保存农场资料
-                saveProfileData(userId, token, farmData);
+        async function saveFarmerProfile() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const userId = user.userId;
+                
+                if (!userId) {
+                    throw new Error('未找到用户ID');
+                }
+                
+                // 收集表单数据
+                const farmData = {
+                    farmName: $('#farmName').val(),
+                    location: $('#location').val(),
+                    description: $('#description').val(),
+                    productCategory: $('#productCategory').val(),
+                    licenseNumber: $('#licenseNumber').val(),
+                    establishedDate: $('#establishedDate').val()
+                };
+                
+                // 首先上传Logo（如果有选择文件）
+                const logoFile = $('#logoUpload')[0].files[0];
+                if (logoFile) {
+                    try {
+                        // 上传Logo成功后，保存农场资料
+                        const logoUrl = await uploadLogo(logoFile);
+                        farmData.logoUrl = logoUrl;
+                    } catch (error) {
+                        // 上传失败但不阻止保存其他资料
+                        console.warn('Logo上传失败，将继续保存其他农场资料');
+                    }
+                }
+                
+                // 保存农场资料
+                await saveProfileData(userId, farmData);
+            } catch (error) {
+                console.error('保存过程中出错:', error);
+                alert('保存过程中出错: ' + error.message);
             }
         }
         
         /**
          * 上传农场Logo
          */
-        function uploadLogo(file, callback) {
-            const token = localStorage.getItem('token');
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            $.ajax({
-                url: '/api/upload/image',
-                type: 'POST',
-                data: formData,
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                contentType: false,
-                processData: false,
-                success: function(data) {
-                    callback(data.url);
-                },
-                error: function(xhr) {
-                    console.error('上传Logo失败', xhr);
-                    alert('上传Logo失败: ' + (xhr.responseJSON?.message || xhr.statusText));
-                }
-            });
+        async function uploadLogo(file) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                // 使用Axios上传文件
+                const response = await axios.post('/api/upload/image', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `Bearer ${window.getToken()}`
+                    }
+                });
+                
+                return response.data.url;
+            } catch (error) {
+                console.error('上传Logo失败', error);
+                alert('上传Logo失败: ' + (error.response?.data?.message || error.message));
+                throw error;
+            }
         }
         
         /**
          * 保存农场资料数据
          */
-        function saveProfileData(userId, token, farmData) {
-            $.ajax({
-                url: '/api/farmer/profile',
-                type: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                },
-                data: JSON.stringify({
+        async function saveProfileData(userId, farmData) {
+            try {
+                // 使用Axios发送请求
+                const response = await http.post('/farmer/profile', {
                     userId: userId,
                     ...farmData
-                }),
-                success: function(data) {
-                    alert('农场资料保存成功');
-                    // 重新加载农场资料
-                    loadFarmProfile();
-                },
-                error: function(xhr) {
-                    console.error('保存农场资料失败', xhr);
-                    alert('保存农场资料失败: ' + (xhr.responseJSON?.message || xhr.statusText));
-                }
-            });
+                });
+                
+                alert('农场资料保存成功');
+                // 重新加载农场资料
+                await loadFarmProfile();
+            } catch (error) {
+                console.error('保存农场资料失败', error);
+                alert('保存农场资料失败: ' + (error.response?.data?.message || error.message));
+            }
         }
     </script>
 </body>
