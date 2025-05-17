@@ -67,6 +67,11 @@ namespace FarmDirectSales.Models
         public bool IsActive { get; set; } = true;
         
         /// <summary>
+        /// 产品分类
+        /// </summary>
+        public string Category { get; set; } = string.Empty;
+        
+        /// <summary>
         /// 平均评分
         /// </summary>
         [Column(TypeName = "decimal(3,1)")]

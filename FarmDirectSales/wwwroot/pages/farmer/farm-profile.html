@@ -34,6 +34,9 @@
                         <a class="nav-link" href="orders.html">订单管理</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="batch-products.html">批量管理</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="statistics.html">销售统计</a>
                     </li>
                 </ul>
@@ -43,9 +46,11 @@
                             <span id="currentUsername">用户</span>
                         </a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="farm-profile.html">农场资料</a>
+                            <a class="dropdown-item active" href="farm-profile.html">农场资料</a>
                             <a class="dropdown-item" href="products.html">我的产品</a>
+                            <a class="dropdown-item" href="batch-products.html">批量管理</a>
                             <a class="dropdown-item" href="orders.html">订单管理</a>
+                            <a class="dropdown-item" href="statistics.html">销售统计</a>
                             <a class="dropdown-item" href="profile.html">个人信息</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="../../index.html">返回网站首页</a>
@@ -69,8 +74,10 @@
             <!-- 侧边栏 -->
             <div class="col-md-3">
                 <div class="list-group">
+                    <a href="dashboard.html" class="list-group-item list-group-item-action">农户首页</a>
                     <a href="farm-profile.html" class="list-group-item list-group-item-action active">农场资料</a>
                     <a href="products.html" class="list-group-item list-group-item-action">我的产品</a>
+                    <a href="batch-products.html" class="list-group-item list-group-item-action">批量管理</a>
                     <a href="orders.html" class="list-group-item list-group-item-action">订单管理</a>
                     <a href="statistics.html" class="list-group-item list-group-item-action">销售统计</a>
                     <a href="profile.html" class="list-group-item list-group-item-action">个人信息</a>
@@ -162,40 +169,51 @@
         /**
          * 页面加载完成后执行
          */
-        $(document).ready(function() {
-            // 检查用户是否登录，并且是农户角色
-            checkLogin(function(user) {
-                if (user && user.role === 'farmer') {
-                    // 显示用户信息
-                    $('#userDropdown').show();
-                    $('#currentUsername').text(user.username);
-                    
-                    // 加载农场资料
-                    loadFarmProfile();
-                } else {
-                    // 如果不是农户，跳转到登录页面
-                    alert('您需要以农户身份登录才能访问此页面');
-                    window.location.href = '../login.html?role=farmer&redirect=' + encodeURIComponent(window.location.href);
-                }
-            });
-            
-            // 绑定表单提交事件
-            $('#farmProfileForm').on('submit', function(e) {
-                e.preventDefault();
-                saveFarmerProfile();
-            });
-            
-            // Logo上传预览
-            $('#logoUpload').on('change', function() {
-                const file = this.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        $('#logoPreview').attr('src', e.target.result);
+        document.addEventListener('DOMContentLoaded', function() {
+            // 使用initDependencies确保jQuery加载
+            window.initDependencies(function() {
+                // jQuery已加载完成，可以安全使用
+                
+                // 检查用户是否登录，并且是农户角色
+                checkLogin(function(user) {
+                    if (user && user.role === 'farmer') {
+                        // 显示用户信息
+                        $('#userDropdown').show();
+                        $('#currentUsername').text(user.username);
+                        
+                        // 加载农场资料
+                        loadFarmProfile();
+                    } else {
+                        // 如果不是农户，跳转到登录页面
+                        alert('您需要以农户身份登录才能访问此页面');
+                        window.location.href = '../login.html?role=farmer&redirect=' + encodeURIComponent(window.location.href);
                     }
-                    reader.readAsDataURL(file);
-                    $('.custom-file-label').text(file.name);
-                }
+                });
+                
+                // 绑定表单提交事件
+                $('#farmProfileForm').on('submit', function(e) {
+                    e.preventDefault();
+                    saveFarmerProfile();
+                });
+                
+                // Logo上传预览
+                $('#logoUpload').on('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            $('#logoPreview').attr('src', e.target.result);
+                        }
+                        reader.readAsDataURL(file);
+                        $('.custom-file-label').text(file.name);
+                    }
+                });
+                
+                // 退出登录按钮点击事件
+                $('#logoutBtn').on('click', function() {
+                    logout();
+                    window.location.href = '../login.html';
+                });
             });
         });
         
@@ -209,27 +227,32 @@
                     throw new Error('未找到用户ID');
                 }
                 
+                console.log('开始加载农户ID为', userId, '的农场资料');
+                
                 // 使用Axios通过http接口获取用户信息
-                const result = await http.get(`/users/${userId}`);
-                const data = result.data;
+                const result = await http.get(`farmerprofile/${userId}`);
+                console.log('获取到农场资料:', result);
                 
                 // 如果用户有农户资料，则填充表单
-                if (data.farmerProfile) {
-                    $('#farmName').val(data.farmerProfile.farmName);
-                    $('#location').val(data.farmerProfile.location);
-                    $('#description').val(data.farmerProfile.description);
-                    $('#productCategory').val(data.farmerProfile.productCategory);
-                    $('#licenseNumber').val(data.farmerProfile.licenseNumber);
-                    $('#establishedDate').val(data.farmerProfile.establishedDate ? data.farmerProfile.establishedDate.substring(0, 10) : '');
+                if (result.code === 200 && result.data) {
+                    $('#farmName').val(result.data.farmName || '');
+                    $('#location').val(result.data.location || '');
+                    $('#description').val(result.data.description || '');
+                    $('#productCategory').val(result.data.productCategory || '');
+                    $('#licenseNumber').val(result.data.licenseNumber || '');
+                    $('#establishedDate').val(result.data.establishedDate ? result.data.establishedDate.substring(0, 10) : '');
                     
                     // 更新LOGO预览
-                    if (data.farmerProfile.logoUrl) {
-                        $('#logoPreview').attr('src', data.farmerProfile.logoUrl);
+                    if (result.data.logoUrl) {
+                        $('#logoPreview').attr('src', result.data.logoUrl);
                     }
+                } else {
+                    console.log('农场资料不存在或为空，显示空表单');
                 }
             } catch (error) {
                 console.error('获取用户信息失败', error);
-                alert('获取用户信息失败: ' + (error.response?.data?.message || error.message));
+                // 不弹出错误提示，只在控制台记录，让用户可以创建新的农场资料
+                console.log('将显示空的农场资料表单供用户创建');
             }
         }
         
@@ -284,18 +307,24 @@
                 const formData = new FormData();
                 formData.append('file', file);
                 
+                console.log('开始上传农场Logo');
+                
                 // 使用Axios上传文件
-                const response = await axios.post('/api/upload/image', formData, {
+                const response = await http.post('farmerprofile/logo', formData, {
                     headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'Authorization': `Bearer ${window.getToken()}`
+                        'Content-Type': 'multipart/form-data'
                     }
                 });
                 
-                return response.data.url;
+                if (response && response.code === 200 && response.data) {
+                    console.log('Logo上传成功:', response.data);
+                    return response.data.filePath;
+                } else {
+                    throw new Error('Logo上传失败: ' + (response.message || '未知错误'));
+                }
             } catch (error) {
                 console.error('上传Logo失败', error);
-                alert('上传Logo失败: ' + (error.response?.data?.message || error.message));
+                alert('上传Logo失败: ' + error.message);
                 throw error;
             }
         }
@@ -305,18 +334,26 @@
          */
         async function saveProfileData(userId, farmData) {
             try {
+                console.log('保存农场资料:', farmData);
+                
                 // 使用Axios发送请求
-                const response = await http.post('/farmer/profile', {
+                const response = await http.post('farmerprofile', {
                     userId: userId,
                     ...farmData
                 });
                 
-                alert('农场资料保存成功');
-                // 重新加载农场资料
-                await loadFarmProfile();
+                if (response && response.code === 200) {
+                    console.log('农场资料保存成功');
+                    alert('农场资料保存成功');
+                    
+                    // 重新加载农场资料
+                    await loadFarmProfile();
+                } else {
+                    throw new Error('保存失败: ' + (response.message || '未知错误'));
+                }
             } catch (error) {
                 console.error('保存农场资料失败', error);
-                alert('保存农场资料失败: ' + (error.response?.data?.message || error.message));
+                alert('保存农场资料失败: ' + error.message);
             }
         }
     </script>

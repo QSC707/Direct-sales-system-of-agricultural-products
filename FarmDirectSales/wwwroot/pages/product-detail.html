@@ -368,8 +368,8 @@
             try {
                 const container = document.getElementById('product-detail-container');
                 
-                // 使用Axios请求产品数据
-                const response = await http.get(`/api/product/${productId}`);
+                // 使用Axios请求产品数据 - 修正API路径
+                const response = await http.get(`/product/${productId}`);
                 const product = response.data;
                 currentProduct = product;
                 
@@ -583,7 +583,7 @@
             
             try {
                 // 调用购物车API
-                await http.post('/api/cart', {
+                await http.post('/cart', {
                     userId: user.userId,
                     productId: currentProductId,
                     quantity: quantity
@@ -663,8 +663,8 @@
                     notification.classList.add('show');
                 }, 10);
                 
-                // 先添加到购物车，然后跳转到结算页面
-                await http.post('/api/cart', {
+                // 先添加到购物车，然后跳转到结算页面 - 修正API路径
+                await http.post('/cart', {
                     userId: user.userId,
                     productId: currentProductId,
                     quantity: quantity
@@ -696,8 +696,8 @@
             try {
                 const container = document.getElementById('related-products');
                 
-                // 请求全部产品数据
-                const response = await http.get('/api/product');
+                // 请求全部产品数据 - 修正API路径
+                const response = await http.get('/product');
                 const allProducts = response.data || [];
                 
                 // 排除当前产品，并只保留最多4个相关产品
@@ -747,7 +747,7 @@
                 reviewsContainer.innerHTML = '<div class="text-center"><div class="spinner-border text-success" role="status"><span class="visually-hidden">加载中...</span></div></div>';
                 
                 // 修改为正确的API路径
-                const response = await http.get(`/api/review/product/${productId}`);
+                const response = await http.get(`/review/product/${productId}`);
                 const reviews = response;
                 
                 if (!reviews || reviews.length === 0) {

@@ -34,6 +34,16 @@
             删除用户（仅管理员）
             </summary>
         </member>
+        <member name="M:FarmDirectSales.Controllers.AdminController.GetProductCategories">
+            <summary>
+            获取产品类别分布
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AdminController.GetProductsByCategory(System.String)">
+            <summary>
+            按类别统计产品数
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.ChangeRoleRequest">
             <summary>
             更改角色请求模型
@@ -294,6 +304,76 @@
             获取农户的订单列表
             </summary>
         </member>
+        <member name="T:FarmDirectSales.Controllers.FarmerProfileController">
+            <summary>
+            农户资料控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.FarmerProfileController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.FarmerProfileController.GetFarmerProfile(System.Int32)">
+            <summary>
+            获取农户资料
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.FarmerProfileController.SaveFarmerProfile(FarmDirectSales.Controllers.FarmerProfileRequest)">
+            <summary>
+            创建或更新农户资料
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.FarmerProfileController.UpdateLogo(System.Int32,Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>
+            更新农户LOGO
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.FarmerProfileRequest">
+            <summary>
+            农户资料请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.FarmerProfileRequest.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.FarmerProfileRequest.FarmName">
+            <summary>
+            农场名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.FarmerProfileRequest.Location">
+            <summary>
+            农场位置
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.FarmerProfileRequest.Description">
+            <summary>
+            农场简介
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.FarmerProfileRequest.ProductCategory">
+            <summary>
+            主营产品类别
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.FarmerProfileRequest.EstablishedDate">
+            <summary>
+            农场成立时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.FarmerProfileRequest.LicenseNumber">
+            <summary>
+            农场营业执照号
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.FarmerProfileRequest.LogoUrl">
+            <summary>
+            农场LOGO或照片URL
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.LogController">
             <summary>
             日志控制器
@@ -339,7 +419,7 @@
             获取用户订单列表
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Controllers.OrderController.GetFarmerOrders(System.Int32)">
+        <member name="M:FarmDirectSales.Controllers.OrderController.GetFarmerOrders(System.Int32,System.String,System.String)">
             <summary>
             获取农户订单列表
             </summary>
@@ -449,7 +529,7 @@
             构造函数
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Controllers.ProductController.GetProducts">
+        <member name="M:FarmDirectSales.Controllers.ProductController.GetProducts(System.Nullable{System.Int32})">
             <summary>
             获取所有产品
             </summary>
@@ -472,6 +552,26 @@
         <member name="M:FarmDirectSales.Controllers.ProductController.DeleteProduct(System.Int32,FarmDirectSales.Controllers.DeleteProductRequest)">
             <summary>
             删除产品（软删除）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ProductController.ExportProducts(System.Nullable{System.Int32})">
+            <summary>
+            批量导出产品
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ProductController.ImportProducts(Microsoft.AspNetCore.Http.IFormFile,System.Int32)">
+            <summary>
+            批量导入产品
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ProductController.UpdateProductsStatus(FarmDirectSales.Controllers.BatchUpdateStatusRequest)">
+            <summary>
+            批量更新产品状态
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ProductController.DeleteProducts(FarmDirectSales.Controllers.BatchDeleteRequest)">
+            <summary>
+            批量删除产品
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.AddProductRequest">
@@ -509,6 +609,11 @@
             农户ID
             </summary>
         </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.Category">
+            <summary>
+            产品类别
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.UpdateProductRequest">
             <summary>
             更新产品请求模型
@@ -536,7 +641,12 @@
         </member>
         <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.ImageUrl">
             <summary>
-            产品图片URL
+            图片URL
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.Category">
+            <summary>
+            分类
             </summary>
         </member>
         <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.FarmerId">
@@ -552,6 +662,41 @@
         <member name="P:FarmDirectSales.Controllers.DeleteProductRequest.FarmerId">
             <summary>
             农户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.BatchUpdateStatusRequest">
+            <summary>
+            批量更新状态的请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.BatchUpdateStatusRequest.ProductIds">
+            <summary>
+            产品ID列表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.BatchUpdateStatusRequest.Status">
+            <summary>
+            要更新的状态（上架/下架）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.BatchUpdateStatusRequest.FarmerId">
+            <summary>
+            农户ID（如果是农户用户）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.BatchDeleteRequest">
+            <summary>
+            批量删除的请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.BatchDeleteRequest.ProductIds">
+            <summary>
+            产品ID列表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.BatchDeleteRequest.FarmerId">
+            <summary>
+            农户ID（如果是农户用户）
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.ReviewController">
@@ -831,7 +976,22 @@
         </member>
         <member name="M:FarmDirectSales.Controllers.UploadController.DeleteUpload(System.Int32)">
             <summary>
-            删除上传的文件
+            删除图片
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UserController.ChangeUserRole(System.Int32,FarmDirectSales.Controllers.UserController.ChangeRoleRequest)">
+            <summary>
+            临时API: 修改用户角色(仅用于测试)
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.UserController.ChangeRoleRequest">
+            <summary>
+            修改角色请求
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UserController.ChangeRoleRequest.NewRole">
+            <summary>
+            新角色
             </summary>
         </member>
         <member name="T:FarmDirectSales.Data.ApplicationDbContext">
@@ -1033,6 +1193,42 @@
             <inheritdoc />
         </member>
         <member name="M:FarmDirectSales.Migrations.AddFarmerProfileTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddCategoryToProduct">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddCategoryToProduct.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddCategoryToProduct.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddCategoryToProduct.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddOrderCancelFields">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderCancelFields.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderCancelFields.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderCancelFields.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddCancelFieldsToOrder">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddCancelFieldsToOrder.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddCancelFieldsToOrder.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddCancelFieldsToOrder.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
         <member name="T:FarmDirectSales.Models.CartItem">
@@ -1338,6 +1534,11 @@
         <member name="P:FarmDirectSales.Models.Product.IsActive">
             <summary>
             产品状态（上架/下架）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.Category">
+            <summary>
+            产品分类
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.Product.AverageRating">

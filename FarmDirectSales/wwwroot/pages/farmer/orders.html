@@ -27,8 +27,11 @@
                     <li class="nav-item">
                         <a class="nav-link" href="products.html">我的产品</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item active">
                         <a class="nav-link" href="orders.html">订单管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="batch-products.html">批量管理</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="statistics.html">销售统计</a>
@@ -42,7 +45,8 @@
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="farm-profile.html">农场资料</a>
                             <a class="dropdown-item" href="products.html">我的产品</a>
-                            <a class="dropdown-item" href="orders.html">订单管理</a>
+                            <a class="dropdown-item" href="batch-products.html">批量管理</a>
+                            <a class="dropdown-item active" href="orders.html">订单管理</a>
                             <a class="dropdown-item" href="profile.html">个人信息</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="../../index.html">返回网站首页</a>
@@ -66,9 +70,10 @@
             <!-- 侧边栏 -->
             <div class="col-md-3">
                 <div class="list-group">
-                    <a href="dashboard.html" class="list-group-item list-group-item-action">农户中心</a>
+                    <a href="dashboard.html" class="list-group-item list-group-item-action">农户首页</a>
                     <a href="farm-profile.html" class="list-group-item list-group-item-action">农场资料</a>
                     <a href="products.html" class="list-group-item list-group-item-action">我的产品</a>
+                    <a href="batch-products.html" class="list-group-item list-group-item-action">批量管理</a>
                     <a href="orders.html" class="list-group-item list-group-item-action active">订单管理</a>
                     <a href="statistics.html" class="list-group-item list-group-item-action">销售统计</a>
                     <a href="profile.html" class="list-group-item list-group-item-action">个人信息</a>
@@ -90,6 +95,7 @@
                         <!-- 订单过滤 -->
                         <div class="row mb-3">
                             <div class="col-md-4">
+                                <label for="statusFilter" class="small mb-1">订单状态筛选</label>
                                 <select class="form-control" id="statusFilter">
                                     <option value="">所有状态</option>
                                     <option value="待付款">待付款</option>
@@ -100,12 +106,23 @@
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <input type="text" class="form-control" id="orderSearch" placeholder="搜索订单号/客户">
+                                <label for="orderSearch" class="small mb-1">搜索订单号/客户</label>
+                                <input type="text" class="form-control" id="orderSearch" placeholder="输入订单号或客户名">
                             </div>
                             <div class="col-md-4">
-                                <button class="btn btn-primary" id="searchBtn">搜索</button>
-                                <button class="btn btn-outline-secondary" id="resetBtn">重置</button>
+                                <label class="small mb-1">&nbsp;</label>
+                                <div class="d-flex">
+                                    <button class="btn btn-primary mr-2" id="searchBtn">
+                                        <i class="fa fa-search"></i> 搜索
+                                    </button>
+                                    <button class="btn btn-outline-secondary" id="resetBtn">
+                                        <i class="fa fa-undo"></i> 重置
+                                    </button>
+                                </div>
                             </div>
+                        </div>
+                        <div class="alert alert-info mb-3" id="filterInfo" style="display: none;">
+                            <i class="fa fa-info-circle"></i> <span id="filterMessage"></span>
                         </div>
                         
                         <!-- 订单列表 -->
@@ -330,43 +347,67 @@
         /**
          * 页面加载完成后执行
          */
-        $(document).ready(function() {
-            // 检查用户是否登录，并且是农户角色
-            checkLogin(function(user) {
-                if (user && user.role === 'farmer') {
-                    // 显示用户信息
-                    $('#userDropdown').show();
-                    $('#currentUsername').text(user.username);
-                    
-                    // 加载订单列表
+        document.addEventListener('DOMContentLoaded', function() {
+            // 使用initDependencies确保jQuery加载
+            window.initDependencies(function() {
+                // jQuery已加载完成，可以安全使用
+                
+                // 检查用户是否登录，并且是农户角色
+                checkLogin(function(user) {
+                    if (user && user.role === 'farmer') {
+                        // 显示用户信息
+                        $('#userDropdown').show();
+                        $('#currentUsername').text(user.username);
+                        
+                        // 加载订单列表
+                        loadOrders(1);
+                    } else {
+                        // 如果不是农户，跳转到登录页面并显示提示
+                        alert('您需要以农户身份登录才能访问此页面');
+                        window.location.href = '../login.html?role=farmer&redirect=' + encodeURIComponent(window.location.href);
+                    }
+                });
+                
+                // 刷新按钮点击事件
+                $('#refreshBtn').on('click', function() {
                     loadOrders(1);
-                } else {
-                    // 如果不是农户，跳转到登录页面并显示提示
-                    alert('您需要以农户身份登录才能访问此页面');
-                    window.location.href = '../login.html?role=farmer&redirect=' + encodeURIComponent(window.location.href);
-                }
-            });
-            
-            // 刷新按钮点击事件
-            $('#refreshBtn').on('click', function() {
-                loadOrders(1);
-            });
-            
-            // 搜索按钮点击事件
-            $('#searchBtn').on('click', function() {
-                loadOrders(1);
-            });
-            
-            // 重置按钮点击事件
-            $('#resetBtn').on('click', function() {
-                $('#statusFilter').val('');
-                $('#orderSearch').val('');
-                loadOrders(1);
-            });
-            
-            // 确认发货按钮点击事件
-            $('#confirmShipBtn').on('click', function() {
-                shipOrder();
+                });
+                
+                // 状态筛选下拉框变更事件
+                $('#statusFilter').on('change', function() {
+                    loadOrders(1);
+                });
+                
+                // 搜索框Enter键事件
+                $('#orderSearch').on('keypress', function(e) {
+                    if (e.which === 13) {  // Enter键的keyCode是13
+                        loadOrders(1);
+                        e.preventDefault();
+                    }
+                });
+                
+                // 搜索按钮点击事件
+                $('#searchBtn').on('click', function() {
+                    loadOrders(1);
+                });
+                
+                // 重置按钮点击事件
+                $('#resetBtn').on('click', function() {
+                    $('#statusFilter').val('');
+                    $('#orderSearch').val('');
+                    loadOrders(1);
+                });
+                
+                // 确认发货按钮点击事件
+                $('#confirmShipBtn').on('click', function() {
+                    shipOrder();
+                });
+                
+                // 退出登录按钮点击事件
+                $('#logoutBtn').on('click', function() {
+                    logout();
+                    window.location.href = '../login.html';
+                });
             });
         });
         
@@ -377,84 +418,91 @@
             const status = $('#statusFilter').val();
             const keyword = $('#orderSearch').val();
             
+            // 显示或隐藏筛选信息
+            if (status || keyword) {
+                let filterMessage = '当前筛选: ';
+                if (status) {
+                    filterMessage += `状态 [${status}] `;
+                }
+                if (keyword) {
+                    filterMessage += `关键词 [${keyword}] `;
+                }
+                $('#filterMessage').text(filterMessage);
+                $('#filterInfo').show();
+            } else {
+                $('#filterInfo').hide();
+            }
+            
             // 清空列表并显示加载提示
-            $('#orderList').html('<tr><td colspan="6" class="text-center">正在加载订单...</td></tr>');
+            $('#orderList').html('<tr><td colspan="6" class="text-center"><div class="spinner-border spinner-border-sm text-primary mr-2"></div>正在加载订单...</td></tr>');
+            
+            // 禁用筛选和搜索元素
+            $('#statusFilter, #orderSearch, #searchBtn, #resetBtn').prop('disabled', true);
             
             try {
                 // 使用Axios从API获取数据
-                // 实际环境应调用API获取真实订单数据
-                // const response = await http.get(`/order/farmer/${user.userId}`);
-                // const orders = response.data;
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const userId = user.userId;
                 
-                // 模拟数据，待后续实现真实API调用
-                const orders = await new Promise(resolve => {
-                    setTimeout(() => {
-                        resolve([
-                            {
-                                orderId: 1,
-                                orderNumber: 'ORD-2023-001',
-                                customerName: '张三',
-                                totalAmount: 156.00,
-                                createTime: '2023-10-15 14:30:25',
-                                status: '已完成'
-                            },
-                            {
-                                orderId: 2,
-                                orderNumber: 'ORD-2023-002',
-                                customerName: '李四',
-                                totalAmount: 89.50,
-                                createTime: '2023-10-16 10:15:12',
-                                status: '已发货'
-                            },
-                            {
-                                orderId: 3,
-                                orderNumber: 'ORD-2023-003',
-                                customerName: '王五',
-                                totalAmount: 210.00,
-                                createTime: '2023-10-17 16:45:33',
-                                status: '待发货'
-                            },
-                            {
-                                orderId: 4,
-                                orderNumber: 'ORD-2023-004',
-                                customerName: '赵六',
-                                totalAmount: 75.00,
-                                createTime: '2023-10-18 09:22:41',
-                                status: '待付款'
-                            },
-                            {
-                                orderId: 5,
-                                orderNumber: 'ORD-2023-005',
-                                customerName: '钱七',
-                                totalAmount: 120.50,
-                                createTime: '2023-10-19 11:10:05',
-                                status: '已取消'
-                            }
-                        ]);
-                    }, 500);
-                });
+                if (!userId) {
+                    throw new Error('未找到用户ID');
+                }
                 
-                // 筛选订单
-                let filteredOrders = orders;
+                console.log(`正在加载订单数据，用户ID: ${userId}，状态: ${status || '全部'}，关键词: ${keyword || '无'}`);
+                
+                // 构建查询参数
+                let apiUrl = `/order/farmer/${userId}`;
+                
+                // 使用URLSearchParams构建查询字符串
+                const params = new URLSearchParams();
                 if (status) {
-                    filteredOrders = filteredOrders.filter(order => order.status === status);
+                    params.append('status', status);
                 }
                 if (keyword) {
-                    const lowerKeyword = keyword.toLowerCase();
-                    filteredOrders = filteredOrders.filter(order => 
-                        order.orderNumber.toLowerCase().includes(lowerKeyword) || 
-                        order.customerName.toLowerCase().includes(lowerKeyword)
-                    );
+                    params.append('keyword', keyword);
                 }
                 
-                // 渲染订单列表
-                renderOrderList(filteredOrders);
+                // 添加查询参数到URL
+                const queryString = params.toString();
+                if (queryString) {
+                    apiUrl += `?${queryString}`;
+                }
                 
-                // 渲染分页（模拟，实际应根据API返回的总页数）
-                renderPagination(1, 1);
+                console.log(`API请求URL: ${apiUrl}`);
+                
+                // 发送API请求前检查用户登录状态
+                if (!localStorage.getItem('token')) {
+                    throw new Error('用户未登录，请先登录');
+                }
+                
+                // 调用API获取农户订单
+                const response = await http.get(apiUrl);
+                console.log('API响应数据:', response);
+                
+                if (response && response.code === 200 && response.data) {
+                    const orders = response.data;
+                    console.log(`成功获取订单数据，共 ${orders.length} 条记录`);
+                    renderOrderList(orders);
+                    
+                    // 渲染分页（传入当前页数和总页数）
+                    // 注意：如果API没有返回总页数，这里暂时使用1
+                    renderPagination(page, Math.ceil(orders.length / 10) || 1);
+                } else if (response && response.code === 404) {
+                    // 处理找不到农户的情况
+                    console.error('未找到农户信息:', response.message);
+                    $('#orderList').html(`<tr><td colspan="6" class="text-center text-danger">无法加载订单: ${response.message}</td></tr>`);
+                } else {
+                    // 如果返回结果不符合预期或为空
+                    console.warn('API返回结果异常:', response);
+                    renderOrderList([]);
+                    renderPagination(1, 1);
+                }
             } catch (error) {
                 console.error('加载订单失败:', error);
                 $('#orderList').html(`<tr><td colspan="6" class="text-center text-danger">加载订单失败: ${error.message}</td></tr>`);
+            } finally {
+                // 恢复筛选和搜索元素
+                $('#statusFilter, #orderSearch, #searchBtn, #resetBtn').prop('disabled', false);
             }
         }
         
@@ -492,12 +540,21 @@
                         statusBadge = '<span class="badge badge-secondary">' + order.status + '</span>';
                 }
                 
+                // 使用orderId替代orderNumber，因为API没有返回orderNumber
+                const orderNumber = order.orderId || '未知';
+                
+                // 从User对象中获取客户名，如果不存在则显示'未知客户'
+                const customerName = order.user && order.user.username ? order.user.username : '未知客户';
+                
+                // 使用totalPrice替代totalAmount，并添加null检查
+                const totalPrice = order.totalPrice ? order.totalPrice.toFixed(2) : '0.00';
+                
                 const row = `
                     <tr>
-                        <td>${order.orderNumber}</td>
-                        <td>${order.customerName}</td>
-                        <td>¥${order.totalAmount.toFixed(2)}</td>
-                        <td>${order.createTime}</td>
+                        <td>${orderNumber}</td>
+                        <td>${customerName}</td>
+                        <td>¥${totalPrice}</td>
+                        <td>${order.createTime || '未知'}</td>
                         <td>${statusBadge}</td>
                         <td>
                             <button class="btn btn-sm btn-info view-order-btn" data-order-id="${order.orderId}">
@@ -558,119 +615,145 @@
          */
         async function openOrderDetail(orderId) {
             try {
-                // 实际环境应从API获取订单详情
-                // const response = await http.get(`/order/${orderId}`);
-                // const orderDetail = response.data;
+                // 显示加载状态
+                $('#orderDetailModal .modal-body').html('<div class="text-center my-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">正在加载订单详情...</p></div>');
+                $('#orderDetailModal').modal('show');
                 
-                // 模拟获取订单详情，实际应从API获取
-                const orderDetail = {
-                    orderId: orderId,
-                    orderNumber: 'ORD-2023-00' + orderId,
-                    createTime: '2023-10-' + (14 + orderId) + ' 14:30:25',
-                    status: orderId === 3 ? '待发货' : (orderId === 2 ? '已发货' : '已完成'),
-                    paymentMethod: '微信支付',
-                    paymentTime: '2023-10-' + (14 + orderId) + ' 14:35:12',
-                    customerName: ['张三', '李四', '王五', '赵六', '钱七'][orderId - 1],
-                    customerPhone: '138****' + (1000 + orderId),
-                    shippingAddress: '广东省广州市天河区珠江新城' + orderId + '号',
-                    customerNotes: orderId % 2 === 0 ? '请在周末送货' : '',
-                    subtotal: orderId * 50,
-                    shippingFee: 10,
-                    totalAmount: orderId * 50 + 10,
-                    items: [
-                        {
-                            productName: '有机胡萝卜',
-                            price: 15.00,
-                            quantity: orderId,
-                            subtotal: 15.00 * orderId
-                        },
-                        {
-                            productName: '新鲜西红柿',
-                            price: 8.50,
-                            quantity: 2,
-                            subtotal: 8.50 * 2
-                        }
-                    ],
-                    logistics: orderId === 2 ? {
-                        company: '顺丰速运',
-                        trackingNumber: 'SF' + (1000000 + orderId),
-                        shippingTime: '2023-10-' + (15 + orderId) + ' 09:15:33'
-                    } : null
-                };
+                // 调用API获取订单详情 - 确认API路径
+                const response = await http.get(`/order/${orderId}`);
                 
-                // 填充基本信息
-                $('#detailOrderNumber').text(orderDetail.orderNumber);
-                $('#detailCreateTime').text(orderDetail.createTime);
-                $('#detailStatus').html(getStatusBadge(orderDetail.status));
-                $('#detailPaymentMethod').text(orderDetail.paymentMethod);
-                $('#detailPaymentTime').text(orderDetail.paymentTime);
-                
-                // 填充客户信息
-                $('#detailCustomerName').text(orderDetail.customerName);
-                $('#detailCustomerPhone').text(orderDetail.customerPhone);
-                $('#detailShippingAddress').text(orderDetail.shippingAddress);
-                $('#detailCustomerNotes').text(orderDetail.customerNotes || '无');
-                
-                // 填充订单项目
-                const $orderItemsList = $('#orderItemsList');
-                $orderItemsList.empty();
-                
-                orderDetail.items.forEach(function(item) {
-                    const row = `
-                        <tr>
-                            <td>${item.productName}</td>
-                            <td>¥${item.price.toFixed(2)}</td>
-                            <td>${item.quantity}</td>
-                            <td>¥${item.subtotal.toFixed(2)}</td>
-                        </tr>
+                if (response && response.code === 200 && response.data) {
+                    const orderDetail = response.data;
+                    
+                    // 重建完整的模态框内容
+                    const modalContent = `
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6>基本信息</h6>
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <th width="120">订单号:</th>
+                                        <td>${orderDetail.orderId || '未知'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>创建时间:</th>
+                                        <td>${orderDetail.createTime || '未知'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>状态:</th>
+                                        <td>${getStatusBadge(orderDetail.status)}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>支付方式:</th>
+                                        <td>在线支付</td>
+                                    </tr>
+                                    <tr>
+                                        <th>支付时间:</th>
+                                        <td>${orderDetail.payTime || '未支付'}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>客户信息</h6>
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <th width="120">客户名称:</th>
+                                        <td>${orderDetail.user ? orderDetail.user.username : '未知'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>联系电话:</th>
+                                        <td>${orderDetail.contactPhone || '未提供'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>收货地址:</th>
+                                        <td>${orderDetail.shippingAddress || '未提供'}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <h6>订单项目</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>产品</th>
+                                        <th>单价</th>
+                                        <th>数量</th>
+                                        <th>小计</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>${orderDetail.product ? orderDetail.product.productName : '未知产品'}</td>
+                                        <td>¥${orderDetail.product && orderDetail.product.price ? orderDetail.product.price.toFixed(2) : '0.00'}</td>
+                                        <td>${orderDetail.quantity || 0}</td>
+                                        <td>¥${orderDetail.totalPrice ? orderDetail.totalPrice.toFixed(2) : '0.00'}</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="3" class="text-right">商品总额:</th>
+                                        <td>¥${orderDetail.totalPrice ? orderDetail.totalPrice.toFixed(2) : '0.00'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="3" class="text-right">运费:</th>
+                                        <td>¥0.00</td>
+                                    </tr>
+                                    <tr class="table-success">
+                                        <th colspan="3" class="text-right">订单总额:</th>
+                                        <td class="font-weight-bold">¥${orderDetail.totalPrice ? orderDetail.totalPrice.toFixed(2) : '0.00'}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <h6>物流信息</h6>
+                            ${orderDetail.shipTime ? 
+                                `<table class="table table-sm table-borderless">
+                                    <tr>
+                                        <th width="120">物流公司:</th>
+                                        <td>标准快递</td>
+                                    </tr>
+                                    <tr>
+                                        <th>物流单号:</th>
+                                        <td>暂无</td>
+                                    </tr>
+                                    <tr>
+                                        <th>发货时间:</th>
+                                        <td>${orderDetail.shipTime}</td>
+                                    </tr>
+                                </table>` :
+                                '<div class="alert alert-warning"><i class="fa fa-exclamation-triangle mr-2"></i>该订单尚未发货</div>'
+                            }
+                        </div>
                     `;
                     
-                    $orderItemsList.append(row);
-                });
-                
-                // 填充金额信息
-                $('#detailSubtotal').text('¥' + orderDetail.subtotal.toFixed(2));
-                $('#detailShippingFee').text('¥' + orderDetail.shippingFee.toFixed(2));
-                $('#detailTotalAmount').text('¥' + orderDetail.totalAmount.toFixed(2));
-                
-                // 显示/隐藏物流信息
-                if (orderDetail.logistics) {
-                    $('#noDeliveryInfo').hide();
-                    $('#deliveryInfo').show();
+                    // 更新模态框内容
+                    $('#orderDetailModal .modal-body').html(modalContent);
                     
-                    $('#detailLogisticsCompany').text(orderDetail.logistics.company);
-                    $('#detailTrackingNumber').text(orderDetail.logistics.trackingNumber);
-                    $('#detailShippingTime').text(orderDetail.logistics.shippingTime);
+                    // 显示/隐藏操作按钮
+                    $('#cancelOrderBtn').hide();
+                    $('#shipOrderBtn').hide();
+                    
+                    // 只有待发货状态的订单可以发货
+                    if (orderDetail.status === '待发货') {
+                        $('#shipOrderBtn').show().data('order-id', orderId);
+                    }
+                    
+                    // 绑定发货按钮点击事件
+                    $('#shipOrderBtn').off('click').on('click', function() {
+                        $('#orderDetailModal').modal('hide');
+                        openShipModal($(this).data('order-id'));
+                    });
                 } else {
-                    $('#noDeliveryInfo').show();
-                    $('#deliveryInfo').hide();
+                    // 显示错误信息
+                    $('#orderDetailModal .modal-body').html('<div class="alert alert-danger">无法获取订单详情，请稍后重试</div>');
                 }
-                
-                // 显示/隐藏操作按钮
-                $('#cancelOrderBtn').hide();
-                $('#shipOrderBtn').hide();
-                
-                // 只有待发货状态的订单可以发货
-                if (orderDetail.status === '待发货') {
-                    $('#shipOrderBtn').show().data('order-id', orderId);
-                }
-                
-                // 只有待付款状态的订单可以取消
-                if (orderDetail.status === '待付款') {
-                    $('#cancelOrderBtn').show().data('order-id', orderId);
-                }
-                
-                // 绑定发货按钮点击事件
-                $('#shipOrderBtn').off('click').on('click', function() {
-                    $('#orderDetailModal').modal('hide');
-                    openShipModal($(this).data('order-id'));
-                });
-                
-                // 打开模态框
-                $('#orderDetailModal').modal('show');
             } catch (error) {
                 console.error('获取订单详情失败:', error);
-                alert(`获取订单详情失败: ${error.message}`);
+                $('#orderDetailModal .modal-body').html(`<div class="alert alert-danger">获取订单详情失败: ${error.message}</div>`);
             }
         }
         
@@ -703,32 +786,45 @@
                 return;
             }
             
+            // 获取当前用户
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.userId) {
+                alert('请先登录');
+                return;
+            }
+            
             // 创建发货数据
             const shipData = {
-                orderId: orderId,
+                farmerId: user.userId,
                 logisticsCompany: logisticsCompany,
                 trackingNumber: trackingNumber,
                 shippingNotes: shippingNotes
             };
             
             try {
-                // 使用Axios发送请求，实际应调用相关API
-                // await http.put(`/order/${orderId}/ship`, shipData);
+                // 显示加载状态
+                $('#confirmShipBtn').attr('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> 处理中...');
                 
-                // 模拟API请求
-                console.log('发货数据:', shipData);
+                // 调用API发货
+                const response = await http.put(`/order/${orderId}/ship`, shipData);
                 
-                // 关闭模态框
-                $('#shipModal').modal('hide');
-                
-                // 显示成功提示
-                alert('订单已发货');
-                
-                // 重新加载订单列表
-                loadOrders(1);
+                if (response && response.code === 200) {
+                    // 发货成功
+                    alert('订单发货成功！');
+                    $('#shipModal').modal('hide');
+                    
+                    // 重新加载订单列表
+                    loadOrders(1);
+                } else {
+                    // 处理API返回的错误
+                    alert(`发货失败: ${response ? response.message : '未知错误'}`);
+                }
             } catch (error) {
                 console.error('订单发货失败:', error);
                 alert(`订单发货失败: ${error.message}`);
+            } finally {
+                // 恢复按钮状态
+                $('#confirmShipBtn').attr('disabled', false).html('确认发货');
             }
         }
         

@@ -29,6 +29,9 @@
                         <a class="nav-link" href="orders.html">订单管理</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="batch-products.html">批量管理</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="statistics.html">销售统计</a>
                     </li>
                 </ul>
@@ -40,7 +43,9 @@
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="farm-profile.html">农场资料</a>
                             <a class="dropdown-item" href="products.html">我的产品</a>
+                            <a class="dropdown-item" href="batch-products.html">批量管理</a>
                             <a class="dropdown-item" href="orders.html">订单管理</a>
+                            <a class="dropdown-item active" href="statistics.html">销售统计</a>
                             <a class="dropdown-item" href="profile.html">个人信息</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="../../index.html">返回网站首页</a>
@@ -64,9 +69,10 @@
             <!-- 侧边栏 -->
             <div class="col-md-3">
                 <div class="list-group">
-                    <a href="dashboard.html" class="list-group-item list-group-item-action">农户中心</a>
+                    <a href="dashboard.html" class="list-group-item list-group-item-action">农户首页</a>
                     <a href="farm-profile.html" class="list-group-item list-group-item-action">农场资料</a>
                     <a href="products.html" class="list-group-item list-group-item-action">我的产品</a>
+                    <a href="batch-products.html" class="list-group-item list-group-item-action">批量管理</a>
                     <a href="orders.html" class="list-group-item list-group-item-action">订单管理</a>
                     <a href="statistics.html" class="list-group-item list-group-item-action active">销售统计</a>
                     <a href="profile.html" class="list-group-item list-group-item-action">个人信息</a>
@@ -111,7 +117,7 @@
                     <div class="col-md-3">
                         <div class="card mb-4 text-center">
                             <div class="card-body">
-                                <h2 class="text-success" id="totalOrders">48</h2>
+                                <h2 class="text-success" id="totalOrders">0</h2>
                                 <p class="text-muted mb-0">订单总数</p>
                             </div>
                         </div>
@@ -119,7 +125,7 @@
                     <div class="col-md-3">
                         <div class="card mb-4 text-center">
                             <div class="card-body">
-                                <h2 class="text-primary" id="totalSales">¥5,678</h2>
+                                <h2 class="text-primary" id="totalSales">¥0</h2>
                                 <p class="text-muted mb-0">销售总额</p>
                             </div>
                         </div>
@@ -127,7 +133,7 @@
                     <div class="col-md-3">
                         <div class="card mb-4 text-center">
                             <div class="card-body">
-                                <h2 class="text-info" id="totalCustomers">27</h2>
+                                <h2 class="text-info" id="totalCustomers">0</h2>
                                 <p class="text-muted mb-0">客户数量</p>
                             </div>
                         </div>
@@ -135,7 +141,7 @@
                     <div class="col-md-3">
                         <div class="card mb-4 text-center">
                             <div class="card-body">
-                                <h2 class="text-warning" id="averageOrderValue">¥118</h2>
+                                <h2 class="text-warning" id="averageOrderValue">¥0</h2>
                                 <p class="text-muted mb-0">平均客单价</p>
                             </div>
                         </div>
@@ -194,47 +200,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="productSalesTable">
+                                    <!-- 产品销售数据将通过JS动态加载 -->
                                     <tr>
-                                        <td>有机胡萝卜</td>
-                                        <td>240 kg</td>
-                                        <td>¥1,680</td>
-                                        <td>29.6%</td>
-                                        <td><span class="text-success"><i class="fa fa-arrow-up"></i> 12%</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>新鲜西红柿</td>
-                                        <td>180 kg</td>
-                                        <td>¥1,440</td>
-                                        <td>25.4%</td>
-                                        <td><span class="text-success"><i class="fa fa-arrow-up"></i> 8%</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>有机土豆</td>
-                                        <td>150 kg</td>
-                                        <td>¥880</td>
-                                        <td>15.5%</td>
-                                        <td><span class="text-danger"><i class="fa fa-arrow-down"></i> 3%</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>黄瓜</td>
-                                        <td>120 kg</td>
-                                        <td>¥720</td>
-                                        <td>12.7%</td>
-                                        <td><span class="text-danger"><i class="fa fa-arrow-down"></i> 2%</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>青椒</td>
-                                        <td>95 kg</td>
-                                        <td>¥570</td>
-                                        <td>10.0%</td>
-                                        <td><span class="text-success"><i class="fa fa-arrow-up"></i> 5%</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>其他</td>
-                                        <td>65 kg</td>
-                                        <td>¥388</td>
-                                        <td>6.8%</td>
-                                        <td><span class="text-success"><i class="fa fa-arrow-up"></i> 1%</span></td>
+                                        <td colspan="5" class="text-center">暂无销售数据</td>
                                     </tr>
                                 </tbody>
                             </table>

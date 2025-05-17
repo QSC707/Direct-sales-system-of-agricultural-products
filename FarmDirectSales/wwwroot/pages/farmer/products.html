@@ -34,6 +34,9 @@
                         <a class="nav-link" href="orders.html">订单管理</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="batch-products.html">批量管理</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="statistics.html">销售统计</a>
                     </li>
                 </ul>
@@ -44,8 +47,10 @@
                         </a>
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="farm-profile.html">农场资料</a>
-                            <a class="dropdown-item" href="products.html">我的产品</a>
+                            <a class="dropdown-item active" href="products.html">我的产品</a>
+                            <a class="dropdown-item" href="batch-products.html">批量管理</a>
                             <a class="dropdown-item" href="orders.html">订单管理</a>
+                            <a class="dropdown-item" href="statistics.html">销售统计</a>
                             <a class="dropdown-item" href="profile.html">个人信息</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="../../index.html">返回网站首页</a>
@@ -69,8 +74,10 @@
             <!-- 侧边栏 -->
             <div class="col-md-3">
                 <div class="list-group">
+                    <a href="dashboard.html" class="list-group-item list-group-item-action">农户首页</a>
                     <a href="farm-profile.html" class="list-group-item list-group-item-action">农场资料</a>
                     <a href="products.html" class="list-group-item list-group-item-action active">我的产品</a>
+                    <a href="batch-products.html" class="list-group-item list-group-item-action">批量管理</a>
                     <a href="orders.html" class="list-group-item list-group-item-action">订单管理</a>
                     <a href="statistics.html" class="list-group-item list-group-item-action">销售统计</a>
                     <a href="profile.html" class="list-group-item list-group-item-action">个人信息</a>
@@ -188,6 +195,8 @@
                             <div class="mt-2">
                                 <img id="imagePreview" src="../../img/no-image.png" alt="产品图片预览" class="img-thumbnail" style="max-width: 200px;">
                             </div>
+                            <!-- 添加上传状态显示 -->
+                            <div id="uploadStatus" class="mt-2 small" style="display: none;"></div>
                         </div>
                         
                         <div class="form-group">
@@ -218,7 +227,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" id="saveProductBtn">保存</button>
+                    <button type="button" class="btn btn-primary" id="saveProductBtn">保存产品</button>
                 </div>
             </div>
         </div>
@@ -291,6 +300,10 @@
                                 <label class="custom-file-label" for="editProductImage">选择新图片</label>
                             </div>
                             <small class="form-text text-muted">如不需更换图片请勿上传</small>
+                            <div class="mt-2">
+                                <img id="editImagePreview" src="../../img/no-image.png" alt="产品图片预览" class="img-thumbnail" style="max-width: 200px;">
+                            </div>
+                            <div id="editUploadStatus" class="mt-2 small" style="display: none;"></div>
                         </div>
                         
                         <div class="form-group">
@@ -337,55 +350,128 @@
     <!-- 自定义JS -->
     <script>
         /**
-         * 页面加载完成后执行
+         * 页面初始化
          */
-        $(document).ready(function() {
-            // 检查用户是否登录，并且是农户角色
-            checkLogin(function(user) {
-                if (user && user.role === 'farmer') {
-                    // 显示用户信息
-                    $('#userDropdown').show();
-                    $('#currentUsername').text(user.username);
-                    
-                    // 加载产品数据
-                    loadProducts();
-                } else {
-                    // 如果不是农户，跳转到登录页面
-                    alert('您需要以农户身份登录才能访问此页面');
-                    window.location.href = '../login.html?role=farmer&redirect=' + encodeURIComponent(window.location.href);
-                }
-            });
-            
-            // 产品图片预览
-            $('#productImage').on('change', function() {
-                previewImage(this, '#imagePreview');
-            });
-            
-            // 编辑产品图片预览
-            $('#editProductImage').on('change', function() {
-                previewImage(this, '#editImagePreview');
-            });
-            
-            // 保存新产品
-            $('#saveProductBtn').on('click', function() {
-                if (validateProductForm('add')) {
-                    saveProduct();
-                }
-            });
-            
-            // 更新产品
-            $('#updateProductBtn').on('click', function() {
-                if (validateProductForm('edit')) {
-                    updateProduct();
-                }
+        document.addEventListener('DOMContentLoaded', function() {
+            window.initDependencies(function() {
+                console.log('产品管理页面初始化');
+                
+                // 检查用户登录状态
+                checkFarmerLogin();
+                
+                // 绑定图片预览事件
+                $('#productImage').on('change', function() {
+                    previewImage(this, '#imagePreview');
+                });
+                
+                $('#editProductImage').on('change', function() {
+                    previewImage(this, '#editImagePreview');
+                });
+                
+                // 绑定表单提交事件
+                $('#saveProductBtn').on('click', function() {
+                    console.log('保存产品按钮被点击');
+                    if (validateForm('add')) {
+                        saveProduct();
+                    }
+                });
+                
+                $('#updateProductBtn').on('click', function() {
+                    console.log('更新产品按钮被点击');
+                    if (validateForm('edit')) {
+                        updateProduct();
+                    }
+                });
+                
+                // 加载产品列表
+                loadProducts();
+                
+                // 动态绑定产品操作按钮事件
+                $(document).on('click', '.edit-btn', function() {
+                    const productId = $(this).data('id');
+                    console.log('编辑按钮被点击，产品ID:', productId);
+                    openEditModal(productId);
+                });
+                
+                $(document).on('click', '.delete-btn', function() {
+                    const productId = $(this).data('id');
+                    console.log('删除按钮被点击，产品ID:', productId);
+                    confirmDeleteProduct(productId);
+                });
             });
         });
+        
+        /**
+         * 预览图片
+         */
+        function previewImage(input, previewSelector) {
+            console.log('预览图片，选择器:', previewSelector);
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                console.log('预览图片文件:', file.name, '大小:', file.size, '类型:', file.type);
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    console.log('图片读取完成，显示预览');
+                    $(previewSelector).attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+                $(input).next('.custom-file-label').text(file.name);
+            } else {
+                console.log('没有选择文件，或文件选择被取消');
+            }
+        }
+        
+        /**
+         * 使用api.js中的checkLoginStatus检查登录，并进行额外的农户身份验证
+         */
+        function checkFarmerLogin() {
+            try {
+                // 获取token和用户信息
+                const token = localStorage.getItem('token');
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                if (!token || !user || !user.userId) {
+                    console.log('用户未登录，跳转到登录页面');
+                    // 重定向到登录页
+                    window.location.href = '../login.html?redirect=' + encodeURIComponent(window.location.href);
+                    return false;
+                }
+                
+                // 使用api.js中的checkLoginStatus检查登录状态
+                if (!api.checkLoginStatus()) {
+                    console.log('登录状态验证失败，跳转到登录页面');
+                    return false;
+                }
+                
+                // 再次检查农户身份
+                if (user.role !== 'farmer') {
+                    console.log('用户不是农户角色，跳转到首页');
+                    alert('您需要以农户身份登录才能访问此页面');
+                    window.location.href = '../../index.html';
+                    return false;
+                }
+                
+                // 显示用户信息
+                $('#userDropdown').show();
+                $('#loginItem, #registerItem').hide();
+                $('#currentUsername').text(user.username || '农户用户');
+                
+                return true;
+            } catch (error) {
+                console.error('验证农户登录状态时发生错误:', error);
+                alert('验证登录状态时发生错误，请重新登录');
+                window.location.href = '../login.html?redirect=' + encodeURIComponent(window.location.href);
+                return false;
+            }
+        }
         
         /**
          * 加载产品列表
          */
         async function loadProducts() {
             try {
+                console.log('开始加载产品列表');
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 const userId = user.userId;
                 
@@ -393,12 +479,25 @@
                     throw new Error('未找到用户ID');
                 }
                 
-                // 使用Axios获取农户产品
-                const result = await http.get(`/products/farmer/${userId}`);
-                renderProductList(result.data);
+                console.log('当前用户ID:', userId);
+                
+                // 显示加载状态
+                $('#productList').html('<tr><td colspan="6" class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">加载中...</span></div></td></tr>');
+                
+                // 使用Axios获取农户产品，确保传递farmerId参数
+                // 明确添加farmerId参数，确保只加载当前农户的产品
+                const result = await http.get(`/product?farmerId=${userId}`);
+                console.log('产品列表响应:', result);
+                
+                if (result && result.code === 200 && result.data) {
+                    renderProductList(result.data);
+                } else {
+                    throw new Error(result.message || '获取产品列表失败');
+                }
             } catch (error) {
                 console.error('获取产品列表失败', error);
-                alert('获取产品列表失败: ' + (error.response?.data?.message || error.message));
+                alert('获取产品列表失败: ' + error.message);
+                $('#productList').html('<tr><td colspan="6" class="text-center text-danger">加载失败: ' + error.message + '</td></tr>');
             }
         }
         
@@ -421,24 +520,32 @@
             
             // 渲染产品列表
             products.forEach(function(product) {
-                const statusClass = product.status === '上架' ? 'badge-success' : 'badge-secondary';
+                const statusClass = product.isActive ? 'badge-success' : 'badge-secondary';
+                const statusText = product.isActive ? '上架' : '下架';
+                
+                // 确保图片路径正确
+                let imageUrl = product.imageUrl;
+                if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+                    imageUrl = '/' + imageUrl;
+                }
+                
+                // 设置默认图片
+                if (!imageUrl) {
+                    imageUrl = '../../img/no-image.png';
+                }
                 
                 const row = `
-                    <tr data-product-id="${product.productId}">
+                    <tr data-id="${product.productId}">
                         <td>
-                            <img src="${product.imageUrl || '../../img/no-image.png'}" alt="${product.name}" class="img-thumbnail" style="max-width: 60px;">
+                            <img src="${imageUrl}" alt="${product.productName}" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
                         </td>
-                        <td>${product.name}</td>
-                        <td>${product.price.toFixed(2)}</td>
-                        <td>${product.stock.toFixed(1)}</td>
-                        <td><span class="badge ${statusClass}">${product.status}</span></td>
+                        <td>${product.productName}</td>
+                        <td>¥${product.price.toFixed(2)}</td>
+                        <td>${product.stock} kg</td>
+                        <td><span class="badge ${statusClass}">${statusText}</span></td>
                         <td>
-                            <button class="btn btn-sm btn-primary edit-product-btn" data-product-id="${product.productId}">
-                                编辑
-                            </button>
-                            <button class="btn btn-sm btn-danger delete-product-btn" data-product-id="${product.productId}">
-                                删除
-                            </button>
+                            <button class="btn btn-sm btn-primary edit-btn" data-id="${product.productId}">编辑</button>
+                            <button class="btn btn-sm btn-danger delete-btn" data-id="${product.productId}">删除</button>
                         </td>
                     </tr>
                 `;
@@ -447,55 +554,63 @@
             });
             
             // 绑定编辑和删除事件
-            $('.edit-product-btn').on('click', function() {
-                const productId = $(this).data('product-id');
-                openEditProductModal(productId);
+            $('.edit-btn').on('click', function() {
+                const productId = $(this).data('id');
+                openEditModal(productId);
             });
             
-            $('.delete-product-btn').on('click', function() {
-                const productId = $(this).data('product-id');
+            $('.delete-btn').on('click', function() {
+                const productId = $(this).data('id');
                 confirmDeleteProduct(productId);
             });
         }
         
         /**
-         * 打开编辑产品模态框
+         * 打开编辑模态框并加载产品详情
          */
-        async function openEditProductModal(productId) {
+        async function openEditModal(productId) {
             try {
+                console.log('获取产品详情:', productId);
+                
                 // 使用Axios获取产品详情
-                const result = await http.get(`/products/${productId}`);
-                const product = result.data;
+                const result = await http.get(`/product/${productId}`);
                 
-                // 填充表单
-                $('#editProductId').val(product.productId);
-                $('#editProductName').val(product.name);
-                $('#editProductCategory').val(product.category);
-                $('#editProductPrice').val(product.price);
-                $('#editProductStock').val(product.stock);
-                $('#editProductDescription').val(product.description);
-                $('#editProductSpecification').val(product.specification);
-                $('#editIsOrganic').prop('checked', product.isOrganic);
-                
-                if (product.harvestDate) {
-                    $('#editHarvestDate').val(product.harvestDate.substring(0, 10));
-                }
-                
-                $('#editShelfLife').val(product.shelfLife);
-                $('#editProductStatus').val(product.status);
-                
-                // 显示产品图片
-                if (product.imageUrl) {
-                    $('#editImagePreview').attr('src', product.imageUrl);
+                if (result && result.code === 200 && result.data) {
+                    const product = result.data;
+                    console.log('获取到产品详情:', product);
+                    
+                    // 填充表单
+                    $('#editProductId').val(product.productId);
+                    $('#editProductName').val(product.productName);
+                    $('#editProductPrice').val(product.price);
+                    $('#editProductStock').val(product.stock);
+                    $('#editProductDescription').val(product.description);
+                    
+                    // 设置产品分类
+                    $('#editProductCategory').val(product.category || '其他');
+                    
+                    // 设置图片预览
+                    if (product.imageUrl) {
+                        // 确保图片路径正确
+                        let imageUrl = product.imageUrl;
+                        if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+                            imageUrl = '/' + imageUrl;
+                        }
+                        
+                        console.log('设置编辑模式图片预览:', imageUrl);
+                        $('#editImagePreview').attr('src', imageUrl);
+                    } else {
+                        $('#editImagePreview').attr('src', '../../img/no-image.png');
+                    }
+                    
+                    // 显示模态框
+                    $('#editProductModal').modal('show');
                 } else {
-                    $('#editImagePreview').attr('src', '../../img/no-image.png');
+                    throw new Error(result.message || '获取产品详情失败');
                 }
-                
-                // 打开模态框
-                $('#editProductModal').modal('show');
             } catch (error) {
-                console.error('获取产品详情失败', error);
-                alert('获取产品详情失败: ' + (error.response?.data?.message || error.message));
+                console.error('加载产品详情失败', error);
+                alert('加载产品详情失败: ' + error.message);
             }
         }
         
@@ -513,81 +628,308 @@
          */
         async function deleteProduct(productId) {
             try {
+                console.log('开始删除产品，ID:', productId);
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                // 准备删除请求数据
+                const deleteData = {
+                    farmerId: parseInt(user.userId)
+                };
+                
+                console.log('删除请求数据:', deleteData);
+                
                 // 使用Axios删除产品
-                await http.delete(`/products/${productId}`);
-                alert('产品删除成功');
-                await loadProducts(); // 重新加载产品列表
+                const result = await http.delete(`/product/${productId}`, deleteData);
+                console.log('删除产品响应:', result);
+                
+                if (result && result.code === 200) {
+                    alert('产品删除成功');
+                    await loadProducts(); // 重新加载产品列表
+                } else {
+                    throw new Error(result.message || '删除产品失败');
+                }
             } catch (error) {
                 console.error('删除产品失败', error);
-                alert('删除产品失败: ' + (error.response?.data?.message || error.message));
+                alert('删除产品失败: ' + error.message);
             }
         }
         
         /**
-         * 验证产品表单
+         * 验证表单
          */
-        function validateProductForm(formType) {
-            const prefix = formType === 'edit' ? 'edit' : '';
+        function validateForm(formType) {
+            console.log('验证表单，类型:', formType);
             
-            // 获取表单字段
-            const name = $(`#${prefix}ProductName`).val();
-            const category = $(`#${prefix}ProductCategory`).val();
-            const price = $(`#${prefix}ProductPrice`).val();
-            const stock = $(`#${prefix}ProductStock`).val();
-            
-            // 验证必填字段
-            if (!name || !category || !price || !stock) {
-                alert('请填写所有必填字段');
-                return false;
-            }
-            
-            // 验证价格和库存
-            if (parseFloat(price) <= 0) {
-                alert('价格必须大于0');
-                return false;
-            }
-            
-            if (parseFloat(stock) < 0) {
-                alert('库存不能为负数');
-                return false;
-            }
-            
-            // 验证图片（仅在添加时是必须的）
-            if (formType !== 'edit' && !$('#productImage')[0].files[0]) {
-                alert('请上传产品图片');
-                return false;
+            if (formType === 'add') {
+                // 获取表单字段
+                const productName = $('#productName').val().trim();
+                const productPrice = $('#productPrice').val();
+                const productStock = $('#productStock').val();
+                const productCategory = $('#productCategory').val();
+                
+                // 验证产品名称
+                if (!productName) {
+                    alert('请输入产品名称');
+                    return false;
+                }
+                
+                // 验证分类
+                if (!productCategory) {
+                    alert('请选择产品分类');
+                    return false;
+                }
+                
+                // 验证价格
+                if (!productPrice || parseFloat(productPrice) <= 0) {
+                    alert('请输入有效的价格');
+                    return false;
+                }
+                
+                // 验证库存
+                if (!productStock || parseFloat(productStock) < 0) {
+                    alert('请输入有效的库存数量');
+                    return false;
+                }
+                
+                // 验证图片（仅在添加时是必须的）
+                if (!$('#productImage')[0].files[0]) {
+                    alert('请上传产品图片');
+                    return false;
+                }
+            } else if (formType === 'edit') {
+                // 获取表单字段
+                const productName = $('#editProductName').val().trim();
+                const productPrice = $('#editProductPrice').val();
+                const productStock = $('#editProductStock').val();
+                const productCategory = $('#editProductCategory').val();
+                
+                // 验证产品名称
+                if (!productName) {
+                    alert('请输入产品名称');
+                    return false;
+                }
+                
+                // 验证分类
+                if (!productCategory) {
+                    alert('请选择产品分类');
+                    return false;
+                }
+                
+                // 验证价格
+                if (!productPrice || parseFloat(productPrice) <= 0) {
+                    alert('请输入有效的价格');
+                    return false;
+                }
+                
+                // 验证库存
+                if (!productStock || parseFloat(productStock) < 0) {
+                    alert('请输入有效的库存数量');
+                    return false;
+                }
             }
             
             return true;
         }
         
         /**
+         * 上传产品图片
+         */
+        function uploadProductImage(file, callback) {
+            // 验证文件类型
+            const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                console.error('不支持的文件类型:', file.type);
+                $('#uploadStatus, #editUploadStatus').text(`不支持的文件类型: ${file.type}，只支持JPG、PNG和GIF`).addClass('text-danger');
+                throw new Error(`不支持的文件类型: ${file.type}，只支持JPG、PNG和GIF`);
+            }
+            
+            // 确保文件大小合理
+            if (file.size > 10 * 1024 * 1024) { // 10MB
+                console.error('文件过大:', file.size);
+                $('#uploadStatus, #editUploadStatus').text(`文件过大: ${Math.round(file.size/1024/1024)}MB，最大支持10MB`).addClass('text-danger');
+                throw new Error(`文件过大，最大支持10MB`);
+            }
+            
+            // 创建FormData对象用于文件上传
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            console.log('开始上传图片:', file.name, '文件大小:', file.size, '文件类型:', file.type);
+            
+            // 显示上传状态
+            $('#uploadStatus, #editUploadStatus').show().text('正在上传图片...').removeClass('text-danger text-success');
+            
+            // 使用 Axios 进行文件上传，这次不指定Content-Type，让浏览器自动处理
+            return axios({
+                method: 'post',
+                url: http.defaults.baseURL + '/upload/single',
+                data: formData,
+                headers: {
+                    'Authorization': 'Bearer ' + window.getToken()
+                }
+            })
+            .then(response => {
+                console.log('上传响应:', response);
+                if (response && response.data && response.data.code === 200 && response.data.data) {
+                    // 返回上传后的文件路径
+                    const filePath = response.data.data.filePath;
+                    console.log('上传成功，文件路径:', filePath);
+                    $('#uploadStatus, #editUploadStatus').text('图片上传成功').removeClass('text-danger').addClass('text-success');
+                    
+                    // 确保路径正确处理
+                    callback(filePath);
+                    return filePath;
+                } else {
+                    console.error('上传响应格式不正确:', response);
+                    $('#uploadStatus, #editUploadStatus').text('上传响应格式不正确').addClass('text-danger');
+                    throw new Error('上传响应格式不正确');
+                }
+            })
+            .catch(error => {
+                console.error('上传图片失败', error);
+                $('#uploadStatus, #editUploadStatus').text(`上传图片失败: ${error.message}`).addClass('text-danger');
+                throw new Error('上传失败，请稍后重试');
+            });
+        }
+        
+        /**
          * 保存新产品
          */
-        function saveProduct() {
-            const token = localStorage.getItem('token');
-            const userId = localStorage.getItem('userId');
-            
-            // 首先上传图片
-            const imageFile = $('#productImage')[0].files[0];
-            uploadProductImage(imageFile, function(imageUrl) {
-                // 收集产品数据
-                const productData = {
-                    farmerId: parseInt(userId),
-                    name: $('#productName').val(),
-                    category: $('#productCategory').val(),
-                    price: parseFloat($('#productPrice').val()),
-                    stock: parseFloat($('#productStock').val()),
-                    description: $('#productDescription').val(),
-                    specification: $('#productSpecification').val(),
-                    imageUrl: imageUrl,
-                    isOrganic: $('#isOrganic').prop('checked'),
-                    harvestDate: $('#harvestDate').val() || null,
-                    shelfLife: $('#shelfLife').val() ? parseInt($('#shelfLife').val()) : null,
-                    status: $('#productStatus').val()
+        async function saveProduct() {
+            try {
+                console.log('开始保存产品');
+                $('#saveProductBtn').attr('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 保存中...');
+                
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                // 首先上传图片
+                const imageFile = $('#productImage')[0].files[0];
+                if (!imageFile) {
+                    throw new Error('请选择产品图片');
+                }
+                
+                console.log('准备上传图片:', imageFile.name);
+                
+                // 使用Promise方式处理图片上传
+                const uploadImage = () => {
+                    return new Promise((resolve, reject) => {
+                        uploadProductImage(imageFile, (imageUrl) => {
+                            console.log('图片上传成功，URL:', imageUrl);
+                            resolve(imageUrl);
+                        });
+                    });
                 };
                 
+                // 等待图片上传完成
+                const imageUrl = await uploadImage();
+                console.log('获取到图片URL:', imageUrl);
+                
+                // 收集产品数据
+                const productData = {
+                    farmerId: parseInt(user.userId),
+                    productName: $('#productName').val(),
+                    description: $('#productDescription').val() || '',
+                    price: parseFloat($('#productPrice').val()),
+                    stock: parseFloat($('#productStock').val()),
+                    imageUrl: imageUrl,
+                    category: $('#productCategory').val() || '其他'
+                };
+                
+                console.log('提交产品数据:', productData);
+                
                 // 提交产品数据
+                const result = await http.post('/product', productData);
+                console.log('产品保存响应:', result);
+                
+                if (result && result.code === 200) {
+                    alert('产品添加成功');
+                    $('#addProductModal').modal('hide');
+                    $('#addProductForm')[0].reset(); // 重置表单
+                    $('#imagePreview').attr('src', '../../img/no-image.png'); // 重置图片预览
+                    $('#uploadStatus').hide(); // 隐藏上传状态
+                    loadProducts(); // 重新加载产品列表
+                } else {
+                    throw new Error(result.message || '添加产品失败');
+                }
+            } catch (error) {
+                console.error('添加产品失败', error);
+                alert('添加产品失败: ' + error.message);
+            } finally {
+                $('#saveProductBtn').attr('disabled', false).html('保存产品');
+            }
+        }
+        
+        /**
+         * 更新产品
+         */
+        async function updateProduct() {
+            try {
+                console.log('开始更新产品');
+                $('#updateProductBtn').attr('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 更新中...');
+                
+                const productId = $('#editProductId').val();
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                // 检查是否需要上传新图片
+                const imageFile = $('#editProductImage')[0].files[0];
+                let imageUrl = null;
+                
+                if (imageFile) {
+                    // 使用Promise方式处理图片上传
+                    const uploadImage = () => {
+                        return new Promise((resolve, reject) => {
+                            uploadProductImage(imageFile, (url) => {
+                                console.log('编辑模式：图片上传成功，URL:', url);
+                                resolve(url);
+                            });
+                        });
+                    };
+                    
+                    // 显示状态
+                    $('#editUploadStatus').show().text('正在上传图片...');
+                    
+                    // 等待图片上传完成
+                    imageUrl = await uploadImage();
+                }
+                
+                // 收集产品数据
+                const productData = {
+                    farmerId: parseInt(user.userId),
+                    productName: $('#editProductName').val(),
+                    description: $('#editProductDescription').val() || '',
+                    price: parseFloat($('#editProductPrice').val()),
+                    stock: parseFloat($('#editProductStock').val()),
+                    category: $('#editProductCategory').val() || '其他'
+                };
+                
+                // 如果有新图片URL，则更新
+                if (imageUrl) {
+                    productData.imageUrl = imageUrl;
+                }
+                
+                // 提交产品更新
+                const result = await http.put(`/product/${productId}`, productData);
+                
+                console.log('产品更新响应:', result);
+                
+                if (result && result.code === 200) {
+                    alert('产品更新成功');
+                    $('#editProductModal').modal('hide');
+                    $('#editUploadStatus').hide(); // 隐藏上传状态
+                    loadProducts(); // 重新加载产品列表
+                } else {
+                    throw new Error(result.message || '更新产品失败');
+                }
+            } catch (error) {
+                console.error('更新产品失败', error);
+                alert('更新产品失败: ' + error.message);
+            } finally {
+                $('#updateProductBtn').attr('disabled', false).html('更新');
+            }
+        }
+    </script>
+</body>
+</html> 
                 $.ajax({
                     url: '/api/products',
                     type: 'POST',

@@ -89,6 +89,52 @@ const checkLoginStatus = () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
     if (token && user && user.userId) {
+        // 解析JWT令牌获取角色信息
+        try {
+            // JWT令牌格式是以.分隔的三部分
+            const parts = token.split('.');
+            if (parts.length === 3) {
+                // 解码JWT的payload部分（第二部分）
+                const payload = JSON.parse(atob(parts[1]));
+                // 从payload中获取角色信息
+                const tokenRole = payload.role;
+                const tokenUserId = payload.nameid;
+                
+                // 检查令牌中的角色是否与localStorage中的角色匹配
+                if (tokenRole && user.role && tokenRole !== user.role) {
+                    console.error('令牌角色与存储角色不匹配，重置登录状态:', {
+                        tokenRole: tokenRole,
+                        localRole: user.role
+                    });
+                    resetLoginStatus();
+                    return false;
+                }
+                
+                // 检查令牌中的用户ID是否与localStorage中的用户ID匹配
+                if (tokenUserId && user.userId && tokenUserId != user.userId) {
+                    console.error('令牌用户ID与存储用户ID不匹配，重置登录状态:', {
+                        tokenUserId: tokenUserId,
+                        localUserId: user.userId
+                    });
+                    resetLoginStatus();
+                    return false;
+                }
+                
+                // 检查令牌是否过期
+                const currentTime = Math.floor(Date.now() / 1000);
+                if (payload.exp && payload.exp < currentTime) {
+                    console.error('令牌已过期，重置登录状态');
+                    resetLoginStatus();
+                    return false;
+                }
+            }
+        } catch (e) {
+            console.error('解析JWT令牌出错:', e);
+            // 解析失败时，保守起见重置登录状态
+            resetLoginStatus();
+            return false;
+        }
+        
         console.log('已登录', {
             token: token.substring(0, 10) + '...',
             user
@@ -152,14 +198,33 @@ const api = {
                         throw new Error('服务器未返回有效的用户ID');
                     }
                     
-                    // 保存登录状态和token
-                    localStorage.setItem('token', data.data.token);
+                    // 保存JWT令牌
+                    const token = data.data.token;
+                    localStorage.setItem('token', token);
                     
-                    // 保存用户信息对象
+                    // 解析JWT令牌获取实际角色信息
+                    let tokenRole = null;
+                    try {
+                        const parts = token.split('.');
+                        if (parts.length === 3) {
+                            const payload = JSON.parse(atob(parts[1]));
+                            // 从payload中获取角色信息
+                            tokenRole = payload.role;
+                            if (!tokenRole && payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]) {
+                                tokenRole = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+                            }
+                            console.log('JWT令牌解析:', payload);
+                            console.log('令牌中的角色:', tokenRole);
+                        }
+                    } catch (e) {
+                        console.error('解析JWT令牌失败:', e);
+                    }
+                    
+                    // 保存用户信息对象，优先使用JWT令牌中的角色
                     const userData = {
                         userId: data.data.userId,
                         username: data.data.username || username,
-                        role: data.data.role || 'customer',
+                        role: tokenRole || data.data.role || 'customer', // 优先使用令牌中的角色
                         email: data.data.email,
                         phone: data.data.phone
                     };
@@ -277,13 +342,33 @@ const api = {
         },
         
         // 获取农户订单
-        getFarmerOrders: async () => {
+        getFarmerOrders: async (status = '', keyword = '') => {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (!user.userId) {
                 throw new Error('用户未登录');
             }
             
-            const response = await fetch(`${window.API_BASE_URL}/order/farmer/${user.userId}`, {
+            // 构造URL并添加查询参数
+            let url = `${window.API_BASE_URL}/order/farmer/${user.userId}`;
+            
+            // 添加查询参数
+            const params = new URLSearchParams();
+            if (status) {
+                params.append('status', status);
+            }
+            if (keyword) {
+                params.append('keyword', keyword);
+            }
+            
+            // 如果有查询参数，添加到URL中
+            const queryString = params.toString();
+            if (queryString) {
+                url += `?${queryString}`;
+            }
+            
+            console.log('请求农户订单URL:', url);
+            
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: window.getHeaders()
             });

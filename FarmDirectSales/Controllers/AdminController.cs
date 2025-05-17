@@ -220,6 +220,86 @@ namespace FarmDirectSales.Controllers
                 _ => role
             };
         }
+
+        /// <summary>
+        /// 获取产品类别分布
+        /// </summary>
+        [HttpGet("products/categories")]
+        public async Task<IActionResult> GetProductCategories()
+        {
+            try
+            {
+                // 验证当前用户是否为管理员
+                var currentUser = HttpContext.Items["User"] as User;
+                if (currentUser == null || currentUser.Role != "admin")
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new { code = 403, message = "无权限访问此接口" });
+                }
+
+                // 获取产品类别分布
+                var productCategories = await _context.Products
+                    .GroupBy(p => p.Category)
+                    .Select(g => new
+                    {
+                        Category = g.Key,
+                        Count = g.Count()
+                    })
+                    .ToListAsync();
+
+                return Ok(new
+                {
+                    code = 200,
+                    message = "获取产品类别分布成功",
+                    data = productCategories
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { code = 400, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// 按类别统计产品数
+        /// </summary>
+        [HttpGet("products/category/{category}")]
+        public async Task<IActionResult> GetProductsByCategory(string category)
+        {
+            try
+            {
+                // 验证当前用户是否为管理员
+                var currentUser = HttpContext.Items["User"] as User;
+                if (currentUser == null || currentUser.Role != "admin")
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new { code = 403, message = "无权限访问此接口" });
+                }
+
+                // 获取指定类别的所有产品
+                var products = await _context.Products.Where(p => p.Category == category).ToListAsync();
+
+                // 按类别统计产品数
+                var productsByCategory = products
+                    .GroupBy(p => p.Category)
+                    .Select(g => new
+                    {
+                        Category = g.Key ?? "未分类",
+                        Count = g.Count()
+                    })
+                    .OrderByDescending(x => x.Count)
+                    .ToList();
+
+                return Ok(new
+                {
+                    code = 200,
+                    message = $"获取{category}类别的产品列表成功",
+                    data = productsByCategory
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { code = 400, message = ex.Message });
+            }
+        }
     }
 
     /// <summary>

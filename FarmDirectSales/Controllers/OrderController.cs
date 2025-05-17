@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 using FarmDirectSales.Data;
 using FarmDirectSales.Models;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 
 namespace FarmDirectSales.Controllers
@@ -183,23 +186,55 @@ namespace FarmDirectSales.Controllers
         /// 获取农户订单列表
         /// </summary>
         [HttpGet("farmer/{farmerId}")]
-        public async Task<IActionResult> GetFarmerOrders(int farmerId)
+        public async Task<IActionResult> GetFarmerOrders(int farmerId, [FromQuery] string status = "", [FromQuery] string keyword = "")
         {
             try
             {
+                Console.WriteLine($"GetFarmerOrders接口被调用：farmerId={farmerId}, status={status}, keyword={keyword}");
+                
                 // 检查农户是否存在
                 var farmer = await _context.Users.FirstOrDefaultAsync(u => u.UserId == farmerId && u.Role == "farmer");
                 if (farmer == null)
                 {
+                    Console.WriteLine($"农户ID {farmerId} 不存在或不是农户角色");
                     return NotFound(new { code = 404, message = "农户不存在" });
                 }
 
-                var orders = await _context.Orders
+                Console.WriteLine($"找到农户：{farmer.Username}");
+
+                // 构建查询
+                var query = _context.Orders
                     .Include(o => o.Product)
                     .Include(o => o.User)
-                    .Where(o => o.Product.FarmerId == farmerId)
+                    .Where(o => o.Product.FarmerId == farmerId);
+
+                Console.WriteLine($"初始查询构建完成，开始应用筛选条件");
+                
+                // 按状态筛选
+                if (!string.IsNullOrEmpty(status))
+                {
+                    Console.WriteLine($"应用状态筛选: status='{status}'");
+                    // 使用常规的 == 比较而不是 string.Equals
+                    query = query.Where(o => o.Status == status);
+                    Console.WriteLine($"状态筛选应用完成");
+                }
+
+                // 按关键词搜索（订单ID或客户用户名）
+                if (!string.IsNullOrEmpty(keyword))
+                {
+                    Console.WriteLine($"应用关键词筛选: keyword='{keyword}'");
+                    query = query.Where(o => o.OrderId.ToString().Contains(keyword) || 
+                                          o.User.Username.Contains(keyword));
+                    Console.WriteLine($"关键词筛选应用完成");
+                }
+
+                Console.WriteLine($"执行查询前的最终查询语句: {query.ToQueryString()}");
+                
+                var orders = await query
                     .OrderByDescending(o => o.CreateTime)
                     .ToListAsync();
+                    
+                Console.WriteLine($"查询结果：找到 {orders.Count} 个订单");
 
                 return Ok(new
                 {
@@ -234,6 +269,8 @@ namespace FarmDirectSales.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"获取农户订单列表出错：{ex.Message}");
+                Console.WriteLine($"异常详情：{ex}");
                 return BadRequest(new { code = 400, message = ex.Message });
             }
         }
@@ -558,5 +595,4 @@ namespace FarmDirectSales.Controllers
         public int UserId { get; set; }
     }
 } 
- 
  

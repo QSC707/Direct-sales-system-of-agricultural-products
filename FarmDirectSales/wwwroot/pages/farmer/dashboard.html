@@ -28,6 +28,9 @@
                         <a class="nav-link" href="orders.html">订单管理</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="batch-products.html">批量管理</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="statistics.html">销售统计</a>
                     </li>
                 </ul>
@@ -37,9 +40,12 @@
                             <span id="currentUsername">用户</span>
                         </a>
                         <div class="dropdown-menu">
+                            <a class="dropdown-item active" href="dashboard.html">农户首页</a>
                             <a class="dropdown-item" href="farm-profile.html">农场资料</a>
                             <a class="dropdown-item" href="products.html">我的产品</a>
+                            <a class="dropdown-item" href="batch-products.html">批量管理</a>
                             <a class="dropdown-item" href="orders.html">订单管理</a>
+                            <a class="dropdown-item" href="statistics.html">销售统计</a>
                             <a class="dropdown-item" href="profile.html">个人信息</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="../../index.html">返回网站首页</a>
@@ -63,9 +69,10 @@
             <!-- 侧边栏 -->
             <div class="col-md-3">
                 <div class="list-group">
-                    <a href="dashboard.html" class="list-group-item list-group-item-action active">农户中心</a>
+                    <a href="dashboard.html" class="list-group-item list-group-item-action active">农户首页</a>
                     <a href="farm-profile.html" class="list-group-item list-group-item-action">农场资料</a>
                     <a href="products.html" class="list-group-item list-group-item-action">我的产品</a>
+                    <a href="batch-products.html" class="list-group-item list-group-item-action">批量管理</a>
                     <a href="orders.html" class="list-group-item list-group-item-action">订单管理</a>
                     <a href="statistics.html" class="list-group-item list-group-item-action">销售统计</a>
                     <a href="profile.html" class="list-group-item list-group-item-action">个人信息</a>
@@ -245,53 +252,76 @@
         /**
          * 页面加载完成后执行
          */
-        $(document).ready(function() {
-            // 检查用户是否登录，并且是农户角色
-            checkLogin(function(user) {
-                if (user && user.role === 'farmer') {
-                    // 显示农户信息
-                    $('#farmerName').text(user.username);
-                    
-                    // 确保用户下拉菜单可见
-                    $('#userDropdown').show();
-                    $('#currentUsername').text(user.username);
-                    
-                    // 更新专属的农户下拉菜单，移除消费者链接
-                    $('#userDropdown .dropdown-menu a').not('#logoutBtn').not('[href^="farm"]').remove();
-                    
-                    // 加载仪表盘数据
-                    loadDashboardData();
-                } else {
-                    // 如果不是农户，跳转到登录页面并显示提示
-                    alert('您需要以农户身份登录才能访问此页面');
-                    window.location.href = '../login.html?role=farmer&redirect=' + encodeURIComponent(window.location.href);
-                }
+        document.addEventListener('DOMContentLoaded', function() {
+            // 使用initDependencies确保jQuery加载
+            window.initDependencies(function() {
+                // jQuery已加载完成，可以安全使用
+                console.log('jQuery已加载，初始化农户中心首页');
+                
+                // 检查用户是否登录，并且是农户角色
+                checkLogin(function(user) {
+                    if (user && user.role === 'farmer') {
+                        // 显示农户信息
+                        $('#farmerName').text(user.username);
+                        
+                        // 确保用户下拉菜单可见
+                        $('#userDropdown').show();
+                        $('#currentUsername').text(user.username);
+                        
+                        // 更新专属的农户下拉菜单，移除消费者链接
+                        $('#userDropdown .dropdown-menu a').not('#logoutBtn').not('[href^="farm"]').remove();
+                        
+                        // 加载仪表盘数据
+                        loadDashboardData();
+                    } else {
+                        // 如果不是农户，跳转到登录页面并显示提示
+                        alert('您需要以农户身份登录才能访问此页面');
+                        window.location.href = '../login.html?role=farmer&redirect=' + encodeURIComponent(window.location.href);
+                    }
+                });
+                
+                // 设置当前日期
+                const now = new Date();
+                const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+                const dateString = now.toLocaleDateString('zh-CN', dateOptions);
+                $('#currentDate').text(dateString);
             });
-            
-            // 设置当前日期
-            const now = new Date();
-            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-            const dateString = now.toLocaleDateString('zh-CN', dateOptions);
-            $('#currentDate').text(dateString);
         });
         
         /**
          * 加载仪表盘数据
          */
         function loadDashboardData() {
-            const token = localStorage.getItem('token');
-            const userId = localStorage.getItem('userId');
+            // 从localStorage中获取用户信息
+            const userStr = localStorage.getItem('user');
+            let user = null;
             
-            if (!token || !userId) {
+            try {
+                user = JSON.parse(userStr);
+            } catch (e) {
+                console.error('解析用户数据失败:', e);
+            }
+            
+            if (!user || !user.userId) {
                 console.error('未找到认证信息');
                 return;
             }
             
-            // 加载统计数据（模拟数据，实际应从API获取）
-            $('#totalProducts').text('8');
-            $('#pendingOrders').text('3');
-            $('#monthlySales').text('¥2,356');
-            $('#newOrdersCount').text('2');
+            const userId = user.userId;
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                console.error('未找到token');
+                return;
+            }
+            
+            console.log('正在加载农户仪表盘数据，用户ID:', userId);
+            
+            // 显示空数据，等待API接入
+            window.$('#totalProducts').text('0');
+            window.$('#pendingOrders').text('0');
+            window.$('#monthlySales').text('¥0');
+            window.$('#newOrdersCount').text('0');
             
             // 加载库存预警数据
             loadLowStockProducts();
@@ -304,84 +334,20 @@
          * 加载库存预警产品
          */
         function loadLowStockProducts() {
-            // 模拟数据，实际应从API获取
-            const lowStockProducts = [
-                { id: 1, name: '有机胡萝卜', stock: 5.0, status: '低库存' },
-                { id: 2, name: '新鲜西红柿', stock: 3.5, status: '低库存' },
-                { id: 3, name: '云南小土豆', stock: 0, status: '缺货' }
-            ];
-            
+            // 显示空数据
             const $lowStockList = $('#lowStockList');
             $lowStockList.empty();
-            
-            if (lowStockProducts.length === 0) {
-                $lowStockList.append('<tr><td colspan="3" class="text-center text-muted">暂无库存预警</td></tr>');
-                return;
-            }
-            
-            // 渲染库存预警列表
-            lowStockProducts.forEach(function(product) {
-                const statusClass = product.status === '缺货' ? 'text-danger' : 'text-warning';
-                
-                const row = `
-                    <tr>
-                        <td>${product.name}</td>
-                        <td>${product.stock.toFixed(1)} kg</td>
-                        <td class="${statusClass}">${product.status}</td>
-                    </tr>
-                `;
-                
-                $lowStockList.append(row);
-            });
+            $lowStockList.append('<tr><td colspan="3" class="text-center text-muted">暂无库存预警</td></tr>');
         }
         
         /**
          * 加载最新订单
          */
         function loadRecentOrders() {
-            // 模拟数据，实际应从API获取
-            const recentOrders = [
-                { id: 'ORD-2023-001', date: '2023-10-15', amount: 156.00, status: '已完成' },
-                { id: 'ORD-2023-002', date: '2023-10-16', amount: 89.50, status: '已发货' },
-                { id: 'ORD-2023-003', date: '2023-10-17', amount: 210.00, status: '待发货' }
-            ];
-            
+            // 显示空数据
             const $ordersList = $('#recentOrdersList');
             $ordersList.empty();
-            
-            if (recentOrders.length === 0) {
-                $ordersList.append('<tr><td colspan="4" class="text-center text-muted">暂无订单数据</td></tr>');
-                return;
-            }
-            
-            // 渲染订单列表
-            recentOrders.forEach(function(order) {
-                let statusClass = '';
-                switch (order.status) {
-                    case '待发货':
-                        statusClass = 'badge-warning';
-                        break;
-                    case '已发货':
-                        statusClass = 'badge-primary';
-                        break;
-                    case '已完成':
-                        statusClass = 'badge-success';
-                        break;
-                    default:
-                        statusClass = 'badge-secondary';
-                }
-                
-                const row = `
-                    <tr>
-                        <td>${order.id}</td>
-                        <td>${order.date}</td>
-                        <td>¥${order.amount.toFixed(2)}</td>
-                        <td><span class="badge ${statusClass}">${order.status}</span></td>
-                    </tr>
-                `;
-                
-                $ordersList.append(row);
-            });
+            $ordersList.append('<tr><td colspan="4" class="text-center text-muted">暂无订单数据</td></tr>');
         }
     </script>
 </body>

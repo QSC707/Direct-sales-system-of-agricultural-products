@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单管理 - 农产品直销平台</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <script src="../../js/dependencies.js"></script>
+    <!-- 引入Axios库 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- API调用相关 -->
+    <script src="../../js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="../../js/axios-config.js"></script>
+    <script src="../../js/auth.js"></script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.html">管理中心</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">管理首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="users.html">用户管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="products.html">产品管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="orders.html">订单管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="statistics.html">统计分析</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown" id="userDropdown" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
+                            <span id="currentUsername">管理员</span>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="dashboard.html">管理中心</a>
+                            <a class="dropdown-item" href="users.html">用户管理</a>
+                            <a class="dropdown-item" href="products.html">产品管理</a>
+                            <a class="dropdown-item" href="orders.html">订单管理</a>
+                            <a class="dropdown-item" href="logs.html">系统日志</a>
+                            <a class="dropdown-item" href="profile.html">个人信息</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="../../index.html">返回网站首页</a>
+                            <a class="dropdown-item" href="#" id="logoutBtn">退出登录</a>
+                        </div>
+                    </li>
+                    <li class="nav-item" id="loginItem">
+                        <a class="nav-link" href="../login.html">登录</a>
+                    </li>
+                    <li class="nav-item" id="registerItem">
+                        <a class="nav-link" href="../register.html">注册</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container my-4">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-3">
+                <div class="list-group">
+                    <a href="dashboard.html" class="list-group-item list-group-item-action">管理中心</a>
+                    <a href="users.html" class="list-group-item list-group-item-action">用户管理</a>
+                    <a href="products.html" class="list-group-item list-group-item-action">产品管理</a>
+                    <a href="orders.html" class="list-group-item list-group-item-action active">订单管理</a>
+                    <a href="statistics.html" class="list-group-item list-group-item-action">统计分析</a>
+                    <a href="reviews.html" class="list-group-item list-group-item-action">评价管理</a>
+                    <a href="logs.html" class="list-group-item list-group-item-action">系统日志</a>
+                    <a href="profile.html" class="list-group-item list-group-item-action">个人信息</a>
+                </div>
+            </div>
+            
+            <!-- 主要内容 -->
+            <div class="col-md-9">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">订单管理</h4>
+                        <div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="searchInput" placeholder="搜索订单号、用户名...">
+                                <div class="input-group-append">
+                                    <button class="btn btn-light" id="searchBtn">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- 订单状态筛选 -->
+                        <div class="mb-3">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-primary active" data-status="all">所有订单</button>
+                                <button type="button" class="btn btn-outline-primary" data-status="待支付">待支付</button>
+                                <button type="button" class="btn btn-outline-primary" data-status="待发货">待发货</button>
+                                <button type="button" class="btn btn-outline-primary" data-status="待收货">待收货</button>
+                                <button type="button" class="btn btn-outline-primary" data-status="待评价">待评价</button>
+                                <button type="button" class="btn btn-outline-primary" data-status="已完成">已完成</button>
+                                <button type="button" class="btn btn-outline-primary" data-status="已取消">已取消</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 排序和筛选 -->
+                        <div class="mb-3 d-flex justify-content-between">
+                            <div class="form-inline">
+                                <label class="mr-2">订单时间：</label>
+                                <input type="date" class="form-control form-control-sm mr-1" id="startDate">
+                                <span class="mr-1">至</span>
+                                <input type="date" class="form-control form-control-sm mr-2" id="endDate">
+                                <button class="btn btn-sm btn-outline-primary" id="dateFilterBtn">
+                                    <i class="fa fa-filter"></i> 筛选
+                                </button>
+                            </div>
+                            <div class="form-inline">
+                                <label class="mr-2">排序：</label>
+                                <select class="form-control form-control-sm" id="sortOrder">
+                                    <option value="newest">下单时间（最新）</option>
+                                    <option value="oldest">下单时间（最早）</option>
+                                    <option value="priceHigh">订单金额（高到低）</option>
+                                    <option value="priceLow">订单金额（低到高）</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- 订单列表 -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>订单号</th>
+                                        <th>用户</th>
+                                        <th>产品</th>
+                                        <th>金额</th>
+                                        <th>状态</th>
+                                        <th>下单时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orderList">
+                                    <!-- 订单列表将通过JS动态加载 -->
+                                    <tr>
+                                        <td colspan="7" class="text-center">正在加载订单...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- 分页控制 -->
+                        <nav class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span>共 <span id="totalItems">0</span> 个订单，每页 <select id="pageSize" class="form-control form-control-sm d-inline-block" style="width: 60px;">
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select> 条</span>
+                            </div>
+                            <ul class="pagination" id="pagination">
+                                <!-- 分页将通过JS动态加载 -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 订单详情模态框 -->
+    <div class="modal fade" id="orderDetailModal" tabindex="-1" role="dialog" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="orderDetailModalLabel">订单详情</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>订单信息</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item px-0">
+                                    <strong>订单编号：</strong> <span id="detailOrderId"></span>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <strong>订单状态：</strong> <span id="detailOrderStatus" class="badge badge-primary"></span>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <strong>下单时间：</strong> <span id="detailOrderTime"></span>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <strong>支付时间：</strong> <span id="detailPayTime"></span>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <strong>发货时间：</strong> <span id="detailShipTime"></span>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <strong>完成时间：</strong> <span id="detailCompleteTime"></span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>买家信息</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item px-0">
+                                    <strong>用户名：</strong> <span id="detailUsername"></span>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <strong>联系电话：</strong> <span id="detailPhone"></span>
+                                </li>
+                                <li class="list-group-item px-0">
+                                    <strong>收货地址：</strong> <span id="detailAddress"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h5>商品信息</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>图片</th>
+                                    <th>产品名称</th>
+                                    <th>单价</th>
+                                    <th>数量</th>
+                                    <th>小计</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailProductList">
+                                <!-- 将通过JS动态加载 -->
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-right"><strong>总计：</strong></td>
+                                    <td><span class="text-danger" id="detailTotalPrice"></span></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <!-- 评价信息 -->
+                    <div id="reviewSection" class="mt-3" style="display: none;">
+                        <h5>用户评价</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex mb-2">
+                                    <div>
+                                        <span class="text-warning" id="detailRating"></span>
+                                    </div>
+                                    <div class="ml-auto">
+                                        <small class="text-muted" id="detailReviewTime"></small>
+                                    </div>
+                                </div>
+                                <p id="detailReviewContent" class="mb-0"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    
+                    <!-- 操作按钮根据订单状态显示 -->
+                    <div id="orderActionButtons">
+                        <!-- 待发货状态 -->
+                        <button type="button" class="btn btn-success" id="shipOrderBtn" style="display: none;">确认发货</button>
+                        
+                        <!-- 待支付状态 -->
+                        <button type="button" class="btn btn-danger" id="cancelOrderBtn" style="display: none;">取消订单</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white mt-5 py-3">
+        <div class="container text-center">
+            <p>© 2023 农产品直销平台 版权所有</p>
+        </div>
+    </footer>
+
+    <!-- 自定义JS -->
+    <script>
+        /**
+         * 页面加载完成后执行
+         */
+        $(document).ready(function() {
+            // 检查用户是否登录，并且是管理员角色
+            checkLogin(function(user) {
+                if (user && user.role === 'admin') {
+                    // 显示用户信息
+                    $('#userDropdown').show();
+                    $('#currentUsername').text(user.username);
+                    
+                    // 初始化分页信息
+                    let currentPage = 1;
+                    let pageSize = parseInt($('#pageSize').val());
+                    let currentStatus = 'all';
+                    
+                    // 加载订单数据
+                    loadOrders(currentPage, pageSize, currentStatus);
+                    
+                    // 绑定分页大小变更事件
+                    $('#pageSize').on('change', function() {
+                        pageSize = parseInt($(this).val());
+                        currentPage = 1; // 切换页面大小时回到第一页
+                        loadOrders(currentPage, pageSize, currentStatus);
+                    });
+                    
+                    // 绑定状态筛选按钮事件
+                    $('.btn-group button').on('click', function() {
+                        $('.btn-group button').removeClass('active').addClass('btn-outline-primary');
+                        $(this).removeClass('btn-outline-primary').addClass('active');
+                        
+                        currentStatus = $(this).data('status');
+                        currentPage = 1; // 筛选时回到第一页
+                        loadOrders(currentPage, pageSize, currentStatus);
+                    });
+                    
+                    // 绑定日期筛选按钮事件
+                    $('#dateFilterBtn').on('click', function() {
+                        currentPage = 1; // 筛选时回到第一页
+                        loadOrders(currentPage, pageSize, currentStatus);
+                    });
+                    
+                    // 绑定排序下拉框变更事件
+                    $('#sortOrder').on('change', function() {
+                        currentPage = 1; // 排序时回到第一页
+                        loadOrders(currentPage, pageSize, currentStatus);
+                    });
+                    
+                    // 绑定搜索按钮事件
+                    $('#searchBtn').on('click', function() {
+                        currentPage = 1; // 搜索时回到第一页
+                        loadOrders(currentPage, pageSize, currentStatus);
+                    });
+                    
+                    // 回车键搜索
+                    $('#searchInput').on('keypress', function(e) {
+                        if (e.which === 13) {
+                            currentPage = 1;
+                            loadOrders(currentPage, pageSize, currentStatus);
+                        }
+                    });
+                    
+                    // 绑定确认发货按钮事件
+                    $('#shipOrderBtn').on('click', function() {
+                        const orderId = $(this).data('order-id');
+                        if (confirm('确认已发货？')) {
+                            shipOrder(orderId);
+                        }
+                    });
+                    
+                    // 绑定取消订单按钮事件
+                    $('#cancelOrderBtn').on('click', function() {
+                        const orderId = $(this).data('order-id');
+                        if (confirm('确定要取消该订单吗？此操作无法撤销。')) {
+                            cancelOrder(orderId);
+                        }
+                    });
+                } else {
+                    // 如果不是管理员，跳转到登录页面
+                    alert('您需要以管理员身份登录才能访问此页面');
+                    window.location.href = '../login.html?role=admin&redirect=' + encodeURIComponent(window.location.href);
+                }
+            });
+        });
+        
+        /**
+         * 加载订单列表
+         */
+        async function loadOrders(page, pageSize, status) {
+            try {
+                // 获取筛选条件
+                const searchTerm = $('#searchInput').val();
+                const sortOrder = $('#sortOrder').val();
+                const startDate = $('#startDate').val();
+                const endDate = $('#endDate').val();
+                
+                // 构建查询参数
+                const params = {
+                    page: page,
+                    pageSize: pageSize
+                };
+                
+                if (status && status !== 'all') params.status = status;
+                if (searchTerm) params.search = searchTerm;
+                if (sortOrder) params.sort = sortOrder;
+                if (startDate) params.startDate = startDate;
+                if (endDate) params.endDate = endDate;
+                
+                // 使用Axios获取订单列表
+                const response = await http.get('/orders', { params });
+                
+                if (response.status === 200 && response.data) {
+                    const { data, totalItems, totalPages } = response.data;
+                    
+                    // 更新总数量显示
+                    $('#totalItems').text(totalItems);
+                    
+                    // 渲染订单列表
+                    renderOrderList(data);
+                    
+                    // 渲染分页控件
+                    renderPagination(page, totalPages, function(newPage) {
+                        loadOrders(newPage, pageSize, status);
+                    });
+                } else {
+                    throw new Error('获取订单列表失败');
+                }
+            } catch (error) {
+                console.error('加载订单列表失败', error);
+                alert('加载订单列表失败: ' + (error.response?.data?.message || error.message));
+                
+                // 显示错误信息
+                $('#orderList').html('<tr><td colspan="7" class="text-center text-danger">加载订单失败，请重试</td></tr>');
+                $('#pagination').empty();
+            }
+        }
+        
+        /**
+         * 渲染订单列表
+         */
+        function renderOrderList(orders) {
+            const $orderList = $('#orderList');
+            $orderList.empty();
+            
+            if (!orders || orders.length === 0) {
+                $orderList.html('<tr><td colspan="7" class="text-center">没有找到符合条件的订单</td></tr>');
+                return;
+            }
+            
+            // 渲染订单列表
+            orders.forEach(function(order) {
+                // 根据状态设置不同的样式
+                let statusClass = '';
+                switch (order.status) {
+                    case '待支付':
+                        statusClass = 'badge-warning';
+                        break;
+                    case '待发货':
+                        statusClass = 'badge-info';
+                        break;
+                    case '待收货':
+                        statusClass = 'badge-primary';
+                        break;
+                    case '待评价':
+                        statusClass = 'badge-secondary';
+                        break;
+                    case '已完成':
+                        statusClass = 'badge-success';
+                        break;
+                    case '已取消':
+                        statusClass = 'badge-danger';
+                        break;
+                    default:
+                        statusClass = 'badge-secondary';
+                }
+                
+                const row = `
+                    <tr>
+                        <td>${order.orderId}</td>
+                        <td>${order.user.username}</td>
+                        <td>${order.product.productName}</td>
+                        <td>¥${order.totalPrice.toFixed(2)}</td>
+                        <td><span class="badge ${statusClass}">${order.status}</span></td>
+                        <td>${formatDate(order.createTime)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info view-order-btn" data-order-id="${order.orderId}">
+                                查看
+                            </button>
+                            ${order.status === '待发货' ? `
+                                <button class="btn btn-sm btn-success ship-btn" data-order-id="${order.orderId}">
+                                    发货
+                                </button>
+                            ` : ''}
+                            ${order.status === '待支付' ? `
+                                <button class="btn btn-sm btn-danger cancel-btn" data-order-id="${order.orderId}">
+                                    取消
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+                
+                $orderList.append(row);
+            });
+            
+            // 绑定查看订单详情按钮事件
+            $('.view-order-btn').on('click', function() {
+                const orderId = $(this).data('order-id');
+                viewOrderDetail(orderId);
+            });
+            
+            // 绑定发货按钮事件
+            $('.ship-btn').on('click', function() {
+                const orderId = $(this).data('order-id');
+                if (confirm('确认已发货？')) {
+                    shipOrder(orderId);
+                }
+            });
+            
+            // 绑定取消按钮事件
+            $('.cancel-btn').on('click', function() {
+                const orderId = $(this).data('order-id');
+                if (confirm('确定要取消该订单吗？此操作无法撤销。')) {
+                    cancelOrder(orderId);
+                }
+            });
+        }
+        
+        /**
+         * 渲染分页控件
+         */
+        function renderPagination(currentPage, totalPages, callback) {
+            const $pagination = $('#pagination');
+            $pagination.empty();
+            
+            // 如果总页数小于等于1，不显示分页
+            if (totalPages <= 1) {
+                return;
+            }
+            
+            // 添加上一页按钮
+            $pagination.append(`
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">上一页</a>
+                </li>
+            `);
+            
+            // 计算显示的页码范围
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            // 调整起始页，确保始终显示5个页码（如果总页数足够）
+            if (endPage - startPage < 4 && totalPages > 5) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            // 添加页码按钮
+            for (let i = startPage; i <= endPage; i++) {
+                $pagination.append(`
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `);
+            }
+            
+            // 添加下一页按钮
+            $pagination.append(`
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage + 1}">下一页</a>
+                </li>
+            `);
+            
+            // 绑定页码点击事件
+            $('.page-link').on('click', function(e) {
+                e.preventDefault();
+                
+                // 如果是禁用状态则不执行
+                if ($(this).parent().hasClass('disabled')) {
+                    return;
+                }
+                
+                const page = parseInt($(this).data('page'));
+                callback(page);
+            });
+        }
+        
+        /**
+         * 查看订单详情
+         */
+        async function viewOrderDetail(orderId) {
+            try {
+                // 使用Axios获取订单详情
+                const response = await http.get(`/orders/${orderId}`);
+                
+                if (response.status === 200 && response.data) {
+                    const order = response.data.data;
+                    
+                    // 填充订单基本信息
+                    $('#detailOrderId').text(order.orderId);
+                    
+                    // 根据状态设置不同的样式
+                    let statusClass = '';
+                    switch (order.status) {
+                        case '待支付':
+                            statusClass = 'badge-warning';
+                            break;
+                        case '待发货':
+                            statusClass = 'badge-info';
+                            break;
+                        case '待收货':
+                            statusClass = 'badge-primary';
+                            break;
+                        case '待评价':
+                            statusClass = 'badge-secondary';
+                            break;
+                        case '已完成':
+                            statusClass = 'badge-success';
+                            break;
+                        case '已取消':
+                            statusClass = 'badge-danger';
+                            break;
+                        default:
+                            statusClass = 'badge-secondary';
+                    }
+                    
+                    // 设置订单状态
+                    $('#detailOrderStatus').removeClass().addClass(`badge ${statusClass}`).text(order.status);
+                    
+                    // 设置各种时间
+                    $('#detailOrderTime').text(formatDate(order.createTime) || '暂无');
+                    $('#detailPayTime').text(order.payTime ? formatDate(order.payTime) : '暂无');
+                    $('#detailShipTime').text(order.shipTime ? formatDate(order.shipTime) : '暂无');
+                    $('#detailCompleteTime').text(order.completeTime ? formatDate(order.completeTime) : '暂无');
+                    
+                    // 设置买家信息
+                    $('#detailUsername').text(order.user.username);
+                    $('#detailPhone').text(order.contactPhone || '暂无');
+                    $('#detailAddress').text(order.shippingAddress || '暂无');
+                    
+                    // 设置产品信息
+                    const product = order.product;
+                    $('#detailProductList').html(`
+                        <tr>
+                            <td>
+                                <img src="${product.imageUrl || '../../img/no-image.png'}" alt="${product.productName}" class="img-thumbnail" style="max-width: 60px;">
+                            </td>
+                            <td>${product.productName}</td>
+                            <td>¥${product.price.toFixed(2)}</td>
+                            <td>${order.quantity}</td>
+                            <td>¥${order.totalPrice.toFixed(2)}</td>
+                        </tr>
+                    `);
+                    
+                    // 设置总价
+                    $('#detailTotalPrice').text(`¥${order.totalPrice.toFixed(2)}`);
+                    
+                    // 如果有评价，显示评价信息
+                    if (order.review) {
+                        const review = order.review;
+                        
+                        // 显示评价部分
+                        $('#reviewSection').show();
+                        
+                        // 设置评分
+                        const ratingHtml = Array(5).fill(0).map((_, i) => 
+                            `<i class="fa fa-star${i < review.rating ? ' text-warning' : ' text-muted'}"></i>`
+                        ).join('');
+                        $('#detailRating').html(ratingHtml);
+                        
+                        // 设置评价时间
+                        $('#detailReviewTime').text(formatDate(review.createTime));
+                        
+                        // 设置评价内容
+                        $('#detailReviewContent').text(review.content || '暂无评价内容');
+                    } else {
+                        // 隐藏评价部分
+                        $('#reviewSection').hide();
+                    }
+                    
+                    // 根据订单状态显示不同的操作按钮
+                    $('#shipOrderBtn').hide().data('order-id', order.orderId);
+                    $('#cancelOrderBtn').hide().data('order-id', order.orderId);
+                    
+                    if (order.status === '待发货') {
+                        $('#shipOrderBtn').show();
+                    } else if (order.status === '待支付') {
+                        $('#cancelOrderBtn').show();
+                    }
+                    
+                    // 显示模态框
+                    $('#orderDetailModal').modal('show');
+                } else {
+                    throw new Error('获取订单详情失败');
+                }
+            } catch (error) {
+                console.error('获取订单详情失败', error);
+                alert('获取订单详情失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+        
+        /**
+         * 确认发货
+         */
+        async function shipOrder(orderId) {
+            try {
+                // 使用Axios更新订单状态
+                const response = await http.put(`/orders/${orderId}/ship`, {});
+                
+                if (response.status === 200) {
+                    alert('订单已确认发货');
+                    
+                    // 关闭订单详情模态框
+                    $('#orderDetailModal').modal('hide');
+                    
+                    // 重新加载订单列表
+                    const currentPage = parseInt($('.pagination .active .page-link').data('page')) || 1;
+                    const pageSize = parseInt($('#pageSize').val());
+                    const currentStatus = $('.btn-group button.active').data('status') || 'all';
+                    
+                    loadOrders(currentPage, pageSize, currentStatus);
+                } else {
+                    throw new Error('确认发货失败');
+                }
+            } catch (error) {
+                console.error('确认发货失败', error);
+                alert('确认发货失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+        
+        /**
+         * 取消订单
+         */
+        async function cancelOrder(orderId) {
+            try {
+                // 使用Axios取消订单
+                const response = await http.put(`/orders/${orderId}/cancel`, {});
+                
+                if (response.status === 200) {
+                    alert('订单已取消');
+                    
+                    // 关闭订单详情模态框
+                    $('#orderDetailModal').modal('hide');
+                    
+                    // 重新加载订单列表
+                    const currentPage = parseInt($('.pagination .active .page-link').data('page')) || 1;
+                    const pageSize = parseInt($('#pageSize').val());
+                    const currentStatus = $('.btn-group button.active').data('status') || 'all';
+                    
+                    loadOrders(currentPage, pageSize, currentStatus);
+                } else {
+                    throw new Error('取消订单失败');
+                }
+            } catch (error) {
+                console.error('取消订单失败', error);
+                alert('取消订单失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+        
+        /**
+         * 格式化日期
+         */
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+    </script>
+</body>
+</html> 
+ 
+ 

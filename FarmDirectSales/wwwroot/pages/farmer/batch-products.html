@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>批量产品管理 - 农产品直销平台</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <script src="../../js/dependencies.js"></script>
+    <!-- 引入Axios库 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- API调用相关 -->
+    <script src="../../js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="../../js/axios-config.js"></script>
+    <script src="../../js/auth.js"></script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.html">农户中心</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">农户首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="products.html">我的产品</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="orders.html">订单管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="batch-products.html">批量管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="statistics.html">销售统计</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown" id="userDropdown" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
+                            <span id="currentUsername">农户</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="farm-profile.html">农场资料</a>
+                            <a class="dropdown-item" href="profile.html">个人信息</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="../../index.html">返回网站首页</a>
+                            <a class="dropdown-item" href="#" id="logoutBtn">退出登录</a>
+                        </div>
+                    </li>
+                    <li class="nav-item" id="loginItem">
+                        <a class="nav-link" href="../login.html">登录</a>
+                    </li>
+                    <li class="nav-item" id="registerItem">
+                        <a class="nav-link" href="../register.html">注册</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container my-4">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-3">
+                <div class="list-group">
+                    <a href="dashboard.html" class="list-group-item list-group-item-action">农户首页</a>
+                    <a href="farm-profile.html" class="list-group-item list-group-item-action">农场资料</a>
+                    <a href="products.html" class="list-group-item list-group-item-action">我的产品</a>
+                    <a href="batch-products.html" class="list-group-item list-group-item-action">批量管理</a>
+                    <a href="orders.html" class="list-group-item list-group-item-action">订单管理</a>
+                    <a href="statistics.html" class="list-group-item list-group-item-action">销售统计</a>
+                    <a href="profile.html" class="list-group-item list-group-item-action">个人信息</a>
+                </div>
+            </div>
+            
+            <!-- 主要内容 -->
+            <div class="col-md-9">
+                <!-- 批量操作卡片 -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">批量产品管理</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" id="batchTabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="import-tab" data-toggle="tab" href="#import" role="tab" aria-controls="import" aria-selected="true">批量导入</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="export-tab" data-toggle="tab" href="#export" role="tab" aria-controls="export" aria-selected="false">批量导出</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="batch-actions-tab" data-toggle="tab" href="#batch-actions" role="tab" aria-controls="batch-actions" aria-selected="false">批量操作</a>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content p-3" id="batchTabContent">
+                            <!-- 批量导入 -->
+                            <div class="tab-pane fade show active" id="import" role="tabpanel" aria-labelledby="import-tab">
+                                <div class="alert alert-info">
+                                    <i class="fa fa-info-circle"></i> 您可以使用CSV文件批量导入产品。CSV文件格式应为：产品名称,类别,描述,价格,库存,图片URL（可选）
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <a href="#" id="downloadTemplateBtn" class="btn btn-outline-secondary">
+                                        <i class="fa fa-download"></i> 下载导入模板
+                                    </a>
+                                </div>
+                                
+                                <form id="importForm" enctype="multipart/form-data">
+                                    <div class="form-group">
+                                        <label for="csvFile">选择CSV文件：</label>
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="csvFile" name="file" accept=".csv">
+                                            <label class="custom-file-label" for="csvFile">选择文件...</label>
+                                        </div>
+                                        <small class="form-text text-muted">文件必须是CSV格式，编码为UTF-8</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-success" id="importBtn">
+                                            <i class="fa fa-upload"></i> 导入产品
+                                        </button>
+                                    </div>
+                                </form>
+                                
+                                <!-- 导入结果 -->
+                                <div id="importResult" style="display: none;">
+                                    <div class="alert alert-success">
+                                        <h5>导入结果：</h5>
+                                        <p id="importResultMessage"></p>
+                                    </div>
+                                    
+                                    <div id="importErrorsContainer" style="display: none;">
+                                        <h5>导入错误：</h5>
+                                        <ul id="importErrors" class="list-group mb-3"></ul>
+                                    </div>
+                                    
+                                    <div>
+                                        <button class="btn btn-outline-primary" id="viewImportedProductsBtn">
+                                            <i class="fa fa-eye"></i> 查看已导入产品
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 批量导出 -->
+                            <div class="tab-pane fade" id="export" role="tabpanel" aria-labelledby="export-tab">
+                                <div class="alert alert-info">
+                                    <i class="fa fa-info-circle"></i> 您可以将产品数据导出为CSV文件，方便保存和编辑。
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>选择导出范围：</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="exportRange" id="exportAll" value="all" checked>
+                                        <label class="form-check-label" for="exportAll">
+                                            导出所有产品
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="exportRange" id="exportActive" value="active">
+                                        <label class="form-check-label" for="exportActive">
+                                            只导出已上架产品
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="exportRange" id="exportInactive" value="inactive">
+                                        <label class="form-check-label" for="exportInactive">
+                                            只导出已下架产品
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>选择导出格式：</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="exportFormat" id="exportCsv" value="csv" checked>
+                                        <label class="form-check-label" for="exportCsv">
+                                            CSV格式（可用于Excel打开）
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <button class="btn btn-success" id="exportBtn">
+                                        <i class="fa fa-download"></i> 导出产品
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- 批量操作 -->
+                            <div class="tab-pane fade" id="batch-actions" role="tabpanel" aria-labelledby="batch-actions-tab">
+                                <div class="alert alert-warning">
+                                    <i class="fa fa-exclamation-triangle"></i> 批量操作将影响多个产品，请谨慎使用。
+                                </div>
+                                
+                                <!-- 产品筛选 -->
+                                <div class="form-row mb-3">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="filterCategory">按类别筛选：</label>
+                                            <select class="form-control" id="filterCategory">
+                                                <option value="">所有类别</option>
+                                                <option value="蔬菜">蔬菜</option>
+                                                <option value="水果">水果</option>
+                                                <option value="谷物">谷物</option>
+                                                <option value="肉类">肉类</option>
+                                                <option value="奶制品">奶制品</option>
+                                                <option value="蛋类">蛋类</option>
+                                                <option value="水产品">水产品</option>
+                                                <option value="干货">干货</option>
+                                                <option value="其他">其他</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="filterStatus">按状态筛选：</label>
+                                            <select class="form-control" id="filterStatus">
+                                                <option value="">所有状态</option>
+                                                <option value="上架">已上架</option>
+                                                <option value="下架">已下架</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="searchKeyword">关键字搜索：</label>
+                                            <input type="text" class="form-control" id="searchKeyword" placeholder="产品名称...">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <button class="btn btn-outline-primary" id="filterProductsBtn">
+                                        <i class="fa fa-filter"></i> 筛选产品
+                                    </button>
+                                    <button class="btn btn-outline-secondary" id="resetFilterBtn">
+                                        <i class="fa fa-refresh"></i> 重置筛选
+                                    </button>
+                                </div>
+                                
+                                <!-- 产品列表 -->
+                                <div class="table-responsive mb-3">
+                                    <table class="table table-hover table-bordered">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th class="text-center">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="selectAllProducts">
+                                                        <label class="form-check-label" for="selectAllProducts"></label>
+                                                    </div>
+                                                </th>
+                                                <th>ID</th>
+                                                <th>产品名称</th>
+                                                <th>类别</th>
+                                                <th>价格(元/kg)</th>
+                                                <th>库存(kg)</th>
+                                                <th>状态</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="batchProductList">
+                                            <!-- 产品列表将通过JS动态加载 -->
+                                            <tr>
+                                                <td colspan="7" class="text-center">正在加载产品...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- 批量操作按钮 -->
+                                <div class="alert alert-info" id="selectedCountInfo" style="display: none;">
+                                    已选择 <span id="selectedCount">0</span> 个产品
+                                </div>
+                                
+                                <div class="btn-group mb-3">
+                                    <button class="btn btn-success" id="batchPublishBtn" disabled>
+                                        <i class="fa fa-check-circle"></i> 批量上架
+                                    </button>
+                                    <button class="btn btn-warning" id="batchUnpublishBtn" disabled>
+                                        <i class="fa fa-ban"></i> 批量下架
+                                    </button>
+                                    <button class="btn btn-danger" id="batchDeleteBtn" disabled>
+                                        <i class="fa fa-trash"></i> 批量删除
+                                    </button>
+                                </div>
+                                
+                                <!-- 分页控制 -->
+                                <nav class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span>共 <span id="totalItems">0</span> 个产品，每页 <select id="pageSize" class="form-control form-control-sm d-inline-block" style="width: 60px;">
+                                            <option value="10">10</option>
+                                            <option value="20">20</option>
+                                            <option value="50">50</option>
+                                        </select> 条</span>
+                                    </div>
+                                    <ul class="pagination" id="pagination">
+                                        <!-- 分页将通过JS动态加载 -->
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSV模板内容（隐藏） -->
+    <div id="csvTemplateContent" style="display: none;">产品名称,类别,描述,价格,库存,图片URL
+有机胡萝卜,蔬菜,新鲜有机胡萝卜，无农药,5.99,100,https://example.com/carrot.jpg
+红富士苹果,水果,新鲜采摘的红富士苹果,8.99,50,https://example.com/apple.jpg</div>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white mt-5 py-3">
+        <div class="container text-center">
+            <p>© 2023 农产品直销平台 版权所有</p>
+        </div>
+    </footer>
+
+    <!-- 自定义JS -->
+    <script>
+        /**
+         * 页面加载完成后执行
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            // 使用initDependencies确保jQuery加载
+            window.initDependencies(function() {
+                // jQuery已加载完成，可以安全使用
+                
+                // 检查用户是否登录，并且是农户角色
+                checkLogin(function(user) {
+                    if (user && user.role === 'farmer') {
+                        // 显示用户信息
+                        $('#userDropdown').show();
+                        $('#currentUsername').text(user.username);
+                        $('#loginItem, #registerItem').hide();
+                        
+                        // 加载农户产品数据
+                        loadProductsForBatchOperation();
+                    } else {
+                        // 如果不是农户，跳转到登录页面并显示提示
+                        alert('您需要以农户身份登录才能访问此页面');
+                        window.location.href = '../login.html?role=farmer&redirect=' + encodeURIComponent(window.location.href);
+                    }
+                });
+                
+                // 退出登录按钮点击事件
+                $('#logoutBtn').on('click', function() {
+                    logout();
+                    window.location.href = '../login.html';
+                });
+                
+                // 绑定其他事件处理函数
+                setupBatchFunctions();
+            });
+        });
+        
+        /**
+         * 导入产品
+         */
+        async function importProducts(farmerId) {
+            try {
+                // 获取表单数据
+                const formData = new FormData(document.getElementById('importForm'));
+                
+                // 检查是否选择了文件
+                const fileInput = document.getElementById('csvFile');
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    alert('请选择要导入的CSV文件');
+                    return;
+                }
+                
+                // 显示导入中状态
+                $('#importBtn').html('<i class="fa fa-spinner fa-spin"></i> 导入中...').prop('disabled', true);
+                
+                // 发送请求
+                const response = await http.post(`/products/import?farmerId=${farmerId}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                
+                // 处理成功响应
+                if (response.status === 200) {
+                    // 显示导入结果
+                    $('#importResult').show();
+                    $('#importResultMessage').text(response.data.message);
+                    
+                    // 如果有错误，显示错误列表
+                    if (response.data.errors && response.data.errors.length > 0) {
+                        $('#importErrorsContainer').show();
+                        const $errorsList = $('#importErrors').empty();
+                        
+                        response.data.errors.forEach(error => {
+                            $errorsList.append(`<li class="list-group-item list-group-item-danger">${error}</li>`);
+                        });
+                    } else {
+                        $('#importErrorsContainer').hide();
+                    }
+                    
+                    // 重置表单
+                    $('#importForm')[0].reset();
+                    $('.custom-file-label').text('选择文件...');
+                } else {
+                    throw new Error('导入失败');
+                }
+            } catch (error) {
+                console.error('导入产品失败', error);
+                
+                // 显示错误信息
+                $('#importResult').show();
+                $('#importResultMessage').html(`<div class="text-danger">导入失败: ${error.response?.data?.message || error.message}</div>`);
+                $('#importErrorsContainer').hide();
+            } finally {
+                // 恢复按钮状态
+                $('#importBtn').html('<i class="fa fa-upload"></i> 导入产品').prop('disabled', false);
+            }
+        }
+        
+        /**
+         * 导出产品
+         */
+        function exportProducts(farmerId) {
+            try {
+                // 获取导出范围
+                const exportRange = $('input[name="exportRange"]:checked').val();
+                
+                // 构建URL
+                let url = `/products/export?farmerId=${farmerId}`;
+                
+                if (exportRange === 'active') {
+                    url += '&status=上架';
+                } else if (exportRange === 'inactive') {
+                    url += '&status=下架';
+                }
+                
+                // 执行下载
+                window.location.href = url;
+            } catch (error) {
+                console.error('导出产品失败', error);
+                alert('导出产品失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+        
+        /**
+         * 下载CSV模板
+         */
+        function downloadCsvTemplate() {
+            // 获取模板内容
+            const csvContent = $('#csvTemplateContent').text();
+            
+            // 创建Blob对象
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            
+            // 创建下载链接
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'product_import_template.csv';
+            
+            // 触发下载
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        /**
+         * 加载产品列表
+         */
+        async function loadProducts(farmerId, page, pageSize) {
+            try {
+                // 获取筛选条件
+                const category = $('#filterCategory').val();
+                const status = $('#filterStatus').val();
+                const keyword = $('#searchKeyword').val();
+                
+                // 构建查询参数
+                const params = {
+                    farmerId: farmerId,
+                    page: page,
+                    pageSize: pageSize
+                };
+                
+                if (category) params.category = category;
+                if (status) params.status = status;
+                if (keyword) params.search = keyword;
+                
+                // 使用Axios获取产品列表
+                const response = await http.get('/products', { params });
+                
+                if (response.status === 200 && response.data) {
+                    const { data, totalItems, totalPages } = response.data;
+                    
+                    // 更新总数量显示
+                    $('#totalItems').text(totalItems);
+                    
+                    // 渲染产品列表
+                    renderProductList(data);
+                    
+                    // 渲染分页控件
+                    renderPagination(page, totalPages, function(newPage) {
+                        loadProducts(farmerId, newPage, pageSize);
+                    });
+                } else {
+                    throw new Error('获取产品列表失败');
+                }
+            } catch (error) {
+                console.error('加载产品列表失败', error);
+                
+                // 显示错误信息
+                $('#batchProductList').html('<tr><td colspan="7" class="text-center text-danger">加载产品失败，请重试</td></tr>');
+                $('#pagination').empty();
+            }
+        }
+        
+        /**
+         * 渲染产品列表
+         */
+        function renderProductList(products) {
+            const $productList = $('#batchProductList');
+            $productList.empty();
+            
+            if (!products || products.length === 0) {
+                $productList.html('<tr><td colspan="7" class="text-center">没有找到符合条件的产品</td></tr>');
+                return;
+            }
+            
+            // 渲染产品列表
+            products.forEach(function(product) {
+                const statusClass = product.isActive ? 'badge-success' : 'badge-secondary';
+                const statusText = product.isActive ? '上架' : '下架';
+                
+                const row = `
+                    <tr>
+                        <td class="text-center">
+                            <div class="form-check">
+                                <input class="form-check-input product-checkbox" type="checkbox" data-product-id="${product.productId}">
+                                <label class="form-check-label"></label>
+                            </div>
+                        </td>
+                        <td>${product.productId}</td>
+                        <td>${product.productName}</td>
+                        <td>${product.category || '未分类'}</td>
+                        <td>${product.price.toFixed(2)}</td>
+                        <td>${product.stock.toFixed(1)}</td>
+                        <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    </tr>
+                `;
+                
+                $productList.append(row);
+            });
+            
+            // 重新绑定复选框事件
+            $('.product-checkbox').on('change', function() {
+                // 如果有任意一个未选中，取消全选状态
+                if (!$(this).prop('checked')) {
+                    $('#selectAllProducts').prop('checked', false);
+                }
+                
+                // 如果全部选中，设置全选状态
+                if ($('.product-checkbox:checked').length === $('.product-checkbox').length) {
+                    $('#selectAllProducts').prop('checked', true);
+                }
+                
+                updateSelectedCount();
+            });
+            
+            // 初始化选中状态
+            updateSelectedCount();
+        }
+        
+        /**
+         * 渲染分页控件
+         */
+        function renderPagination(currentPage, totalPages, callback) {
+            const $pagination = $('#pagination');
+            $pagination.empty();
+            
+            // 如果总页数小于等于1，不显示分页
+            if (totalPages <= 1) {
+                return;
+            }
+            
+            // 添加上一页按钮
+            $pagination.append(`
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">上一页</a>
+                </li>
+            `);
+            
+            // 计算显示的页码范围
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            // 调整起始页，确保始终显示5个页码（如果总页数足够）
+            if (endPage - startPage < 4 && totalPages > 5) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            // 添加页码按钮
+            for (let i = startPage; i <= endPage; i++) {
+                $pagination.append(`
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `);
+            }
+            
+            // 添加下一页按钮
+            $pagination.append(`
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage + 1}">下一页</a>
+                </li>
+            `);
+            
+            // 绑定页码点击事件
+            $('.page-link').on('click', function(e) {
+                e.preventDefault();
+                
+                // 如果是禁用状态则不执行
+                if ($(this).parent().hasClass('disabled')) {
+                    return;
+                }
+                
+                const page = parseInt($(this).data('page'));
+                callback(page);
+            });
+        }
+        
+        /**
+         * 更新选中产品数量
+         */
+        function updateSelectedCount() {
+            const selectedCount = $('.product-checkbox:checked').length;
+            
+            // 更新选中数量显示
+            $('#selectedCount').text(selectedCount);
+            $('#selectedCountInfo').toggle(selectedCount > 0);
+            
+            // 启用/禁用批量操作按钮
+            $('#batchPublishBtn, #batchUnpublishBtn, #batchDeleteBtn').prop('disabled', selectedCount === 0);
+        }
+        
+        /**
+         * 获取选中的产品ID列表
+         */
+        function getSelectedProductIds() {
+            return $('.product-checkbox:checked').map(function() {
+                return parseInt($(this).data('product-id'));
+            }).get();
+        }
+        
+        /**
+         * 批量更新产品状态
+         */
+        async function batchUpdateStatus(farmerId, productIds, status) {
+            try {
+                // 使用Axios发送请求
+                const response = await http.put('/products/batch/status', {
+                    productIds: productIds,
+                    status: status,
+                    farmerId: farmerId
+                });
+                
+                if (response.status === 200) {
+                    alert(response.data.message);
+                    
+                    // 重新加载产品列表
+                    const currentPage = parseInt($('.pagination .active .page-link').data('page')) || 1;
+                    const pageSize = parseInt($('#pageSize').val());
+                    
+                    loadProducts(farmerId, currentPage, pageSize);
+                } else {
+                    throw new Error(`批量${status}产品失败`);
+                }
+            } catch (error) {
+                console.error(`批量${status}产品失败`, error);
+                alert(`批量${status}产品失败: ` + (error.response?.data?.message || error.message));
+            }
+        }
+        
+        /**
+         * 批量删除产品
+         */
+        async function batchDeleteProducts(farmerId, productIds) {
+            try {
+                // 使用Axios发送请求
+                const response = await http.delete('/products/batch', {
+                    data: {
+                        productIds: productIds,
+                        farmerId: farmerId
+                    }
+                });
+                
+                if (response.status === 200) {
+                    alert(response.data.message);
+                    
+                    // 重新加载产品列表
+                    const currentPage = parseInt($('.pagination .active .page-link').data('page')) || 1;
+                    const pageSize = parseInt($('#pageSize').val());
+                    
+                    loadProducts(farmerId, currentPage, pageSize);
+                } else {
+                    throw new Error('批量删除产品失败');
+                }
+            } catch (error) {
+                console.error('批量删除产品失败', error);
+                alert('批量删除产品失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+    </script>
+</body>
+</html> 
+ 
+ 

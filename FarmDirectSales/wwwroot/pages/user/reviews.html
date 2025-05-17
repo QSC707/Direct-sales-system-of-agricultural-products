@@ -328,16 +328,16 @@
         // 更新界面
         function updateUI() {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
-            
-            // 设置用户名
+                
+                // 设置用户名
             document.getElementById('username').textContent = user.username || '用户名';
-            
+                
             // 根据用户角色显示对应菜单
-            if (user.role === 'farmer') {
-                document.getElementById('farmer-menu-item').classList.remove('d-none');
-            } else if (user.role === 'admin') {
-                document.getElementById('admin-menu-item').classList.remove('d-none');
-            }
+                if (user.role === 'farmer') {
+                    document.getElementById('farmer-menu-item').classList.remove('d-none');
+                } else if (user.role === 'admin') {
+                    document.getElementById('admin-menu-item').classList.remove('d-none');
+                }
         }
         
         // 加载评价数据

@@ -5,7 +5,7 @@
 
 // 创建Axios实例
 const axiosInstance = axios.create({
-    baseURL: window.API_BASE_URL, // 使用全局API_BASE_URL
+    baseURL: window.API_BASE_URL || 'http://localhost:5004/api', // 使用全局API_BASE_URL或默认值
     timeout: 10000, // 请求超时时间10秒
     headers: {
         'Content-Type': 'application/json'
@@ -26,6 +26,14 @@ axiosInstance.interceptors.request.use(
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
+        
+        // 检测是否是FormData类型，如果是，不要设置Content-Type
+        if (config.data instanceof FormData) {
+            // 删除Content-Type，让浏览器自动设置
+            delete config.headers['Content-Type'];
+            console.log('检测到FormData，自动移除Content-Type头');
+        }
+        
         return config;
     },
     error => {
@@ -36,30 +44,44 @@ axiosInstance.interceptors.request.use(
 
 /**
  * 响应拦截器
- * 统一处理响应数据和错误
+ * 处理响应统一格式和错误处理
  */
 axiosInstance.interceptors.response.use(
     response => {
-        // 直接返回响应数据
+        // 如果服务器返回的数据有code字段，检查错误码
+        if (response.data && typeof response.data === 'object' && response.data.code !== undefined) {
+            if (response.data.code !== 200) {
+                // 服务器业务错误
+                console.warn('服务器业务错误:', response.data);
+                return Promise.resolve(response.data);
+            }
+        }
+        
+        // 正常响应
         return response.data;
     },
     error => {
         console.error('响应错误:', error);
         
-        // 处理未授权(401)错误，重定向到登录页面
+        // 检查是否是认证错误
         if (error.response && error.response.status === 401) {
-            // 清除登录状态
+            console.warn('认证失效，需要重新登录');
+            // 清除本地token
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             
-            // 获取当前URL作为重定向参数
-            const redirectUrl = encodeURIComponent(window.location.href);
-            window.location.href = `/pages/login.html?redirect=${redirectUrl}`;
+            // 如果不是登录页面，跳转到登录页面
+            if (window.location.pathname !== '/login.html' && window.location.pathname !== '/index.html') {
+                window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+            }
         }
         
-        // 提取错误信息
-        const errorMsg = error.response?.data?.message || '请求失败，请稍后重试';
-        return Promise.reject(new Error(errorMsg));
+        // 构造统一的错误返回
+        const errorMessage = error.response && error.response.data && error.response.data.message
+            ? error.response.data.message
+            : '请求失败，请稍后重试';
+            
+        return Promise.reject(new Error(errorMessage));
     }
 );
 
@@ -74,48 +96,53 @@ const isLoggedIn = () => {
 };
 
 /**
- * HTTP模块对象
- * 提供通用的HTTP请求方法，使用Axios实例发送请求
+ * HTTP接口封装
  */
 const http = {
+    // Axios实例
+    defaults: axiosInstance.defaults,
+    
     /**
      * GET请求
      * @param {string} url 请求URL
      * @param {Object} params 查询参数
+     * @param {Object} config 其他配置选项
      * @returns {Promise} 响应数据
      */
-    get: (url, params = {}) => {
-        return axiosInstance.get(url, { params });
+    get: (url, params = {}, config = {}) => {
+        return axiosInstance.get(url, { params, ...config });
     },
     
     /**
      * POST请求
      * @param {string} url 请求URL
      * @param {Object} data 请求体数据
+     * @param {Object} config 其他配置选项
      * @returns {Promise} 响应数据
      */
-    post: (url, data = {}) => {
-        return axiosInstance.post(url, data);
+    post: (url, data = {}, config = {}) => {
+        return axiosInstance.post(url, data, config);
     },
     
     /**
      * PUT请求
      * @param {string} url 请求URL
      * @param {Object} data 请求体数据
+     * @param {Object} config 其他配置选项
      * @returns {Promise} 响应数据
      */
-    put: (url, data = {}) => {
-        return axiosInstance.put(url, data);
+    put: (url, data = {}, config = {}) => {
+        return axiosInstance.put(url, data, config);
     },
     
     /**
      * DELETE请求
      * @param {string} url 请求URL
-     * @param {Object} data 请求体数据
+     * @param {Object} config 其他配置选项
      * @returns {Promise} 响应数据
      */
-    delete: (url, data = {}) => {
-        return axiosInstance.delete(url, { data });
+    delete: (url, config = {}) => {
+        return axiosInstance.delete(url, config);
     }
 };
 

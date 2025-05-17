@@ -21,6 +21,7 @@ window.dependencyCallbacks = [];
     if (typeof jQuery !== 'undefined') {
         console.log('jQuery 已存在');
         window.dependenciesLoaded.jquery = true;
+        loadBootstrap();
         executeCallbacks();
         return;
     }
@@ -33,6 +34,7 @@ window.dependencyCallbacks = [];
     script.onload = function() {
         console.log('jQuery 加载成功');
         window.dependenciesLoaded.jquery = true;
+        window.$ = jQuery; // 确保$ 全局变量设置
         loadBootstrap();
         executeCallbacks();
     };
@@ -46,8 +48,25 @@ window.dependencyCallbacks = [];
         backupScript.onload = function() {
             console.log('jQuery 从备用CDN加载成功');
             window.dependenciesLoaded.jquery = true;
+            window.$ = jQuery; // 确保$ 全局变量设置
             loadBootstrap();
             executeCallbacks();
+        };
+        backupScript.onerror = function() {
+            console.error('所有jQuery CDN加载失败');
+            // 最后一次尝试从本地加载
+            var localScript = document.createElement('script');
+            localScript.type = 'text/javascript';
+            localScript.src = '/lib/jquery/jquery.min.js';
+            localScript.async = false;
+            localScript.onload = function() {
+                console.log('jQuery 从本地加载成功');
+                window.dependenciesLoaded.jquery = true;
+                window.$ = jQuery; // 确保$ 全局变量设置
+                loadBootstrap();
+                executeCallbacks();
+            };
+            document.head.appendChild(localScript);
         };
         document.head.appendChild(backupScript);
     };
@@ -89,17 +108,14 @@ window.initDependencies = function(callback) {
         
         // 如果bootstrap已加载则直接执行回调
         if (window.dependenciesLoaded.bootstrap) {
-            callback();
+            try {
+                callback();
+            } catch (e) {
+                console.error('执行回调时出错:', e);
+            }
         } else {
             // 否则等待bootstrap加载完成
-            $(document).ready(function() {
-                if (window.dependenciesLoaded.bootstrap) {
-                    callback();
-                } else {
-                    // 添加到回调队列
-                    window.dependencyCallbacks.push(callback);
-                }
-            });
+            window.dependencyCallbacks.push(callback);
         }
     }
 };
@@ -130,8 +146,16 @@ function executeCallbacks() {
  */
 function loadBootstrap() {
     loadStylesheet('https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css');
+    
+    // 检查jQuery是否已加载，Bootstrap依赖jQuery
+    if (!window.dependenciesLoaded.jquery) {
+        console.warn('无法加载Bootstrap，jQuery尚未加载');
+        return;
+    }
+    
     loadScript('https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js', function() {
         window.dependenciesLoaded.bootstrap = true;
+        console.log('Bootstrap 加载成功');
         executeCallbacks();
     });
 }
@@ -145,8 +169,13 @@ function loadScript(url, callback) {
     var script = document.createElement('script');
     script.type = 'text/javascript';
     script.src = url;
+    script.async = false; // 确保按顺序加载
     script.onload = function() {
         if (callback) callback();
+    };
+    script.onerror = function() {
+        console.error(`加载脚本失败: ${url}`);
+        if (callback) callback(new Error(`加载脚本失败: ${url}`));
     };
     document.head.appendChild(script);
 }

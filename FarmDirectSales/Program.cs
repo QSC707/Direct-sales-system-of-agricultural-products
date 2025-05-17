@@ -9,6 +9,8 @@ using FarmDirectSales.Middlewares;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -145,6 +147,14 @@ app.UseDefaultFiles(new DefaultFilesOptions
 
 // 先注册静态文件中间件，确保前端文件可以被访问
 app.UseStaticFiles();
+
+// 添加额外的静态文件映射，确保上传目录可以被访问
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")),
+    RequestPath = "/uploads"
+});
 
 // 使用CORS
 app.UseCors();

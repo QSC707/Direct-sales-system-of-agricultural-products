@@ -359,7 +359,7 @@
                 }
                 
                 // 使用Axios获取购物车数据
-                const response = await http.get(`/api/cart/user/${user.userId}`);
+                const response = await http.get(`/cart/user/${user.userId}`);
                 cartData = response.data;
                 
                 if (!cartData || !cartData.items || cartData.items.length === 0) {
@@ -448,7 +448,7 @@
                 
                 // 提交多个订单（购物车中的每个商品一个订单）
                 const orderPromises = cartData.items.map(item => {
-                    return http.post('/api/order', {
+                    return http.post('/order', {
                         userId: user.userId,
                         productId: item.product.productId,
                         quantity: item.quantity,
@@ -460,7 +460,7 @@
                 const results = await Promise.all(orderPromises);
                 
                 // 清空购物车
-                await http.delete(`/api/cart/clear/${user.userId}`);
+                await http.delete(`/cart/clear/${user.userId}`);
                 
                 // 根据支付方式进行不同处理
                 if (paymentMethod === 'online') {
