@@ -249,18 +249,15 @@ function logout() {
     localStorage.removeItem('role');
     localStorage.removeItem('user');
     
-    // 根据角色重定向到不同页面
-    if (role === 'farmer') {
-        // 跳转到农户登录页面
-        window.location.href = '/pages/login.html?role=farmer';
-    } else if (role === 'admin') {
-        // 跳转到管理员登录页面
-        window.location.href = '/pages/login.html?role=admin';
-    } else {
-        // 默认跳转到首页
-        window.location.href = '/index.html';
-    }
+    // 记住上次的角色，便于用户再次登录时直接选择相同角色
+    sessionStorage.setItem('last_role', role);
+    
+    // 重定向到登录页面，并传递提示参数和之前的角色
+    window.location.href = '/pages/login.html?reason=logout&last_role=' + role;
 }
+
+// 将logout函数设置为全局函数，这样其他页面可以直接调用
+window.logout = logout;
 
 // 确保jQuery加载后初始化
 if (typeof jQuery !== 'undefined') {

@@ -283,6 +283,20 @@
          * 初始化登录页面
          */
         function initLoginPage() {
+            // 检查是否已登录，如果已登录则重定向（除非明确是退出操作）
+            const urlParams = new URLSearchParams(window.location.search);
+            const reason = urlParams.get('reason');
+            
+            if (reason !== 'logout') {
+                checkLogin(function(user) {
+                    if (user) {
+                        console.log('用户已登录，重定向到相应页面');
+                        redirectAfterLogin(user.role);
+                        return;
+                    }
+                });
+            }
+            
             // 登录表单提交
             $('#login-form').on('submit', function(e) {
                 e.preventDefault();
@@ -311,12 +325,11 @@
             });
             
             // 处理URL参数
-            const urlParams = new URLSearchParams(window.location.search);
-            const reason = urlParams.get('reason');
             const role = urlParams.get('role');
+            const lastRole = urlParams.get('last_role');
             const redirectUrl = urlParams.get('redirect');
             
-            // 如果URL中指定了角色，则选择该角色
+            // 优先使用URL中指定的角色，其次使用上次退出时的角色
             if (role && ['customer', 'farmer', 'admin'].includes(role)) {
                 selectRole(role);
                 
@@ -326,6 +339,9 @@
                 } else if (role === 'admin') {
                     showMessage('请使用管理员账号登录', 'info');
                 }
+            } else if (lastRole && ['customer', 'farmer', 'admin'].includes(lastRole)) {
+                // 如果没有指定角色，但有上次退出的角色信息，则选择该角色
+                selectRole(lastRole);
             }
             
             // 存储重定向URL（如果存在）
@@ -340,6 +356,18 @@
                 showError('您的账号权限不足，无法访问该页面');
             } else if (reason === 'expired') {
                 showError('登录已过期，请重新登录');
+            } else if (reason === 'logout') {
+                // 获取角色名称用于显示
+                let roleName = '账号';
+                if (lastRole === 'farmer') {
+                    roleName = '农户账号';
+                } else if (lastRole === 'admin') {
+                    roleName = '管理员账号';
+                } else if (lastRole === 'customer') {
+                    roleName = '用户账号';
+                }
+                
+                showMessage(`您已成功退出${roleName}，可以选择身份重新登录`, 'success');
             }
         }
         
@@ -457,7 +485,20 @@
          */
         function showMessage(message, type) {
             const $error = $('#login-error');
-            $error.text(message).removeClass('d-none alert-danger').addClass('alert-' + type);
+            $error.text(message).removeClass('d-none alert-danger alert-info alert-warning alert-success').addClass('alert-' + type);
+            
+            // 如果是成功消息，添加淡出效果
+            if (type === 'success') {
+                // 先添加fadeIn动画效果
+                $error.hide().fadeIn(500);
+                
+                // 5秒后自动淡出
+                setTimeout(function() {
+                    $error.fadeOut(1000, function() {
+                        $error.removeClass('alert-success').addClass('d-none').show();
+                    });
+                }, 5000);
+            }
         }
         
         /**

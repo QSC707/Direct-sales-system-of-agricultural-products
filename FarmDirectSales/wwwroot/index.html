@@ -362,9 +362,37 @@
         
         // 退出登录
         function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/index.html';
+            // 使用auth.js中的统一logout函数实现
+            if (typeof window.logout === 'function') {
+                // 如果auth.js的logout函数已加载，直接调用
+                window.logout();
+            } else {
+                // 如果auth.js还没加载完，先保存当前角色再跳转
+                const userStr = localStorage.getItem('user');
+                let role = 'customer';
+                
+                try {
+                    if (userStr) {
+                        const userData = JSON.parse(userStr);
+                        role = userData.role || 'customer';
+                    }
+                } catch (e) {
+                    console.error('解析用户数据失败:', e);
+                }
+                
+                // 清除本地存储的认证信息
+                localStorage.removeItem('token');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('username');
+                localStorage.removeItem('role');
+                localStorage.removeItem('user');
+                
+                // 记住上次的角色，便于用户再次登录时直接选择相同角色
+                sessionStorage.setItem('last_role', role);
+                
+                // 重定向到登录页面，并传递提示参数和之前的角色
+                window.location.href = '/pages/login.html?reason=logout&last_role=' + role;
+            }
         }
         
         // 加载热门商品
