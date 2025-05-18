@@ -321,7 +321,7 @@
         // 加载配送区域列表
         async function loadDeliveryAreas() {
             try {
-                const response = await http.get('/api/delivery-area');
+                const response = await api.deliveryArea.getAll();
                 
                 const tableBody = document.getElementById('areas-list');
                 const noDataPlaceholder = document.getElementById('no-data-placeholder');
@@ -420,7 +420,7 @@
                     description: description || null
                 };
                 
-                const response = await http.post('/api/delivery-area', requestData);
+                const response = await api.deliveryArea.add(requestData);
                 
                 if (response.code === 200) {
                     // 关闭模态框
@@ -498,7 +498,7 @@
                     description: description || null
                 };
                 
-                const response = await http.put(`/api/delivery-area/${areaId}`, requestData);
+                const response = await api.deliveryArea.update(areaId, requestData);
                 
                 if (response.code === 200) {
                     // 关闭模态框
@@ -545,7 +545,7 @@
             deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>删除中...';
             
             try {
-                const response = await http.delete(`/api/delivery-area/${areaId}`);
+                const response = await api.deliveryArea.delete(areaId);
                 
                 if (response.code === 200) {
                     // 关闭模态框
@@ -582,7 +582,7 @@
             initBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>初始化中...';
             
             try {
-                const response = await http.post('/api/delivery-area/initialize');
+                const response = await api.deliveryArea.initializeDefault();
                 
                 if (response.code === 200) {
                     // 重新加载数据

@@ -634,6 +634,11 @@
             获取支持当天配送的区域
             </summary>
         </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryController.GetSameDayAreas">
+            <summary>
+            获取支持当天配送的区域 (用于兼容前端代码的API调用)
+            </summary>
+        </member>
         <member name="M:FarmDirectSales.Controllers.DeliveryController.CheckSameDayDelivery(FarmDirectSales.Controllers.CheckSameDayDeliveryRequest)">
             <summary>
             检查地址是否支持当天配送
@@ -811,7 +816,7 @@
         </member>
         <member name="M:FarmDirectSales.Controllers.OrderController.ShipOrder(System.Int32,FarmDirectSales.Controllers.ShipOrderRequest)">
             <summary>
-            发货
+            开始配送订单（已移除发货功能，改为直接开始配送）
             </summary>
         </member>
         <member name="M:FarmDirectSales.Controllers.OrderController.CompleteOrder(System.Int32,FarmDirectSales.Controllers.CompleteOrderRequest)">
@@ -871,7 +876,7 @@
         </member>
         <member name="T:FarmDirectSales.Controllers.ShipOrderRequest">
             <summary>
-            发货请求模型
+            开始配送请求模型（已移除物流信息字段）
             </summary>
         </member>
         <member name="P:FarmDirectSales.Controllers.ShipOrderRequest.FarmerId">

@@ -11,9 +11,13 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <!-- 自定义样式 -->
     <link href="/css/style.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/js/axios-config.js"></script>
+    <!-- 认证相关 -->
+    <script src="/js/auth.js"></script>
     <!-- 行政区划数据 -->
     <script src="/js/region-data.js"></script>
     <style>
@@ -224,11 +228,6 @@
                                 <select class="form-select" id="saved-addresses">
                                     <option value="">-- 请选择收货地址 --</option>
                                 </select>
-                                <div class="mt-2 text-end">
-                                    <button type="button" class="btn btn-sm btn-outline-primary" id="add-new-address">
-                                        <i class="fas fa-plus-circle me-1"></i>新增收货地址
-                                    </button>
-                                </div>
                             </div>
                             
                             <form id="shipping-form">
@@ -258,8 +257,8 @@
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <label for="detailAddress" class="form-label">详细地址</label>
-                                        <input type="text" class="form-control" id="streetAddress" required placeholder="区县、街道等">
+                                        <label for="district" class="form-label">详细地址</label>
+                                        <input type="text" class="form-control" id="district" required placeholder="区县、街道等">
                                     </div>
                                     <div class="col-12">
                                         <label for="detailAddress" class="form-label">详细地址</label>
@@ -269,13 +268,16 @@
                                         <label for="order-notes" class="form-label">订单备注 (可选)</label>
                                         <textarea class="form-control" id="order-notes" rows="2" placeholder="如有特殊要求请在此备注，如送货时间等"></textarea>
                                     </div>
-                                    <div class="col-12">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="saveAddress">
-                                            <label class="form-check-label" for="saveAddress">
-                                                保存为我的地址
-                                            </label>
+                                    <!-- 地址保存按钮 -->
+                                    <div class="col-12 mt-3">
+                                        <button type="button" class="btn btn-outline-success" id="save-address-btn">
+                                            <i class="fas fa-plus-circle me-2"></i>将此地址添加到我的地址簿
+                                        </button>
+                                        <div class="mt-2 text-muted small">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            您最多可以保存7个收货地址，如果已达上限，请前往<a href="/pages/user/profile.html" class="text-decoration-none">个人中心</a>管理地址。
                                         </div>
+                                        <div id="address-save-result" class="mt-2 d-none"></div>
                                     </div>
                                 </div>
                             </form>
@@ -294,18 +296,25 @@
                                 <div class="d-flex align-items-center mb-3">
                                     <div class="me-3">
                                         <i class="fas fa-truck fa-2x text-success"></i>
-                                    </div>
-                                    <div>
+                                            </div>
+                                            <div>
                                         <strong>货到付款配送</strong>
                                         <p class="text-muted mb-0">下单后由附近农户直接配送，下单后会尽快安排送货</p>
-                                    </div>
-                                </div>
+                                            </div>
+                                        </div>
                                 <input type="hidden" name="deliveryMethod" id="deliveryMethod" value="sameDay">
                                 
                                 <!-- 配送地区信息 -->
                                 <div id="deliveryAreaInfo" class="alert alert-info mt-2">
                                     <i class="fas fa-info-circle me-2"></i>
-                                    <span>我们将尽快为您配送商品，若所在区域超出配送范围，系统会通知您协商其他配送方案</span>
+                                    <span><strong>重要提示：</strong>我们只能在以下配送区域内提供服务，超出配送范围将无法下单</span>
+                                    <div id="delivery-status-message" class="mt-2 p-2 rounded d-none"></div>
+                                    <div class="mt-2 small">
+                                        <p class="mb-1"><strong>当前支持配送的区域：</strong></p>
+                                        <ul id="sameday-areas-list" class="mb-0">
+                                            <!-- 将通过JS加载区域列表 -->
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -405,58 +414,94 @@
         </div>
     </footer>
 
+    <!-- 页脚结束 -->
+
+    <!-- Toast 提示 -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span id="success-message">操作成功</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        
+        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-times-circle me-2"></i>
+                    <span id="error-message">操作失败</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- API 调用 -->
     <script src="/js/api.js"></script>
     
-    <!-- 结账页面逻辑 -->
+    <!-- 主要脚本 -->
     <script>
-        // 全局变量存储购物车数据
+        // 全局变量
         let cartData = null;
+        let deliveryAreas = [];
+        let currentAddressInfo = {
+            province: '',
+            city: '',
+            district: ''
+        };
+        let successToast = null;
+        let errorToast = null;
         
         document.addEventListener('DOMContentLoaded', function() {
-            // 检查用户登录状态
-            if (!checkAuthStatus()) {
-                // 未登录跳转到登录页
-                window.location.href = '/pages/login.html?redirect=checkout';
-                return;
-            }
-            
-            // 加载购物车数据
-            loadCartData();
-            
-            // 初始化省市选择
-            initRegionSelector();
-            
-            // 加载已保存的地址
-            loadSavedAddresses();
-            
-            // 设置地址选择事件
-            document.getElementById('saved-addresses').addEventListener('change', function() {
-                const selectedAddressId = this.value;
-                if (selectedAddressId) {
-                    fillAddressForm(selectedAddressId);
-                }
-            });
-            
-            // 设置添加新地址按钮事件
-            document.getElementById('add-new-address').addEventListener('click', function() {
-                // 清空地址表单
-                clearAddressForm();
-            });
-            
-            // 设置提交订单按钮点击事件
-            document.getElementById('place-order-btn').addEventListener('click', placeOrder);
+            // 初始化Toast
+            successToast = new bootstrap.Toast(document.getElementById('successToast'));
+            errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
             
             // 设置登出按钮事件
             document.getElementById('logout-button').addEventListener('click', function(e) {
                 e.preventDefault();
                 logout();
             });
+            
+            // 检查用户登录状态
+            checkLogin(function(user) {
+                if (!user) {
+                // 未登录跳转到登录页
+                window.location.href = '/pages/login.html?redirect=checkout';
+                return;
+            }
+            
+            // 更新导航栏状态
+            checkAuthStatus();
+            
+            // 加载购物车数据
+            loadCartData();
+            
+                // 加载配送区域数据
+                loadDeliveryAreas();
+                
+                // 加载用户已保存地址
+                loadUserAddresses();
+                
+                // 初始化省份选择器
+                initProvinceSelector();
+                
+                // 绑定事件
+            document.getElementById('place-order-btn').addEventListener('click', placeOrder);
+                document.getElementById('saved-addresses').addEventListener('change', fillAddressFromSelection);
+                document.getElementById('province').addEventListener('change', loadCities);
+            
+                // 绑定保存地址按钮事件
+                document.getElementById('save-address-btn').addEventListener('click', saveAddress);
+            });
         });
         
-        // 检查用户登录状态
+        // 检查用户登录状态并更新导航栏
         function checkAuthStatus() {
             const token = localStorage.getItem('token');
             const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -478,6 +523,9 @@
                 
                 return true; // 已登录
             } else {
+                // 未登录
+                document.getElementById('unauthenticated-menu').classList.remove('d-none');
+                document.getElementById('authenticated-menu').classList.add('d-none');
                 return false; // 未登录
             }
         }
@@ -486,441 +534,465 @@
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            localStorage.removeItem('username');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('role');
             window.location.href = '/index.html';
         }
         
-        // 更新订单摘要
-        function updateOrderSummary(cartData) {
-            try {
-                // 计算商品总金额
-                let itemsTotal = 0;
-                if (cartData && cartData.items) {
-                    itemsTotal = cartData.items.reduce((sum, item) => {
-                        return sum + (item.product.price * item.quantity);
-                    }, 0);
-                }
-                
-                // 配送费
-                let shippingFee = 0;
-                
-                // 如果金额不满足最低起送价，则收取配送费
-                if (itemsTotal < 100) {
-                    shippingFee = 10;
-                }
-                
-                // 计算总金额
-                const totalAmount = itemsTotal + shippingFee;
-                
-                // 更新显示
-                document.getElementById('items-total').textContent = `¥${itemsTotal.toFixed(2)}`;
-                document.getElementById('shipping-fee').textContent = shippingFee === 0 ? '免费' : `¥${shippingFee.toFixed(2)}`;
-                document.getElementById('total-amount').textContent = `¥${totalAmount.toFixed(2)}`;
-            } catch (error) {
-                console.error('更新订单摘要失败:', error);
-            }
-        }
-        
-        // 检查配送地区
-        let isSameDayDeliveryAvailable = false;
-        
-        /**
-         * 检查配送地区
-         * 判断用户所选地址是否在当天配送范围内
-         */
-        async function checkDeliveryArea() {
-            try {
-                // 获取当前选择的省市
-                const province = document.getElementById('province').value;
-                const city = document.getElementById('city').value;
-                        
-                // 如果未选择地址，显示默认信息
-                if (!province || !city) {
-                    document.getElementById('delivery-status-message').innerHTML = 
-                        '请选择您的地址，以便我们确认是否支持当天配送';
-                    return;
-                }
-                
-                // 默认支持的配送区域（当API不可用时使用）
-                const defaultDeliveryAreas = [
-                    { province: '广东省', city: '广州市' },
-                    { province: '广东省', city: '深圳市' },
-                    { province: '广东省', city: '佛山市' },
-                    { province: '广东省', city: '东莞市' }
-                ];
-                
-                let deliveryAreas = [];
-                
-                // 检查API是否存在
-                if (api && api.delivery && typeof api.delivery.getSameDayAreas === 'function') {
-            try {
-                        // 尝试获取支持当天配送的区域列表
-                        const response = await api.delivery.getSameDayAreas();
-                
-                if (response.code === 200 && response.data) {
-                            deliveryAreas = response.data;
-                        } else {
-                            console.warn('获取配送区域失败，使用默认数据:', response.message);
-                            deliveryAreas = defaultDeliveryAreas;
-                        }
-                    } catch (error) {
-                        console.warn('获取配送区域API调用失败，使用默认数据:', error);
-                        deliveryAreas = defaultDeliveryAreas;
-                    }
-                } else {
-                    console.warn('配送区域API不存在，使用默认数据');
-                    deliveryAreas = defaultDeliveryAreas;
-                }
-                
-                // 更新支持区域列表显示
-                const areasList = document.getElementById('sameday-areas-list');
-                let areasHtml = '';
-                
-                deliveryAreas.forEach(area => {
-                    areasHtml += `<li>${area.province} ${area.city}</li>`;
-                });
-                
-                areasList.innerHTML = areasHtml || '<li>暂无支持区域数据</li>';
-                
-                // 检查当前地址是否在支持区域内
-                const currentArea = `${province} ${city}`;
-                isSameDayDeliveryAvailable = deliveryAreas.some(area => 
-                    `${area.province} ${area.city}` === currentArea);
-                    
-                // 更新配送状态信息
-                const statusMessage = document.getElementById('delivery-status-message');
-                if (isSameDayDeliveryAvailable) {
-                    statusMessage.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-1"></i> 您的地址支持当天配送</span>';
-                } else {
-                    statusMessage.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle me-1"></i> 您的地址暂不支持当天配送</span>';
-                    
-                    // 自动切换到快递配送
-                    document.getElementById('deliveryExpress').checked = true;
-                }
-            } catch (error) {
-                console.error('检查配送区域失败:', error);
-                document.getElementById('delivery-status-message').innerHTML = 
-                    '无法获取配送区域信息，请选择快递配送';
-                // 出错时默认切换到快递配送
-                document.getElementById('deliveryExpress').checked = true;
-            }
-        }
-        
-        // 初始化省市选择器
-        function initRegionSelector() {
-            const provinceSelect = document.getElementById('province');
-            const citySelect = document.getElementById('city');
+        // 从选择的地址填充表单
+        function fillAddressFromSelection() {
+            const selectElement = document.getElementById('saved-addresses');
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
             
-            // 如果regionData不存在，则退出
-            if (!window.regionData) {
-                console.error('省市数据未加载');
+            if (selectedOption && selectedOption.dataset.address) {
+                try {
+                    const addressData = JSON.parse(selectedOption.dataset.address);
+                    fillAddressFromData(addressData);
+                } catch (e) {
+                    console.error('解析地址数据错误:', e);
+                }
+            }
+        }
+        
+        // 根据地址数据填充表单
+        function fillAddressFromData(address) {
+            document.getElementById('receiverName').value = address.receiverName || '';
+            document.getElementById('contactPhone').value = address.contactPhone || '';
+                
+            // 选择省份
+            const provinceSelect = document.getElementById('province');
+            provinceSelect.value = address.province || '';
+            provinceSelect.dispatchEvent(new Event('change'));
+            
+            // 需要延迟选择城市，因为城市是基于省份动态加载的
+            setTimeout(() => {
+                const citySelect = document.getElementById('city');
+                citySelect.value = address.city || '';
+                citySelect.dispatchEvent(new Event('change'));
+                
+                document.getElementById('district').value = address.district || '';
+                document.getElementById('detailAddress').value = address.detailAddress || '';
+            }, 300);
+        }
+        
+        // 初始化省份选择器
+        function initProvinceSelector() {
+            if (!window.regionData || !window.regionData.provinces) {
+                console.error('地区数据未加载!');
                 return;
             }
             
-            // 获取省份列表
-            const provinces = window.regionData.getProvinces();
+            const provinceSelect = document.getElementById('province');
+            provinceSelect.innerHTML = '<option value="">请选择省份</option>';
             
-            // 填充省份下拉框
-            provinces.forEach(province => {
+            window.regionData.provinces.forEach(province => {
                 const option = document.createElement('option');
                 option.value = province.name;
                 option.textContent = province.name;
                 provinceSelect.appendChild(option);
             });
+        }
+        
+        // 加载城市选择器
+        function loadCities() {
+            const provinceSelect = document.getElementById('province');
+            const citySelect = document.getElementById('city');
+            const selectedProvince = provinceSelect.value;
             
-            // 省份选择变更事件
-            provinceSelect.addEventListener('change', function() {
-                const provinceCode = window.regionData.getProvinceCode(this.value);
+            // 更新当前地址信息
+            currentAddressInfo.province = selectedProvince;
+            currentAddressInfo.city = '';
+            currentAddressInfo.district = '';
+            
+            // 重置城市选择器
             citySelect.innerHTML = '<option value="">请选择城市</option>';
             
-                if (provinceCode) {
-                    // 获取城市列表
-                    const cities = window.regionData.getCities(provinceCode);
+            if (!selectedProvince) {
+                return;
+            }
             
-                    // 填充城市下拉框
-            cities.forEach(city => {
-                const option = document.createElement('option');
-                        option.value = city.name;
-                option.textContent = city.name;
-                citySelect.appendChild(option);
-                    });
+            if (!window.regionData || !window.regionData.provinces || !window.regionData.cities) {
+                console.error('地区数据未加载!');
+                return;
+            }
+            
+            // 根据省份名称查找省份代码
+            const provinceCode = window.regionData.getProvinceCode(selectedProvince);
+            
+            if (!provinceCode) {
+                console.error('未找到省份代码:', selectedProvince);
+                    return;
                 }
                 
-                // 检查配送区域
-                checkDeliveryArea();
-            });
+            // 获取该省份的城市列表
+            const cities = window.regionData.getCities(provinceCode);
             
-            // 城市选择变更事件
-            citySelect.addEventListener('change', function() {
-                // 检查配送区域
-                checkDeliveryArea();
-                    });
+            if (!cities || cities.length === 0) {
+                console.error('未找到城市数据:', provinceCode);
+                return;
+            }
+            
+            // 填充城市选择器
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.name;
+                option.textContent = city.name;
+                citySelect.appendChild(option);
+            });
         }
         
-        // 加载已保存的地址
-        async function loadSavedAddresses() {
-            try {
-                const savedAddressesSelect = document.getElementById('saved-addresses');
-                
-                // 默认地址数据（当API未实现时使用）
-                const defaultAddresses = [
-                    {
-                        addressId: 'default1',
-                        contactName: '张三',
-                        province: '广东省',
-                        city: '广州市',
-                        streetAddress: '天河区',
-                        detailAddress: '天河路385号',
-                        phone: '13800138000',
-                        isDefault: true
-                    },
-                    {
-                        addressId: 'default2',
-                        contactName: '李四',
-                        province: '广东省',
-                        city: '深圳市',
-                        streetAddress: '南山区',
-                        detailAddress: '科技园路1号',
-                        phone: '13900139000',
-                        isDefault: false
-                    }
-                ];
+        // 更新配送状态
+        function updateDeliveryStatus() {
+            const provinceSelect = document.getElementById('province');
+            const citySelect = document.getElementById('city');
+            const districtInput = document.getElementById('district');
             
-                // 初始化地址选择框
-                savedAddressesSelect.innerHTML = '<option value="">-- 请选择收货地址 --</option>';
+            currentAddressInfo.province = provinceSelect.value;
+            currentAddressInfo.city = citySelect.value;
+            currentAddressInfo.district = districtInput.value;
+            
+            // 移除实时检测配送可用性的代码，仅保留更新当前地址信息的逻辑
+            // 配送范围检测将只在提交订单时进行
+        }
+        
+        // 检查配送可用性
+        function checkDeliveryAvailability(addressInfo) {
+            if (!deliveryAreas || deliveryAreas.length === 0) {
+                return false;
+            }
+            
+            return deliveryAreas.some(area => {
+                // 完全匹配
+                if (area.province === addressInfo.province && 
+                    area.city === addressInfo.city && 
+                    (!area.district || area.district === addressInfo.district)) {
+                    return true;
+                }
                 
-                // 检查API是否存在
-                if (api && api.address && typeof api.address.getSavedAddresses === 'function') {
-                    try {
-                        const response = await api.address.getSavedAddresses();
+                // 省市匹配，区县为空（代表全市范围）
+                if (area.province === addressInfo.province && 
+                    area.city === addressInfo.city && 
+                    !area.district) {
+                    return true;
+                }
+                
+                return false;
+            });
+        }
+        
+        // 显示警告提示
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alert-container') || document.createElement('div');
+            
+            if (!document.getElementById('alert-container')) {
+                alertContainer.id = 'alert-container';
+                alertContainer.style.position = 'fixed';
+                alertContainer.style.top = '20px';
+                alertContainer.style.right = '20px';
+                alertContainer.style.zIndex = '9999';
+                document.body.appendChild(alertContainer);
+                    }
+            
+            const alertElement = document.createElement('div');
+            alertElement.className = `alert alert-${type} alert-dismissible fade show`;
+            alertElement.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            alertContainer.appendChild(alertElement);
+            
+            // 添加动画效果
+            alertElement.style.transition = 'all 0.3s ease-in-out';
+            alertElement.style.opacity = '0';
+            alertElement.style.transform = 'translateX(100%)';
+            
+                setTimeout(() => {
+                alertElement.style.opacity = '1';
+                alertElement.style.transform = 'translateX(0)';
+            }, 10);
                         
-                        if (response && response.code === 200 && response.data && response.data.length > 0) {
-                            // 添加地址选项
-                            response.data.forEach(address => {
-                const option = document.createElement('option');
-                                option.value = address.addressId;
-                                option.textContent = `${address.contactName} - ${address.province}${address.city} (${address.phone})`;
-                                savedAddressesSelect.appendChild(option);
-                            });
-                            console.log('成功加载保存的地址数据');
-            } else {
-                            // 使用默认地址数据
-                            console.warn('未找到已保存的地址，使用默认数据');
-                            addDefaultAddresses(savedAddressesSelect, defaultAddresses);
-            }
-                    } catch (error) {
-                        console.warn('获取保存地址API调用失败，使用默认数据:', error);
-                        addDefaultAddresses(savedAddressesSelect, defaultAddresses);
+            // 设置自动消失
+                        setTimeout(() => {
+                alertElement.classList.remove('show');
+                setTimeout(() => {
+                    // 添加检查确保元素仍然是容器的子节点
+                    if (alertElement.parentNode === alertContainer) {
+                        alertContainer.removeChild(alertElement);
                     }
-                } else {
-                    console.warn('地址API不存在，使用默认数据');
-                    addDefaultAddresses(savedAddressesSelect, defaultAddresses);
-            }
-            } catch (error) {
-                console.error('加载已保存地址失败:', error);
-                // 隐藏地址选择区域
-                document.getElementById('saved-addresses-container').style.display = 'none';
-            }
+                }, 300);
+            }, 5000);
         }
         
-        // 辅助函数：添加默认地址到选择框
-        function addDefaultAddresses(selectElement, addresses) {
-            addresses.forEach(address => {
-                const option = document.createElement('option');
-                option.value = address.addressId;
-                option.textContent = `${address.contactName} - ${address.province}${address.city} (${address.phone})${address.isDefault ? ' [默认]' : ''}`;
-                selectElement.appendChild(option);
-            });
-        }
-        
-        // 填充地址表单
-        async function fillAddressForm(addressId) {
+        // 保存地址
+        async function saveAddress() {
             try {
-                // 默认地址数据（当API未实现时使用）
-                const defaultAddresses = [
-                    {
-                        addressId: 'default1',
-                        contactName: '张三',
-                        province: '广东省',
-                        city: '广州市',
-                        streetAddress: '天河区',
-                        detailAddress: '天河路385号',
-                        phone: '13800138000',
-                        isDefault: true
-                    },
-                    {
-                        addressId: 'default2',
-                        contactName: '李四',
-                        province: '广东省',
-                        city: '深圳市',
-                        streetAddress: '南山区',
-                        detailAddress: '科技园路1号',
-                        phone: '13900139000',
-                        isDefault: false
-                    }
-                ];
+                // 获取收货地址信息
+                const receiverName = document.getElementById('receiverName').value.trim();
+                const contactPhone = document.getElementById('contactPhone').value.trim();
+                const province = document.getElementById('province').value;
+                const city = document.getElementById('city').value;
+                const district = document.getElementById('district').value;
+                const detailAddress = document.getElementById('detailAddress').value.trim();
                 
-                // 检查是否为默认地址ID
-                if (addressId.startsWith('default')) {
-                    const defaultAddress = defaultAddresses.find(addr => addr.addressId === addressId);
-                    if (defaultAddress) {
-                        fillFormWithAddress(defaultAddress);
+                // 验证表单
+                if (!receiverName || !contactPhone || !province || !city || !district || !detailAddress) {
+                    showToast('请填写完整的收货地址信息', 'error');
+                    return;
+                }
+        
+                // 验证手机号
+                if (!/^1[3-9]\d{9}$/.test(contactPhone)) {
+                    showToast('请输入正确的手机号码', 'error');
+                    return;
+                }
+                
+                // 获取用户当前地址数量
+                const addressesResponse = await api.address.getSavedAddresses();
+                if (addressesResponse && addressesResponse.code === 200) {
+                    const existingAddresses = addressesResponse.data || [];
+                    
+                    // 如果地址数量已达到7个，不允许再添加
+                    if (existingAddresses.length >= 7) {
+                        showToast('您最多只能保存7个收货地址，请先删除不需要的地址', 'error');
+                        const resultElement = document.getElementById('address-save-result');
+                        resultElement.className = 'mt-2 alert alert-warning';
+                        resultElement.innerHTML = `
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            您最多只能保存7个收货地址，请前往<a href="/pages/user/profile.html" class="alert-link">个人中心</a>管理地址。
+                        `;
+                        resultElement.classList.remove('d-none');
+                        return;
+                    }
+                    
+                    // 检查是否有相同的地址
+                    let exactSameAddress = false;
+                    
+                    for (const addr of existingAddresses) {
+                        // 统一格式化地址进行比较（去除空格和标点符号）
+                        const normalizeString = (str) => str.replace(/[\s,，。.、；;：:!！?？\-]/g, '').toLowerCase();
+                        
+                        // 比较关键部分是否相同
+                        const isSameProvince = addr.province === province;
+                        const isSameCity = addr.city === city;
+                        const isSameDistrict = addr.district === district;
+                        
+                        // 对详细地址进行归一化处理再比较
+                        const normalizedExistingAddress = normalizeString(addr.detailAddress || '');
+                        const normalizedNewAddress = normalizeString(detailAddress);
+                        const isSameDetail = normalizedExistingAddress === normalizedNewAddress;
+                        
+                        // 比较收货人和联系电话是否相同
+                        const isSameReceiver = addr.receiverName === receiverName;
+                        const isSamePhone = addr.contactPhone === contactPhone;
+                        
+                        // 仅当省市区、详细地址、收货人姓名和联系电话都相同时，才视为完全相同的地址
+                        if (isSameProvince && isSameCity && isSameDistrict && isSameDetail && isSameReceiver && isSamePhone) {
+                            exactSameAddress = true;
+                                    break;
+                                }
+                            }
+                            
+                    if (exactSameAddress) {
+                        showToast('已存在完全相同的地址信息，无需重复添加', 'info');
+                        const resultElement = document.getElementById('address-save-result');
+                        resultElement.className = 'mt-2 alert alert-info';
+                        resultElement.innerHTML = `
+                            <i class="fas fa-info-circle me-2"></i>
+                            您已经添加过完全相同的地址信息（包括收货人和联系电话），无需重复添加。
+                        `;
+                        resultElement.classList.remove('d-none');
                         return;
                     }
                 }
                 
-                // 检查API是否存在
-                if (api && api.address && typeof api.address.getAddressById === 'function') {
-                    try {
-                        const response = await api.address.getAddressById(addressId);
+                // 构建地址数据
+                const addressData = {
+                    receiverName,
+                    contactPhone,
+                    province,
+                    city,
+                    district,
+                    detailAddress,
+                    isDefault: false // 默认不设为默认地址
+                };
+                    
+                // 调用API保存地址
+                const response = await api.address.addAddress(addressData);
                 
-                        if (response && response.code === 200 && response.data) {
-                            fillFormWithAddress(response.data);
-                    } else {
-                            console.warn('获取地址数据失败，尝试使用默认数据');
-                            // 尝试从默认数据中查找
-                            const defaultAddress = defaultAddresses.find(addr => addr.addressId === addressId);
-                            if (defaultAddress) {
-                                fillFormWithAddress(defaultAddress);
-                    }
+                if (response && response.code === 200) {
+                    // 显示成功消息
+                    showToast('地址保存成功', 'success');
+                    const resultElement = document.getElementById('address-save-result');
+                    resultElement.className = 'mt-2 alert alert-success';
+                    resultElement.innerHTML = `
+                        <i class="fas fa-check-circle me-2"></i>
+                        地址已成功保存到您的地址簿！
+                    `;
+                    resultElement.classList.remove('d-none');
+                    
+                    // 延迟一段时间后隐藏成功消息
+                    setTimeout(() => {
+                        resultElement.classList.add('d-none');
+                    }, 5000);
+                    
+                    // 重新加载用户地址
+                    loadUserAddresses();
+                } else {
+                    showToast('保存地址失败: ' + (response?.message || '未知错误'), 'error');
+                    const resultElement = document.getElementById('address-save-result');
+                    resultElement.className = 'mt-2 alert alert-danger';
+                    resultElement.innerHTML = `
+                        <i class="fas fa-times-circle me-2"></i>
+                        保存地址失败: ${response?.message || '未知错误'}
+                    `;
+                    resultElement.classList.remove('d-none');
                 }
             } catch (error) {
-                        console.warn('获取地址API调用失败，尝试使用默认数据:', error);
-                        // 尝试从默认数据中查找
-                        const defaultAddress = defaultAddresses.find(addr => addr.addressId === addressId);
-                        if (defaultAddress) {
-                            fillFormWithAddress(defaultAddress);
-                        }
-                    }
-                } else {
-                    console.warn('地址API不存在，尝试使用默认数据');
-                    // 尝试从默认数据中查找
-                    const defaultAddress = defaultAddresses.find(addr => addr.addressId === addressId);
-                    if (defaultAddress) {
-                        fillFormWithAddress(defaultAddress);
-                    }
-                }
-                    } catch (error) {
-                console.error('填充地址表单失败:', error);
-                    }
-                }
-                
-        // 辅助函数：用地址数据填充表单
-        function fillFormWithAddress(address) {
-            // 填充表单字段
-            document.getElementById('receiverName').value = address.contactName || '';
-            document.getElementById('contactPhone').value = address.phone || '';
+                console.error('保存地址错误:', error);
+                showToast('保存地址错误: ' + error.message, 'error');
+                const resultElement = document.getElementById('address-save-result');
+                resultElement.className = 'mt-2 alert alert-danger';
+                resultElement.innerHTML = `
+                    <i class="fas fa-times-circle me-2"></i>
+                    保存地址失败: ${error.message || '未知错误'}
+                `;
+                resultElement.classList.remove('d-none');
+            }
+        }
+        
+        // 显示Toast消息
+        function showToast(message, type = 'success') {
+            // 设置消息文本
+            const messageElement = document.getElementById(type === 'success' ? 'success-message' : 'error-message');
+            if (messageElement) {
+                messageElement.textContent = message;
+            }
             
-            // 选择省份
-            const provinceSelect = document.getElementById('province');
-            provinceSelect.value = address.province || '';
-                
-            // 触发省份变更事件
-            const event = new Event('change');
-            provinceSelect.dispatchEvent(event);
-                
-            // 等待城市列表加载
-            setTimeout(() => {
-                // 选择城市
-                const citySelect = document.getElementById('city');
-                citySelect.value = address.city || '';
-                    
-                // 触发城市变更事件
-                citySelect.dispatchEvent(new Event('change'));
-                
-                // 填充详细地址
-                document.getElementById('streetAddress').value = address.streetAddress || '';
-                document.getElementById('detailAddress').value = address.detailAddress || '';
-            }, 300);
-                }
-                
-        // 清空地址表单
-        function clearAddressForm() {
-            document.getElementById('receiverName').value = '';
-            document.getElementById('contactPhone').value = '';
-            document.getElementById('province').value = '';
-            document.getElementById('city').innerHTML = '<option value="">请先选择省份</option>';
-            document.getElementById('streetAddress').value = '';
-            document.getElementById('detailAddress').value = '';
-            document.getElementById('saved-addresses').value = '';
+            // 显示对应的Toast
+            if (type === 'success' && successToast) {
+                successToast.show();
+            } else if (type === 'error' && errorToast) {
+                errorToast.show();
+            }
         }
         
         // 提交订单
         async function placeOrder() {
-            // 获取表单数据
-            const shippingAddress = `${document.getElementById('province').value} ${document.getElementById('city').value} ${document.getElementById('streetAddress').value}`;
-            const contactPhone = document.getElementById('contactPhone').value;
-            const contactName = document.getElementById('receiverName').value;
-            
-            // 验证表单
-            if (!contactName) {
-                alert('请填写收货人姓名');
-                document.getElementById('receiverName').focus();
-                return;
-            }
-            
-            if (!contactPhone) {
-                alert('请填写联系电话');
-                document.getElementById('contactPhone').focus();
-                return;
-            }
-            
-            if (!document.getElementById('province').value || !document.getElementById('city').value || !document.getElementById('streetAddress').value) {
-                alert('请填写完整的收货地址');
-                return;
-            }
-            
-            // 显示提交中状态
-            const orderBtn = document.getElementById('place-order-btn');
-            const originalBtnText = orderBtn.innerHTML;
-            orderBtn.disabled = true;
-            orderBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>处理中...';
-            
             try {
-                // 再次验证库存
-                const cartResult = await api.cart.getCart();
-                if (cartResult.code !== 200) {
-                    throw new Error('获取最新购物车数据失败');
+                // 禁用提交按钮，防止重复提交
+                const submitBtn = document.getElementById('place-order-btn');
+                submitBtn.disabled = true;
+            
+                // 获取收货地址信息
+                const receiverName = document.getElementById('receiverName').value.trim();
+                const contactPhone = document.getElementById('contactPhone').value.trim();
+                const province = document.getElementById('province').value;
+                const city = document.getElementById('city').value;
+                const district = document.getElementById('district').value;
+                const detailAddress = document.getElementById('detailAddress').value.trim();
+            
+                // 验证表单
+                if (!receiverName || !contactPhone || !province || !city || !district || !detailAddress) {
+                    showToast('请填写完整的收货地址信息', 'error');
+                    submitBtn.disabled = false;
+                    return;
+                }
+            
+                // 验证手机号
+                if (!/^1[3-9]\d{9}$/.test(contactPhone)) {
+                    showToast('请输入正确的手机号码', 'error');
+                    submitBtn.disabled = false;
+                    return;
                 }
                 
-                const latestCartData = cartResult.data;
-                
-                if (!latestCartData || !latestCartData.items || latestCartData.items.length === 0) {
-                    throw new Error('购物车为空，无法提交订单');
-                }
-                
-                // 检查库存
-                for (const item of latestCartData.items) {
-                    if (item.quantity > item.product.stock) {
-                        throw new Error(`商品"${item.product.productName}"库存不足，当前库存:${item.product.stock}，需求数量:${item.quantity}`);
-                    }
-                }
-                
-                // 准备订单信息
+                // 检查配送区域可用性
                 const addressInfo = {
-                    shippingAddress: shippingAddress + ' ' + document.getElementById('detailAddress').value,
+                    province: province,
+                    city: city,
+                    district: district
+                };
+                
+                const isDeliverable = checkDeliveryAvailability(addressInfo);
+                if (!isDeliverable) {
+                    showToast('您选择的区域暂不支持配送，请修改收货地址', 'error');
+                    
+                    // 显示配送区域提示
+                    const deliveryAreaInfo = document.getElementById('deliveryAreaInfo');
+                    if (deliveryAreaInfo) {
+                        deliveryAreaInfo.scrollIntoView({ behavior: 'smooth' });
+                        
+                        // 显示错误消息
+                        const statusElement = document.getElementById('delivery-status-message');
+                        if (statusElement) {
+                            statusElement.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle me-2"></i>您选择的地区暂不支持配送，请选择其他地址</span>';
+                            statusElement.className = 'mt-2 p-2 bg-danger bg-opacity-10 rounded';
+                        }
+                    }
+                    
+                    submitBtn.disabled = false;
+                return;
+            }
+            
+                // 格式化地址
+                const shippingAddress = `${province} ${city} ${district} ${detailAddress}`;
+                
+                // 构建订单数据
+                const orderData = {
+                    userId: JSON.parse(localStorage.getItem('user') || '{}').userId,
+                    contactName: receiverName,
                     contactPhone: contactPhone,
-                    contactName: contactName,
-                    deliveryMethod: 'sameDay', // 固定使用当天配送
-                    paymentMethod: 'COD' // 确保设置正确的支付方式为货到付款
+                    shippingAddress: shippingAddress,
+                    deliveryMethod: 'express' // 目前默认使用快递配送
                 };
             
-                // 创建订单
-                const orderResult = await api.orders.createFromCart(addressInfo);
+                // 提交订单
+                const response = await api.orders.createFromCart(orderData);
                 
-                if (orderResult.code === 200) {
-                    // 订单创建成功，跳转到订单确认页
-                    alert('订单提交成功！');
-                    window.location.href = '/pages/user/orders.html';
-                } else {
-                    throw new Error(orderResult.message || '创建订单失败');
+                if (response.code === 200) {
+                    // 提示成功并跳转
+                    showToast('订单提交成功！正在跳转...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/pages/user/orders.html';
+                    }, 1500);
+            } else {
+                    showToast(`订单提交失败: ${response.message || '未知错误'}`, 'error');
+                    submitBtn.disabled = false;
                 }
             } catch (error) {
-                console.error('提交订单失败:', error);
-                alert(`提交订单失败: ${error.message}`);
-            } finally {
-                // 恢复按钮状态
-                orderBtn.disabled = false;
-                orderBtn.innerHTML = originalBtnText;
+                console.error('提交订单错误:', error);
+                showToast(`订单提交出错: ${error.message || '未知错误'}`, 'error');
+                document.getElementById('place-order-btn').disabled = false;
+            }
+        }
+        
+        // 加载配送区域数据
+        async function loadDeliveryAreas() {
+            try {
+                const response = await api.delivery.getSameDayAreas();
+                if (response.code === 200) {
+                    deliveryAreas = response.data || [];
+                    
+                    // 更新配送区域列表显示
+                    const areasList = document.getElementById('sameday-areas-list');
+                    if (areasList) {
+                        if (deliveryAreas.length > 0) {
+                            areasList.innerHTML = '';
+                            deliveryAreas.forEach(area => {
+                                const li = document.createElement('li');
+                                li.textContent = `${area.province}${area.city}${area.district || ''}`;
+                                areasList.appendChild(li);
+                            });
+            } else {
+                            areasList.innerHTML = '<li>暂无配送区域信息</li>';
+            }
+        }
+                } else {
+                    console.error('加载配送区域数据失败:', response.message);
+                }
+            } catch (error) {
+                console.error('加载配送区域数据出错:', error);
             }
         }
         
@@ -929,7 +1001,7 @@
             try {
                 // 调用API获取购物车数据
                 const response = await api.cart.getCart();
-                
+            
                 if (response.code === 200) {
                     cartData = response.data;
                     
@@ -938,13 +1010,13 @@
                         renderEmptyCart();
                         return;
                     }
-                    
+            
                     // 渲染购物车商品
                     renderCartItems(cartData.items);
-                    
+                        
                     // 更新订单摘要
                     updateOrderSummary(cartData);
-                } else {
+                    } else {
                     // API返回错误
                     renderCartError(response.message || '获取购物车数据失败');
                 }
@@ -1033,10 +1105,80 @@
                 `;
                 const checkoutItems = document.getElementById('checkout-items');
                 checkoutItems.insertBefore(alertRow, checkoutItems.firstChild);
-            } else {
+                } else {
                 // 启用提交按钮
                 document.getElementById('place-order-btn').disabled = false;
                 document.getElementById('place-order-btn').innerHTML = '<i class="fas fa-check me-2"></i>提交订单';
+            }
+        }
+        
+        // 更新订单摘要
+        function updateOrderSummary(cartData) {
+            try {
+                // 计算商品总金额
+                let itemsTotal = 0;
+                if (cartData && cartData.items) {
+                    itemsTotal = cartData.items.reduce((sum, item) => {
+                        return sum + (item.product.price * item.quantity);
+                    }, 0);
+                }
+                
+                // 配送费
+                let shippingFee = 0;
+                
+                // 如果金额不满足最低起送价，则收取配送费
+                if (itemsTotal < 100) {
+                    shippingFee = 10;
+            }
+            
+            // 计算总金额
+                const totalAmount = itemsTotal + shippingFee;
+                
+                // 更新显示
+                document.getElementById('items-total').textContent = `¥${itemsTotal.toFixed(2)}`;
+                document.getElementById('shipping-fee').textContent = shippingFee === 0 ? '免费' : `¥${shippingFee.toFixed(2)}`;
+                document.getElementById('total-amount').textContent = `¥${totalAmount.toFixed(2)}`;
+            } catch (error) {
+                console.error('更新订单摘要失败:', error);
+            }
+        }
+        
+        // 加载用户已保存地址
+        async function loadUserAddresses() {
+            try {
+                const response = await api.address.getSavedAddresses();
+                
+                if (response && response.code === 200) {
+                    const addresses = response.data || [];
+                    const selectElement = document.getElementById('saved-addresses');
+                    selectElement.innerHTML = '<option value="">-- 请选择收货地址 --</option>';
+                
+                    if (addresses.length === 0) {
+                        // 如果没有保存的地址，显示提示
+                        const emptyOption = document.createElement('option');
+                        emptyOption.disabled = true;
+                        emptyOption.textContent = '没有保存的地址';
+                        selectElement.appendChild(emptyOption);
+                    } else {
+                        // 添加地址选项
+                        addresses.forEach(address => {
+                            const option = document.createElement('option');
+                            option.value = address.addressId;
+                            option.textContent = `${address.receiverName} ${address.contactPhone} (${address.province} ${address.city} ${address.district})`;
+                            option.dataset.address = JSON.stringify(address);
+                            if (address.isDefault) {
+                                option.selected = true;
+                                // 自动填充默认地址
+                                fillAddressFromData(address);
+                            }
+                            selectElement.appendChild(option);
+                        });
+                    }
+                } else {
+                    console.error('加载用户地址失败:', response?.message || '未知错误');
+                }
+            } catch (error) {
+                console.error('加载用户地址错误:', error);
             }
         }
     </script>

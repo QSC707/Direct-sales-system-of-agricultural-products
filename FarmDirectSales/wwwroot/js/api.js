@@ -820,6 +820,98 @@ const api = {
         }
     },
     
+    // 配送区域管理相关
+    deliveryArea: {
+        // 获取所有配送区域
+        getAll: async () => {
+            const response = await fetch(`${window.API_BASE_URL}/delivery-area`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 获取当天配送区域
+        getSameDayAreas: async () => {
+            const response = await fetch(`${window.API_BASE_URL}/delivery-area/sameday`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 添加配送区域（仅管理员）
+        add: async (areaData) => {
+            const response = await fetch(`${window.API_BASE_URL}/delivery-area`, {
+                method: 'POST',
+                headers: window.getHeaders(),
+                body: JSON.stringify(areaData)
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 批量导入配送区域（仅管理员）
+        batchImport: async (areasData) => {
+            const response = await fetch(`${window.API_BASE_URL}/delivery-area/batch`, {
+                method: 'POST',
+                headers: window.getHeaders(),
+                body: JSON.stringify(areasData)
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 更新配送区域（仅管理员）
+        update: async (areaId, areaData) => {
+            const response = await fetch(`${window.API_BASE_URL}/delivery-area/${areaId}`, {
+                method: 'PUT',
+                headers: window.getHeaders(),
+                body: JSON.stringify(areaData)
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 删除配送区域（仅管理员）
+        delete: async (areaId) => {
+            const response = await fetch(`${window.API_BASE_URL}/delivery-area/${areaId}`, {
+                method: 'DELETE',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 初始化默认配送区域（仅管理员）
+        initializeDefault: async () => {
+            const response = await fetch(`${window.API_BASE_URL}/delivery-area/initialize`, {
+                method: 'POST',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 检查地址是否在配送范围内
+        checkDeliveryAvailability: async (address) => {
+            const params = new URLSearchParams({
+                province: address.province,
+                city: address.city,
+                district: address.district
+            });
+            
+            const response = await fetch(`${window.API_BASE_URL}/delivery-area/check?${params.toString()}`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        }
+    },
+    
     // 管理员专用功能
     admin: {
         // 获取所有用户

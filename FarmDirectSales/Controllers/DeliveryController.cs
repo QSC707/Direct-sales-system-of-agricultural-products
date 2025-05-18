@@ -26,8 +26,42 @@ namespace FarmDirectSales.Controllers
         /// <summary>
         /// 获取支持当天配送的区域
         /// </summary>
-        [HttpGet("sameday-areas")]
+        [HttpGet("sameday-delivery-areas")]
         public async Task<IActionResult> GetSameDayDeliveryAreas()
+        {
+            try
+            {
+                var areas = await _context.DeliveryAreas
+                    .Where(a => a.SupportSameDayDelivery)
+                    .OrderBy(a => a.Province)
+                    .ThenBy(a => a.City)
+                    .ThenBy(a => a.District)
+                    .ToListAsync();
+
+                return Ok(new
+                {
+                    code = 200,
+                    message = "获取当天配送区域成功",
+                    data = areas.Select(a => new {
+                        a.Province,
+                        a.City,
+                        a.District,
+                        a.SupportSameDayDelivery,
+                        a.DeliveryFee
+                    }).ToList()
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { code = 400, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// 获取支持当天配送的区域 (用于兼容前端代码的API调用)
+        /// </summary>
+        [HttpGet("sameday-areas")]
+        public async Task<IActionResult> GetSameDayAreas()
         {
             try
             {
