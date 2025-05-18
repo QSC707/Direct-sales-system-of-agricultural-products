@@ -381,11 +381,11 @@
                 }
                 
                 // 清除本地存储的认证信息
-                localStorage.removeItem('token');
+            localStorage.removeItem('token');
                 localStorage.removeItem('userId');
                 localStorage.removeItem('username');
                 localStorage.removeItem('role');
-                localStorage.removeItem('user');
+            localStorage.removeItem('user');
                 
                 // 记住上次的角色，便于用户再次登录时直接选择相同角色
                 sessionStorage.setItem('last_role', role);

@@ -86,7 +86,7 @@ namespace FarmDirectSales.Services
                 else
                 {
                     _logger.LogError($"上传失败: 不支持的文件类型 {extension}，ContentType={file.ContentType}");
-                    throw new ArgumentException($"文件类型不支持，允许的类型: {string.Join(", ", _allowedExtensions)}");
+                throw new ArgumentException($"文件类型不支持，允许的类型: {string.Join(", ", _allowedExtensions)}");
                 }
             }
 
@@ -205,12 +205,12 @@ namespace FarmDirectSales.Services
         /// 删除上传的文件
         /// </summary>
         public async Task<bool> DeleteUploadAsync(int uploadId)
-        {
-            var upload = await _context.Uploads.FindAsync(uploadId);
-            if (upload == null)
             {
-                return false;
-            }
+                var upload = await _context.Uploads.FindAsync(uploadId);
+                if (upload == null)
+                {
+                    return false;
+                }
 
             try
             {
@@ -224,7 +224,7 @@ namespace FarmDirectSales.Services
                 // 删除数据库记录
                 _context.Uploads.Remove(upload);
                 await _context.SaveChangesAsync();
-                
+
                 return true;
             }
             catch (Exception ex)

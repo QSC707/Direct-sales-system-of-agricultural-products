@@ -99,6 +99,7 @@
                                 <select class="form-control" id="statusFilter">
                                     <option value="">所有状态</option>
                                     <option value="待付款">待付款</option>
+                                    <option value="待支付">待支付</option>
                                     <option value="待发货">待发货</option>
                                     <option value="已发货">已发货</option>
                                     <option value="已完成">已完成</option>
@@ -335,6 +336,41 @@
         </div>
     </div>
 
+    <!-- 取消订单确认模态框 -->
+    <div class="modal fade" id="cancelOrderModal" tabindex="-1" role="dialog" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="cancelOrderModalLabel">确认取消订单</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="cancelOrderId">
+                    <div class="alert alert-warning">
+                        <i class="fa fa-exclamation-triangle mr-2"></i>您确定要取消这个订单吗？此操作不可撤销。
+                    </div>
+                    <p>取消订单后，相应的产品库存将会恢复。</p>
+                    <div class="form-group">
+                        <label for="cancelReason">取消原因（可选）</label>
+                        <select class="form-control" id="cancelReason">
+                            <option value="无法发货">无法发货</option>
+                            <option value="产品库存不足">产品库存不足</option>
+                            <option value="与客户协商取消">与客户协商取消</option>
+                            <option value="订单信息有误">订单信息有误</option>
+                            <option value="其他原因">其他原因</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">返回</button>
+                    <button type="button" class="btn btn-danger" id="confirmCancelBtn">确认取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 页脚 -->
     <footer class="bg-dark text-white mt-5 py-3">
         <div class="container text-center">
@@ -401,6 +437,11 @@
                 // 确认发货按钮点击事件
                 $('#confirmShipBtn').on('click', function() {
                     shipOrder();
+                });
+                
+                // 确认取消订单按钮点击事件
+                $('#confirmCancelBtn').on('click', function() {
+                    cancelOrder();
                 });
                 
                 // 退出登录按钮点击事件
@@ -522,6 +563,7 @@
                 let statusBadge = '';
                 switch (order.status) {
                     case '待付款':
+                    case '待支付':
                         statusBadge = '<span class="badge badge-warning">待付款</span>';
                         break;
                     case '待发货':
@@ -563,7 +605,14 @@
                             ${order.status === '待发货' ? 
                                 `<button class="btn btn-sm btn-success ship-order-btn" data-order-id="${order.orderId}">
                                     发货
-                                </button>` : ''
+                                </button>
+                                <button class="btn btn-sm btn-danger cancel-order-btn" data-order-id="${order.orderId}">
+                                    取消
+                                </button>` : 
+                                (order.status === '待付款' || order.status === '待支付' ? 
+                                    `<button class="btn btn-sm btn-danger cancel-order-btn" data-order-id="${order.orderId}">
+                                        取消
+                                    </button>` : '')
                             }
                         </td>
                     </tr>
@@ -582,6 +631,12 @@
             $('.ship-order-btn').on('click', function() {
                 const orderId = $(this).data('order-id');
                 openShipModal(orderId);
+            });
+            
+            // 绑定取消订单按钮事件
+            $('.cancel-order-btn').on('click', function() {
+                const orderId = $(this).data('order-id');
+                openCancelOrderModal(orderId);
             });
         }
         
@@ -740,12 +795,23 @@
                     // 只有待发货状态的订单可以发货
                     if (orderDetail.status === '待发货') {
                         $('#shipOrderBtn').show().data('order-id', orderId);
+                        // 待发货状态的订单也可以取消
+                        $('#cancelOrderBtn').show().data('order-id', orderId);
+                    } else if (orderDetail.status === '待付款' || orderDetail.status === '待支付') {
+                        // 待支付状态的订单可以取消
+                        $('#cancelOrderBtn').show().data('order-id', orderId);
                     }
                     
                     // 绑定发货按钮点击事件
                     $('#shipOrderBtn').off('click').on('click', function() {
                         $('#orderDetailModal').modal('hide');
                         openShipModal($(this).data('order-id'));
+                    });
+                    
+                    // 绑定取消订单按钮点击事件
+                    $('#cancelOrderBtn').off('click').on('click', function() {
+                        $('#orderDetailModal').modal('hide');
+                        openCancelOrderModal($(this).data('order-id'));
                     });
                 } else {
                     // 显示错误信息
@@ -834,6 +900,7 @@
         function getStatusBadge(status) {
             switch (status) {
                 case '待付款':
+                case '待支付':
                     return '<span class="badge badge-warning">待付款</span>';
                 case '待发货':
                     return '<span class="badge badge-primary">待发货</span>';
@@ -845,6 +912,67 @@
                     return '<span class="badge badge-danger">已取消</span>';
                 default:
                     return '<span class="badge badge-secondary">' + status + '</span>';
+            }
+        }
+        
+        /**
+         * 打开取消订单确认模态框
+         */
+        function openCancelOrderModal(orderId) {
+            // 重置表单
+            $('#cancelReason').val('无法发货');
+            
+            // 设置订单ID
+            $('#cancelOrderId').val(orderId);
+            
+            // 打开模态框
+            $('#cancelOrderModal').modal('show');
+        }
+        
+        /**
+         * 取消订单处理
+         */
+        async function cancelOrder() {
+            const orderId = $('#cancelOrderId').val();
+            const cancelReason = $('#cancelReason').val();
+            
+            // 获取当前用户
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.userId) {
+                alert('请先登录');
+                return;
+            }
+            
+            // 创建取消订单数据
+            const cancelData = {
+                userId: user.userId,
+                cancelReason: cancelReason
+            };
+            
+            try {
+                // 显示加载状态
+                $('#confirmCancelBtn').attr('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> 处理中...');
+                
+                // 调用API取消订单
+                const response = await http.put(`/order/${orderId}/cancel`, cancelData);
+                
+                if (response && response.code === 200) {
+                    // 取消成功
+                    alert('订单取消成功！');
+                    $('#cancelOrderModal').modal('hide');
+                    
+                    // 重新加载订单列表
+                    loadOrders(1);
+                } else {
+                    // 处理API返回的错误
+                    alert(`取消订单失败: ${response ? response.message : '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('取消订单失败:', error);
+                alert(`取消订单失败: ${error.message}`);
+            } finally {
+                // 恢复按钮状态
+                $('#confirmCancelBtn').attr('disabled', false).html('确认取消');
             }
         }
     </script>

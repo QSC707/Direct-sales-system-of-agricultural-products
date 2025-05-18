@@ -60,7 +60,7 @@ namespace FarmDirectSales.Controllers
                 // 添加日志
                 Console.WriteLine($"用户角色: {userRole}, 用户ID: {userId}, 农户ID参数: {farmerId}");
                 Console.WriteLine($"查询到 {products.Count} 个产品");
-                
+
                 return Ok(new
                 {
                     code = 200,

@@ -353,6 +353,7 @@
                 // 根据订单状态设置不同的样式
                 let statusClass = '';
                 let statusBadgeClass = '';
+                let statusText = order.status;
                 
                 switch (order.status) {
                     case '待支付':
@@ -374,6 +375,12 @@
                     case '已取消':
                         statusClass = 'text-danger';
                         statusBadgeClass = 'cancelled';
+                        // 根据取消人显示不同文本
+                        if (order.cancelByType === 'farmer') {
+                            statusText = '已取消(商家)';
+                        } else if (order.cancelByType === 'user') {
+                            statusText = '已取消(自己)';
+                        }
                         break;
                     default:
                         statusClass = 'text-secondary';
@@ -436,7 +443,7 @@
                                     <span class="fw-bold">订单号: ${order.orderId}</span>
                                     <span class="text-muted ms-3">下单时间: ${new Date(order.createTime).toLocaleString()}</span>
                                 </div>
-                                <span class="status-badge ${statusBadgeClass}">${order.status}</span>
+                                <span class="status-badge ${statusBadgeClass}">${statusText}</span>
                             </div>
                         </div>
                         <div class="card-body">
@@ -480,7 +487,8 @@
                 const result = await http.get(`/order/${orderId}`);
                 
                 if (result.code === 200) {
-                    renderOrderDetail(result.data);
+                    // 调用新的showOrderDetail函数替代旧的renderOrderDetail
+                    showOrderDetail(result.data);
                 } else {
                     throw new Error(result.message || '获取订单详情失败');
                 }
@@ -495,145 +503,42 @@
             }
         }
         
-        // 渲染订单详情
-        function renderOrderDetail(order) {
-            const container = document.getElementById('order-detail-content');
+        // 辅助函数 - 格式化日期时间
+        function formatDateTime(dateTimeStr) {
+            if (!dateTimeStr) return '未知';
             
-            let statusClass = '';
-            switch (order.status) {
+            try {
+                const date = new Date(dateTimeStr);
+                return date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            } catch (e) {
+                console.error('日期格式化错误:', e);
+                return dateTimeStr || '未知';
+            }
+        }
+        
+        // 辅助函数 - 获取状态样式
+        function getStatusClass(status) {
+            switch (status) {
                 case '待支付':
-                    statusClass = 'text-warning';
-                    break;
+                    return 'alert-warning';
                 case '待发货':
-                    statusClass = 'text-primary';
-                    break;
+                    return 'alert-primary';
                 case '已发货':
-                    statusClass = 'text-info';
-                    break;
+                    return 'alert-info';
                 case '已完成':
-                    statusClass = 'text-success';
-                    break;
+                    return 'alert-success';
                 case '已取消':
-                    statusClass = 'text-danger';
-                    break;
+                    return 'alert-danger';
                 default:
-                    statusClass = 'text-warning';
+                    return 'alert-secondary';
             }
-            
-            let statusTimeline = `
-                <div class="d-flex align-items-center mb-2">
-                    <div class="bg-success rounded-circle p-2 me-2"><i class="fas fa-check text-white small"></i></div>
-                    <div>下单时间: ${new Date(order.createTime).toLocaleString()}</div>
-                </div>
-            `;
-            
-            if (order.payTime) {
-                statusTimeline += `
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="bg-success rounded-circle p-2 me-2"><i class="fas fa-check text-white small"></i></div>
-                        <div>支付时间: ${new Date(order.payTime).toLocaleString()}</div>
-                    </div>
-                `;
-            }
-            
-            if (order.shipTime) {
-                statusTimeline += `
-                    <div class="d-flex align-items-center mb-2">
-                        <div class="bg-success rounded-circle p-2 me-2"><i class="fas fa-check text-white small"></i></div>
-                        <div>发货时间: ${new Date(order.shipTime).toLocaleString()}</div>
-                    </div>
-                `;
-            }
-            
-            if (order.completeTime) {
-                statusTimeline += `
-                    <div class="d-flex align-items-center">
-                        <div class="bg-success rounded-circle p-2 me-2"><i class="fas fa-check text-white small"></i></div>
-                        <div>完成时间: ${new Date(order.completeTime).toLocaleString()}</div>
-                    </div>
-                `;
-            }
-            
-            const html = `
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <h5>订单信息</h5>
-                        <p class="mb-1">订单号: ${order.orderId}</p>
-                        <p class="mb-1">状态: <span class="${statusClass}">${order.status}</span></p>
-                        <p class="mb-1">下单时间: ${new Date(order.createTime).toLocaleString()}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h5>收货信息</h5>
-                        <p class="mb-1">收货地址: ${order.shippingAddress}</p>
-                        <p class="mb-1">联系电话: ${order.contactPhone}</p>
-                    </div>
-                </div>
-                
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <h5>商品信息</h5>
-                        <div class="card">
-                            <div class="card-body p-0">
-                                <table class="table mb-0">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>商品</th>
-                                            <th>单价</th>
-                                            <th>数量</th>
-                                            <th class="text-end">小计</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="${order.product.imageUrl || '/img/placeholder.jpg'}" alt="${order.product.productName}" class="product-img me-3">
-                                                    <div>
-                                                        <div>${order.product.productName}</div>
-                                                        <small class="text-muted">农户: ${order.product.farmer.username}</small>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td>¥${order.product.price.toFixed(2)}</td>
-                                            <td>${order.quantity}</td>
-                                            <td class="text-end">¥${order.totalPrice.toFixed(2)}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5>订单状态跟踪</h5>
-                        <div class="border rounded p-3">
-                            ${statusTimeline}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <h5>订单总计</h5>
-                        <div class="border rounded p-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>商品金额:</span>
-                                <span>¥${order.totalPrice.toFixed(2)}</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>运费:</span>
-                                <span>¥0.00</span>
-                            </div>
-                            <hr>
-                            <div class="d-flex justify-content-between">
-                                <strong>实付款:</strong>
-                                <strong class="text-danger">¥${order.totalPrice.toFixed(2)}</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            container.innerHTML = html;
         }
         
         // 更新模态框按钮显示
@@ -724,10 +629,13 @@
                 return;
             }
             
+            const reason = prompt("请输入取消原因（可选）", "不再需要");
+            
             try {
                 // 使用Axios通过http接口取消订单
                 const result = await http.put(`/order/${orderId}/cancel`, {
-                    userId: JSON.parse(localStorage.getItem('user') || '{}').userId
+                    userId: JSON.parse(localStorage.getItem('user') || '{}').userId,
+                    cancelReason: reason
                 });
                 
                 if (result.code === 200) {
@@ -752,9 +660,12 @@
                 return;
             }
             
+            const reason = prompt("请输入取消原因（可选）", "不再需要");
+            
             try {
                 const result = await http.put(`/order/${currentOrder}/cancel`, {
-                    userId: JSON.parse(localStorage.getItem('user') || '{}').userId
+                    userId: JSON.parse(localStorage.getItem('user') || '{}').userId,
+                    cancelReason: reason
                 });
                 
                 if (result.code === 200) {
@@ -771,6 +682,215 @@
                 console.error('取消订单失败:', error);
                 alert(`取消订单失败: ${error.message}`);
             }
+        }
+
+        // 显示订单详情
+        function showOrderDetail(order) {
+            currentOrder = order.orderId;
+            const modal = document.getElementById('orderDetailModal');
+            modal.setAttribute('data-current-order', order.orderId);
+            
+            console.log("订单详情数据:", order); // 添加调试信息
+            
+            // 订单状态时间线
+            let statusTimeline = `
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-success rounded-circle p-2 me-2">
+                        <i class="fas fa-check"></i>
+                    </span>
+                    <div>
+                        <div>订单创建</div>
+                        <small class="text-muted">${formatDateTime(order.createTime)}</small>
+                    </div>
+                </div>
+            `;
+            
+            if (order.status === '已取消') {
+                // 被取消的订单显示取消信息
+                let cancelInfo = '';
+                console.log("取消信息:", order.cancelByType, order.cancelReason, order.cancelTime);
+                
+                if (order.cancelByType) {
+                    const cancelByText = order.cancelByType === 'farmer' ? '农户取消' : '您取消';
+                    cancelInfo = `
+                        <div class="alert alert-danger mt-3">
+                            <strong>取消信息：</strong> ${cancelByText}
+                            <div>原因：${order.cancelReason || '未提供原因'}</div>
+                            <div>时间：${formatDateTime(order.cancelTime)}</div>
+                        </div>
+                    `;
+                }
+                
+                statusTimeline += `
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-danger rounded-circle p-2 me-2">
+                            <i class="fas fa-times"></i>
+                        </span>
+                        <div>
+                            <div>订单取消</div>
+                            <small class="text-muted">${formatDateTime(order.cancelTime || order.createTime)}</small>
+                        </div>
+                    </div>
+                    ${cancelInfo}
+                `;
+            } else {
+                if (order.payTime) {
+                    statusTimeline += `
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-success rounded-circle p-2 me-2">
+                                <i class="fas fa-check"></i>
+                            </span>
+                            <div>
+                                <div>支付完成</div>
+                                <small class="text-muted">${formatDateTime(order.payTime)}</small>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (order.shipTime) {
+                    statusTimeline += `
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-success rounded-circle p-2 me-2">
+                                <i class="fas fa-check"></i>
+                            </span>
+                            <div>
+                                <div>商品发货</div>
+                                <small class="text-muted">${formatDateTime(order.shipTime)}</small>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (order.completeTime) {
+                    statusTimeline += `
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-success rounded-circle p-2 me-2">
+                                <i class="fas fa-check"></i>
+                            </span>
+                            <div>
+                                <div>订单完成</div>
+                                <small class="text-muted">${formatDateTime(order.completeTime)}</small>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // 获取状态栏样式
+            const statusClass = getStatusClass(order.status);
+            
+            // 构建HTML内容
+            const container = modal.querySelector('.modal-body');
+            let html = `
+                <div class="alert ${statusClass} d-flex align-items-center mb-4" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <div>订单状态: <strong>${order.status}</strong></div>
+                </div>
+            `;
+            
+            // 对于取消的订单显示取消信息
+            if (order.status === '已取消' && order.cancelByType) {
+                const cancelByText = order.cancelByType === 'farmer' ? '农户取消' : '您取消';
+                html += `
+                    <div class="alert alert-danger mb-4">
+                        <strong>取消信息：</strong> ${cancelByText}
+                        <div>原因：${order.cancelReason || '未提供原因'}</div>
+                        <div>时间：${formatDateTime(order.cancelTime)}</div>
+                    </div>
+                `;
+            }
+            
+            html += `
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>订单信息</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">订单编号：</dt>
+                            <dd class="col-sm-8">${order.orderId}</dd>
+                            
+                            <dt class="col-sm-4">下单时间：</dt>
+                            <dd class="col-sm-8">${formatDateTime(order.createTime)}</dd>
+                            
+                            <dt class="col-sm-4">支付方式：</dt>
+                            <dd class="col-sm-8">在线支付</dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>配送信息</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">收货地址：</dt>
+                            <dd class="col-sm-8">${order.shippingAddress}</dd>
+                            
+                            <dt class="col-sm-4">联系电话：</dt>
+                            <dd class="col-sm-8">${order.contactPhone}</dd>
+                        </dl>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5>商品信息</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>商品</th>
+                                        <th>单价</th>
+                                        <th>数量</th>
+                                        <th class="text-end">小计</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="${order.product.imageUrl || '/img/placeholder.jpg'}" alt="${order.product.productName}" class="product-img me-3">
+                                                <div>
+                                                    <div>${order.product.productName}</div>
+                                                    <small class="text-muted">农户: ${order.product.farmer.username}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>¥${order.product.price.toFixed(2)}</td>
+                                        <td>${order.quantity}</td>
+                                        <td class="text-end">¥${order.totalPrice.toFixed(2)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>订单状态跟踪</h5>
+                        <div class="border rounded p-3">
+                            ${statusTimeline}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>订单总计</h5>
+                        <div class="border rounded p-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>商品金额:</span>
+                                <span>¥${order.totalPrice.toFixed(2)}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>运费:</span>
+                                <span>¥0.00</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <strong>实付款:</strong>
+                                <strong class="text-danger">¥${order.totalPrice.toFixed(2)}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
         }
     </script>
 </body>

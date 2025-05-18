@@ -163,6 +163,10 @@ namespace FarmDirectSales.Controllers
                         o.PayTime,
                         o.ShipTime,
                         o.CompleteTime,
+                        o.CancelTime,
+                        o.CancelReason,
+                        o.CancelBy,
+                        o.CancelByType,
                         o.ShippingAddress,
                         o.ContactPhone,
                         isReviewed = o.Review != null,
@@ -262,6 +266,10 @@ namespace FarmDirectSales.Controllers
                         o.PayTime,
                         o.ShipTime,
                         o.CompleteTime,
+                        o.CancelTime,
+                        o.CancelReason,
+                        o.CancelBy,
+                        o.CancelByType,
                         o.ShippingAddress,
                         o.ContactPhone
                     })
@@ -326,6 +334,10 @@ namespace FarmDirectSales.Controllers
                         order.PayTime,
                         order.ShipTime,
                         order.CompleteTime,
+                        order.CancelTime,
+                        order.CancelReason,
+                        order.CancelBy,
+                        order.CancelByType,
                         order.ShippingAddress,
                         order.ContactPhone
                     }
@@ -477,10 +489,13 @@ namespace FarmDirectSales.Controllers
                     return NotFound(new { code = 404, message = "订单不存在" });
                 }
 
-                // 检查是否是订单所有者
-                if (order.UserId != request.UserId)
+                // 检查是否是订单所有者或农户（产品所有者）
+                bool isOwner = order.UserId == request.UserId;
+                bool isFarmer = order.Product != null && order.Product.FarmerId == request.UserId;
+                
+                if (!isOwner && !isFarmer)
                 {
-                    return BadRequest(new { code = 400, message = "只有订单所有者才能取消订单" });
+                    return BadRequest(new { code = 400, message = "只有订单所有者或农户才能取消订单" });
                 }
 
                 // 检查订单状态
@@ -498,6 +513,10 @@ namespace FarmDirectSales.Controllers
 
                 // 取消订单
                 order.Status = "已取消";
+                order.CancelTime = DateTime.Now;
+                order.CancelBy = request.UserId;
+                order.CancelByType = isOwner ? "user" : "farmer";
+                order.CancelReason = request.CancelReason;
 
                 await _context.SaveChangesAsync();
 
@@ -593,6 +612,11 @@ namespace FarmDirectSales.Controllers
         /// </summary>
         [Required(ErrorMessage = "用户ID不能为空")]
         public int UserId { get; set; }
+        
+        /// <summary>
+        /// 取消原因
+        /// </summary>
+        public string? CancelReason { get; set; }
     }
 } 
  

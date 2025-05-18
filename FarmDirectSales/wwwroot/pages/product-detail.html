@@ -582,48 +582,48 @@
             addToCartBtn.disabled = true;
             
             try {
-                // 调用购物车API
+            // 调用购物车API
                 await http.post('/cart', {
                     userId: user.userId,
                     productId: currentProductId,
                     quantity: quantity
                 });
-                
-                // 显示顶部成功提示
-                const notification = document.getElementById('cart-notification');
-                const notificationText = document.getElementById('cart-notification-text');
-                
-                // 根据数量设置提示文本
-                notificationText.textContent = `已成功添加 ${quantity} 件商品到购物车！`;
-                
-                // 显示提示
-                notification.classList.remove('d-none');
-                setTimeout(() => {
-                    notification.classList.add('show');
-                }, 10);
-                
-                // 清除之前的定时器
-                if (addToCartTimeout) {
-                    clearTimeout(addToCartTimeout);
-                }
-                
-                // 设置定时器自动关闭提示
-                addToCartTimeout = setTimeout(() => {
-                    notification.classList.remove('show');
                     
-                    // 延迟添加d-none类，允许淡出动画完成
+                    // 显示顶部成功提示
+                    const notification = document.getElementById('cart-notification');
+                    const notificationText = document.getElementById('cart-notification-text');
+                    
+                    // 根据数量设置提示文本
+                    notificationText.textContent = `已成功添加 ${quantity} 件商品到购物车！`;
+                    
+                    // 显示提示
+                    notification.classList.remove('d-none');
                     setTimeout(() => {
-                        notification.classList.add('d-none');
-                    }, 300);
+                        notification.classList.add('show');
+                    }, 10);
                     
-                    addToCartTimeout = null;
-                }, 500);
+                    // 清除之前的定时器
+                    if (addToCartTimeout) {
+                        clearTimeout(addToCartTimeout);
+                    }
+                    
+                    // 设置定时器自动关闭提示
+                    addToCartTimeout = setTimeout(() => {
+                        notification.classList.remove('show');
+                        
+                        // 延迟添加d-none类，允许淡出动画完成
+                        setTimeout(() => {
+                            notification.classList.add('d-none');
+                        }, 300);
+                        
+                        addToCartTimeout = null;
+                    }, 500);
             } catch (error) {
-                console.error('添加购物车失败', error);
-                alert(`添加购物车失败: ${error.message}`);
+                    console.error('添加购物车失败', error);
+                    alert(`添加购物车失败: ${error.message}`);
             } finally {
-                // 恢复按钮状态
-                addToCartBtn.disabled = false;
+                    // 恢复按钮状态
+                    addToCartBtn.disabled = false;
             }
         }
         
@@ -654,15 +654,15 @@
             buyNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>处理中...';
             
             try {
-                // 显示提示消息
-                const notification = document.getElementById('cart-notification');
-                const notificationText = document.getElementById('cart-notification-text');
-                notificationText.textContent = '正在添加到购物车并跳转...';
-                notification.classList.remove('d-none');
-                setTimeout(() => {
-                    notification.classList.add('show');
-                }, 10);
-                
+            // 显示提示消息
+            const notification = document.getElementById('cart-notification');
+            const notificationText = document.getElementById('cart-notification-text');
+            notificationText.textContent = '正在添加到购物车并跳转...';
+            notification.classList.remove('d-none');
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
                 // 先添加到购物车，然后跳转到结算页面 - 修正API路径
                 await http.post('/cart', {
                     userId: user.userId,
@@ -670,24 +670,24 @@
                     quantity: quantity
                 });
                 
-                // 短暂延迟后跳转，让用户看到提示
-                setTimeout(() => {
-                    window.location.href = '/pages/cart.html';
-                }, 500);
+                    // 短暂延迟后跳转，让用户看到提示
+                    setTimeout(() => {
+                        window.location.href = '/pages/cart.html';
+                    }, 500);
             } catch (error) {
-                console.error('添加购物车失败', error);
+                    console.error('添加购物车失败', error);
                 
                 const notification = document.getElementById('cart-notification');
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    notification.classList.add('d-none');
-                }, 300);
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.classList.add('d-none');
+                    }, 300);
                 
-                alert(`添加购物车失败: ${error.message}`);
-                
-                // 恢复按钮状态
-                buyNowBtn.disabled = false;
-                buyNowBtn.innerHTML = originalBuyNowText;
+                    alert(`添加购物车失败: ${error.message}`);
+                    
+                    // 恢复按钮状态
+                    buyNowBtn.disabled = false;
+                    buyNowBtn.innerHTML = originalBuyNowText;
             }
         }
         

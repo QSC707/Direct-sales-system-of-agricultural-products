@@ -65,6 +65,26 @@ namespace FarmDirectSales.Models
         /// 完成时间
         /// </summary>
         public DateTime? CompleteTime { get; set; }
+        
+        /// <summary>
+        /// 取消时间
+        /// </summary>
+        public DateTime? CancelTime { get; set; }
+        
+        /// <summary>
+        /// 取消原因
+        /// </summary>
+        public string? CancelReason { get; set; }
+        
+        /// <summary>
+        /// 取消人ID
+        /// </summary>
+        public int? CancelBy { get; set; }
+        
+        /// <summary>
+        /// 取消人类型：user-用户取消，farmer-农户取消
+        /// </summary>
+        public string? CancelByType { get; set; }
 
         /// <summary>
         /// 收货地址

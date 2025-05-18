@@ -519,6 +519,11 @@
             用户ID
             </summary>
         </member>
+        <member name="P:FarmDirectSales.Controllers.CancelOrderRequest.CancelReason">
+            <summary>
+            取消原因
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.ProductController">
             <summary>
             产品管理控制器
@@ -1231,6 +1236,18 @@
         <member name="M:FarmDirectSales.Migrations.AddCancelFieldsToOrder.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:FarmDirectSales.Migrations.AddOrderCancelDetailsFields">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderCancelDetailsFields.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderCancelDetailsFields.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderCancelDetailsFields.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:FarmDirectSales.Models.CartItem">
             <summary>
             购物车项模型
@@ -1449,6 +1466,26 @@
         <member name="P:FarmDirectSales.Models.Order.CompleteTime">
             <summary>
             完成时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.CancelTime">
+            <summary>
+            取消时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.CancelReason">
+            <summary>
+            取消原因
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.CancelBy">
+            <summary>
+            取消人ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.CancelByType">
+            <summary>
+            取消人类型：user-用户取消，farmer-农户取消
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.Order.ShippingAddress">

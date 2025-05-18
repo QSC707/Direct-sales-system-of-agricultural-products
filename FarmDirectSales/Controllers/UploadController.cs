@@ -55,7 +55,7 @@ namespace FarmDirectSales.Controllers
                 // 验证文件类型
                 var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
                 Console.WriteLine($"文件扩展名: {fileExtension}, 文件类型: {file.ContentType}");
-                
+
                 // 如果指定了产品ID，验证产品是否存在
                 if (productId.HasValue)
                 {
