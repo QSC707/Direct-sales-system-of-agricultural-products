@@ -271,6 +271,16 @@
             }
             
             try {
+                // 显示加载状态
+                document.getElementById('cart-container').innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                        <p class="mt-2">正在加载购物车...</p>
+                    </div>
+                `;
+                
                 const response = await api.cart.getCart();
                 const cartData = response.data;
                 
@@ -303,27 +313,50 @@
                             <tbody>
                 `;
                 
+                let hasOutOfStockItems = false;
+                let totalPrice = 0;
+                
                 cartData.items.forEach(item => {
+                    // 检查库存状态
+                    const isOutOfStock = item.quantity > item.product.stock;
+                    if (isOutOfStock) {
+                        hasOutOfStockItems = true;
+                    } else {
+                        totalPrice += item.quantity * item.product.price;
+                    }
+                    
                     cartHtml += `
-                        <tr>
+                        <tr ${isOutOfStock ? 'class="table-danger"' : ''}>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <img src="${item.product.imageUrl || '/img/placeholder.jpg'}" alt="${item.product.productName}" class="cart-img me-3">
                                     <div>
                                         <h6 class="mb-0">${item.product.productName}</h6>
                                         <small class="text-muted">${item.product.description.substring(0, 50)}${item.product.description.length > 50 ? '...' : ''}</small>
+                                        ${isOutOfStock ? 
+                                            `<div class="alert alert-danger py-1 px-2 mt-1 mb-0 d-inline-block">
+                                                <small><i class="fas fa-exclamation-triangle me-1"></i>库存不足 (当前库存: ${item.product.stock})</small>
+                                            </div>` 
+                                        : ''}
                                     </div>
                                 </div>
                             </td>
                             <td>￥${item.product.price.toFixed(2)}</td>
                             <td>
                                 <div class="quantity-control">
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="updateQuantity(${item.cartItemId}, ${item.quantity - 1})">-</button>
-                                    <input type="number" class="form-control form-control-sm mx-2 text-center" value="${item.quantity}" min="1" max="${item.product.stock}" onchange="updateQuantity(${item.cartItemId}, this.value)">
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="updateQuantity(${item.cartItemId}, ${item.quantity + 1})">+</button>
+                                    <button class="btn btn-sm btn-outline-secondary" 
+                                        onclick="updateQuantity(${item.cartItemId}, ${item.quantity - 1})"
+                                        ${item.quantity <= 1 ? 'disabled' : ''}>-</button>
+                                    <input type="number" class="form-control form-control-sm mx-2 text-center" 
+                                        value="${item.quantity}" min="1" max="${item.product.stock}" 
+                                        ${isOutOfStock ? 'style="color: #dc3545; border-color: #dc3545;"' : ''}
+                                        onchange="updateQuantity(${item.cartItemId}, this.value)">
+                                    <button class="btn btn-sm btn-outline-secondary" 
+                                        onclick="updateQuantity(${item.cartItemId}, ${item.quantity + 1})"
+                                        ${item.quantity >= item.product.stock ? 'disabled' : ''}>+</button>
                                 </div>
                             </td>
-                            <td>￥${item.itemTotal.toFixed(2)}</td>
+                            <td>￥${(item.quantity * item.product.price).toFixed(2)}</td>
                             <td>
                                 <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${item.cartItemId})">
                                     <i class="fas fa-trash"></i>
@@ -337,7 +370,19 @@
                             </tbody>
                         </table>
                     </div>
-                    
+                `;
+                
+                // 如果有库存不足的商品，显示警告信息
+                if (hasOutOfStockItems) {
+                    cartHtml += `
+                        <div class="alert alert-warning mt-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>注意：</strong> 部分商品库存不足，请调整数量或移除后再结算。
+                        </div>
+                    `;
+                }
+                
+                cartHtml += `
                     <div class="row mt-4">
                         <div class="col-md-6">
                             <button class="btn btn-outline-danger" onclick="clearCart()">
@@ -346,11 +391,15 @@
                         </div>
                         <div class="col-md-6 text-md-end">
                             <div class="mb-3">
-                                <h5>总计: <span class="text-danger">￥${cartData.totalPrice.toFixed(2)}</span></h5>
+                                <h5>总计: <span class="text-danger">￥${totalPrice.toFixed(2)}</span></h5>
+                                ${hasOutOfStockItems ? '<p class="text-muted small">(已排除库存不足商品)</p>' : ''}
                             </div>
-                            <a href="/pages/checkout.html" class="btn btn-success">
+                            <a href="/pages/checkout.html" class="btn btn-success ${hasOutOfStockItems ? 'disabled' : ''}" 
+                               ${hasOutOfStockItems ? 'aria-disabled="true" tabindex="-1"' : ''}>
                                 <i class="fas fa-shopping-bag me-2"></i>去结算
                             </a>
+                            ${hasOutOfStockItems ? 
+                                '<div class="text-danger small mt-2">请先解决库存问题再结算</div>' : ''}
                         </div>
                     </div>
                 `;
@@ -370,6 +419,10 @@
         // 更新购物车项数量
         async function updateQuantity(cartItemId, newQuantity) {
             try {
+                // 显示加载状态
+                const quantityInputs = document.querySelectorAll('.quantity-control input');
+                quantityInputs.forEach(input => input.disabled = true);
+                
                 // 确保数量合法
                 newQuantity = parseInt(newQuantity);
                 if (isNaN(newQuantity) || newQuantity < 1) {
@@ -378,11 +431,21 @@
                     return;
                 }
                 
+                // 获取商品信息以检查库存上限
+                const response = await api.cart.getCart();
+                const item = response.data.items.find(i => i.cartItemId === cartItemId);
+                
+                if (item && newQuantity > item.product.stock) {
+                    alert(`该商品库存不足，最多可购买${item.product.stock}件`);
+                    newQuantity = item.product.stock;
+                }
+                
                 await api.cart.updateCartItem(cartItemId, newQuantity);
                 loadCart(); // 重新加载购物车
             } catch (error) {
                 console.error('更新购物车失败:', error);
                 alert(`更新失败: ${error.message}`);
+                loadCart(); // 重新加载购物车
             }
         }
         

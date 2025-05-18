@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FarmDirectSales.Data;
 using FarmDirectSales.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
 
 namespace FarmDirectSales.Controllers
 {
@@ -65,7 +66,7 @@ namespace FarmDirectSales.Controllers
                     ProductId = request.ProductId,
                     Quantity = request.Quantity,
                     TotalPrice = totalPrice,
-                    Status = "待支付",
+                    Status = "货到付款待处理",
                     CreateTime = DateTime.Now,
                     PayTime = null,
                     ShipTime = null,
@@ -390,7 +391,7 @@ namespace FarmDirectSales.Controllers
         }
 
         /// <summary>
-        /// 发货
+        /// 开始配送订单（已移除发货功能，改为直接开始配送）
         /// </summary>
         [HttpPut("{id}/ship")]
         public async Task<IActionResult> ShipOrder(int id, [FromBody] ShipOrderRequest request)
@@ -409,22 +410,22 @@ namespace FarmDirectSales.Controllers
                 // 检查是否是产品所有者
                 if (order.Product.FarmerId != request.FarmerId)
                 {
-                    return BadRequest(new { code = 400, message = "只有产品所有者才能发货" });
+                    return BadRequest(new { code = 400, message = "只有产品所有者才能操作订单" });
                 }
 
                 // 检查订单状态
-                if (order.Status != "待发货")
+                if (order.Status != "货到付款待处理" && order.Status != "待付款" && order.Status != "已付款" && order.Status != "待发货")
                 {
-                    return BadRequest(new { code = 400, message = $"订单状态为 {order.Status}，不能发货" });
+                    return BadRequest(new { code = 400, message = $"订单状态为 {order.Status}，不能开始配送" });
                 }
 
-                // 发货
-                order.Status = "待收货";
+                // 直接更新为货到付款配送中状态
+                order.Status = "货到付款配送中";
                 order.ShipTime = DateTime.Now;
 
                 await _context.SaveChangesAsync();
 
-                return Ok(new { code = 200, message = "发货成功" });
+                return Ok(new { code = 200, message = "订单已开始配送" });
             }
             catch (Exception ex)
             {
@@ -527,6 +528,125 @@ namespace FarmDirectSales.Controllers
                 return BadRequest(new { code = 400, message = ex.Message });
             }
         }
+
+        /// <summary>
+        /// 从购物车创建订单
+        /// </summary>
+        [HttpPost("from-cart")]
+        public async Task<IActionResult> CreateFromCart([FromBody] CreateFromCartRequest request)
+        {
+            try
+            {
+                Console.WriteLine($"CreateFromCart接口被调用：userId={request.UserId}");
+                
+                // 检查用户是否存在
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == request.UserId);
+                if (user == null)
+                {
+                    Console.WriteLine($"用户ID {request.UserId} 不存在");
+                    return NotFound(new { code = 404, message = "用户不存在" });
+                }
+
+                Console.WriteLine($"找到用户：{user.Username}");
+
+                // 获取用户购物车商品
+                var cartItems = await _context.CartItems
+                    .Include(c => c.Product)
+                    .Where(c => c.UserId == request.UserId)
+                    .ToListAsync();
+
+                if (cartItems.Count == 0)
+                {
+                    Console.WriteLine("购物车为空");
+                    return BadRequest(new { code = 400, message = "购物车为空" });
+                }
+
+                Console.WriteLine($"购物车商品数量：{cartItems.Count}");
+
+                // 检查库存是否充足
+                var outOfStockItems = cartItems.Where(c => c.Quantity > c.Product.Stock).ToList();
+                if (outOfStockItems.Any())
+                {
+                    var products = string.Join(", ", outOfStockItems.Select(c => c.Product.ProductName));
+                    Console.WriteLine($"库存不足的商品: {products}");
+                    return BadRequest(new { 
+                        code = 400, 
+                        message = "部分商品库存不足", 
+                        data = outOfStockItems.Select(c => new { 
+                            c.Product.ProductId, 
+                            c.Product.ProductName, 
+                            c.Product.Stock, 
+                            c.Quantity
+                        })
+                    });
+                }
+
+                decimal totalAmount = 0;
+                var createdOrders = new List<Order>();
+
+                // 创建订单
+                foreach (var item in cartItems)
+                {
+                    var product = item.Product;
+                    decimal itemTotal = product.Price * item.Quantity;
+                    
+                    // 创建订单
+                    var order = new Order
+                    {
+                        UserId = request.UserId,
+                        ProductId = product.ProductId,
+                        Quantity = item.Quantity,
+                        TotalPrice = itemTotal,
+                        Status = "货到付款待处理",
+                        CreateTime = DateTime.Now,
+                        PayTime = null,
+                        ShipTime = null,
+                        CompleteTime = null,
+                        ShippingAddress = request.ShippingAddress,
+                        ContactPhone = request.ContactPhone
+                    };
+
+                    // 减少库存
+                    product.Stock -= item.Quantity;
+                    product.UpdateTime = DateTime.Now;
+
+                    _context.Orders.Add(order);
+                    createdOrders.Add(order);
+                    totalAmount += itemTotal;
+                }
+
+                // 清空购物车
+                _context.CartItems.RemoveRange(cartItems);
+                
+                await _context.SaveChangesAsync();
+                
+                Console.WriteLine($"创建了 {createdOrders.Count} 个订单，总金额：{totalAmount}");
+
+                return Ok(new
+                {
+                    code = 200,
+                    message = "创建订单成功",
+                    data = new
+                    {
+                        orders = createdOrders.Select(o => new {
+                            o.OrderId,
+                            o.ProductId,
+                            o.Quantity,
+                            o.TotalPrice,
+                            o.Status,
+                            o.CreateTime
+                        }),
+                        totalAmount,
+                        orderCount = createdOrders.Count
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"创建订单异常: {ex.Message}");
+                return BadRequest(new { code = 400, message = ex.Message });
+            }
+        }
     }
 
     /// <summary>
@@ -579,7 +699,7 @@ namespace FarmDirectSales.Controllers
     }
 
     /// <summary>
-    /// 发货请求模型
+    /// 开始配送请求模型（已移除物流信息字段）
     /// </summary>
     public class ShipOrderRequest
     {
@@ -617,6 +737,24 @@ namespace FarmDirectSales.Controllers
         /// 取消原因
         /// </summary>
         public string? CancelReason { get; set; }
+    }
+
+    public class CreateFromCartRequest
+    {
+        [Required(ErrorMessage = "用户ID不能为空")]
+        public int UserId { get; set; }
+
+        [Required(ErrorMessage = "收货地址不能为空")]
+        [StringLength(500, ErrorMessage = "收货地址最多500个字符")]
+        public string ShippingAddress { get; set; }
+
+        [Required(ErrorMessage = "联系电话不能为空")]
+        [StringLength(20, ErrorMessage = "联系电话最多20个字符")]
+        [RegularExpression(@"^1[3-9]\d{9}$", ErrorMessage = "手机号格式不正确")]
+        public string ContactPhone { get; set; }
+        
+        [StringLength(20)]
+        public string DeliveryMethod { get; set; } = "express";
     }
 } 
  

@@ -5,7 +5,7 @@
 
 // 创建Axios实例
 const axiosInstance = axios.create({
-    baseURL: window.API_BASE_URL || 'http://localhost:5004/api', // 使用全局API_BASE_URL或默认值
+    baseURL: window.API_BASE_URL || 'http://localhost:5004', // 使用全局API_BASE_URL或默认值
     timeout: 10000, // 请求超时时间10秒
     headers: {
         'Content-Type': 'application/json'

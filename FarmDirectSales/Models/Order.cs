@@ -102,6 +102,21 @@ namespace FarmDirectSales.Models
         /// 是否已评价
         /// </summary>
         public bool IsReviewed { get; set; } = false;
+        
+        /// <summary>
+        /// 用户评分(1-5星)
+        /// </summary>
+        public int? Rating { get; set; }
+        
+        /// <summary>
+        /// 是否已评分
+        /// </summary>
+        public bool IsRated { get; set; } = false;
+        
+        /// <summary>
+        /// 评分时间
+        /// </summary>
+        public DateTime? RateTime { get; set; }
 
         // 导航属性
         /// <summary>

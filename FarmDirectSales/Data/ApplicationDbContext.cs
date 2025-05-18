@@ -59,6 +59,16 @@ namespace FarmDirectSales.Data
         /// 农户资料表
         /// </summary>
         public DbSet<FarmerProfile> FarmerProfiles { get; set; }
+        
+        /// <summary>
+        /// 用户地址表
+        /// </summary>
+        public DbSet<UserAddress> UserAddresses { get; set; }
+        
+        /// <summary>
+        /// 配送区域表
+        /// </summary>
+        public DbSet<DeliveryArea> DeliveryAreas { get; set; }
 
         /// <summary>
         /// 模型创建
@@ -157,6 +167,13 @@ namespace FarmDirectSales.Data
                 .HasOne(u => u.FarmerProfile)
                 .WithOne(f => f.User)
                 .HasForeignKey<FarmerProfile>(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            // 用户-地址关系
+            modelBuilder.Entity<UserAddress>()
+                .HasOne(a => a.User)
+                .WithMany()
+                .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

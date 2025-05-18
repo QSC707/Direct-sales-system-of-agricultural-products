@@ -4,6 +4,226 @@
         <name>FarmDirectSales</name>
     </assembly>
     <members>
+        <member name="T:FarmDirectSales.Controllers.RequestModels.AddAddressRequest">
+            <summary>
+            添加地址请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.AddAddressRequest.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.AddAddressRequest.ReceiverName">
+            <summary>
+            收货人姓名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.AddAddressRequest.ContactPhone">
+            <summary>
+            联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.AddAddressRequest.Province">
+            <summary>
+            省份
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.AddAddressRequest.City">
+            <summary>
+            城市
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.AddAddressRequest.District">
+            <summary>
+            区/县
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.AddAddressRequest.DetailAddress">
+            <summary>
+            详细地址
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.AddAddressRequest.IsDefault">
+            <summary>
+            是否默认地址
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.RequestModels.UpdateAddressRequest">
+            <summary>
+            更新地址请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UpdateAddressRequest.ReceiverName">
+            <summary>
+            收货人姓名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UpdateAddressRequest.ContactPhone">
+            <summary>
+            联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UpdateAddressRequest.Province">
+            <summary>
+            省份
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UpdateAddressRequest.City">
+            <summary>
+            城市
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UpdateAddressRequest.District">
+            <summary>
+            区/县
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UpdateAddressRequest.DetailAddress">
+            <summary>
+            详细地址
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UpdateAddressRequest.IsDefault">
+            <summary>
+            是否默认地址
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.RequestModels.SetDefaultAddressRequest">
+            <summary>
+            设置默认地址请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.SetDefaultAddressRequest.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest">
+            <summary>
+            用户添加地址请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.ReceiverName">
+            <summary>
+            收货人姓名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.ContactPhone">
+            <summary>
+            联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.Province">
+            <summary>
+            省份
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.City">
+            <summary>
+            城市
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.District">
+            <summary>
+            区/县
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.DetailAddress">
+            <summary>
+            详细地址
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.IsDefault">
+            <summary>
+            是否默认地址
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest">
+            <summary>
+            用户更新地址请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.ReceiverName">
+            <summary>
+            收货人姓名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.ContactPhone">
+            <summary>
+            联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.Province">
+            <summary>
+            省份
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.City">
+            <summary>
+            城市
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.District">
+            <summary>
+            区/县
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.DetailAddress">
+            <summary>
+            详细地址
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.IsDefault">
+            <summary>
+            是否默认地址
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.AddressController">
+            <summary>
+            地址管理控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AddressController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AddressController.GetUserAddresses(System.Int32)">
+            <summary>
+            获取用户的所有地址
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AddressController.GetAddressById(System.Int32)">
+            <summary>
+            获取地址详情
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AddressController.AddAddress(FarmDirectSales.Controllers.RequestModels.AddAddressRequest)">
+            <summary>
+            添加地址
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AddressController.UpdateAddress(System.Int32,FarmDirectSales.Controllers.RequestModels.UpdateAddressRequest)">
+            <summary>
+            更新地址
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AddressController.DeleteAddress(System.Int32)">
+            <summary>
+            删除地址
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AddressController.SetDefaultAddress(System.Int32,FarmDirectSales.Controllers.RequestModels.SetDefaultAddressRequest)">
+            <summary>
+            设置默认地址
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.AdminController">
             <summary>
             管理员控制器
@@ -274,6 +494,161 @@
             用户ID
             </summary>
         </member>
+        <member name="T:FarmDirectSales.Controllers.DeliveryAreaController">
+            <summary>
+            配送区域控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryAreaController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryAreaController.GetAllDeliveryAreas">
+            <summary>
+            获取所有配送区域
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryAreaController.GetSameDayDeliveryAreas">
+            <summary>
+            获取支持当天配送的区域
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryAreaController.CheckDeliveryAvailability(FarmDirectSales.Controllers.CheckDeliveryRequest)">
+            <summary>
+            检查地址是否支持当天配送
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryAreaController.AddDeliveryArea(FarmDirectSales.Controllers.AddDeliveryAreaRequest)">
+            <summary>
+            添加配送区域（仅管理员）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryAreaController.UpdateDeliveryArea(System.Int32,FarmDirectSales.Controllers.UpdateDeliveryAreaRequest)">
+            <summary>
+            更新配送区域（仅管理员）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryAreaController.DeleteDeliveryArea(System.Int32)">
+            <summary>
+            删除配送区域（仅管理员）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryAreaController.BatchImportDeliveryAreas(System.Collections.Generic.List{FarmDirectSales.Controllers.AddDeliveryAreaRequest})">
+            <summary>
+            批量导入配送区域（仅管理员）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryAreaController.InitializeDefaultAreas">
+            <summary>
+            初始化默认配送区域（仅管理员）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.AddDeliveryAreaRequest">
+            <summary>
+            添加配送区域请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddDeliveryAreaRequest.Province">
+            <summary>
+            省份
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddDeliveryAreaRequest.City">
+            <summary>
+            城市
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddDeliveryAreaRequest.District">
+            <summary>
+            区/县
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddDeliveryAreaRequest.SupportSameDayDelivery">
+            <summary>
+            是否支持当天配送
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddDeliveryAreaRequest.DeliveryFee">
+            <summary>
+            配送费用
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddDeliveryAreaRequest.Description">
+            <summary>
+            配送说明
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.UpdateDeliveryAreaRequest">
+            <summary>
+            更新配送区域请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateDeliveryAreaRequest.SupportSameDayDelivery">
+            <summary>
+            是否支持当天配送
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateDeliveryAreaRequest.DeliveryFee">
+            <summary>
+            配送费用
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateDeliveryAreaRequest.Description">
+            <summary>
+            配送说明
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.CheckDeliveryRequest">
+            <summary>
+            检查配送区域请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CheckDeliveryRequest.Province">
+            <summary>
+            省份
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CheckDeliveryRequest.City">
+            <summary>
+            城市
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CheckDeliveryRequest.District">
+            <summary>
+            区/县
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.DeliveryController">
+            <summary>
+            配送服务控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryController.GetSameDayDeliveryAreas">
+            <summary>
+            获取支持当天配送的区域
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryController.CheckSameDayDelivery(FarmDirectSales.Controllers.CheckSameDayDeliveryRequest)">
+            <summary>
+            检查地址是否支持当天配送
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryController.GetDeliveryFee(FarmDirectSales.Controllers.GetDeliveryFeeRequest)">
+            <summary>
+            获取配送费用
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryController.GetEstimatedDeliveryTime(FarmDirectSales.Controllers.GetEstimatedTimeRequest)">
+            <summary>
+            获取预计送达时间
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.FarmerController">
             <summary>
             农户控制器
@@ -447,6 +822,11 @@
         <member name="M:FarmDirectSales.Controllers.OrderController.CancelOrder(System.Int32,FarmDirectSales.Controllers.CancelOrderRequest)">
             <summary>
             取消订单
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.CreateFromCart(FarmDirectSales.Controllers.CreateFromCartRequest)">
+            <summary>
+            从购物车创建订单
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.CreateOrderRequest">
@@ -702,6 +1082,51 @@
         <member name="P:FarmDirectSales.Controllers.BatchDeleteRequest.FarmerId">
             <summary>
             农户ID（如果是农户用户）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.RatingController">
+            <summary>
+            评分管理控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.RatingController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.RatingController.SubmitRating(FarmDirectSales.Controllers.RatingRequest)">
+            <summary>
+            提交订单评分
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.RatingController.GetOrderRating(System.Int32)">
+            <summary>
+            获取订单评分
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.RatingController.GetProductRatings(System.Int32)">
+            <summary>
+            获取产品评分统计
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.RatingRequest">
+            <summary>
+            评分请求参数
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RatingRequest.OrderId">
+            <summary>
+            订单ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RatingRequest.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RatingRequest.Rating">
+            <summary>
+            评分(1-5)
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.ReviewController">
@@ -984,6 +1409,41 @@
             删除图片
             </summary>
         </member>
+        <member name="T:FarmDirectSales.Controllers.UserAddressController">
+            <summary>
+            用户地址控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UserAddressController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UserAddressController.GetUserAddresses(System.Int32)">
+            <summary>
+            获取用户的所有地址
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UserAddressController.GetDefaultAddress(System.Int32)">
+            <summary>
+            获取用户的默认地址
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UserAddressController.AddUserAddress(FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest)">
+            <summary>
+            添加新地址
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UserAddressController.UpdateUserAddress(System.Int32,FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest)">
+            <summary>
+            更新地址
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UserAddressController.DeleteUserAddress(System.Int32)">
+            <summary>
+            删除地址
+            </summary>
+        </member>
         <member name="M:FarmDirectSales.Controllers.UserController.ChangeUserRole(System.Int32,FarmDirectSales.Controllers.UserController.ChangeRoleRequest)">
             <summary>
             临时API: 修改用户角色(仅用于测试)
@@ -1052,6 +1512,16 @@
         <member name="P:FarmDirectSales.Data.ApplicationDbContext.FarmerProfiles">
             <summary>
             农户资料表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.UserAddresses">
+            <summary>
+            用户地址表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.DeliveryAreas">
+            <summary>
+            配送区域表
             </summary>
         </member>
         <member name="M:FarmDirectSales.Data.ApplicationDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
@@ -1248,6 +1718,30 @@
         <member name="M:FarmDirectSales.Migrations.AddOrderCancelDetailsFields.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:FarmDirectSales.Migrations.AddUserAddressAndDeliveryArea">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddUserAddressAndDeliveryArea.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddUserAddressAndDeliveryArea.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddUserAddressAndDeliveryArea.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddRatingFieldsToOrders">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddRatingFieldsToOrders.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddRatingFieldsToOrders.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddRatingFieldsToOrders.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:FarmDirectSales.Models.CartItem">
             <summary>
             购物车项模型
@@ -1291,6 +1785,61 @@
         <member name="P:FarmDirectSales.Models.CartItem.Product">
             <summary>
             产品导航属性
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.DeliveryArea">
+            <summary>
+            配送区域模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryArea.DeliveryAreaId">
+            <summary>
+            配送区域ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryArea.Province">
+            <summary>
+            省份
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryArea.City">
+            <summary>
+            城市
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryArea.District">
+            <summary>
+            区/县
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryArea.SupportSameDayDelivery">
+            <summary>
+            是否支持当天配送
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryArea.DeliveryFee">
+            <summary>
+            配送费用
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryArea.Description">
+            <summary>
+            配送说明
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryArea.CreateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryArea.UpdateTime">
+            <summary>
+            最后更新时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryArea.UpdateBy">
+            <summary>
+            更新人（管理员ID）
             </summary>
         </member>
         <member name="T:FarmDirectSales.Models.FarmerProfile">
@@ -1501,6 +2050,21 @@
         <member name="P:FarmDirectSales.Models.Order.IsReviewed">
             <summary>
             是否已评价
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.Rating">
+            <summary>
+            用户评分(1-5星)
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.IsRated">
+            <summary>
+            是否已评分
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.RateTime">
+            <summary>
+            评分时间
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.Order.User">
@@ -1976,6 +2540,71 @@
         <member name="P:FarmDirectSales.Models.User.FarmerProfile">
             <summary>
             农户资料（仅当用户是农户时有效）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.UserAddress">
+            <summary>
+            用户地址模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.UserAddress.AddressId">
+            <summary>
+            地址ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.UserAddress.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.UserAddress.ReceiverName">
+            <summary>
+            收货人姓名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.UserAddress.ContactPhone">
+            <summary>
+            联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.UserAddress.Province">
+            <summary>
+            省份
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.UserAddress.City">
+            <summary>
+            城市
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.UserAddress.District">
+            <summary>
+            区/县
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.UserAddress.DetailAddress">
+            <summary>
+            详细地址
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.UserAddress.IsDefault">
+            <summary>
+            是否为默认地址
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.UserAddress.CreateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.UserAddress.UpdateTime">
+            <summary>
+            最后更新时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.UserAddress.User">
+            <summary>
+            用户导航属性
             </summary>
         </member>
         <member name="T:FarmDirectSales.Services.ILogService">

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配送区域管理 - 农产品直销系统</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- 自定义样式 -->
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+
+    <!-- 顶部导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/pages/admin/index.html">农产品直销系统 - 管理后台</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="adminNavbar">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html" target="_blank">
+                            <i class="fas fa-home me-1"></i>前台首页
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i><span id="adminUsername">管理员</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/pages/admin/profile.html">个人信息</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logoutBtn">退出登录</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主体内容区域 -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边导航栏 -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/pages/admin/index.html">
+                                <i class="fas fa-tachometer-alt me-2"></i>控制台
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/pages/admin/users.html">
+                                <i class="fas fa-users me-2"></i>用户管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/pages/admin/farmers.html">
+                                <i class="fas fa-tractor me-2"></i>农户管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/pages/admin/products.html">
+                                <i class="fas fa-shopping-basket me-2"></i>产品管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/pages/admin/orders.html">
+                                <i class="fas fa-clipboard-list me-2"></i>订单管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/pages/admin/statistics.html">
+                                <i class="fas fa-chart-bar me-2"></i>数据统计
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/pages/admin/delivery-areas.html">
+                                <i class="fas fa-truck me-2"></i>配送区域管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/pages/admin/logs.html">
+                                <i class="fas fa-history me-2"></i>操作日志
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/pages/admin/settings.html">
+                                <i class="fas fa-cog me-2"></i>系统设置
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- 内容主体区域 -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">配送区域管理</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addAreaModal">
+                                <i class="fas fa-plus me-1"></i>添加配送区域
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="initializeAreasBtn">
+                                <i class="fas fa-sync me-1"></i>初始化默认区域
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 配送区域卡片 -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <i class="fas fa-map-marker-alt me-1"></i>
+                        当前配送区域列表
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover table-bordered align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>省份</th>
+                                        <th>城市</th>
+                                        <th>区/县</th>
+                                        <th>是否支持当天配送</th>
+                                        <th>配送费用</th>
+                                        <th>说明</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="areas-list">
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4">
+                                            <i class="fas fa-spinner fa-spin me-2"></i>正在加载数据...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 无数据提示 -->
+                        <div id="no-data-placeholder" class="text-center py-5 d-none">
+                            <i class="fas fa-exclamation-circle fa-4x text-muted mb-3"></i>
+                            <p class="mb-0">暂无配送区域数据</p>
+                            <p class="text-muted">点击右上角"添加配送区域"按钮添加，或点击"初始化默认区域"来快速创建默认区域</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 添加配送区域模态框 -->
+    <div class="modal fade" id="addAreaModal" tabindex="-1" aria-labelledby="addAreaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="addAreaModalLabel">添加配送区域</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAreaForm">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="province" class="form-label">省份 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="province" required placeholder="如：广东省">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="city" class="form-label">城市 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="city" required placeholder="如：广州市">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="district" class="form-label">区/县 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="district" required placeholder="如：天河区">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="deliveryFee" class="form-label">配送费用 (元) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="deliveryFee" required min="0" step="0.1" value="15">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label d-block">是否支持当天配送</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="supportSameDayDelivery" id="supportTrue" value="true" checked>
+                                    <label class="form-check-label" for="supportTrue">支持</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="supportSameDayDelivery" id="supportFalse" value="false">
+                                    <label class="form-check-label" for="supportFalse">不支持</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">配送说明</label>
+                            <textarea class="form-control" id="description" rows="3" placeholder="填写该区域配送相关说明，如配送时间、特殊限制等"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-success" id="saveAreaBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑配送区域模态框 -->
+    <div class="modal fade" id="editAreaModal" tabindex="-1" aria-labelledby="editAreaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editAreaModalLabel">编辑配送区域</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editAreaForm">
+                        <input type="hidden" id="edit-areaId">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">省份</label>
+                                <input type="text" class="form-control" id="edit-province" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">城市</label>
+                                <input type="text" class="form-control" id="edit-city" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">区/县</label>
+                                <input type="text" class="form-control" id="edit-district" readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="edit-deliveryFee" class="form-label">配送费用 (元) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="edit-deliveryFee" required min="0" step="0.1">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label d-block">是否支持当天配送</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="edit-supportSameDayDelivery" id="edit-supportTrue" value="true">
+                                    <label class="form-check-label" for="edit-supportTrue">支持</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="edit-supportSameDayDelivery" id="edit-supportFalse" value="false">
+                                    <label class="form-check-label" for="edit-supportFalse">不支持</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-description" class="form-label">配送说明</label>
+                            <textarea class="form-control" id="edit-description" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="updateAreaBtn">更新</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认删除模态框 -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">确认删除</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除此配送区域吗？此操作无法撤销。</p>
+                    <input type="hidden" id="delete-areaId">
+                    <p class="mb-0 fw-bold" id="delete-area-info"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- API 调用 -->
+    <script src="/js/api.js"></script>
+    <!-- 管理员通用脚本 -->
+    <script src="/js/admin-common.js"></script>
+    
+    <!-- 配送区域管理脚本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查登录状态
+            checkAdminAuthStatus();
+            
+            // 加载配送区域列表
+            loadDeliveryAreas();
+            
+            // 绑定添加区域事件
+            document.getElementById('saveAreaBtn').addEventListener('click', addDeliveryArea);
+            
+            // 绑定更新区域事件
+            document.getElementById('updateAreaBtn').addEventListener('click', updateDeliveryArea);
+            
+            // 绑定确认删除事件
+            document.getElementById('confirmDeleteBtn').addEventListener('click', deleteDeliveryArea);
+            
+            // 绑定初始化默认区域事件
+            document.getElementById('initializeAreasBtn').addEventListener('click', initializeDefaultAreas);
+        });
+        
+        // 加载配送区域列表
+        async function loadDeliveryAreas() {
+            try {
+                const response = await http.get('/api/delivery-area');
+                
+                const tableBody = document.getElementById('areas-list');
+                const noDataPlaceholder = document.getElementById('no-data-placeholder');
+                
+                if (response.code === 200 && response.data && response.data.length > 0) {
+                    // 有数据，生成表格行
+                    tableBody.innerHTML = '';
+                    noDataPlaceholder.classList.add('d-none');
+                    
+                    response.data.forEach(area => {
+                        const row = document.createElement('tr');
+                        
+                        row.innerHTML = `
+                            <td>${area.deliveryAreaId}</td>
+                            <td>${area.province}</td>
+                            <td>${area.city}</td>
+                            <td>${area.district}</td>
+                            <td>
+                                <span class="badge ${area.supportSameDayDelivery ? 'bg-success' : 'bg-secondary'}">
+                                    ${area.supportSameDayDelivery ? '支持' : '不支持'}
+                                </span>
+                            </td>
+                            <td>¥${area.deliveryFee.toFixed(2)}</td>
+                            <td>${area.description || '-'}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary edit-btn" data-area-id="${area.deliveryAreaId}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger ms-1 delete-btn" data-area-id="${area.deliveryAreaId}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        `;
+                        
+                        tableBody.appendChild(row);
+                    });
+                    
+                    // 绑定编辑按钮事件
+                    document.querySelectorAll('.edit-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const areaId = this.getAttribute('data-area-id');
+                            openEditModal(areaId, response.data);
+                        });
+                    });
+                    
+                    // 绑定删除按钮事件
+                    document.querySelectorAll('.delete-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const areaId = this.getAttribute('data-area-id');
+                            openDeleteConfirmModal(areaId, response.data);
+                        });
+                    });
+                } else {
+                    // 无数据，显示占位符
+                    tableBody.innerHTML = '';
+                    noDataPlaceholder.classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('加载配送区域失败:', error);
+                alert('加载配送区域数据失败，请刷新页面重试');
+            }
+        }
+        
+        // 添加配送区域
+        async function addDeliveryArea() {
+            const province = document.getElementById('province').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const district = document.getElementById('district').value.trim();
+            const deliveryFee = parseFloat(document.getElementById('deliveryFee').value);
+            const supportSameDayDelivery = document.querySelector('input[name="supportSameDayDelivery"]:checked').value === 'true';
+            const description = document.getElementById('description').value.trim();
+            
+            // 表单验证
+            if (!province || !city || !district) {
+                alert('请填写完整的地区信息');
+                return;
+            }
+            
+            if (isNaN(deliveryFee) || deliveryFee < 0) {
+                alert('请输入有效的配送费用');
+                return;
+            }
+            
+            // 禁用保存按钮
+            const saveBtn = document.getElementById('saveAreaBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>保存中...';
+            
+            try {
+                const requestData = {
+                    province,
+                    city,
+                    district,
+                    deliveryFee,
+                    supportSameDayDelivery,
+                    description: description || null
+                };
+                
+                const response = await http.post('/api/delivery-area', requestData);
+                
+                if (response.code === 200) {
+                    // 关闭模态框
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addAreaModal'));
+                    modal.hide();
+                    
+                    // 重置表单
+                    document.getElementById('addAreaForm').reset();
+                    
+                    // 重新加载数据
+                    await loadDeliveryAreas();
+                    
+                    // 显示成功消息
+                    alert('配送区域添加成功');
+                } else {
+                    throw new Error(response.message || '添加配送区域失败');
+                }
+            } catch (error) {
+                console.error('添加配送区域失败:', error);
+                alert(`添加配送区域失败: ${error.message || '服务器错误'}`);
+            } finally {
+                // 恢复保存按钮
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '保存';
+            }
+        }
+        
+        // 打开编辑模态框
+        function openEditModal(areaId, areasData) {
+            const area = areasData.find(a => a.deliveryAreaId == areaId);
+            if (!area) return;
+            
+            // 填充表单
+            document.getElementById('edit-areaId').value = area.deliveryAreaId;
+            document.getElementById('edit-province').value = area.province;
+            document.getElementById('edit-city').value = area.city;
+            document.getElementById('edit-district').value = area.district;
+            document.getElementById('edit-deliveryFee').value = area.deliveryFee;
+            
+            if (area.supportSameDayDelivery) {
+                document.getElementById('edit-supportTrue').checked = true;
+            } else {
+                document.getElementById('edit-supportFalse').checked = true;
+            }
+            
+            document.getElementById('edit-description').value = area.description || '';
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('editAreaModal'));
+            modal.show();
+        }
+        
+        // 更新配送区域
+        async function updateDeliveryArea() {
+            const areaId = document.getElementById('edit-areaId').value;
+            const deliveryFee = parseFloat(document.getElementById('edit-deliveryFee').value);
+            const supportSameDayDelivery = document.querySelector('input[name="edit-supportSameDayDelivery"]:checked').value === 'true';
+            const description = document.getElementById('edit-description').value.trim();
+            
+            // 表单验证
+            if (isNaN(deliveryFee) || deliveryFee < 0) {
+                alert('请输入有效的配送费用');
+                return;
+            }
+            
+            // 禁用更新按钮
+            const updateBtn = document.getElementById('updateAreaBtn');
+            updateBtn.disabled = true;
+            updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>更新中...';
+            
+            try {
+                const requestData = {
+                    deliveryFee,
+                    supportSameDayDelivery,
+                    description: description || null
+                };
+                
+                const response = await http.put(`/api/delivery-area/${areaId}`, requestData);
+                
+                if (response.code === 200) {
+                    // 关闭模态框
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editAreaModal'));
+                    modal.hide();
+                    
+                    // 重新加载数据
+                    await loadDeliveryAreas();
+                    
+                    // 显示成功消息
+                    alert('配送区域更新成功');
+                } else {
+                    throw new Error(response.message || '更新配送区域失败');
+                }
+            } catch (error) {
+                console.error('更新配送区域失败:', error);
+                alert(`更新配送区域失败: ${error.message || '服务器错误'}`);
+            } finally {
+                // 恢复更新按钮
+                updateBtn.disabled = false;
+                updateBtn.innerHTML = '更新';
+            }
+        }
+        
+        // 打开删除确认模态框
+        function openDeleteConfirmModal(areaId, areasData) {
+            const area = areasData.find(a => a.deliveryAreaId == areaId);
+            if (!area) return;
+            
+            document.getElementById('delete-areaId').value = area.deliveryAreaId;
+            document.getElementById('delete-area-info').textContent = `${area.province} ${area.city} ${area.district}`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            modal.show();
+        }
+        
+        // 删除配送区域
+        async function deleteDeliveryArea() {
+            const areaId = document.getElementById('delete-areaId').value;
+            
+            // 禁用删除按钮
+            const deleteBtn = document.getElementById('confirmDeleteBtn');
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>删除中...';
+            
+            try {
+                const response = await http.delete(`/api/delivery-area/${areaId}`);
+                
+                if (response.code === 200) {
+                    // 关闭模态框
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
+                    modal.hide();
+                    
+                    // 重新加载数据
+                    await loadDeliveryAreas();
+                    
+                    // 显示成功消息
+                    alert('配送区域删除成功');
+                } else {
+                    throw new Error(response.message || '删除配送区域失败');
+                }
+            } catch (error) {
+                console.error('删除配送区域失败:', error);
+                alert(`删除配送区域失败: ${error.message || '服务器错误'}`);
+            } finally {
+                // 恢复删除按钮
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = '确认删除';
+            }
+        }
+        
+        // 初始化默认配送区域
+        async function initializeDefaultAreas() {
+            if (!confirm('确定要初始化默认配送区域吗？这将创建广东省广州市和深圳市的配送区域。')) {
+                return;
+            }
+            
+            // 禁用按钮
+            const initBtn = document.getElementById('initializeAreasBtn');
+            initBtn.disabled = true;
+            initBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>初始化中...';
+            
+            try {
+                const response = await http.post('/api/delivery-area/initialize');
+                
+                if (response.code === 200) {
+                    // 重新加载数据
+                    await loadDeliveryAreas();
+                    
+                    // 显示成功消息
+                    alert(`初始化配送区域成功！添加了 ${response.data.addedCount} 个区域，跳过了 ${response.data.skippedCount} 个已存在的区域。`);
+                } else {
+                    throw new Error(response.message || '初始化配送区域失败');
+                }
+            } catch (error) {
+                console.error('初始化配送区域失败:', error);
+                alert(`初始化配送区域失败: ${error.message || '服务器错误'}`);
+            } finally {
+                // 恢复按钮
+                initBtn.disabled = false;
+                initBtn.innerHTML = '<i class="fas fa-sync me-1"></i>初始化默认区域';
+            }
+        }
+    </script>
+</body>
+</html> 

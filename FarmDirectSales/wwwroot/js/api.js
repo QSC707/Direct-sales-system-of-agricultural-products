@@ -154,6 +154,21 @@ const resetLoginStatus = () => {
     return false;
 };
 
+// 封装带授权的fetch请求
+const fetchWithAuth = async (url, options = {}) => {
+    // 确保请求头设置正确
+    options.headers = options.headers || {};
+    Object.assign(options.headers, window.getHeaders());
+    
+    try {
+        const response = await fetch(url, options);
+        return handleResponse(response);
+    } catch (error) {
+        console.error('API请求失败:', error);
+        throw error;
+    }
+};
+
 // API封装对象
 const api = {
     // 调试功能
@@ -321,19 +336,56 @@ const api = {
             });
             
             return handleResponse(response);
+        },
+        
+        // 批量更新产品状态
+        batchUpdateStatus: async (productIds, status, farmerId) => {
+            const response = await fetch(`${window.API_BASE_URL}/product/batch/status`, {
+                method: 'PUT',
+                headers: window.getHeaders(),
+                body: JSON.stringify({
+                    productIds,
+                    status,
+                    farmerId
+                })
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 更新产品库存
+        updateStock: async (productId, stockChange) => {
+            const response = await fetch(`${window.API_BASE_URL}/product/${productId}/stock`, {
+                method: 'PUT',
+                headers: window.getHeaders(),
+                body: JSON.stringify({ stockChange })
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 检查产品库存
+        checkStock: async (productId, quantity) => {
+            const response = await fetch(`${window.API_BASE_URL}/product/${productId}/stock/check`, {
+                method: 'POST',
+                headers: window.getHeaders(),
+                body: JSON.stringify({ quantity })
+            });
+            
+            return handleResponse(response);
         }
     },
     
     // 订单相关
     orders: {
-        // 获取用户订单
-        getUserOrders: async () => {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            if (!user.userId) {
-                throw new Error('用户未登录');
+        // 获取订单列表
+        getAll: async (status = null, page = 1, pageSize = 10) => {
+            let url = `${window.API_BASE_URL}/order?page=${page}&pageSize=${pageSize}`;
+            if (status) {
+                url += `&status=${status}`;
             }
             
-            const response = await fetch(`${window.API_BASE_URL}/order/user/${user.userId}`, {
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: window.getHeaders()
             });
@@ -341,34 +393,9 @@ const api = {
             return handleResponse(response);
         },
         
-        // 获取农户订单
-        getFarmerOrders: async (status = '', keyword = '') => {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            if (!user.userId) {
-                throw new Error('用户未登录');
-            }
-            
-            // 构造URL并添加查询参数
-            let url = `${window.API_BASE_URL}/order/farmer/${user.userId}`;
-            
-            // 添加查询参数
-            const params = new URLSearchParams();
-            if (status) {
-                params.append('status', status);
-            }
-            if (keyword) {
-                params.append('keyword', keyword);
-            }
-            
-            // 如果有查询参数，添加到URL中
-            const queryString = params.toString();
-            if (queryString) {
-                url += `?${queryString}`;
-            }
-            
-            console.log('请求农户订单URL:', url);
-            
-            const response = await fetch(url, {
+        // 获取订单详情
+        getById: async (orderId) => {
+            const response = await fetch(`${window.API_BASE_URL}/order/${orderId}`, {
                 method: 'GET',
                 headers: window.getHeaders()
             });
@@ -387,105 +414,80 @@ const api = {
             return handleResponse(response);
         },
         
-        // 获取订单详情
-        getById: async (orderId) => {
-            const response = await fetch(`${window.API_BASE_URL}/order/${orderId}`, {
-                method: 'GET',
-                headers: window.getHeaders()
-            });
-            
-            return handleResponse(response);
-        },
-        
-        // 支付订单
-        payOrder: async (orderId) => {
+        // 从购物车创建订单
+        createFromCart: async (addressInfo) => {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (!user.userId) {
                 throw new Error('用户未登录');
             }
             
-            const response = await fetch(`${window.API_BASE_URL}/order/${orderId}/pay`, {
-                method: 'PUT',
+            const response = await fetch(`${window.API_BASE_URL}/order/from-cart`, {
+                method: 'POST',
                 headers: window.getHeaders(),
-                body: JSON.stringify({ userId: user.userId })
+                body: JSON.stringify({
+                    userId: user.userId,
+                    contactName: addressInfo.contactName,
+                    contactPhone: addressInfo.contactPhone,
+                    shippingAddress: addressInfo.shippingAddress,
+                    deliveryMethod: addressInfo.deliveryMethod || 'express'
+                })
             });
             
             return handleResponse(response);
         },
         
-        // 确认收货
-        confirmReceipt: async (orderId) => {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            if (!user.userId) {
-                throw new Error('用户未登录');
-            }
-            
-            const response = await fetch(`${window.API_BASE_URL}/order/${orderId}/complete`, {
+        // 更新订单状态
+        updateStatus: async (orderId, status, remark = '') => {
+            const response = await fetch(`${window.API_BASE_URL}/order/${orderId}/status`, {
                 method: 'PUT',
                 headers: window.getHeaders(),
-                body: JSON.stringify({ userId: user.userId })
+                body: JSON.stringify({ 
+                    status,
+                    remark
+                })
             });
             
             return handleResponse(response);
         },
         
         // 取消订单
-        cancelOrder: async (orderId) => {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            if (!user.userId) {
-                throw new Error('用户未登录');
-            }
-            
+        cancel: async (orderId, reason) => {
             const response = await fetch(`${window.API_BASE_URL}/order/${orderId}/cancel`, {
                 method: 'PUT',
                 headers: window.getHeaders(),
-                body: JSON.stringify({ userId: user.userId })
+                body: JSON.stringify({ reason })
             });
             
             return handleResponse(response);
         },
         
-        // 从购物车创建订单
-        createFromCart: async (addressInfo) => {
-            try {
-                const user = JSON.parse(localStorage.getItem('user') || '{}');
-                if (!user.userId) {
-                    throw new Error('用户未登录');
-                }
-                
-                // 1. 获取购物车数据
-                const cartResponse = await api.cart.getCart();
-                const cartData = cartResponse.data;
-                
-                if (!cartData || !cartData.items || cartData.items.length === 0) {
-                    throw new Error('购物车为空');
-                }
-                
-                // 2. 为每个购物车项创建订单
-                const orderPromises = cartData.items.map(item => {
-                    return api.orders.create({
-                        userId: user.userId,
-                        productId: item.product.productId,
-                        quantity: item.quantity,
-                        shippingAddress: addressInfo.shippingAddress,
-                        contactPhone: addressInfo.contactPhone
-                    });
-                });
-                
-                const results = await Promise.all(orderPromises);
-                
-                // 3. 清空购物车
-                await api.cart.clearCart();
-                
-                return {
-                    code: 200,
-                    message: "订单创建成功",
-                    data: results.map(r => r.data)
-                };
-            } catch (error) {
-                console.error('从购物车创建订单失败:', error);
-                throw error;
+        // 批量更新订单状态
+        batchUpdateStatus: async (orderIds, status) => {
+            const response = await fetch(`${window.API_BASE_URL}/order/batch/status`, {
+                method: 'PUT',
+                headers: window.getHeaders(),
+                body: JSON.stringify({
+                    orderIds,
+                    status
+                })
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 获取农户订单
+        getFarmerOrders: async (farmerId, status = null, page = 1, pageSize = 10) => {
+            let url = `${window.API_BASE_URL}/order/farmer/${farmerId}?page=${page}&pageSize=${pageSize}`;
+            if (status) {
+                url += `&status=${status}`;
             }
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
         }
     },
     
@@ -664,6 +666,181 @@ const api = {
             });
             
             return handleResponse(response);
+        }
+    },
+    
+    // 地址相关
+    address: {
+        // 获取用户保存的地址列表
+        getSavedAddresses: async () => {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.userId) {
+                throw new Error('用户未登录');
+            }
+            
+            const response = await fetch(`${window.API_BASE_URL}/address/user/${user.userId}`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 获取单个地址详情
+        getAddressById: async (addressId) => {
+            const response = await fetch(`${window.API_BASE_URL}/address/${addressId}`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 添加新地址
+        addAddress: async (addressData) => {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.userId) {
+                throw new Error('用户未登录');
+            }
+            
+            // 确保addressData包含userId
+            addressData.userId = user.userId;
+            
+            const response = await fetch(`${window.API_BASE_URL}/address`, {
+                method: 'POST',
+                headers: window.getHeaders(),
+                body: JSON.stringify(addressData)
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 更新地址
+        updateAddress: async (addressId, addressData) => {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.userId) {
+                throw new Error('用户未登录');
+            }
+            
+            // 确保addressData包含userId
+            addressData.userId = user.userId;
+            
+            const response = await fetch(`${window.API_BASE_URL}/address/${addressId}`, {
+                method: 'PUT',
+                headers: window.getHeaders(),
+                body: JSON.stringify(addressData)
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 删除地址
+        deleteAddress: async (addressId) => {
+            const response = await fetch(`${window.API_BASE_URL}/address/${addressId}`, {
+                method: 'DELETE',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 设置默认地址
+        setDefaultAddress: async (addressId) => {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.userId) {
+                throw new Error('用户未登录');
+            }
+            
+            const response = await fetch(`${window.API_BASE_URL}/address/${addressId}/set-default`, {
+                method: 'PUT',
+                headers: window.getHeaders(),
+                body: JSON.stringify({
+                    userId: user.userId
+                })
+            });
+            
+            return handleResponse(response);
+        }
+    },
+    
+    // 配送相关
+    delivery: {
+        // 获取当天配送支持的区域
+        getSameDayAreas: async () => {
+            const response = await fetch(`${window.API_BASE_URL}/delivery/sameday-areas`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 检查地址是否支持当天配送
+        checkSameDayDelivery: async (province, city) => {
+            const response = await fetch(`${window.API_BASE_URL}/delivery/check-sameday`, {
+                method: 'POST',
+                headers: window.getHeaders(),
+                body: JSON.stringify({
+                    province,
+                    city
+                })
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 获取配送费用
+        getDeliveryFee: async (province, city, deliveryMethod) => {
+            const response = await fetch(`${window.API_BASE_URL}/delivery/fee`, {
+                method: 'POST',
+                headers: window.getHeaders(),
+                body: JSON.stringify({
+                    province,
+                    city,
+                    deliveryMethod
+                })
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 获取预计送达时间
+        getEstimatedDeliveryTime: async (province, city, deliveryMethod) => {
+            const response = await fetch(`${window.API_BASE_URL}/delivery/estimated-time`, {
+                method: 'POST',
+                headers: window.getHeaders(),
+                body: JSON.stringify({
+                    province,
+                    city,
+                    deliveryMethod
+                })
+            });
+            
+            return handleResponse(response);
+        }
+    },
+    
+    // 管理员专用功能
+    admin: {
+        // 获取所有用户
+        getAllUsers: async () => {
+            return await fetchWithAuth(`${window.API_BASE_URL}/admin/users`, {
+                method: 'GET'
+            });
+        },
+        
+        // 删除默认商品数据
+        clearDefaultProducts: async () => {
+            return await fetchWithAuth(`${window.API_BASE_URL}/admin/products/clear-defaults`, {
+                method: 'DELETE'
+            });
+        },
+        
+        // 获取系统统计数据
+        getStatistics: async () => {
+            return await fetchWithAuth(`${window.API_BASE_URL}/admin/statistics`, {
+                method: 'GET'
+            });
         }
     }
 };

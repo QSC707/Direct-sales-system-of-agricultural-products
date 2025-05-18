@@ -10,6 +10,8 @@
     <!-- 添加Axios引用 -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="../../js/axios-config.js"></script>
+    <!-- 添加订单管理工具引用 -->
+    <script src="../../js/order-manager.js"></script>
 </head>
 <body>
     <!-- 导航栏 -->
@@ -252,22 +254,18 @@
                     </div>
                     
                     <div id="deliverySection" class="mt-3">
-                        <h6>物流信息</h6>
+                        <h6>配送信息</h6>
                         <div id="noDeliveryInfo" class="alert alert-warning">
-                            <i class="fa fa-exclamation-triangle mr-2"></i>该订单尚未发货
+                            <i class="fa fa-exclamation-triangle mr-2"></i>该订单尚未开始配送
                         </div>
                         <div id="deliveryInfo" style="display: none;">
                             <table class="table table-sm table-borderless">
                                 <tr>
-                                    <th width="120">物流公司:</th>
-                                    <td id="detailLogisticsCompany"></td>
+                                    <th width="120">配送方式:</th>
+                                    <td>货到付款</td>
                                 </tr>
                                 <tr>
-                                    <th>物流单号:</th>
-                                    <td id="detailTrackingNumber"></td>
-                                </tr>
-                                <tr>
-                                    <th>发货时间:</th>
+                                    <th>开始配送时间:</th>
                                     <td id="detailShippingTime"></td>
                                 </tr>
                             </table>
@@ -289,12 +287,12 @@
         </div>
     </div>
 
-    <!-- 发货模态框 -->
+    <!-- 开始配送确认模态框 -->
     <div class="modal fade" id="shipModal" tabindex="-1" role="dialog" aria-labelledby="shipModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="shipModalLabel">订单发货</h5>
+                    <h5 class="modal-title" id="shipModalLabel">开始订单配送</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -302,35 +300,18 @@
                 <div class="modal-body">
                     <form id="shipForm">
                         <input type="hidden" id="shipOrderId">
-                        <div class="form-group">
-                            <label for="logisticsCompany">物流公司 <span class="text-danger">*</span></label>
-                            <select class="form-control" id="logisticsCompany" required>
-                                <option value="">请选择物流公司</option>
-                                <option value="顺丰速运">顺丰速运</option>
-                                <option value="圆通快递">圆通快递</option>
-                                <option value="中通快递">中通快递</option>
-                                <option value="申通快递">申通快递</option>
-                                <option value="韵达快递">韵达快递</option>
-                                <option value="邮政EMS">邮政EMS</option>
-                                <option value="京东物流">京东物流</option>
-                                <option value="天天快递">天天快递</option>
-                                <option value="德邦快递">德邦快递</option>
-                                <option value="其他">其他</option>
-                            </select>
+                        <div class="alert alert-info">
+                            <i class="fa fa-info-circle mr-2"></i>确认开始配送此订单吗？订单状态将更新为"货到付款配送中"。
                         </div>
                         <div class="form-group">
-                            <label for="trackingNumber">物流单号 <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="trackingNumber" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="shippingNotes">发货备注</label>
-                            <textarea class="form-control" id="shippingNotes" rows="3"></textarea>
+                            <label for="shippingNotes">配送备注（可选）</label>
+                            <textarea class="form-control" id="shippingNotes" rows="3" placeholder="可以输入送货时间、联系方式等备注信息"></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-success" id="confirmShipBtn">确认发货</button>
+                    <button type="button" class="btn btn-success" id="confirmShipBtn">确认开始配送</button>
                 </div>
             </div>
         </div>
@@ -355,10 +336,11 @@
                     <div class="form-group">
                         <label for="cancelReason">取消原因（可选）</label>
                         <select class="form-control" id="cancelReason">
-                            <option value="无法发货">无法发货</option>
+                            <option value="无法配送">无法配送</option>
                             <option value="产品库存不足">产品库存不足</option>
                             <option value="与客户协商取消">与客户协商取消</option>
                             <option value="订单信息有误">订单信息有误</option>
+                            <option value="配送区域不覆盖">配送区域不覆盖</option>
                             <option value="其他原因">其他原因</option>
                         </select>
                     </div>
@@ -366,6 +348,66 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">返回</button>
                     <button type="button" class="btn btn-danger" id="confirmCancelBtn">确认取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 退款申请模态框 -->
+    <div class="modal fade" id="refundModal" tabindex="-1" role="dialog" aria-labelledby="refundModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-white">
+                    <h5 class="modal-title" id="refundModalLabel">申请退款</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="refundOrderId">
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle mr-2"></i><span id="refundStatusMessage">您正在为此订单申请退款。退款申请提交后，系统将通知客户。</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="refundType">退款类型</label>
+                        <select class="form-control" id="refundType">
+                            <option value="full">全额退款</option>
+                            <option value="partial">部分退款</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="partialRefundAmountGroup" style="display: none;">
+                        <label for="refundAmount">退款金额</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">¥</span>
+                            </div>
+                            <input type="number" class="form-control" id="refundAmount" step="0.01" min="0">
+                        </div>
+                        <small class="form-text text-muted">请输入退款金额，不能超过订单总金额</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="refundReason">退款原因</label>
+                        <select class="form-control" id="refundReason">
+                            <option value="无法配送">无法配送</option>
+                            <option value="缺货">缺货</option>
+                            <option value="客户要求退款">客户要求退款</option>
+                            <option value="商品质量问题">商品质量问题</option>
+                            <option value="配送问题">配送问题</option>
+                            <option value="其他原因">其他原因</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="refundNotes">备注说明</label>
+                        <textarea class="form-control" id="refundNotes" rows="3" placeholder="请输入退款相关说明..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-warning" id="confirmRefundBtn">确认申请退款</button>
                 </div>
             </div>
         </div>
@@ -444,6 +486,11 @@
                     cancelOrder();
                 });
                 
+                // 确认退款按钮点击事件
+                $('#confirmRefundBtn').on('click', function() {
+                    processRefund();
+                });
+                
                 // 退出登录按钮点击事件
                 $('#logoutBtn').on('click', function() {
                     logout();
@@ -492,7 +539,7 @@
                 console.log(`正在加载订单数据，用户ID: ${userId}，状态: ${status || '全部'}，关键词: ${keyword || '无'}`);
                 
                 // 构建查询参数
-                let apiUrl = `/order/farmer/${userId}`;
+                let apiUrl = `/api/order/farmer/${userId}`;
                 
                 // 使用URLSearchParams构建查询字符串
                 const params = new URLSearchParams();
@@ -560,30 +607,13 @@
             }
             
             orders.forEach(function(order) {
-                let statusBadge = '';
-                switch (order.status) {
-                    case '待付款':
-                    case '待支付':
-                        statusBadge = '<span class="badge badge-warning">待付款</span>';
-                        break;
-                    case '待发货':
-                        statusBadge = '<span class="badge badge-primary">待发货</span>';
-                        break;
-                    case '已发货':
-                        statusBadge = '<span class="badge badge-info">已发货</span>';
-                        break;
-                    case '已完成':
-                        statusBadge = '<span class="badge badge-success">已完成</span>';
-                        break;
-                    case '已取消':
-                        statusBadge = '<span class="badge badge-danger">已取消</span>';
-                        break;
-                    default:
-                        statusBadge = '<span class="badge badge-secondary">' + order.status + '</span>';
-                }
+                // 使用OrderManager获取状态样式
+                const statusStyle = OrderManager.getStatusStyle(order.status);
+                const statusBadge = OrderManager.renderStatusBadge(order.status);
                 
-                // 使用orderId替代orderNumber，因为API没有返回orderNumber
-                const orderNumber = order.orderId || '未知';
+                // 支付方式显示
+                const paymentMethod = '货到付款';
+                const paymentBadge = `<span class="badge badge-secondary">${paymentMethod}</span>`;
                 
                 // 从User对象中获取客户名，如果不存在则显示'未知客户'
                 const customerName = order.user && order.user.username ? order.user.username : '未知客户';
@@ -591,36 +621,68 @@
                 // 使用totalPrice替代totalAmount，并添加null检查
                 const totalPrice = order.totalPrice ? order.totalPrice.toFixed(2) : '0.00';
                 
+                // 添加操作按钮
+                let actionButtons = `
+                    <button class="btn btn-sm btn-info view-order-btn" data-order-id="${order.orderId}">
+                        查看
+                    </button>
+                `;
+                
+                // 获取当前用户
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                // 根据订单状态添加不同的操作按钮
+                if (OrderManager.showStartDeliveryButton(order, user.role)) {
+                    // 开始配送按钮
+                    const nextStatus = order.status === '已发货' ? '配送中' : '货到付款配送中';
+                    actionButtons += `
+                        <button class="btn btn-sm btn-success start-delivery-btn" data-order-id="${order.orderId}">
+                            <i class="fas fa-truck me-1"></i> 开始配送
+                        </button>
+                    `;
+                }
+                
+                // 发货按钮 - 对于已付款或处理中的订单
+                if (order.status === '已付款' || order.status === '处理中') {
+                    actionButtons += `
+                        <button class="btn btn-sm btn-primary ship-order-btn" data-order-id="${order.orderId}">
+                            <i class="fas fa-shipping-fast me-1"></i> 发货
+                        </button>
+                    `;
+                }
+                
+                // 取消按钮 - 对于待处理或待支付的订单
+                if (order.status === '货到付款待处理' || order.status === '待付款' || order.status === '待支付') {
+                    actionButtons += `
+                        <button class="btn btn-sm btn-danger cancel-order-btn" data-order-id="${order.orderId}">
+                            <i class="fas fa-times me-1"></i> 取消
+                        </button>
+                    `;
+                }
+                
+                // 表格行HTML
                 const row = `
                     <tr>
-                        <td>${orderNumber}</td>
-                        <td>${customerName}</td>
+                        <td>${order.orderId}</td>
+                        <td>${customerName} ${paymentBadge}</td>
                         <td>¥${totalPrice}</td>
                         <td>${order.createTime || '未知'}</td>
                         <td>${statusBadge}</td>
-                        <td>
-                            <button class="btn btn-sm btn-info view-order-btn" data-order-id="${order.orderId}">
-                                查看
-                            </button>
-                            ${order.status === '待发货' ? 
-                                `<button class="btn btn-sm btn-success ship-order-btn" data-order-id="${order.orderId}">
-                                    发货
-                                </button>
-                                <button class="btn btn-sm btn-danger cancel-order-btn" data-order-id="${order.orderId}">
-                                    取消
-                                </button>` : 
-                                (order.status === '待付款' || order.status === '待支付' ? 
-                                    `<button class="btn btn-sm btn-danger cancel-order-btn" data-order-id="${order.orderId}">
-                                        取消
-                                    </button>` : '')
-                            }
-                        </td>
+                        <td>${actionButtons}</td>
                     </tr>
                 `;
                 
                 $orderList.append(row);
             });
             
+            // 绑定订单操作按钮事件
+            bindOrderEvents();
+        }
+        
+        /**
+         * 绑定订单列表事件
+         */
+        function bindOrderEvents() {
             // 绑定查看订单事件
             $('.view-order-btn').on('click', function() {
                 const orderId = $(this).data('order-id');
@@ -633,10 +695,22 @@
                 openShipModal(orderId);
             });
             
+            // 绑定开始配送按钮事件
+            $('.start-delivery-btn').on('click', function() {
+                const orderId = $(this).data('order-id');
+                startDelivery(orderId);
+            });
+            
             // 绑定取消订单按钮事件
             $('.cancel-order-btn').on('click', function() {
                 const orderId = $(this).data('order-id');
                 openCancelOrderModal(orderId);
+            });
+            
+            // 绑定退款按钮事件
+            $('.refund-order-btn').on('click', function() {
+                const orderId = $(this).data('order-id');
+                openRefundModal(orderId);
             });
         }
         
@@ -674,8 +748,8 @@
                 $('#orderDetailModal .modal-body').html('<div class="text-center my-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">正在加载订单详情...</p></div>');
                 $('#orderDetailModal').modal('show');
                 
-                // 调用API获取订单详情 - 确认API路径
-                const response = await http.get(`/order/${orderId}`);
+                // 调用API获取订单详情
+                const response = await http.get(`/api/order/${orderId}`);
                 
                 if (response && response.code === 200 && response.data) {
                     const orderDetail = response.data;
@@ -764,23 +838,23 @@
                         </div>
                         
                         <div class="mt-3">
-                            <h6>物流信息</h6>
+                            <h6>配送信息</h6>
                             ${orderDetail.shipTime ? 
                                 `<table class="table table-sm table-borderless">
                                     <tr>
-                                        <th width="120">物流公司:</th>
-                                        <td>标准快递</td>
+                                        <th width="120">配送方式:</th>
+                                        <td>货到付款</td>
                                     </tr>
                                     <tr>
-                                        <th>物流单号:</th>
-                                        <td>暂无</td>
+                                        <th>配送状态:</th>
+                                        <td>${getStatusBadge(orderDetail.status)}</td>
                                     </tr>
                                     <tr>
-                                        <th>发货时间:</th>
+                                        <th>开始配送时间:</th>
                                         <td>${orderDetail.shipTime}</td>
                                     </tr>
                                 </table>` :
-                                '<div class="alert alert-warning"><i class="fa fa-exclamation-triangle mr-2"></i>该订单尚未发货</div>'
+                                '<div class="alert alert-warning"><i class="fa fa-exclamation-triangle mr-2"></i>该订单尚未开始配送</div>'
                             }
                         </div>
                     `;
@@ -792,26 +866,32 @@
                     $('#cancelOrderBtn').hide();
                     $('#shipOrderBtn').hide();
                     
-                    // 只有待发货状态的订单可以发货
-                    if (orderDetail.status === '待发货') {
-                        $('#shipOrderBtn').show().data('order-id', orderId);
-                        // 待发货状态的订单也可以取消
-                        $('#cancelOrderBtn').show().data('order-id', orderId);
-                    } else if (orderDetail.status === '待付款' || orderDetail.status === '待支付') {
-                        // 待支付状态的订单可以取消
-                        $('#cancelOrderBtn').show().data('order-id', orderId);
+                    // 根据订单状态显示不同操作按钮
+                    if (orderDetail.status === '货到付款待处理' || orderDetail.status === '待付款' || orderDetail.status === '已付款') {
+                        // 显示开始配送按钮
+                        $('#shipOrderBtn').show().data('order-id', orderId).text('开始配送');
+                        // 显示取消订单按钮
+                        $('#cancelOrderBtn').show().data('order-id', orderId).text('取消订单');
+                    } else if (orderDetail.status === '货到付款配送中') {
+                        // 配送中订单可以取消
+                        $('#cancelOrderBtn').show().data('order-id', orderId).text('取消订单');
                     }
                     
-                    // 绑定发货按钮点击事件
+                    // 绑定开始配送按钮点击事件
                     $('#shipOrderBtn').off('click').on('click', function() {
                         $('#orderDetailModal').modal('hide');
                         openShipModal($(this).data('order-id'));
                     });
                     
-                    // 绑定取消订单按钮点击事件
+                    // 绑定取消/退款按钮点击事件
                     $('#cancelOrderBtn').off('click').on('click', function() {
                         $('#orderDetailModal').modal('hide');
-                        openCancelOrderModal($(this).data('order-id'));
+                        const btnText = $(this).text().trim();
+                        if (btnText === '申请退款') {
+                            openRefundModal($(this).data('order-id'));
+                        } else {
+                            openCancelOrderModal($(this).data('order-id'));
+                        }
                     });
                 } else {
                     // 显示错误信息
@@ -824,7 +904,7 @@
         }
         
         /**
-         * 打开发货模态框
+         * 打开开始配送确认模态框
          */
         function openShipModal(orderId) {
             // 重置表单
@@ -838,19 +918,11 @@
         }
         
         /**
-         * 订单发货处理
+         * 开始配送处理
          */
         async function shipOrder() {
             const orderId = $('#shipOrderId').val();
-            const logisticsCompany = $('#logisticsCompany').val();
-            const trackingNumber = $('#trackingNumber').val();
             const shippingNotes = $('#shippingNotes').val();
-            
-            // 验证表单
-            if (!logisticsCompany || !trackingNumber) {
-                alert('请填写物流公司和物流单号');
-                return;
-            }
             
             // 获取当前用户
             const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -859,11 +931,9 @@
                 return;
             }
             
-            // 创建发货数据
+            // 创建配送数据
             const shipData = {
                 farmerId: user.userId,
-                logisticsCompany: logisticsCompany,
-                trackingNumber: trackingNumber,
                 shippingNotes: shippingNotes
             };
             
@@ -871,26 +941,26 @@
                 // 显示加载状态
                 $('#confirmShipBtn').attr('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> 处理中...');
                 
-                // 调用API发货
-                const response = await http.put(`/order/${orderId}/ship`, shipData);
+                // 调用API开始配送
+                const response = await http.put(`/api/order/${orderId}/ship`, shipData);
                 
                 if (response && response.code === 200) {
-                    // 发货成功
-                    alert('订单发货成功！');
+                    // 配送成功
+                    alert('订单已开始配送！');
                     $('#shipModal').modal('hide');
                     
                     // 重新加载订单列表
                     loadOrders(1);
                 } else {
                     // 处理API返回的错误
-                    alert(`发货失败: ${response ? response.message : '未知错误'}`);
+                    alert(`开始配送失败: ${response ? response.message : '未知错误'}`);
                 }
             } catch (error) {
-                console.error('订单发货失败:', error);
-                alert(`订单发货失败: ${error.message}`);
+                console.error('开始配送失败:', error);
+                alert(`开始配送失败: ${error.message}`);
             } finally {
                 // 恢复按钮状态
-                $('#confirmShipBtn').attr('disabled', false).html('确认发货');
+                $('#confirmShipBtn').attr('disabled', false).html('确认开始配送');
             }
         }
         
@@ -902,14 +972,16 @@
                 case '待付款':
                 case '待支付':
                     return '<span class="badge badge-warning">待付款</span>';
-                case '待发货':
-                    return '<span class="badge badge-primary">待发货</span>';
-                case '已发货':
-                    return '<span class="badge badge-info">已发货</span>';
+                case '货到付款待处理':
+                    return '<span class="badge badge-primary">待配送</span>';
+                case '货到付款配送中':
+                    return '<span class="badge badge-info"><i class="fa fa-truck"></i> 配送中</span>';
+                case '已送达':
+                    return '<span class="badge badge-info"><i class="fa fa-box-open"></i> 已送达</span>';
                 case '已完成':
-                    return '<span class="badge badge-success">已完成</span>';
+                    return '<span class="badge badge-success"><i class="fa fa-check-circle"></i> 已完成</span>';
                 case '已取消':
-                    return '<span class="badge badge-danger">已取消</span>';
+                    return '<span class="badge badge-danger"><i class="fa fa-ban"></i> 已取消</span>';
                 default:
                     return '<span class="badge badge-secondary">' + status + '</span>';
             }
@@ -920,7 +992,7 @@
          */
         function openCancelOrderModal(orderId) {
             // 重置表单
-            $('#cancelReason').val('无法发货');
+            $('#cancelReason').val('无法配送');
             
             // 设置订单ID
             $('#cancelOrderId').val(orderId);
@@ -954,7 +1026,7 @@
                 $('#confirmCancelBtn').attr('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> 处理中...');
                 
                 // 调用API取消订单
-                const response = await http.put(`/order/${orderId}/cancel`, cancelData);
+                const response = await http.put(`/api/order/${orderId}/cancel`, cancelData);
                 
                 if (response && response.code === 200) {
                     // 取消成功
@@ -973,6 +1045,164 @@
             } finally {
                 // 恢复按钮状态
                 $('#confirmCancelBtn').attr('disabled', false).html('确认取消');
+            }
+        }
+        
+        /**
+         * 打开退款模态框
+         */
+        function openRefundModal(orderId) {
+            // 清空表单
+            $('#refundNotes').val('');
+            $('#refundAmount').val('');
+            $('#refundType').val('full');
+            $('#partialRefundAmountGroup').hide();
+            
+            // 设置订单ID
+            $('#refundOrderId').val(orderId);
+            
+            // 获取订单详情以显示更多信息
+            http.get(`/api/order/${orderId}`).then(response => {
+                if (response && response.code === 200 && response.data) {
+                    const order = response.data;
+                    
+                    // 根据订单状态调整提示信息
+                    if (order.status === '货到付款配送中') {
+                        $('#refundStatusMessage').html('订单正在配送中，申请退款后可能需要中止配送。确认退款前请与客户沟通。');
+                    } else {
+                        $('#refundStatusMessage').html('您正在为此订单申请退款。退款申请提交后，系统将通知客户。');
+                    }
+                }
+            }).catch(error => {
+                console.error('获取订单详情失败:', error);
+            });
+            
+            // 监听退款类型变化
+            $('#refundType').off('change').on('change', function() {
+                if ($(this).val() === 'partial') {
+                    $('#partialRefundAmountGroup').show();
+                } else {
+                    $('#partialRefundAmountGroup').hide();
+                }
+            });
+            
+            // 打开模态框
+            $('#refundModal').modal('show');
+        }
+        
+        /**
+         * 处理退款申请
+         */
+        async function processRefund() {
+            const orderId = $('#refundOrderId').val();
+            const refundType = $('#refundType').val();
+            const refundReason = $('#refundReason').val();
+            const refundNotes = $('#refundNotes').val();
+            let refundAmount = null;
+            
+            if (refundType === 'partial') {
+                refundAmount = parseFloat($('#refundAmount').val());
+                if (isNaN(refundAmount) || refundAmount <= 0) {
+                    alert('请输入有效的退款金额');
+                    return;
+                }
+            }
+            
+            // 获取当前用户
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (!user.userId) {
+                alert('请先登录');
+                return;
+            }
+            
+            // 创建退款数据
+            const refundData = {
+                farmerId: user.userId,
+                refundType: refundType,
+                refundReason: refundReason,
+                notes: refundNotes
+            };
+            
+            // 如果是部分退款，添加金额
+            if (refundType === 'partial') {
+                refundData.refundAmount = refundAmount;
+            }
+            
+            try {
+                // 显示加载状态
+                $('#confirmRefundBtn').attr('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> 处理中...');
+                
+                // 调用API申请退款
+                const response = await http.put(`/api/order/${orderId}/refund`, refundData);
+                
+                if (response && response.code === 200) {
+                    // 退款申请成功
+                    alert('退款申请已提交成功！系统将通知客户并处理后续流程。');
+                    $('#refundModal').modal('hide');
+                    
+                    // 重新加载订单列表
+                    loadOrders(1);
+                } else {
+                    // 处理API返回的错误
+                    alert(`申请退款失败: ${response ? response.message : '未知错误'}`);
+                }
+            } catch (error) {
+                console.error('申请退款失败:', error);
+                alert(`申请退款失败: ${error.message}`);
+            } finally {
+                // 恢复按钮状态
+                $('#confirmRefundBtn').attr('disabled', false).html('确认申请退款');
+            }
+        }
+
+        /**
+         * 开始配送订单
+         */
+        async function startDelivery(orderId) {
+            try {
+                if (!confirm('确定要开始配送该订单吗？')) {
+                    return;
+                }
+                
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                // 查询订单当前状态
+                const orderResponse = await http.get(`/api/order/${orderId}`);
+                if (!orderResponse || orderResponse.code !== 200 || !orderResponse.data) {
+                    throw new Error('无法获取订单信息');
+                }
+                
+                const order = orderResponse.data;
+                
+                // 构建API参数
+                let apiUrl = `/api/order/${orderId}/status`;
+                let newStatus = '';
+                
+                // 判断订单类型和当前状态
+                if (order.status === '已发货') {
+                    newStatus = '配送中';
+                } else if (order.status === '货到付款待处理') {
+                    newStatus = '货到付款配送中';
+                } else {
+                    throw new Error(`订单状态(${order.status})无法开始配送`);
+                }
+                
+                // 更新订单状态
+                const response = await http.put(apiUrl, {
+                    status: newStatus,
+                    remark: '开始配送'
+                });
+                
+                if (response && response.code === 200) {
+                    alert('订单已开始配送');
+                    // 重新加载订单列表
+                    loadOrders(1);
+                } else {
+                    throw new Error(response?.message || '操作失败');
+                }
+            } catch (error) {
+                console.error('开始配送订单失败:', error);
+                alert('开始配送订单失败: ' + error.message);
             }
         }
     </script>

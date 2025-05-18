@@ -282,11 +282,17 @@
     <script src="/js/api.js"></script>
     <!-- 评价模块 -->
     <script src="/js/reviews.js"></script>
+    <!-- 库存管理工具 -->
+    <script src="/js/stock-manager.js"></script>
+    <!-- 评价管理工具 -->
+    <script src="/js/review-manager.js"></script>
     
     <!-- 产品详情页面逻辑 -->
     <script>
+        // 全局变量
         let currentProduct = null;
         let currentProductId = null;
+        let addToCartTimeout = null; // 添加购物车超时变量定义
         
         document.addEventListener('DOMContentLoaded', function() {
             // 获取URL参数中的产品ID
@@ -369,7 +375,7 @@
                 const container = document.getElementById('product-detail-container');
                 
                 // 使用Axios请求产品数据 - 修正API路径
-                const response = await http.get(`/product/${productId}`);
+                const response = await http.get(`/api/product/${productId}`);
                 const product = response.data;
                 currentProduct = product;
                 
@@ -385,7 +391,7 @@
                 const html = `
                     <div class="col-md-6 mb-4">
                         <div class="card border-0 shadow-sm">
-                            <img src="${product.imageUrl || '/img/placeholder.jpg'}" class="card-img-top" alt="${product.productName}" style="height: 400px; object-fit: cover;">
+                            <img src="${product.imageUrl || '/img/placeholder.jpg'}" class="card-img-top" alt="${product.productName}" style="height: 400px; object-fit: cover;" onerror="this.src='/img/placeholder.jpg'">
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -393,6 +399,7 @@
                         <div class="mb-3">
                             <span class="badge bg-success">农户：${product.farmer?.username || '未知'}</span>
                             <span class="badge bg-secondary ms-2">库存：${product.stock} 件</span>
+                            ${product.stock <= 0 ? '<span class="badge bg-danger ms-2">已售罄</span>' : ''}
                             ${product.avgRating ? `<span class="badge bg-warning text-dark ms-2">评分：${product.avgRating.toFixed(1)}分</span>` : ''}
                         </div>
                         <div class="mb-4">
@@ -404,17 +411,17 @@
                         </div>
                         <div class="mb-4">
                             <div class="d-flex align-items-center">
-                                <button type="button" class="btn btn-sm btn-outline-secondary me-2" onclick="decreaseQuantity()">-</button>
-                                <input type="number" id="quantity" class="form-control form-control-sm text-center" style="width: 60px;" value="1" min="1" max="${product.stock}">
-                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="increaseQuantity()">+</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary me-2" onclick="decreaseQuantity()" ${product.stock <= 0 ? 'disabled' : ''}>-</button>
+                                <input type="number" id="quantity" class="form-control form-control-sm text-center" style="width: 60px;" value="1" min="1" max="${product.stock}" ${product.stock <= 0 ? 'disabled' : ''}>
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="increaseQuantity()" ${product.stock <= 0 ? 'disabled' : ''}>+</button>
                             </div>
                         </div>
                         <div class="d-grid gap-2 d-md-block">
-                            <button id="add-to-cart-btn" class="btn btn-success btn-lg me-md-2">
-                                <i class="fas fa-shopping-cart me-2"></i>加入购物车
+                            <button id="add-to-cart-btn" class="btn btn-success btn-lg me-md-2" ${product.stock <= 0 ? 'disabled' : ''}>
+                                <i class="fas fa-shopping-cart me-2"></i>${product.stock <= 0 ? '已售罄' : '加入购物车'}
                             </button>
-                            <button id="buy-now-btn" class="btn btn-outline-success btn-lg">
-                                <i class="fas fa-bolt me-2"></i>立即购买
+                            <button id="buy-now-btn" class="btn btn-outline-success btn-lg" ${product.stock <= 0 ? 'disabled' : ''}>
+                                <i class="fas fa-bolt me-2"></i>${product.stock <= 0 ? '暂时缺货' : '立即购买'}
                             </button>
                         </div>
                         
@@ -558,11 +565,11 @@
         }
         
         // 加入购物车
-        let addToCartTimeout = null; // 添加一个变量来跟踪定时器
-        
         async function addToCart() {
             const token = localStorage.getItem('token');
             if (!token) {
+                // 保存当前页面URL
+                localStorage.setItem('redirectAfterLogin', window.location.href);
                 alert('请先登录!');
                 window.location.href = '/pages/login.html';
                 return;
@@ -575,15 +582,37 @@
                 return;
             }
             
+            // 检查库存
+            if (currentProduct.stock <= 0) {
+                alert('该商品已售罄，请选择其他商品');
+                return;
+            }
+            
             const quantity = parseInt(document.getElementById('quantity').value);
-            const addToCartBtn = document.getElementById('add-to-cart-btn');
+            
+            // 验证数量
+            if (quantity <= 0) {
+                alert('请选择有效的购买数量');
+                return;
+            }
+            
+            if (quantity > currentProduct.stock) {
+                alert(`该商品库存不足，当前最多可购买 ${currentProduct.stock} 件`);
+                document.getElementById('quantity').value = currentProduct.stock;
+                return;
+            }
             
             // 禁用按钮防止重复点击
+            const addToCartBtn = document.getElementById('add-to-cart-btn');
             addToCartBtn.disabled = true;
+            
+            // 显示加载状态
+            const originalText = addToCartBtn.innerHTML;
+            addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>添加中...';
             
             try {
             // 调用购物车API
-                await http.post('/cart', {
+                await http.post('/api/cart', {
                     userId: user.userId,
                     productId: currentProductId,
                     quantity: quantity
@@ -624,6 +653,7 @@
             } finally {
                     // 恢复按钮状态
                     addToCartBtn.disabled = false;
+                    addToCartBtn.innerHTML = originalText;
             }
         }
         
@@ -631,6 +661,8 @@
         async function buyNow() {
             const token = localStorage.getItem('token');
             if (!token) {
+                // 保存当前页面URL
+                localStorage.setItem('redirectAfterLogin', window.location.href);
                 alert('请先登录!');
                 window.location.href = '/pages/login.html';
                 return;
@@ -643,7 +675,25 @@
                 return;
             }
             
+            // 检查库存
+            if (currentProduct.stock <= 0) {
+                alert('该商品已售罄，请选择其他商品');
+                return;
+            }
+            
             const quantity = parseInt(document.getElementById('quantity').value);
+            
+            // 验证数量
+            if (quantity <= 0) {
+                alert('请选择有效的购买数量');
+                return;
+            }
+            
+            if (quantity > currentProduct.stock) {
+                alert(`该商品库存不足，当前最多可购买 ${currentProduct.stock} 件`);
+                document.getElementById('quantity').value = currentProduct.stock;
+                return;
+            }
             
             // 禁用按钮防止重复点击
             const buyNowBtn = document.getElementById('buy-now-btn');
@@ -664,7 +714,7 @@
             }, 10);
             
                 // 先添加到购物车，然后跳转到结算页面 - 修正API路径
-                await http.post('/cart', {
+                await http.post('/api/cart', {
                     userId: user.userId,
                     productId: currentProductId,
                     quantity: quantity
@@ -697,7 +747,7 @@
                 const container = document.getElementById('related-products');
                 
                 // 请求全部产品数据 - 修正API路径
-                const response = await http.get('/product');
+                const response = await http.get('/api/product');
                 const allProducts = response.data || [];
                 
                 // 排除当前产品，并只保留最多4个相关产品
@@ -717,7 +767,7 @@
                     html += `
                         <div class="col-lg-3 col-md-6">
                             <div class="card product-card h-100">
-                                <img src="${product.imageUrl || '/img/placeholder.jpg'}" class="card-img-top product-img" alt="${product.productName}">
+                                <img src="${product.imageUrl || '/img/placeholder.jpg'}" class="card-img-top product-img" alt="${product.productName}" onerror="this.src='/img/placeholder.jpg'">
                                 <div class="card-body">
                                     <h5 class="card-title">${product.productName}</h5>
                                     <p class="card-text text-truncate">${product.description}</p>
@@ -747,7 +797,7 @@
                 reviewsContainer.innerHTML = '<div class="text-center"><div class="spinner-border text-success" role="status"><span class="visually-hidden">加载中...</span></div></div>';
                 
                 // 修改为正确的API路径
-                const response = await http.get(`/review/product/${productId}`);
+                const response = await http.get(`/api/review/product/${productId}`);
                 const reviews = response;
                 
                 if (!reviews || reviews.length === 0) {

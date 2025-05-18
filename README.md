@@ -27,7 +27,7 @@ cd FarmDirectSales
 dotnet run
 ```
 
-默认运行在 http://localhost:5003
+默认运行在 http://localhost:5004
 
 ## 主要API端点
 
