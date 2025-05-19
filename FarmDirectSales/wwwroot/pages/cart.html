@@ -303,6 +303,12 @@
                         <table class="table align-middle">
                             <thead>
                                 <tr>
+                                    <th scope="col">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="selectAllItems" onchange="toggleAllItems()">
+                                            <label class="form-check-label" for="selectAllItems">全选</label>
+                                        </div>
+                                    </th>
                                     <th scope="col">商品</th>
                                     <th scope="col">单价</th>
                                     <th scope="col">数量</th>
@@ -327,6 +333,16 @@
                     
                     cartHtml += `
                         <tr ${isOutOfStock ? 'class="table-danger"' : ''}>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input cart-item-checkbox" type="checkbox" 
+                                        id="item-${item.cartItemId}" 
+                                        data-id="${item.cartItemId}" 
+                                        data-price="${item.product.price * item.quantity}" 
+                                        ${isOutOfStock ? 'disabled' : ''}
+                                        onchange="updateTotalPrice()">
+                                </div>
+                            </td>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <img src="${item.product.imageUrl || '/img/placeholder.jpg'}" alt="${item.product.productName}" class="cart-img me-3">
@@ -391,15 +407,12 @@
                         </div>
                         <div class="col-md-6 text-md-end">
                             <div class="mb-3">
-                                <h5>总计: <span class="text-danger">￥${totalPrice.toFixed(2)}</span></h5>
-                                ${hasOutOfStockItems ? '<p class="text-muted small">(已排除库存不足商品)</p>' : ''}
+                                <h5>总计: <span class="text-danger" id="selected-total-amount">￥0.00</span></h5>
+                                <p class="text-muted small">已选择 <span id="selected-items-count">0</span> 件商品</p>
                             </div>
-                            <a href="/pages/checkout.html" class="btn btn-success ${hasOutOfStockItems ? 'disabled' : ''}" 
-                               ${hasOutOfStockItems ? 'aria-disabled="true" tabindex="-1"' : ''}>
+                            <button id="checkout-selected-btn" class="btn btn-success" onclick="checkoutSelected()" disabled>
                                 <i class="fas fa-shopping-bag me-2"></i>去结算
-                            </a>
-                            ${hasOutOfStockItems ? 
-                                '<div class="text-danger small mt-2">请先解决库存问题再结算</div>' : ''}
+                            </button>
                         </div>
                     </div>
                 `;
@@ -501,7 +514,7 @@
             }
         }
         
-        // 显示操作成功的Toast提示
+        // 辅助函数 - 显示操作成功的Toast提示
         function showToast(message) {
             // 如果页面上没有toast容器，则创建一个
             if (!document.getElementById('toastContainer')) {
@@ -536,6 +549,54 @@
             toastElement.addEventListener('hidden.bs.toast', function() {
                 toastElement.remove();
             });
+        }
+        
+        // 全选/取消全选
+        function toggleAllItems() {
+            const allCheckbox = document.getElementById('selectAllItems');
+            const itemCheckboxes = document.querySelectorAll('.cart-item-checkbox:not(:disabled)');
+            
+            itemCheckboxes.forEach(checkbox => {
+                checkbox.checked = allCheckbox.checked;
+            });
+            
+            updateTotalPrice();
+        }
+        
+        // 更新总价
+        function updateTotalPrice() {
+            const selectedCheckboxes = document.querySelectorAll('.cart-item-checkbox:checked');
+            const selectedCount = selectedCheckboxes.length;
+            let totalSelected = 0;
+            
+            selectedCheckboxes.forEach(checkbox => {
+                totalSelected += parseFloat(checkbox.getAttribute('data-price'));
+            });
+            
+            document.getElementById('selected-total-amount').textContent = `￥${totalSelected.toFixed(2)}`;
+            document.getElementById('selected-items-count').textContent = selectedCount;
+            
+            // 禁用/启用结算按钮
+            document.getElementById('checkout-selected-btn').disabled = selectedCount === 0;
+        }
+        
+        // 结算选中的商品
+        function checkoutSelected() {
+            const selectedItems = [];
+            document.querySelectorAll('.cart-item-checkbox:checked').forEach(checkbox => {
+                selectedItems.push(parseInt(checkbox.getAttribute('data-id')));
+            });
+            
+            if (selectedItems.length === 0) {
+                alert('请至少选择一个商品');
+                return;
+            }
+            
+            // 存储选中的商品ID到sessionStorage
+            sessionStorage.setItem('selectedCartItems', JSON.stringify(selectedItems));
+            
+            // 跳转到结算页面
+            window.location.href = '/pages/checkout.html';
         }
     </script>
 </body>

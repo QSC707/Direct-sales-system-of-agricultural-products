@@ -429,7 +429,8 @@ const api = {
                     contactName: addressInfo.contactName,
                     contactPhone: addressInfo.contactPhone,
                     shippingAddress: addressInfo.shippingAddress,
-                    deliveryMethod: addressInfo.deliveryMethod || 'express'
+                    deliveryMethod: addressInfo.deliveryMethod || 'express',
+                    selectedItems: addressInfo.selectedItems || [] // 添加选中的商品ID列表
                 })
             });
             

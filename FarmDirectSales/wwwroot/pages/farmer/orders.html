@@ -271,6 +271,16 @@
                             </table>
                         </div>
                     </div>
+                    
+                    ${orderDetail.status === '已取消' ? 
+                    `<div class="mt-3">
+                        <h6>取消信息</h6>
+                        <div class="alert alert-danger">
+                            <div><strong>取消方：</strong> ${orderDetail.cancelByType === 'farmer' ? '农户取消（您）' : '用户取消'}</div>
+                            <div><strong>取消原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
+                            <div><strong>取消时间：</strong> ${orderDetail.cancelTime || '未知'}</div>
+                        </div>
+                    </div>` : ''}
                 </div>
                 <div class="modal-footer">
                     <div id="actionButtons" class="w-100 d-flex justify-content-between">
@@ -609,7 +619,13 @@
             orders.forEach(function(order) {
                 // 使用OrderManager获取状态样式
                 const statusStyle = OrderManager.getStatusStyle(order.status);
-                const statusBadge = OrderManager.renderStatusBadge(order.status);
+                let statusBadge = OrderManager.renderStatusBadge(order.status);
+                
+                // 如果订单已取消，显示取消方信息
+                if (order.status === '已取消' && order.cancelByType) {
+                    const cancelByText = order.cancelByType === 'farmer' ? '（农户）' : '（用户）';
+                    statusBadge = `<span class="badge badge-danger"><i class="fa fa-ban"></i> 已取消${cancelByText}</span>`;
+                }
                 
                 // 支付方式显示
                 const paymentMethod = '货到付款';
@@ -853,10 +869,25 @@
                                         <th>开始配送时间:</th>
                                         <td>${orderDetail.shipTime}</td>
                                     </tr>
+                                    ${orderDetail.completeTime ? 
+                                    `<tr>
+                                        <th>完成时间:</th>
+                                        <td>${orderDetail.completeTime}</td>
+                                    </tr>` : ''}
                                 </table>` :
                                 '<div class="alert alert-warning"><i class="fa fa-exclamation-triangle mr-2"></i>该订单尚未开始配送</div>'
                             }
                         </div>
+                        
+                        ${orderDetail.status === '已取消' ? 
+                        `<div class="mt-3">
+                            <h6>取消信息</h6>
+                            <div class="alert alert-danger">
+                                <div><strong>取消方：</strong> ${orderDetail.cancelByType === 'farmer' ? '农户取消（您）' : '用户取消'}</div>
+                                <div><strong>取消原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
+                                <div><strong>取消时间：</strong> ${orderDetail.cancelTime || '未知'}</div>
+                            </div>
+                        </div>` : ''}
                     `;
                     
                     // 更新模态框内容
@@ -1166,32 +1197,13 @@
                 
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 
-                // 查询订单当前状态
-                const orderResponse = await http.get(`/api/order/${orderId}`);
-                if (!orderResponse || orderResponse.code !== 200 || !orderResponse.data) {
-                    throw new Error('无法获取订单信息');
-                }
-                
-                const order = orderResponse.data;
-                
                 // 构建API参数
-                let apiUrl = `/api/order/${orderId}/status`;
-                let newStatus = '';
+                const shipData = {
+                    farmerId: user.userId
+                };
                 
-                // 判断订单类型和当前状态
-                if (order.status === '已发货') {
-                    newStatus = '配送中';
-                } else if (order.status === '货到付款待处理') {
-                    newStatus = '货到付款配送中';
-                } else {
-                    throw new Error(`订单状态(${order.status})无法开始配送`);
-                }
-                
-                // 更新订单状态
-                const response = await http.put(apiUrl, {
-                    status: newStatus,
-                    remark: '开始配送'
-                });
+                // 调用API开始配送
+                const response = await http.put(`/api/order/${orderId}/ship`, shipData);
                 
                 if (response && response.code === 200) {
                     alert('订单已开始配送');

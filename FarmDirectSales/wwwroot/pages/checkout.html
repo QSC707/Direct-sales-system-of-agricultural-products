@@ -456,6 +456,7 @@
         };
         let successToast = null;
         let errorToast = null;
+        let selectedCartItems = []; // 添加selectedCartItems变量存储选中的商品ID
         
         document.addEventListener('DOMContentLoaded', function() {
             // 初始化Toast
@@ -478,6 +479,18 @@
             
             // 更新导航栏状态
             checkAuthStatus();
+            
+            // 从sessionStorage获取选中的商品ID
+            const selectedItemsStr = sessionStorage.getItem('selectedCartItems');
+            if (selectedItemsStr) {
+                try {
+                    selectedCartItems = JSON.parse(selectedItemsStr);
+                    console.log('从购物车获取选中商品ID:', selectedCartItems);
+                } catch (e) {
+                    console.error('解析选中商品ID失败:', e);
+                    selectedCartItems = [];
+                }
+            }
             
             // 加载购物车数据
             loadCartData();
@@ -609,9 +622,9 @@
             citySelect.innerHTML = '<option value="">请选择城市</option>';
             
             if (!selectedProvince) {
-                return;
-            }
-            
+                    return;
+                }
+                
             if (!window.regionData || !window.regionData.provinces || !window.regionData.cities) {
                 console.error('地区数据未加载!');
                 return;
@@ -944,13 +957,17 @@
                     contactName: receiverName,
                     contactPhone: contactPhone,
                     shippingAddress: shippingAddress,
-                    deliveryMethod: 'express' // 目前默认使用快递配送
+                    deliveryMethod: 'express', // 目前默认使用快递配送
+                    selectedItems: selectedCartItems // 添加选中的商品ID列表
                 };
             
                 // 提交订单
                 const response = await api.orders.createFromCart(orderData);
                 
                 if (response.code === 200) {
+                    // 清除选中商品的会话存储
+                    sessionStorage.removeItem('selectedCartItems');
+                    
                     // 提示成功并跳转
                     showToast('订单提交成功！正在跳转...', 'success');
                     setTimeout(() => {
@@ -988,7 +1005,7 @@
                             areasList.innerHTML = '<li>暂无配送区域信息</li>';
             }
         }
-                } else {
+            } else {
                     console.error('加载配送区域数据失败:', response.message);
                 }
             } catch (error) {
@@ -1008,10 +1025,26 @@
                     if (!cartData || !cartData.items || cartData.items.length === 0) {
                         // 购物车为空
                         renderEmptyCart();
+                return;
+            }
+            
+                    // 如果有选中的商品，则只显示选中的商品
+                    if (selectedCartItems && selectedCartItems.length > 0) {
+                        const filteredItems = cartData.items.filter(item => 
+                            selectedCartItems.includes(item.cartItemId)
+                        );
+                        if (filteredItems.length > 0) {
+                            // 渲染选中的购物车商品
+                            renderCartItems(filteredItems);
+                            
+                            // 更新订单摘要 - 使用选中的商品
+                            const filteredCart = {...cartData, items: filteredItems};
+                            updateOrderSummary(filteredCart);
                         return;
                     }
-            
-                    // 渲染购物车商品
+                }
+                
+                    // 如果没有选中的商品或选中的商品不存在，则显示全部商品
                     renderCartItems(cartData.items);
                         
                     // 更新订单摘要

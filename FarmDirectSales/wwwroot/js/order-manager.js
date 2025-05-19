@@ -116,12 +116,31 @@ const OrderManager = {
             if (!this.isTransitionAllowed(order.status, newStatus, user.role)) {
                 throw new Error(`无法将订单从"${order.status}"状态更新为"${newStatus}"状态`);
             }
+
+            let response;
             
-            // 调用API更新状态
-            const response = await http.put(`/api/order/${orderId}/status`, {
-                status: newStatus,
-                remark: remark
-            });
+            // 根据目标状态使用不同的API端点
+            if (newStatus === '货到付款配送中') {
+                // 使用ship端点开始配送
+                response = await http.put(`/api/order/${orderId}/ship`, {
+                    farmerId: user.userId
+                });
+            } else if (newStatus === '已完成') {
+                // 使用complete端点确认收货
+                response = await http.put(`/api/order/${orderId}/complete`, {
+                    userId: user.userId
+                });
+            } else if (newStatus === '已取消') {
+                // 使用cancel端点取消订单
+                response = await http.put(`/api/order/${orderId}/cancel`, {
+                    userId: user.userId,
+                    cancelReason: remark
+                });
+            } else {
+                // 这里可能需要实现其他状态的处理，否则可能会有问题
+                // 如果需要通用的状态更新端点，需要在OrderController.cs中添加
+                throw new Error(`状态 "${newStatus}" 的更新尚未实现API`);
+            }
             
             return response;
         } catch (error) {

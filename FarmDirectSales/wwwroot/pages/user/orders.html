@@ -122,6 +122,50 @@
     <div class="container py-5">
         <h2 class="mb-4">我的订单</h2>
         
+        <!-- 筛选条件区域 -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="statusFilter" class="form-label">订单状态</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="all" selected>全部状态</option>
+                            <option value="已完成">已完成</option>
+                            <option value="已取消">已取消</option>
+                            <option value="货到付款待处理">货到付款待处理</option>
+                            <option value="货到付款配送中">货到付款配送中</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="searchInput" class="form-label">搜索订单</label>
+                        <input type="text" class="form-control" id="searchInput" placeholder="订单号或商品名称">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="dateFilter" class="form-label">日期范围</label>
+                        <select class="form-select" id="dateFilter">
+                            <option value="custom">自定义日期</option>
+                            <option value="all">全部日期</option>
+                            <option value="lastMonth" selected>最近一个月</option>
+                            <option value="lastWeek">最近一周</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 date-range-picker" style="display: none;">
+                        <label for="startDate" class="form-label">开始日期</label>
+                        <input type="date" class="form-control" id="startDate">
+                    </div>
+                    <div class="col-md-2 date-range-picker" style="display: none;">
+                        <label for="endDate" class="form-label">结束日期</label>
+                        <input type="date" class="form-control" id="endDate">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" id="filterOrdersBtn">
+                            <i class="fas fa-filter me-2"></i>筛选订单
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- 订单列表 -->
         <div id="orders-container">
             <!-- 加载中占位符 -->
@@ -131,6 +175,25 @@
                 </div>
                 <p class="mt-2">正在加载订单信息...</p>
             </div>
+        </div>
+        
+        <!-- 分页控件 -->
+        <div id="pagination-container" class="d-flex justify-content-center mt-4 d-none">
+            <nav aria-label="订单分页">
+                <ul class="pagination">
+                    <li class="page-item disabled" id="prev-page">
+                        <a class="page-link" href="#" aria-label="上一页">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <!-- 页码将由JS生成 -->
+                    <li class="page-item disabled" id="next-page">
+                        <a class="page-link" href="#" aria-label="下一页">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
         
         <!-- 暂无订单提示 -->
@@ -215,6 +278,9 @@
         // 全局变量
         let userOrders = [];
         let currentOrder = null;
+        let filteredOrders = []; // 筛选后的订单列表
+        let currentPage = 1;     // 当前页码
+        const ordersPerPage = 5; // 每页显示的订单数
         
         document.addEventListener('DOMContentLoaded', function() {
             // 检查用户登录状态
@@ -236,6 +302,41 @@
             // 设置确认收货和取消订单按钮事件
             document.getElementById('confirmReceiptBtn').addEventListener('click', confirmReceipt);
             document.getElementById('cancelOrderBtn').addEventListener('click', cancelOrder);
+            
+            // 设置默认日期
+            const today = new Date();
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(today.getMonth() - 1);
+            
+            document.getElementById('endDate').valueAsDate = today;
+            document.getElementById('startDate').valueAsDate = oneMonthAgo;
+            
+            // 根据初始选择的筛选器设置UI状态
+            const dateFilter = document.getElementById('dateFilter');
+            if (dateFilter.value !== 'custom') {
+                document.querySelectorAll('.date-range-picker').forEach(el => {
+                    el.style.display = 'none';
+                });
+            }
+            
+            // 监听日期范围选择变化
+            dateFilter.addEventListener('change', function() {
+                const dateRangePickers = document.querySelectorAll('.date-range-picker');
+                
+                if (this.value === 'custom') {
+                    // 显示自定义日期选择器
+                    dateRangePickers.forEach(el => el.style.display = 'block');
+                } else {
+                    // 隐藏自定义日期选择器
+                    dateRangePickers.forEach(el => el.style.display = 'none');
+                    
+                    // 直接触发筛选
+                    filterOrders();
+                }
+            });
+            
+            // 初始化筛选按钮事件
+            document.getElementById('filterOrdersBtn').addEventListener('click', filterOrders);
             
             // 记录打开模态框的触发元素
             let lastFocusedElement = null;
@@ -269,6 +370,13 @@
                 if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
                     lastFocusedElement.focus();
                 }
+            });
+
+            // 添加搜索框输入事件（实时搜索）
+            document.getElementById('searchInput').addEventListener('input', function() {
+                // 延迟300毫秒后执行筛选，避免频繁筛选影响性能
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(filterOrders, 300);
             });
         });
         
@@ -319,9 +427,10 @@
                         // 没有订单
                         document.getElementById('orders-container').classList.add('d-none');
                         document.getElementById('no-orders').classList.remove('d-none');
+                        document.getElementById('pagination-container').classList.add('d-none');
                     } else {
-                        // 渲染订单列表
-                        renderOrders(userOrders);
+                        // 初始筛选并渲染订单列表
+                        filterOrders();
                     }
                 } else {
                     throw new Error(result.message || '获取订单失败');
@@ -334,80 +443,196 @@
                         加载订单失败: ${error.message}
                     </div>
                 `;
+                document.getElementById('pagination-container').classList.add('d-none');
             }
         }
         
-        // 渲染订单列表
-        function renderOrders(orders) {
-            const container = document.getElementById('orders-container');
+        // 筛选订单
+        function filterOrders() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
             
-            if (orders.length === 0) {
-                document.getElementById('no-orders').classList.remove('d-none');
-                container.innerHTML = '';
+            let startDate, endDate;
+            
+            if (dateFilter === 'all') {
+                // 全部日期范围 - 使用一个足够早的日期和今天
+                startDate = new Date(2000, 0, 1); // 2000年1月1日
+                endDate = new Date();
+                endDate.setHours(23, 59, 59, 999);
+            } else if (dateFilter === 'lastMonth') {
+                // 最近一个月
+                endDate = new Date();
+                endDate.setHours(23, 59, 59, 999);
+                startDate = new Date();
+                startDate.setMonth(endDate.getMonth() - 1);
+            } else if (dateFilter === 'lastWeek') {
+                // 最近一周
+                endDate = new Date();
+                endDate.setHours(23, 59, 59, 999);
+                startDate = new Date();
+                startDate.setDate(endDate.getDate() - 7);
+            } else {
+                // 自定义日期范围
+                startDate = new Date(document.getElementById('startDate').value);
+                endDate = new Date(document.getElementById('endDate').value);
+                
+                // 结束日期设置为当天的最后一秒，以包含整个结束日
+                endDate.setHours(23, 59, 59, 999);
+                
+                // 检验日期是否有效
+                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                    alert('请选择有效的日期范围');
+                    return;
+                }
+                
+                // 如果开始日期晚于结束日期，交换它们
+                if (startDate > endDate) {
+                    alert('开始日期不能晚于结束日期');
+                    return;
+                }
+            }
+            
+            // 筛选订单
+            filteredOrders = userOrders.filter(order => {
+                const orderDate = new Date(order.createTime);
+                const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+                const matchesDateRange = orderDate >= startDate && orderDate <= endDate;
+                
+                // 添加搜索功能
+                let matchesSearch = true;
+                if (searchQuery) {
+                    // 检查订单号匹配
+                    const orderIdMatch = order.orderId.toString().includes(searchQuery);
+                    
+                    // 检查商品名称匹配
+                    const productNameMatch = order.product && 
+                                            order.product.productName && 
+                                            order.product.productName.toLowerCase().includes(searchQuery);
+                    
+                    matchesSearch = orderIdMatch || productNameMatch;
+                }
+                
+                return matchesStatus && matchesDateRange && matchesSearch;
+            });
+            
+            // 重置当前页为第一页
+            currentPage = 1;
+            
+            // 渲染订单列表
+            renderPaginatedOrders();
+        }
+        
+        // 渲染分页后的订单列表
+        function renderPaginatedOrders() {
+            const container = document.getElementById('orders-container');
+            const paginationContainer = document.getElementById('pagination-container');
+            
+            if (!filteredOrders || filteredOrders.length === 0) {
+                container.innerHTML = '<div class="alert alert-info mb-4"><i class="fas fa-info-circle me-2"></i>没有找到符合条件的订单</div>';
+                document.getElementById('no-orders').classList.add('d-none');
+                paginationContainer.classList.add('d-none');
                 return;
             }
             
             document.getElementById('no-orders').classList.add('d-none');
             
+            // 计算总页数
+            const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+            
+            // 确保当前页在有效范围内
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            
+            // 计算当前页的订单范围
+            const startIndex = (currentPage - 1) * ordersPerPage;
+            const endIndex = Math.min(startIndex + ordersPerPage, filteredOrders.length);
+            
+            // 获取当前页的订单
+            const currentPageOrders = filteredOrders.slice(startIndex, endIndex);
+            
+            // 将订单按批次分组
+            const groupedOrders = groupOrdersByBatch(currentPageOrders);
+            
             let html = '';
             
-            orders.forEach(order => {
-                // 使用OrderManager获取状态样式
-                const statusStyle = OrderManager.getStatusStyle(order.status);
-                const statusBadge = OrderManager.renderStatusBadge(order.status);
-                
-                // 支付方式显示
-                const paymentMethod = '货到付款';
-                
-                // 添加操作按钮
-                let actionButtons = '';
-                
-                // 获取当前用户
-                const user = JSON.parse(localStorage.getItem('user') || '{}');
-                
-                // 根据订单状态添加不同的操作按钮
-                if (OrderManager.showConfirmReceiptButton(order, user.role)) {
-                    actionButtons += `
-                        <button class="btn btn-sm btn-success" onclick="confirmReceiptDirect(${order.orderId})">
-                            <i class="fas fa-check me-1"></i> 确认收货
-                        </button>
-                    `;
-                }
-                
-                // 取消订单按钮
-                if (order.status === '待付款' || 
-                    order.status === '待支付' || 
-                    order.status === '待发货' || 
-                    order.status === '货到付款待处理') {
-                    actionButtons += `
-                        <button class="btn btn-sm btn-danger ms-2" onclick="cancelOrderDirect(${order.orderId})">
-                            <i class="fas fa-times me-1"></i> 取消订单
-                        </button>
-                    `;
-                }
-                
-                // 评分按钮 - 已完成且未评分的订单
-                if (OrderManager.canRate(order)) {
-                    actionButtons += `
-                        <button class="btn btn-sm btn-outline-warning ms-2" onclick="showRatingModal(${order.orderId})">
-                            <i class="fas fa-star me-1"></i> 评分
-                        </button>
-                    `;
-                }
+            // 渲染每个批次的订单组
+            Object.entries(groupedOrders).forEach(([batchKey, orderGroup]) => {
+                // 计算订单组的总金额
+                const totalAmount = orderGroup.reduce((sum, order) => sum + order.totalPrice, 0);
                 
                 html += `
-                    <div class="card order-card">
+                    <div class="order-batch card mb-4">
                         <div class="card-header bg-light">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <span class="fw-bold">订单号: ${order.orderId}</span>
-                                    <span class="text-muted ms-3">下单时间: ${new Date(order.createTime).toLocaleString()}</span>
-                                    <span class="badge bg-secondary ms-2">${paymentMethod}</span>
+                                    <span class="text-muted">下单时间: ${new Date(orderGroup[0].createTime).toLocaleString()}</span>
+                                    <span class="badge bg-secondary ms-2">货到付款</span>
                                 </div>
-                                ${statusBadge}
+                                <div>
+                                    <span class="fw-bold text-danger">订单总金额: ¥${totalAmount.toFixed(2)}</span>
+                                    <span class="ms-2 badge bg-info"><i class="fas fa-box me-1"></i>${orderGroup.length}件商品</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-body">
+                `;
+                
+                // 在订单组中渲染每个订单项
+                orderGroup.forEach(order => {
+                    // 获取订单状态样式
+                    let statusBadge = OrderManager.renderStatusBadge(order.status);
+                    
+                    // 如果订单已取消，显示取消方信息
+                    if (order.status === '已取消' && order.cancelByType) {
+                        const cancelByText = order.cancelByType === 'farmer' ? '（商家）' : '（我）';
+                        statusBadge = `<span class="badge bg-danger text-white"><i class="fas fa-ban me-1"></i>已取消${cancelByText}</span>`;
+                    }
+                    
+                    // 支付方式显示
+                    const paymentMethod = '货到付款';
+                    
+                    // 添加操作按钮
+                    let actionButtons = '';
+                    
+                    // 获取当前用户
+                    const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    
+                    // 根据订单状态添加不同的操作按钮
+                    if (OrderManager.showConfirmReceiptButton(order, user.role)) {
+                        actionButtons += `
+                                <button class="btn btn-sm btn-success" onclick="confirmReceiptDirect(${order.orderId})">
+                                    <i class="fas fa-check me-1"></i> 确认收货
+                                </button>
+                            `;
+                    }
+                    
+                    // 取消订单按钮
+                    if (order.status === '待付款' || 
+                        order.status === '待支付' || 
+                        order.status === '待发货' || 
+                        order.status === '货到付款待处理') {
+                        actionButtons += `
+                            <button class="btn btn-sm btn-danger ms-2" onclick="cancelOrderDirect(${order.orderId})">
+                                <i class="fas fa-times me-1"></i> 取消订单
+                            </button>
+                                `;
+                    }
+                    
+                    // 评分按钮 - 已完成且未评分的订单
+                    if (OrderManager.canRate(order)) {
+                        actionButtons += `
+                            <button class="btn btn-sm btn-outline-warning ms-2" onclick="showRatingModal(${order.orderId})">
+                                <i class="fas fa-star me-1"></i> 评分
+                            </button>
+                        `;
+                    }
+                    
+                    html += `
+                        <div class="card-body border-bottom py-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="fw-bold">订单号: ${order.orderId}</span>
+                                ${statusBadge}
+                            </div>
                             <div class="row align-items-center">
                                 <div class="col-md-7">
                                     <div class="d-flex align-items-center">
@@ -415,7 +640,8 @@
                                         <div>
                                             <h5 class="mb-1">${order.product.productName}</h5>
                                             <p class="text-muted mb-0">农户: ${order.product.farmer.username} | 数量: ${order.quantity}</p>
-                                            <!-- 移除了物流信息的显示 -->
+                                            <!-- 显示农户联系方式 -->
+                                            <p class="text-muted small mb-0">联系电话: ${order.product.farmer.phone || '未提供'}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -430,11 +656,155 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                });
+                
+                html += `</div>`;
             });
             
+            // 更新分页控件
+            renderPagination(totalPages);
+            
             container.innerHTML = html;
+            paginationContainer.classList.remove('d-none');
+        }
+        
+        // 渲染分页控件
+        function renderPagination(totalPages) {
+            const pagination = document.querySelector('.pagination');
+            const prevPageItem = document.getElementById('prev-page');
+            const nextPageItem = document.getElementById('next-page');
+            
+            // 移除现有的页码项
+            const pageItems = pagination.querySelectorAll('.page-item:not(#prev-page):not(#next-page)');
+            pageItems.forEach(item => item.remove());
+            
+            // 更新上一页按钮状态
+            if (currentPage <= 1) {
+                prevPageItem.classList.add('disabled');
+            } else {
+                prevPageItem.classList.remove('disabled');
+                prevPageItem.querySelector('a').onclick = () => {
+                    currentPage--;
+                    renderPaginatedOrders();
+                };
+            }
+            
+            // 更新下一页按钮状态
+            if (currentPage >= totalPages) {
+                nextPageItem.classList.add('disabled');
+            } else {
+                nextPageItem.classList.remove('disabled');
+                nextPageItem.querySelector('a').onclick = () => {
+                    currentPage++;
+                    renderPaginatedOrders();
+                };
+            }
+            
+            // 确定要显示的页码范围
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            // 调整起始页以确保始终显示5个页码（如果有足够的页码）
+            if (endPage - startPage < 4 && totalPages > 5) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            // 添加第一页和省略号（如有必要）
+            if (startPage > 1) {
+                const firstPageItem = document.createElement('li');
+                firstPageItem.className = 'page-item';
+                firstPageItem.innerHTML = `<a class="page-link" href="#">1</a>`;
+                firstPageItem.querySelector('a').onclick = () => {
+                    currentPage = 1;
+                    renderPaginatedOrders();
+                    return false;
+                };
+                pagination.insertBefore(firstPageItem, nextPageItem);
+                
+                if (startPage > 2) {
+                    const ellipsisItem = document.createElement('li');
+                    ellipsisItem.className = 'page-item disabled';
+                    ellipsisItem.innerHTML = `<a class="page-link" href="#">...</a>`;
+                    pagination.insertBefore(ellipsisItem, nextPageItem);
+                }
+            }
+            
+            // 添加页码
+            for (let i = startPage; i <= endPage; i++) {
+                const pageItem = document.createElement('li');
+                pageItem.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                pageItem.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                
+                if (i !== currentPage) {
+                    pageItem.querySelector('a').onclick = () => {
+                        currentPage = i;
+                        renderPaginatedOrders();
+                        return false;
+                    };
+                }
+                
+                pagination.insertBefore(pageItem, nextPageItem);
+            }
+            
+            // 添加最后一页和省略号（如有必要）
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsisItem = document.createElement('li');
+                    ellipsisItem.className = 'page-item disabled';
+                    ellipsisItem.innerHTML = `<a class="page-link" href="#">...</a>`;
+                    pagination.insertBefore(ellipsisItem, nextPageItem);
+                }
+                
+                const lastPageItem = document.createElement('li');
+                lastPageItem.className = 'page-item';
+                lastPageItem.innerHTML = `<a class="page-link" href="#">${totalPages}</a>`;
+                lastPageItem.querySelector('a').onclick = () => {
+                    currentPage = totalPages;
+                    renderPaginatedOrders();
+                    return false;
+                };
+                pagination.insertBefore(lastPageItem, nextPageItem);
+            }
+        }
+        
+        /**
+         * 将订单按批次分组
+         * 批次识别规则: 创建时间在相近时间范围内(5秒内)的订单视为一批
+         * @param {Array} orders 订单列表
+         * @returns {Object} 按批次分组的订单
+         */
+        function groupOrdersByBatch(orders) {
+            // 对订单按创建时间排序
+            const sortedOrders = [...orders].sort((a, b) => 
+                new Date(a.createTime).getTime() - new Date(b.createTime).getTime()
+            );
+            
+            const grouped = {};
+            let currentBatchKey = '';
+            let currentBatchTime = 0;
+            
+            // 按时间相近原则分组
+            sortedOrders.forEach(order => {
+                const orderTime = new Date(order.createTime).getTime();
+                
+                // 如果是第一个订单或者订单时间与当前批次时间相差超过5秒(5000毫秒)，则创建新批次
+                if (!currentBatchKey || Math.abs(orderTime - currentBatchTime) > 5000) {
+                    currentBatchKey = `batch_${orderTime}`;
+                    currentBatchTime = orderTime;
+                    grouped[currentBatchKey] = [];
+                }
+                
+                grouped[currentBatchKey].push(order);
+            });
+            
+            return grouped;
+        }
+        
+        // 将renderOrderList函数改为使用renderPaginatedOrders
+        function renderOrderList(orders) {
+            filteredOrders = orders;
+            renderPaginatedOrders();
         }
         
         // 通过ID查找订单
@@ -577,26 +947,7 @@
                 return;
             }
             
-            const reason = prompt("请输入取消原因（可选）", "不再需要");
-            
-            try {
-                // 使用Axios通过http接口取消订单
-                const result = await http.put(`/order/${orderId}/cancel`, {
-                    userId: JSON.parse(localStorage.getItem('user') || '{}').userId,
-                    cancelReason: reason
-                });
-                
-                if (result.code === 200) {
-                    alert('取消订单成功');
-                    // 重新加载订单列表
-                    loadUserOrders();
-                } else {
-                    throw new Error(result.message || '取消订单失败');
-                }
-            } catch (error) {
-                console.error('取消订单失败:', error);
-                alert(`取消订单失败: ${error.message}`);
-            }
+            showCancelOrderModal(orderId);
         }
         
         // 从订单详情中取消订单
@@ -608,19 +959,78 @@
                 return;
             }
             
-            const reason = prompt("请输入取消原因（可选）", "不再需要");
+            showCancelOrderModal(currentOrder);
             
-            try {
-                const result = await http.put(`/order/${currentOrder}/cancel`, {
+            // 关闭订单详情模态框
+            var modal = bootstrap.Modal.getInstance(document.getElementById('orderDetailModal'));
+            modal.hide();
+        }
+        
+        // 显示取消订单模态框
+        function showCancelOrderModal(orderId) {
+            // 如果模态框不存在，创建它
+            if (!document.getElementById('cancelOrderModal')) {
+                const modalHTML = `
+                <div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="cancelOrderModalLabel">取消订单</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>确定要取消此订单吗？此操作不可恢复。
+                                </div>
+                                <input type="hidden" id="cancelOrderId">
+                                <div class="mb-3">
+                                    <label for="cancelReason" class="form-label">取消原因</label>
+                                    <select class="form-select" id="cancelReason">
+                                        <option value="不再需要">不再需要</option>
+                                        <option value="重新下单">重新下单</option>
+                                        <option value="信息填写错误">信息填写错误</option>
+                                        <option value="经济原因">经济原因</option>
+                                        <option value="对商品不满意">对商品不满意</option>
+                                        <option value="其他原因">其他原因</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">返回</button>
+                                <button type="button" class="btn btn-danger" id="confirmCancelBtn">确认取消</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+                
+                // 添加到页面
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+                
+                // 绑定确认取消按钮事件
+                document.getElementById('confirmCancelBtn').addEventListener('click', async function() {
+                    const orderId = document.getElementById('cancelOrderId').value;
+                    const reason = document.getElementById('cancelReason').value;
+                    
+                    try {
+                        // 禁用按钮并显示加载状态
+                        const btn = document.getElementById('confirmCancelBtn');
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 处理中...';
+                        
+                        // 调用API取消订单
+                        const result = await http.put(`/order/${orderId}/cancel`, {
                     userId: JSON.parse(localStorage.getItem('user') || '{}').userId,
                     cancelReason: reason
                 });
                 
                 if (result.code === 200) {
-                    alert('取消订单成功');
                     // 关闭模态框
-                    var modal = bootstrap.Modal.getInstance(document.getElementById('orderDetailModal'));
-                    modal.hide();
+                            bootstrap.Modal.getInstance(document.getElementById('cancelOrderModal')).hide();
+                            
+                            // 提示成功
+                            alert('取消订单成功');
+                            
                     // 重新加载订单列表
                     loadUserOrders();
                 } else {
@@ -629,7 +1039,20 @@
             } catch (error) {
                 console.error('取消订单失败:', error);
                 alert(`取消订单失败: ${error.message}`);
+                    } finally {
+                        // 恢复按钮状态
+                        const btn = document.getElementById('confirmCancelBtn');
+                        btn.disabled = false;
+                        btn.innerHTML = '确认取消';
+                    }
+                });
             }
+            
+            // 设置订单ID并显示模态框
+            document.getElementById('cancelOrderId').value = orderId;
+            
+            // 显示模态框
+            new bootstrap.Modal(document.getElementById('cancelOrderModal')).show();
         }
 
         // 显示订单详情
@@ -755,7 +1178,7 @@
                         <h6 class="mb-2">我的评分</h6>
                         <div class="star-rating">
                             ${renderStarRating(order.rating)}
-                        </div>
+                </div>
                     </div>
                 `;
             }
@@ -779,10 +1202,10 @@
                     <div class="col-md-6">
                         <h6 class="mb-3">订单信息</h6>
                         <table class="table table-sm">
-                            <tr>
+                                    <tr>
                                 <th width="120">订单号:</th>
                                 <td>${order.orderId}</td>
-                            </tr>
+                                    </tr>
                             <tr>
                                 <th>下单时间:</th>
                                 <td>${formatDateTime(order.createTime)}</td>
@@ -816,23 +1239,39 @@
                 <h6 class="mb-3">商品信息</h6>
                 <div class="card mb-4">
                     <div class="card-body p-3">
-                        <div class="d-flex align-items-center">
+                                            <div class="d-flex align-items-center">
                             <img src="${order.product.imageUrl || '/img/placeholder.jpg'}" alt="${order.product.productName}" class="me-3" style="width:80px;height:80px;object-fit:cover;">
-                            <div>
+                                                <div>
                                 <h5 class="mb-1">${order.product.productName}</h5>
                                 <div class="text-muted">单价: ¥${order.product.price.toFixed(2)} × ${order.quantity} = ¥${order.totalPrice.toFixed(2)}</div>
                                 <div class="text-muted">农户: ${order.product.farmer.username}</div>
-                            </div>
-                        </div>
+                                                </div>
+                                            </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">农户信息</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <th width="120">农户名称:</th>
+                                <td>${order.product.farmer.username}</td>
+                                    </tr>
+                            <tr>
+                                <th>联系电话:</th>
+                                <td>${order.product.farmer.phone || '未提供'}</td>
+                            </tr>
+                            </table>
                     </div>
                 </div>
                 
                 <h6 class="mb-3">订单进度</h6>
                 <div class="card">
                     <div class="card-body">
-                        ${statusTimeline}
+                            ${statusTimeline}
+                        </div>
                     </div>
-                </div>
                 
                 ${ratingInfo}
             `;
@@ -874,7 +1313,7 @@
                                         <i class="fas fa-star rating-star" data-rating="3"></i>
                                         <i class="fas fa-star rating-star" data-rating="4"></i>
                                         <i class="fas fa-star rating-star" data-rating="5"></i>
-                                    </div>
+                            </div>
                                     <div id="rating-text">请选择评分</div>
                                     <input type="hidden" id="selected-rating" value="0">
                                     <input type="hidden" id="rating-order-id" value="">
@@ -887,8 +1326,8 @@
                         </div>
                     </div>
                 </div>
-                `;
-                
+            `;
+            
                 // 添加到页面
                 document.body.insertAdjacentHTML('beforeend', modalHTML);
                 

@@ -10,7 +10,7 @@ namespace FarmDirectSales.Controllers.RequestModels
     /// <summary>
     /// 用户添加地址请求模型
     /// </summary>
-    public class UserAddAddressRequest
+    public class UserAddressAddRequest
     {
         /// <summary>
         /// 用户ID
@@ -70,7 +70,7 @@ namespace FarmDirectSales.Controllers.RequestModels
     /// <summary>
     /// 用户更新地址请求模型
     /// </summary>
-    public class UserUpdateAddressRequest
+    public class UserAddressUpdateRequest
     {
         /// <summary>
         /// 收货人姓名
@@ -227,7 +227,7 @@ namespace FarmDirectSales.Controllers
         /// 添加新地址
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> AddUserAddress([FromBody] UserAddAddressRequest request)
+        public async Task<IActionResult> AddUserAddress([FromBody] UserAddressAddRequest request)
         {
             try
             {
@@ -287,7 +287,7 @@ namespace FarmDirectSales.Controllers
         /// 更新地址
         /// </summary>
         [HttpPut("{addressId}")]
-        public async Task<IActionResult> UpdateUserAddress(int addressId, [FromBody] UserUpdateAddressRequest request)
+        public async Task<IActionResult> UpdateUserAddress(int addressId, [FromBody] UserAddressUpdateRequest request)
         {
             try
             {

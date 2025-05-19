@@ -454,7 +454,7 @@ namespace FarmDirectSales.Controllers
                 }
 
                 // 检查订单状态
-                if (order.Status != "待收货")
+                if (order.Status != "待收货" && order.Status != "货到付款配送中")
                 {
                     return BadRequest(new { code = 400, message = $"订单状态为 {order.Status}，不能确认收货" });
                 }
@@ -500,7 +500,7 @@ namespace FarmDirectSales.Controllers
                 }
 
                 // 检查订单状态
-                if (order.Status != "待支付" && order.Status != "待发货")
+                if (order.Status != "待支付" && order.Status != "待发货" && order.Status != "货到付款待处理" && order.Status != "货到付款配送中")
                 {
                     return BadRequest(new { code = 400, message = $"订单状态为 {order.Status}，不能取消" });
                 }
@@ -562,6 +562,19 @@ namespace FarmDirectSales.Controllers
                 }
 
                 Console.WriteLine($"购物车商品数量：{cartItems.Count}");
+                
+                // 如果选中了特定商品，则只处理选中的商品
+                if (request.SelectedItems != null && request.SelectedItems.Count > 0)
+                {
+                    Console.WriteLine($"选中了{request.SelectedItems.Count}个商品");
+                    cartItems = cartItems.Where(item => request.SelectedItems.Contains(item.CartItemId)).ToList();
+                    
+                    if (cartItems.Count == 0)
+                    {
+                        Console.WriteLine("没有找到选中的商品");
+                        return BadRequest(new { code = 400, message = "未找到选中的商品" });
+                    }
+                }
 
                 // 检查库存是否充足
                 var outOfStockItems = cartItems.Where(c => c.Quantity > c.Product.Stock).ToList();
@@ -615,8 +628,9 @@ namespace FarmDirectSales.Controllers
                     totalAmount += itemTotal;
                 }
 
-                // 清空购物车
-                _context.CartItems.RemoveRange(cartItems);
+                // 只从购物车中移除已下单的商品
+                var cartItemsToRemove = cartItems.ToList();
+                _context.CartItems.RemoveRange(cartItemsToRemove);
                 
                 await _context.SaveChangesAsync();
                 
@@ -755,6 +769,9 @@ namespace FarmDirectSales.Controllers
         
         [StringLength(20)]
         public string DeliveryMethod { get; set; } = "express";
+        
+        // 选中的购物车项ID列表
+        public List<int> SelectedItems { get; set; } = new List<int>();
     }
 } 
  

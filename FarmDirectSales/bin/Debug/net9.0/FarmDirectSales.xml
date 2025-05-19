@@ -99,87 +99,87 @@
             用户ID
             </summary>
         </member>
-        <member name="T:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest">
+        <member name="T:FarmDirectSales.Controllers.RequestModels.UserAddressAddRequest">
             <summary>
             用户添加地址请求模型
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.UserId">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressAddRequest.UserId">
             <summary>
             用户ID
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.ReceiverName">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressAddRequest.ReceiverName">
             <summary>
             收货人姓名
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.ContactPhone">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressAddRequest.ContactPhone">
             <summary>
             联系电话
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.Province">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressAddRequest.Province">
             <summary>
             省份
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.City">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressAddRequest.City">
             <summary>
             城市
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.District">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressAddRequest.District">
             <summary>
             区/县
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.DetailAddress">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressAddRequest.DetailAddress">
             <summary>
             详细地址
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest.IsDefault">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressAddRequest.IsDefault">
             <summary>
             是否默认地址
             </summary>
         </member>
-        <member name="T:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest">
+        <member name="T:FarmDirectSales.Controllers.RequestModels.UserAddressUpdateRequest">
             <summary>
             用户更新地址请求模型
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.ReceiverName">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressUpdateRequest.ReceiverName">
             <summary>
             收货人姓名
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.ContactPhone">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressUpdateRequest.ContactPhone">
             <summary>
             联系电话
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.Province">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressUpdateRequest.Province">
             <summary>
             省份
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.City">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressUpdateRequest.City">
             <summary>
             城市
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.District">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressUpdateRequest.District">
             <summary>
             区/县
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.DetailAddress">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressUpdateRequest.DetailAddress">
             <summary>
             详细地址
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest.IsDefault">
+        <member name="P:FarmDirectSales.Controllers.RequestModels.UserAddressUpdateRequest.IsDefault">
             <summary>
             是否默认地址
             </summary>
@@ -1434,12 +1434,12 @@
             获取用户的默认地址
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Controllers.UserAddressController.AddUserAddress(FarmDirectSales.Controllers.RequestModels.UserAddAddressRequest)">
+        <member name="M:FarmDirectSales.Controllers.UserAddressController.AddUserAddress(FarmDirectSales.Controllers.RequestModels.UserAddressAddRequest)">
             <summary>
             添加新地址
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Controllers.UserAddressController.UpdateUserAddress(System.Int32,FarmDirectSales.Controllers.RequestModels.UserUpdateAddressRequest)">
+        <member name="M:FarmDirectSales.Controllers.UserAddressController.UpdateUserAddress(System.Int32,FarmDirectSales.Controllers.RequestModels.UserAddressUpdateRequest)">
             <summary>
             更新地址
             </summary>
@@ -1745,6 +1745,18 @@
             <inheritdoc />
         </member>
         <member name="M:FarmDirectSales.Migrations.AddRatingFieldsToOrders.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddOrderBatchId">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderBatchId.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderBatchId.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderBatchId.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
         <member name="T:FarmDirectSales.Models.CartItem">
