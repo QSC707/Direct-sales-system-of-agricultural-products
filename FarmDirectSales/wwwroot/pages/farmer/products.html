@@ -34,9 +34,6 @@
                         <a class="nav-link" href="orders.html">订单管理</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="batch-products.html">批量管理</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="statistics.html">销售统计</a>
                     </li>
                 </ul>
@@ -48,7 +45,6 @@
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="farm-profile.html">农场资料</a>
                             <a class="dropdown-item active" href="products.html">我的产品</a>
-                            <a class="dropdown-item" href="batch-products.html">批量管理</a>
                             <a class="dropdown-item" href="orders.html">订单管理</a>
                             <a class="dropdown-item" href="statistics.html">销售统计</a>
                             <a class="dropdown-item" href="profile.html">个人信息</a>
@@ -77,7 +73,6 @@
                     <a href="dashboard.html" class="list-group-item list-group-item-action">农户首页</a>
                     <a href="farm-profile.html" class="list-group-item list-group-item-action">农场资料</a>
                     <a href="products.html" class="list-group-item list-group-item-action active">我的产品</a>
-                    <a href="batch-products.html" class="list-group-item list-group-item-action">批量管理</a>
                     <a href="orders.html" class="list-group-item list-group-item-action">订单管理</a>
                     <a href="statistics.html" class="list-group-item list-group-item-action">销售统计</a>
                     <a href="profile.html" class="list-group-item list-group-item-action">个人信息</a>
@@ -892,6 +887,9 @@
                     imageUrl = await uploadImage();
                 }
                 
+                // 获取产品状态
+                const isActive = $('#editProductStatus').val() === '上架';
+                
                 // 收集产品数据
                 const productData = {
                     farmerId: parseInt(user.userId),
@@ -899,13 +897,16 @@
                     description: $('#editProductDescription').val() || '',
                     price: parseFloat($('#editProductPrice').val()),
                     stock: parseFloat($('#editProductStock').val()),
-                    category: $('#editProductCategory').val() || '其他'
+                    category: $('#editProductCategory').val() || '其他',
+                    isActive: isActive
                 };
                 
                 // 如果有新图片URL，则更新
                 if (imageUrl) {
                     productData.imageUrl = imageUrl;
                 }
+                
+                console.log('更新产品数据:', productData);
                 
                 // 提交产品更新
                 const result = await http.put(`/product/${productId}`, productData);
@@ -925,138 +926,6 @@
                 alert('更新产品失败: ' + error.message);
             } finally {
                 $('#updateProductBtn').attr('disabled', false).html('更新');
-            }
-        }
-    </script>
-</body>
-</html> 
-                $.ajax({
-                    url: '/api/products',
-                    type: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer ' + token,
-                        'Content-Type': 'application/json'
-                    },
-                    data: JSON.stringify(productData),
-                    success: function(data) {
-                        alert('产品添加成功');
-                        $('#addProductModal').modal('hide');
-                        $('#addProductForm')[0].reset(); // 重置表单
-                        $('#imagePreview').attr('src', '../../img/no-image.png'); // 重置图片预览
-                        loadProducts(); // 重新加载产品列表
-                    },
-                    error: function(xhr) {
-                        console.error('添加产品失败', xhr);
-                        alert('添加产品失败: ' + (xhr.responseJSON?.message || xhr.statusText));
-                    }
-                });
-            });
-        }
-        
-        /**
-         * 更新产品
-         */
-        function updateProduct() {
-            const token = localStorage.getItem('token');
-            const productId = $('#editProductId').val();
-            
-            // 检查是否需要上传新图片
-            const imageFile = $('#editProductImage')[0].files[0];
-            
-            if (imageFile) {
-                // 如果有新图片，先上传图片
-                uploadProductImage(imageFile, function(imageUrl) {
-                    submitProductUpdate(productId, token, imageUrl);
-                });
-            } else {
-                // 如果没有新图片，直接更新产品信息
-                submitProductUpdate(productId, token);
-            }
-        }
-        
-        /**
-         * 提交产品更新
-         */
-        function submitProductUpdate(productId, token, imageUrl) {
-            // 收集产品数据
-            const productData = {
-                productId: parseInt(productId),
-                name: $('#editProductName').val(),
-                category: $('#editProductCategory').val(),
-                price: parseFloat($('#editProductPrice').val()),
-                stock: parseFloat($('#editProductStock').val()),
-                description: $('#editProductDescription').val(),
-                specification: $('#editProductSpecification').val(),
-                isOrganic: $('#editIsOrganic').prop('checked'),
-                harvestDate: $('#editHarvestDate').val() || null,
-                shelfLife: $('#editShelfLife').val() ? parseInt($('#editShelfLife').val()) : null,
-                status: $('#editProductStatus').val()
-            };
-            
-            // 如果有新图片URL，则更新
-            if (imageUrl) {
-                productData.imageUrl = imageUrl;
-            }
-            
-            // 提交产品数据
-            $.ajax({
-                url: '/api/products/' + productId,
-                type: 'PUT',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                },
-                data: JSON.stringify(productData),
-                success: function(data) {
-                    alert('产品更新成功');
-                    $('#editProductModal').modal('hide');
-                    loadProducts(); // 重新加载产品列表
-                },
-                error: function(xhr) {
-                    console.error('更新产品失败', xhr);
-                    alert('更新产品失败: ' + (xhr.responseJSON?.message || xhr.statusText));
-                }
-            });
-        }
-        
-        /**
-         * 上传产品图片
-         */
-        function uploadProductImage(file, callback) {
-            const token = localStorage.getItem('token');
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            $.ajax({
-                url: '/api/upload/image',
-                type: 'POST',
-                data: formData,
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                contentType: false,
-                processData: false,
-                success: function(data) {
-                    callback(data.url);
-                },
-                error: function(xhr) {
-                    console.error('上传图片失败', xhr);
-                    alert('上传图片失败: ' + (xhr.responseJSON?.message || xhr.statusText));
-                }
-            });
-        }
-        
-        /**
-         * 预览图片
-         */
-        function previewImage(input, previewSelector) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $(previewSelector).attr('src', e.target.result);
-                }
-                reader.readAsDataURL(input.files[0]);
-                $(input).next('.custom-file-label').text(input.files[0].name);
             }
         }
     </script>

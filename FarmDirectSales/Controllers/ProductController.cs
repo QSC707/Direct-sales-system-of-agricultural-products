@@ -198,27 +198,66 @@ namespace FarmDirectSales.Controllers
         {
             try
             {
-                var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == id && p.IsActive);
+                // 检查请求是否有效
+                if (request == null)
+                {
+                    return BadRequest(new { code = 400, message = "请求参数无效" });
+                }
+
+                // 查找产品
+                var product = await _context.Products.FindAsync(id);
                 if (product == null)
                 {
-                    return NotFound(new { code = 404, message = "产品不存在" });
+                    return NotFound(new { code = 404, message = "未找到指定的产品" });
                 }
 
-                // 检查是否是产品所有者
+                // 验证农户身份
                 if (product.FarmerId != request.FarmerId)
                 {
-                    return BadRequest(new { code = 400, message = "只有产品所有者才能更新产品" });
+                    return BadRequest(new { code = 400, message = "您没有权限更新此产品" });
                 }
 
-                // 更新产品信息
-                product.ProductName = request.ProductName ?? product.ProductName;
-                product.Description = request.Description ?? product.Description;
-                product.Price = request.Price ?? product.Price;
-                product.Stock = request.Stock ?? product.Stock;
-                product.ImageUrl = request.ImageUrl ?? product.ImageUrl;
-                product.Category = request.Category ?? product.Category;
+                // 更新产品字段（仅当请求中提供了相应的值时）
+                if (!string.IsNullOrWhiteSpace(request.ProductName))
+                {
+                    product.ProductName = request.ProductName;
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.Description))
+                {
+                    product.Description = request.Description;
+                }
+
+                if (request.Price.HasValue && request.Price > 0)
+                {
+                    product.Price = request.Price.Value;
+                }
+
+                if (request.Stock.HasValue && request.Stock >= 0)
+                {
+                    product.Stock = request.Stock.Value;
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.ImageUrl))
+                {
+                    product.ImageUrl = request.ImageUrl;
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.Category))
+                {
+                    product.Category = request.Category;
+                }
+                
+                // 处理上下架状态
+                if (request.IsActive.HasValue)
+                {
+                    product.IsActive = request.IsActive.Value;
+                }
+
+                // 更新修改时间
                 product.UpdateTime = DateTime.Now;
 
+                // 保存更改
                 await _context.SaveChangesAsync();
 
                 return Ok(new
@@ -235,7 +274,8 @@ namespace FarmDirectSales.Controllers
                         product.ImageUrl,
                         product.Category,
                         product.FarmerId,
-                        product.CreateTime,
+                        product.IsActive,
+                        Status = product.IsActive ? "上架" : "下架",
                         product.UpdateTime
                     }
                 });
@@ -467,139 +507,6 @@ namespace FarmDirectSales.Controllers
             }
         }
 
-        /// <summary>
-        /// 批量更新产品状态
-        /// </summary>
-        [HttpPut("batch/status")]
-        [Authorize(Roles = "farmer,admin")]
-        public async Task<IActionResult> UpdateProductsStatus([FromBody] BatchUpdateStatusRequest request)
-        {
-            try
-            {
-                // 验证请求
-                if (request == null || request.ProductIds == null || !request.ProductIds.Any())
-                {
-                    return BadRequest(new { code = 400, message = "请提供产品ID列表" });
-                }
-
-                if (string.IsNullOrWhiteSpace(request.Status))
-                {
-                    return BadRequest(new { code = 400, message = "请提供状态" });
-                }
-
-                // 验证状态值
-                if (request.Status != "上架" && request.Status != "下架")
-                {
-                    return BadRequest(new { code = 400, message = "状态值无效，只能为'上架'或'下架'" });
-                }
-
-                // 查找要更新的产品
-                var productsToUpdate = await _context.Products
-                    .Where(p => request.ProductIds.Contains(p.ProductId))
-                    .ToListAsync();
-
-                if (productsToUpdate.Count == 0)
-                {
-                    return NotFound(new { code = 404, message = "未找到指定的产品" });
-                }
-
-                // 如果是农户用户，只能更新自己的产品
-                if (request.FarmerId.HasValue)
-                {
-                    productsToUpdate = productsToUpdate.Where(p => p.FarmerId == request.FarmerId.Value).ToList();
-                    
-                    if (productsToUpdate.Count == 0)
-                    {
-                        return BadRequest(new { code = 400, message = "您没有权限更新这些产品" });
-                    }
-                }
-
-                // 更新产品状态
-                bool isActive = request.Status == "上架";
-                foreach (var product in productsToUpdate)
-                {
-                    product.IsActive = isActive;
-                    product.UpdateTime = DateTime.Now;
-                }
-
-                await _context.SaveChangesAsync();
-
-                return Ok(new
-                {
-                    code = 200,
-                    message = $"成功更新{productsToUpdate.Count}个产品状态",
-                    data = productsToUpdate.Select(p => new
-                    {
-                        p.ProductId,
-                        p.ProductName,
-                        Status = p.IsActive ? "上架" : "下架",
-                        p.UpdateTime
-                    })
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { code = 400, message = ex.Message });
-            }
-        }
-
-        /// <summary>
-        /// 批量删除产品
-        /// </summary>
-        [HttpDelete("batch")]
-        [Authorize(Roles = "farmer,admin")]
-        public async Task<IActionResult> DeleteProducts([FromBody] BatchDeleteRequest request)
-        {
-            try
-            {
-                // 验证请求
-                if (request == null || request.ProductIds == null || !request.ProductIds.Any())
-                {
-                    return BadRequest(new { code = 400, message = "请提供产品ID列表" });
-                }
-
-                // 查找要删除的产品
-                var productsToDelete = await _context.Products
-                    .Where(p => request.ProductIds.Contains(p.ProductId))
-                    .ToListAsync();
-
-                if (productsToDelete.Count == 0)
-                {
-                    return NotFound(new { code = 404, message = "未找到指定的产品" });
-                }
-
-                // 如果是农户用户，只能删除自己的产品
-                if (request.FarmerId.HasValue)
-                {
-                    productsToDelete = productsToDelete.Where(p => p.FarmerId == request.FarmerId.Value).ToList();
-                    
-                    if (productsToDelete.Count == 0)
-                    {
-                        return BadRequest(new { code = 400, message = "您没有权限删除这些产品" });
-                    }
-                }
-
-                // 执行软删除
-                foreach (var product in productsToDelete)
-                {
-                    product.IsActive = false;
-                    product.UpdateTime = DateTime.Now;
-                }
-
-                await _context.SaveChangesAsync();
-
-                return Ok(new
-                {
-                    code = 200,
-                    message = $"成功删除{productsToDelete.Count}个产品"
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { code = 400, message = ex.Message });
-            }
-        }
-
         // 辅助方法：处理CSV字段转义
         private string EscapeCsvField(string field)
         {
@@ -701,24 +608,24 @@ namespace FarmDirectSales.Controllers
         /// 产品名称
         /// </summary>
         public string? ProductName { get; set; }
-
+        
         /// <summary>
         /// 产品描述
         /// </summary>
         public string? Description { get; set; }
-
+        
         /// <summary>
-        /// 产品价格
+        /// 价格
         /// </summary>
         [Range(0.01, double.MaxValue, ErrorMessage = "价格必须大于0")]
         public decimal? Price { get; set; }
-
+        
         /// <summary>
-        /// 库存数量
+        /// 库存
         /// </summary>
         [Range(0, int.MaxValue, ErrorMessage = "库存不能为负数")]
         public int? Stock { get; set; }
-
+        
         /// <summary>
         /// 图片URL
         /// </summary>
@@ -728,12 +635,17 @@ namespace FarmDirectSales.Controllers
         /// 分类
         /// </summary>
         public string? Category { get; set; }
-
+        
         /// <summary>
         /// 农户ID
         /// </summary>
         [Required(ErrorMessage = "农户ID不能为空")]
         public int FarmerId { get; set; }
+        
+        /// <summary>
+        /// 是否上架
+        /// </summary>
+        public bool? IsActive { get; set; }
     }
 
     /// <summary>
@@ -746,46 +658,6 @@ namespace FarmDirectSales.Controllers
         /// </summary>
         [Required(ErrorMessage = "农户ID不能为空")]
         public int FarmerId { get; set; }
-    }
-
-    /// <summary>
-    /// 批量更新状态的请求模型
-    /// </summary>
-    public class BatchUpdateStatusRequest
-    {
-        /// <summary>
-        /// 产品ID列表
-        /// </summary>
-        [Required]
-        public List<int> ProductIds { get; set; }
-
-        /// <summary>
-        /// 要更新的状态（上架/下架）
-        /// </summary>
-        [Required]
-        public string Status { get; set; }
-
-        /// <summary>
-        /// 农户ID（如果是农户用户）
-        /// </summary>
-        public int? FarmerId { get; set; }
-    }
-
-    /// <summary>
-    /// 批量删除的请求模型
-    /// </summary>
-    public class BatchDeleteRequest
-    {
-        /// <summary>
-        /// 产品ID列表
-        /// </summary>
-        [Required]
-        public List<int> ProductIds { get; set; }
-
-        /// <summary>
-        /// 农户ID（如果是农户用户）
-        /// </summary>
-        public int? FarmerId { get; set; }
     }
 } 
  

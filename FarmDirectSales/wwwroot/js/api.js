@@ -338,21 +338,6 @@ const api = {
             return handleResponse(response);
         },
         
-        // 批量更新产品状态
-        batchUpdateStatus: async (productIds, status, farmerId) => {
-            const response = await fetch(`${window.API_BASE_URL}/product/batch/status`, {
-                method: 'PUT',
-                headers: window.getHeaders(),
-                body: JSON.stringify({
-                    productIds,
-                    status,
-                    farmerId
-                })
-            });
-            
-            return handleResponse(response);
-        },
-        
         // 更新产品库存
         updateStock: async (productId, stockChange) => {
             const response = await fetch(`${window.API_BASE_URL}/product/${productId}/stock`, {
@@ -457,20 +442,6 @@ const api = {
                 method: 'PUT',
                 headers: window.getHeaders(),
                 body: JSON.stringify({ reason })
-            });
-            
-            return handleResponse(response);
-        },
-        
-        // 批量更新订单状态
-        batchUpdateStatus: async (orderIds, status) => {
-            const response = await fetch(`${window.API_BASE_URL}/order/batch/status`, {
-                method: 'PUT',
-                headers: window.getHeaders(),
-                body: JSON.stringify({
-                    orderIds,
-                    status
-                })
             });
             
             return handleResponse(response);

@@ -5,123 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using FarmDirectSales.Controllers.RequestModels;
 
-namespace FarmDirectSales.Controllers.RequestModels
-{
-    /// <summary>
-    /// 用户添加地址请求模型
-    /// </summary>
-    public class UserAddressAddRequest
-    {
-        /// <summary>
-        /// 用户ID
-        /// </summary>
-        [Required(ErrorMessage = "用户ID不能为空")]
-        public int UserId { get; set; }
-
-        /// <summary>
-        /// 收货人姓名
-        /// </summary>
-        [Required(ErrorMessage = "收货人姓名不能为空")]
-        [StringLength(50, ErrorMessage = "收货人姓名长度不能超过50个字符")]
-        public string ReceiverName { get; set; }
-
-        /// <summary>
-        /// 联系电话
-        /// </summary>
-        [Required(ErrorMessage = "联系电话不能为空")]
-        [StringLength(20, ErrorMessage = "联系电话长度不能超过20个字符")]
-        [RegularExpression(@"^1[3-9]\d{9}$", ErrorMessage = "联系电话格式不正确")]
-        public string ContactPhone { get; set; }
-
-        /// <summary>
-        /// 省份
-        /// </summary>
-        [Required(ErrorMessage = "省份不能为空")]
-        [StringLength(20, ErrorMessage = "省份长度不能超过20个字符")]
-        public string Province { get; set; }
-
-        /// <summary>
-        /// 城市
-        /// </summary>
-        [Required(ErrorMessage = "城市不能为空")]
-        [StringLength(20, ErrorMessage = "城市长度不能超过20个字符")]
-        public string City { get; set; }
-
-        /// <summary>
-        /// 区/县
-        /// </summary>
-        [Required(ErrorMessage = "区/县不能为空")]
-        [StringLength(20, ErrorMessage = "区/县长度不能超过20个字符")]
-        public string District { get; set; }
-
-        /// <summary>
-        /// 详细地址
-        /// </summary>
-        [Required(ErrorMessage = "详细地址不能为空")]
-        [StringLength(100, ErrorMessage = "详细地址长度不能超过100个字符")]
-        public string DetailAddress { get; set; }
-
-        /// <summary>
-        /// 是否默认地址
-        /// </summary>
-        public bool IsDefault { get; set; } = false;
-    }
-
-    /// <summary>
-    /// 用户更新地址请求模型
-    /// </summary>
-    public class UserAddressUpdateRequest
-    {
-        /// <summary>
-        /// 收货人姓名
-        /// </summary>
-        [Required(ErrorMessage = "收货人姓名不能为空")]
-        [StringLength(50, ErrorMessage = "收货人姓名长度不能超过50个字符")]
-        public string ReceiverName { get; set; }
-
-        /// <summary>
-        /// 联系电话
-        /// </summary>
-        [Required(ErrorMessage = "联系电话不能为空")]
-        [StringLength(20, ErrorMessage = "联系电话长度不能超过20个字符")]
-        [RegularExpression(@"^1[3-9]\d{9}$", ErrorMessage = "联系电话格式不正确")]
-        public string ContactPhone { get; set; }
-
-        /// <summary>
-        /// 省份
-        /// </summary>
-        [Required(ErrorMessage = "省份不能为空")]
-        [StringLength(20, ErrorMessage = "省份长度不能超过20个字符")]
-        public string Province { get; set; }
-
-        /// <summary>
-        /// 城市
-        /// </summary>
-        [Required(ErrorMessage = "城市不能为空")]
-        [StringLength(20, ErrorMessage = "城市长度不能超过20个字符")]
-        public string City { get; set; }
-
-        /// <summary>
-        /// 区/县
-        /// </summary>
-        [Required(ErrorMessage = "区/县不能为空")]
-        [StringLength(20, ErrorMessage = "区/县长度不能超过20个字符")]
-        public string District { get; set; }
-
-        /// <summary>
-        /// 详细地址
-        /// </summary>
-        [Required(ErrorMessage = "详细地址不能为空")]
-        [StringLength(100, ErrorMessage = "详细地址长度不能超过100个字符")]
-        public string DetailAddress { get; set; }
-
-        /// <summary>
-        /// 是否默认地址
-        /// </summary>
-        public bool IsDefault { get; set; } = false;
-    }
-}
-
 namespace FarmDirectSales.Controllers
 {
     /// <summary>
@@ -227,7 +110,7 @@ namespace FarmDirectSales.Controllers
         /// 添加新地址
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> AddUserAddress([FromBody] UserAddressAddRequest request)
+        public async Task<IActionResult> AddUserAddress([FromBody] AddAddressRequest request)
         {
             try
             {
@@ -287,7 +170,7 @@ namespace FarmDirectSales.Controllers
         /// 更新地址
         /// </summary>
         [HttpPut("{addressId}")]
-        public async Task<IActionResult> UpdateUserAddress(int addressId, [FromBody] UserAddressUpdateRequest request)
+        public async Task<IActionResult> UpdateUserAddress(int addressId, [FromBody] UpdateAddressRequest request)
         {
             try
             {
