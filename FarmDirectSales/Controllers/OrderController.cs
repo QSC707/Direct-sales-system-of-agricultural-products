@@ -500,7 +500,9 @@ namespace FarmDirectSales.Controllers
                 }
 
                 // 检查订单状态
-                if (order.Status != "待支付" && order.Status != "待发货" && order.Status != "货到付款待处理" && order.Status != "货到付款配送中")
+                if (order.Status != "待支付" && order.Status != "待发货" && 
+                    order.Status != "货到付款待处理" && order.Status != "货到付款配送中" && 
+                    !(order.Status == "已完成" && isFarmer)) // 仅农户可以取消已完成订单(退款)
                 {
                     return BadRequest(new { code = 400, message = $"订单状态为 {order.Status}，不能取消" });
                 }

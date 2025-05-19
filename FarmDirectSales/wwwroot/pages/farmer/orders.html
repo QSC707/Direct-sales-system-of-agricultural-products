@@ -667,11 +667,17 @@
                     `;
                 }
                 
-                // 取消按钮 - 对于待处理或待支付的订单
-                if (order.status === '货到付款待处理' || order.status === '待付款' || order.status === '待支付') {
+                // 取消按钮 - 对于待处理、待支付、配送中或已完成的订单
+                if (order.status === '货到付款待处理' || order.status === '待付款' || order.status === '待支付' || 
+                    order.status === '货到付款配送中' || order.status === '已完成') {
+                    
+                    // 为不同状态设置不同的取消图标和文本
+                    const cancelIcon = order.status === '已完成' ? 'fa-undo' : 'fa-times';
+                    const cancelText = order.status === '已完成' ? '退款' : '取消';
+                    
                     actionButtons += `
                         <button class="btn btn-sm btn-danger cancel-order-btn" data-order-id="${order.orderId}">
-                            <i class="fas fa-times me-1"></i> 取消
+                            <i class="fas ${cancelIcon} me-1"></i> ${cancelText}
                         </button>
                     `;
                 }
@@ -906,6 +912,9 @@
                     } else if (orderDetail.status === '货到付款配送中') {
                         // 配送中订单可以取消
                         $('#cancelOrderBtn').show().data('order-id', orderId).text('取消订单');
+                    } else if (orderDetail.status === '已完成') {
+                        // 已完成订单可以申请退款
+                        $('#cancelOrderBtn').show().data('order-id', orderId).text('申请退款');
                     }
                     
                     // 绑定开始配送按钮点击事件
@@ -1022,14 +1031,73 @@
          * 打开取消订单确认模态框
          */
         function openCancelOrderModal(orderId) {
-            // 重置表单
-            $('#cancelReason').val('无法配送');
-            
-            // 设置订单ID
-            $('#cancelOrderId').val(orderId);
-            
-            // 打开模态框
-            $('#cancelOrderModal').modal('show');
+            // 检查订单状态
+            http.get(`/api/order/${orderId}`).then(response => {
+                if (response && response.code === 200 && response.data) {
+                    const order = response.data;
+                    const isCompleted = order.status === '已完成';
+                    const isDelivering = order.status === '货到付款配送中';
+                    
+                    // 设置模态框标题
+                    $('#cancelOrderModalLabel').text(isCompleted ? '申请退款' : '确认取消订单');
+                    
+                    // 设置不同的提示信息
+                    let alertText = '<i class="fa fa-exclamation-triangle mr-2"></i>您确定要取消这个订单吗？此操作不可撤销。';
+                    if (isCompleted) {
+                        alertText = '<i class="fa fa-exclamation-triangle mr-2"></i>您确定要为此已完成订单申请退款吗？请确保已与客户沟通。';
+                    } else if (isDelivering) {
+                        alertText = '<i class="fa fa-exclamation-triangle mr-2"></i>订单正在配送中，确定要取消吗？请确保已与客户沟通。';
+                    }
+                    $('.alert-warning').html(alertText);
+                    
+                    // 更新取消原因下拉框选项
+                    $('#cancelReason').empty();
+                    
+                    if (isCompleted) {
+                        // 退款相关选项
+                        $('#cancelReason').append(`
+                            <option value="客户要求退款">客户要求退款</option>
+                            <option value="产品质量问题">产品质量问题</option>
+                            <option value="配送损坏">配送损坏</option>
+                            <option value="重复下单">重复下单</option>
+                            <option value="其他退款原因">其他退款原因</option>
+                        `);
+                    } else if (isDelivering) {
+                        // 配送中取消选项
+                        $('#cancelReason').append(`
+                            <option value="客户取消配送">客户取消配送</option>
+                            <option value="无法送达指定地址">无法送达指定地址</option>
+                            <option value="联系不上客户">联系不上客户</option>
+                            <option value="其他配送问题">其他配送问题</option>
+                        `);
+                    } else {
+                        // 常规取消选项
+                        $('#cancelReason').append(`
+                            <option value="无法配送">无法配送</option>
+                            <option value="产品库存不足">产品库存不足</option>
+                            <option value="与客户协商取消">与客户协商取消</option>
+                            <option value="订单信息有误">订单信息有误</option>
+                            <option value="配送区域不覆盖">配送区域不覆盖</option>
+                            <option value="其他原因">其他原因</option>
+                        `);
+                    }
+                    
+                    // 设置订单ID
+                    $('#cancelOrderId').val(orderId);
+                    
+                    // 更新确认按钮文字
+                    $('#confirmCancelBtn').text(isCompleted ? '确认申请退款' : '确认取消');
+                    
+                    // 打开模态框
+                    $('#cancelOrderModal').modal('show');
+                } else {
+                    console.error('获取订单详情失败');
+                    alert('获取订单详情失败，请稍后重试');
+                }
+            }).catch(error => {
+                console.error('获取订单详情失败:', error);
+                alert(`获取订单详情失败: ${error.message}`);
+            });
         }
         
         /**
