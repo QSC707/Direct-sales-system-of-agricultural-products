@@ -8,11 +8,46 @@
     <script src="../../js/dependencies.js"></script>
     <!-- 引入Axios库 -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- 引入Font Awesome图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <!-- API调用相关 -->
     <script src="../../js/api.js"></script>
     <!-- Axios配置 -->
     <script src="../../js/axios-config.js"></script>
     <script src="../../js/auth.js"></script>
+    <style>
+        /* 批量管理相关样式 */
+        #batchToolbar {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .batch-column {
+            width: 40px;
+        }
+        
+        /* 选中行的样式 */
+        tr.selected {
+            background-color: #e6f3ff !important;
+        }
+        
+        /* 按钮间距 */
+        #batchToolbar .btn {
+            margin-right: 5px;
+        }
+        
+        /* 上下架状态标签 */
+        .badge-success {
+            background-color: #28a745;
+        }
+        
+        .badge-secondary {
+            background-color: #6c757d;
+        }
+    </style>
 </head>
 <body>
     <!-- 导航栏 -->
@@ -84,16 +119,65 @@
                 <div class="card mb-4">
                     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">我的产品</h4>
+                        <div>
+                            <button class="btn btn-light mr-2" id="batchManageBtn">
+                                <i class="fa fa-tasks"></i> 批量管理
+                            </button>
                         <button class="btn btn-light" data-toggle="modal" data-target="#addProductModal">
                             <i class="fa fa-plus"></i> 添加产品
                         </button>
+                        </div>
                     </div>
                     <div class="card-body">
+                        <!-- 批量操作工具栏 -->
+                        <div id="batchToolbar" class="mb-3" style="display: none;">
+                            <div class="btn-group">
+                                <button class="btn btn-success" id="batchActiveBtn">批量上架</button>
+                                <button class="btn btn-secondary" id="batchInactiveBtn">批量下架</button>
+                                <button class="btn btn-danger" id="batchDeleteBtn">批量删除</button>
+                                <button class="btn btn-info" id="batchExportBtn">导出选中</button>
+                                <button class="btn btn-light" id="exitBatchBtn">退出批量管理</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 筛选工具栏 -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="statusFilter">状态筛选：</label>
+                                    <select class="form-control" id="statusFilter">
+                                        <option value="all">全部商品</option>
+                                        <option value="active">已上架</option>
+                                        <option value="inactive">已下架</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="searchProduct">搜索商品：</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="searchProduct" placeholder="输入商品名称">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" type="button" id="searchBtn">
+                                                <i class="fa fa-search"></i> 搜索
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- 产品列表 -->
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
+                                        <th class="batch-column" style="display: none;">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="selectAllProducts">
+                                                <label class="custom-control-label" for="selectAllProducts"></label>
+                                            </div>
+                                        </th>
                                         <th>产品图片</th>
                                         <th>名称</th>
                                         <th>价格(元/kg)</th>
@@ -105,7 +189,7 @@
                                 <tbody id="productList">
                                     <!-- 产品列表将通过JS动态加载 -->
                                     <tr>
-                                        <td colspan="6" class="text-center">正在加载产品...</td>
+                                        <td colspan="7" class="text-center">正在加载产品...</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -334,6 +418,95 @@
             </div>
         </div>
     </div>
+    
+    <!-- 产品详情模态框 -->
+    <div class="modal fade" id="productDetailModal" tabindex="-1" role="dialog" aria-labelledby="productDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="productDetailModalLabel">产品详情</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <img id="detailProductImage" src="../../img/no-image.png" alt="产品图片" class="img-fluid rounded mb-3" style="max-height: 200px;">
+                        </div>
+                        <div class="col-md-8">
+                            <h4 id="detailProductName">产品名称</h4>
+                            <div class="mb-3">
+                                <span id="detailProductStatus" class="badge badge-success">上架</span>
+                                <span class="text-muted ml-2" id="detailProductCategory">类别</span>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <strong>价格：</strong> <span id="detailProductPrice">¥0.00</span> 元/kg
+                                </div>
+                                <div class="col-6">
+                                    <strong>库存：</strong> <span id="detailProductStock">0</span> kg
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>详细信息</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width: 150px;">创建时间</th>
+                                            <td id="detailCreateTime">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>最后更新</th>
+                                            <td id="detailUpdateTime">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>上架时间</th>
+                                            <td id="detailActiveTime">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>下架时间</th>
+                                            <td id="detailInactiveTime">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>产品描述</th>
+                                            <td id="detailDescription">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>规格说明</th>
+                                            <td id="detailSpecification">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>有机认证</th>
+                                            <td id="detailIsOrganic">否</td>
+                                        </tr>
+                                        <tr>
+                                            <th>评价信息</th>
+                                            <td>
+                                                <div>平均评分: <span id="detailRating">-</span></div>
+                                                <div>评价数量: <span id="detailReviewCount">0</span></div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary detail-edit-btn">编辑产品</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- 页脚 -->
     <footer class="bg-dark text-white mt-5 py-3">
@@ -378,6 +551,18 @@
                     }
                 });
                 
+                // 绑定筛选事件
+                $('#statusFilter').on('change', filterProducts);
+                $('#searchBtn').on('click', filterProducts);
+                
+                // 绑定搜索框回车事件
+                $('#searchProduct').on('keypress', function(e) {
+                    if (e.which === 13) { // 回车键的键值是13
+                        e.preventDefault();
+                        filterProducts();
+                    }
+                });
+                
                 // 加载产品列表
                 loadProducts();
                 
@@ -392,6 +577,65 @@
                     const productId = $(this).data('id');
                     console.log('删除按钮被点击，产品ID:', productId);
                     confirmDeleteProduct(productId);
+                });
+                
+                // 添加详情按钮点击事件
+                $(document).on('click', '.product-detail-btn', function() {
+                    const productId = $(this).data('id');
+                    console.log('详情按钮被点击，产品ID:', productId);
+                    openProductDetailModal(productId);
+                });
+                
+                // 批量管理功能事件绑定
+                $('#batchManageBtn').on('click', function() {
+                    toggleBatchMode(true);
+                });
+                
+                $('#exitBatchBtn').on('click', function() {
+                    toggleBatchMode(false);
+                });
+                
+                // 全选/取消全选
+                $('#selectAllProducts').on('change', function() {
+                    const isChecked = $(this).prop('checked');
+                    $('.product-checkbox').prop('checked', isChecked);
+                });
+                
+                // 批量操作按钮事件
+                $('#batchActiveBtn').on('click', function() {
+                    batchUpdateStatus(true);
+                });
+                
+                $('#batchInactiveBtn').on('click', function() {
+                    batchUpdateStatus(false);
+                });
+                
+                $('#batchDeleteBtn').on('click', function() {
+                    batchDeleteProducts();
+                });
+                
+                $('#batchExportBtn').on('click', function() {
+                    batchExportProducts();
+                });
+                
+                // 单个产品复选框点击事件 - 高亮选中行
+                $(document).on('change', '.product-checkbox', function() {
+                    const $row = $(this).closest('tr');
+                    if ($(this).prop('checked')) {
+                        $row.addClass('selected');
+                    } else {
+                        $row.removeClass('selected');
+                        // 如果有取消选中的，则取消全选状态
+                        $('#selectAllProducts').prop('checked', false);
+                    }
+                    
+                    // 检查是否所有产品都被选中，如果是则将全选框也设置为选中状态
+                    const totalCheckboxes = $('.product-checkbox').length;
+                    const checkedCheckboxes = $('.product-checkbox:checked').length;
+                    
+                    if (totalCheckboxes > 0 && totalCheckboxes === checkedCheckboxes) {
+                        $('#selectAllProducts').prop('checked', true);
+                    }
                 });
             });
         });
@@ -477,7 +721,7 @@
                 console.log('当前用户ID:', userId);
                 
                 // 显示加载状态
-                $('#productList').html('<tr><td colspan="6" class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">加载中...</span></div></td></tr>');
+                $('#productList').html('<tr><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">加载中...</span></div></td></tr>');
                 
                 // 使用Axios获取农户产品，确保传递farmerId参数
                 // 明确添加farmerId参数，确保只加载当前农户的产品
@@ -491,8 +735,91 @@
                 }
             } catch (error) {
                 console.error('获取产品列表失败', error);
-                alert('获取产品列表失败: ' + error.message);
-                $('#productList').html('<tr><td colspan="6" class="text-center text-danger">加载失败: ' + error.message + '</td></tr>');
+                
+                // 避免在404错误时显示过多弹窗
+                if (!error.message.includes('404') && !error.message.includes('Not Found')) {
+                    alert('获取产品列表失败: ' + error.message);
+                }
+                
+                $('#productList').html('<tr><td colspan="7" class="text-center text-danger">加载失败: ' + error.message + '</td></tr>');
+            }
+        }
+        
+        /**
+         * 打开产品详情模态框并加载详情数据
+         */
+        async function openProductDetailModal(productId) {
+            try {
+                console.log('获取产品详情:', productId);
+                
+                // 显示加载状态
+                $('#detailProductName').text('加载中...');
+                $('#detailProductImage').attr('src', '../../img/loading.gif');
+                $('#productDetailModal').modal('show');
+                
+                // 使用Axios获取产品详情
+                const result = await http.get(`/product/${productId}`);
+                
+                if (result && result.code === 200 && result.data) {
+                    const product = result.data;
+                    console.log('获取到产品详情:', product);
+                    
+                    // 填充基本信息
+                    $('#detailProductName').text(product.productName || '-');
+                    $('#detailProductCategory').text(product.category || '未分类');
+                    $('#detailProductPrice').text(`¥${product.price ? product.price.toFixed(2) : '0.00'}`);
+                    $('#detailProductStock').text(`${product.stock || 0}`);
+                    $('#detailDescription').text(product.description || '暂无描述');
+                    $('#detailSpecification').text(product.specification || '-');
+                    $('#detailIsOrganic').text(product.isOrganic ? '是' : '否');
+                    
+                    // 设置评分信息
+                    $('#detailRating').text(product.averageRating ? product.averageRating.toFixed(1) : '-');
+                    $('#detailReviewCount').text(product.reviewCount || 0);
+                    
+                    // 设置状态
+                    const statusClass = product.isActive ? 'badge-success' : 'badge-secondary';
+                    const statusText = product.isActive ? '上架' : '下架';
+                    $('#detailProductStatus').removeClass('badge-success badge-secondary').addClass(statusClass).text(statusText);
+                    
+                    // 设置时间信息
+                    $('#detailCreateTime').text(product.createTime ? new Date(product.createTime).toLocaleString() : '-');
+                    $('#detailUpdateTime').text(product.updateTime ? new Date(product.updateTime).toLocaleString() : '-');
+                    $('#detailActiveTime').text(product.activeTime ? new Date(product.activeTime).toLocaleString() : '-');
+                    $('#detailInactiveTime').text(product.inactiveTime ? new Date(product.inactiveTime).toLocaleString() : '-');
+                    
+                    // 设置图片
+                    if (product.imageUrl) {
+                        // 确保图片路径正确
+                        let imageUrl = product.imageUrl;
+                        if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+                            imageUrl = '/' + imageUrl;
+                        }
+                        $('#detailProductImage').attr('src', imageUrl);
+                    } else {
+                        $('#detailProductImage').attr('src', '../../img/no-image.png');
+                    }
+                    
+                    // 设置编辑按钮事件
+                    $('.detail-edit-btn').off('click').on('click', function() {
+                        $('#productDetailModal').modal('hide');
+                        setTimeout(() => {
+                            openEditModal(productId);
+                        }, 500);
+                    });
+                } else {
+                    throw new Error(result.message || '获取产品详情失败');
+                }
+            } catch (error) {
+                console.error('加载产品详情失败', error);
+                // 检查是否是产品不存在错误
+                if (error.message.includes('产品不存在') || error.message.includes('404')) {
+                    $('#productDetailModal').modal('hide');
+                    setTimeout(() => alert('该产品不存在或已被删除'), 500);
+                } else {
+                    $('#detailProductName').text('加载失败');
+                    $('#detailDescription').text(`错误: ${error.message}`);
+                }
             }
         }
         
@@ -506,7 +833,8 @@
             if (!products || products.length === 0) {
                 // 显示空状态
                 $('#emptyProducts').show();
-                $productList.append('<tr><td colspan="6" class="text-center">暂无产品数据</td></tr>');
+                const colSpan = $('.batch-column').is(':visible') ? 7 : 6;
+                $productList.append(`<tr><td colspan="${colSpan}" class="text-center">暂无产品数据</td></tr>`);
                 return;
             }
             
@@ -529,16 +857,43 @@
                     imageUrl = '../../img/no-image.png';
                 }
                 
+                // 格式化上架/下架时间显示
+                let statusTimeInfo = '';
+                let formattedTime = '';
+                if (product.isActive && product.activeTime) {
+                    const activeTime = new Date(product.activeTime);
+                    statusTimeInfo = `上架时间: ${activeTime.toLocaleString()}`;
+                    formattedTime = `<div class="small text-muted">${activeTime.toLocaleString()}</div>`;
+                } else if (!product.isActive && product.inactiveTime) {
+                    const inactiveTime = new Date(product.inactiveTime);
+                    statusTimeInfo = `下架时间: ${inactiveTime.toLocaleString()}`;
+                    formattedTime = `<div class="small text-muted">${inactiveTime.toLocaleString()}</div>`;
+                }
+                
                 const row = `
-                    <tr data-id="${product.productId}">
+                    <tr data-id="${product.productId}" 
+                        data-status="${product.isActive ? 'active' : 'inactive'}"
+                        data-active-time="${product.activeTime || ''}"
+                        data-inactive-time="${product.inactiveTime || ''}"
+                        data-create-time="${product.createTime || ''}"
+                        data-update-time="${product.updateTime || ''}">
+                        <td class="batch-column" style="display: none;">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input product-checkbox" id="product${product.productId}" data-id="${product.productId}">
+                                <label class="custom-control-label" for="product${product.productId}"></label>
+                            </div>
+                        </td>
                         <td>
                             <img src="${imageUrl}" alt="${product.productName}" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
                         </td>
                         <td>${product.productName}</td>
                         <td>¥${product.price.toFixed(2)}</td>
                         <td>${product.stock} kg</td>
-                        <td><span class="badge ${statusClass}">${statusText}</span></td>
                         <td>
+                            <span class="badge ${statusClass}">${statusText}</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-info product-detail-btn" data-id="${product.productId}" data-toggle="tooltip" title="查看详情"><i class="fa fa-info-circle"></i></button>
                             <button class="btn btn-sm btn-primary edit-btn" data-id="${product.productId}">编辑</button>
                             <button class="btn btn-sm btn-danger delete-btn" data-id="${product.productId}">删除</button>
                         </td>
@@ -558,6 +913,9 @@
                 const productId = $(this).data('id');
                 confirmDeleteProduct(productId);
             });
+            
+            // 初始化工具提示
+            $('[data-toggle="tooltip"]').tooltip();
         }
         
         /**
@@ -613,7 +971,7 @@
          * 确认删除产品
          */
         function confirmDeleteProduct(productId) {
-            if (confirm('确定要删除这个产品吗？此操作无法撤销。')) {
+            if (confirm('确定要永久删除这个产品吗？此操作将从数据库中彻底删除数据，无法恢复。')) {
                 deleteProduct(productId);
             }
         }
@@ -626,9 +984,10 @@
                 console.log('开始删除产品，ID:', productId);
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 
-                // 准备删除请求数据
+                // 准备删除请求数据，添加硬删除标记
                 const deleteData = {
-                    farmerId: parseInt(user.userId)
+                    farmerId: parseInt(user.userId),
+                    hardDelete: true  // 添加硬删除标记
                 };
                 
                 console.log('删除请求数据:', deleteData);
@@ -638,14 +997,35 @@
                 console.log('删除产品响应:', result);
                 
                 if (result && result.code === 200) {
-                    alert('产品删除成功');
-                    await loadProducts(); // 重新加载产品列表
+                    // 根据后端返回的结果显示不同的提示信息
+                    if (result.isHardDeleted) {
+                        // 如果是硬删除，直接从DOM中移除该行，避免后续查询已删除的产品
+                        $(`tr[data-id="${productId}"]`).fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                        alert('产品已永久删除');
+                    } else {
+                        alert(result.message || '产品已下架但无法永久删除');
+                        // 只有对于软删除才重新加载，因为产品仍然存在
+                        await loadProducts();
+                    }
                 } else {
                     throw new Error(result.message || '删除产品失败');
                 }
             } catch (error) {
                 console.error('删除产品失败', error);
-                alert('删除产品失败: ' + error.message);
+                
+                // 更友好的错误提示
+                let errorMessage = error.message;
+                if (errorMessage.includes('Network Error')) {
+                    errorMessage = '网络错误，请检查您的网络连接';
+                } else if (errorMessage.includes('timeout')) {
+                    errorMessage = '请求超时，请稍后再试';
+                } else if (errorMessage.includes('订单引用')) {
+                    errorMessage = '该产品已被订单引用，无法永久删除，但已被设置为下架状态';
+                }
+                
+                alert('删除产品失败: ' + errorMessage);
             }
         }
         
@@ -822,13 +1202,26 @@
                 // 收集产品数据
                 const productData = {
                     farmerId: parseInt(user.userId),
-                    productName: $('#productName').val(),
-                    description: $('#productDescription').val() || '',
-                    price: parseFloat($('#productPrice').val()),
-                    stock: parseFloat($('#productStock').val()),
+                    productName: $('#productName').val().trim(),
+                    description: $('#productDescription').val().trim() || '暂无描述',  // 确保描述不为空
+                    price: parseFloat($('#productPrice').val()) || 0,  // 确保价格有效
+                    stock: parseInt($('#productStock').val()) || 0,    // 确保库存为整数
                     imageUrl: imageUrl,
                     category: $('#productCategory').val() || '其他'
                 };
+                
+                // 验证必填字段
+                if (!productData.productName) {
+                    throw new Error('产品名称不能为空');
+                }
+                
+                if (productData.price <= 0) {
+                    throw new Error('价格必须大于0');
+                }
+                
+                if (productData.stock < 0) {
+                    throw new Error('库存不能为负数');
+                }
                 
                 console.log('提交产品数据:', productData);
                 
@@ -926,6 +1319,345 @@
                 alert('更新产品失败: ' + error.message);
             } finally {
                 $('#updateProductBtn').attr('disabled', false).html('更新');
+            }
+        }
+        
+        /**
+         * 切换批量管理模式
+         */
+        function toggleBatchMode(enable) {
+            if (enable) {
+                // 启用批量管理模式
+                $('#batchToolbar').show();
+                $('.batch-column').show();
+                $('#batchManageBtn').hide();
+            } else {
+                // 关闭批量管理模式
+                $('#batchToolbar').hide();
+                $('.batch-column').hide();
+                $('#batchManageBtn').show();
+                
+                // 取消所有选中的复选框
+                $('#selectAllProducts').prop('checked', false);
+                $('.product-checkbox').prop('checked', false);
+            }
+        }
+        
+        /**
+         * 获取选中的产品ID列表
+         */
+        function getSelectedProductIds() {
+            const selectedIds = [];
+            $('.product-checkbox:checked').each(function() {
+                selectedIds.push($(this).data('id'));
+            });
+            return selectedIds;
+        }
+        
+        /**
+         * 批量更新产品状态（上架/下架）
+         */
+        async function batchUpdateStatus(isActive) {
+            try {
+                const selectedIds = getSelectedProductIds();
+                if (selectedIds.length === 0) {
+                    alert('请先选择要操作的产品');
+                    return;
+                }
+                
+                if (!confirm(`确定要批量${isActive ? '上架' : '下架'}选中的 ${selectedIds.length} 个产品吗？`)) {
+                    return;
+                }
+                
+                console.log(`开始批量${isActive ? '上架' : '下架'}产品，IDs:`, selectedIds);
+                
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const currentTime = new Date().toISOString();
+                
+                // 逐个更新产品状态
+                let successCount = 0;
+                let errors = [];
+                
+                for (const productId of selectedIds) {
+                    try {
+                        // 使用现有的API更新产品状态
+                        const updateData = {
+                            farmerId: parseInt(user.userId),
+                            isActive: isActive
+                        };
+                        
+                        // 添加上下架时间
+                        if (isActive) {
+                            updateData.activeTime = currentTime;
+            } else {
+                            updateData.inactiveTime = currentTime;
+                        }
+                        
+                        const response = await http.put(`/product/${productId}`, updateData);
+                        
+                        if (response && response.code === 200) {
+                            successCount++;
+                            
+                            // 更新页面上的产品状态
+                            const $row = $(`tr[data-id="${productId}"]`);
+                            const statusClass = isActive ? 'badge-success' : 'badge-secondary';
+                            const statusText = isActive ? '上架' : '下架';
+                            const formattedTime = new Date(currentTime).toLocaleString();
+                            
+                            $row.attr('data-status', isActive ? 'active' : 'inactive');
+                            $row.find('td:nth-child(6) .badge')
+                                .removeClass('badge-success badge-secondary')
+                                .addClass(statusClass)
+                                .text(statusText);
+                                
+                            // 更新时间显示
+                            $row.find('td:nth-child(6) .small')
+                                .text(formattedTime);
+                        } else {
+                            throw new Error(response.message || `更新产品${productId}失败`);
+                        }
+                    } catch (error) {
+                        console.error(`更新产品${productId}失败:`, error);
+                        errors.push(`产品ID ${productId}: ${error.message}`);
+                    }
+                }
+                
+                // 显示操作结果
+                if (errors.length > 0) {
+                    alert(`批量${isActive ? '上架' : '下架'}完成，成功: ${successCount}，失败: ${errors.length}\n\n失败原因:\n${errors.join('\n')}`);
+                } else {
+                    alert(`成功批量${isActive ? '上架' : '下架'} ${successCount} 个产品`);
+                }
+            } catch (error) {
+                console.error(`批量${isActive ? '上架' : '下架'}失败:`, error);
+                alert(`批量${isActive ? '上架' : '下架'}失败: ${error.message}`);
+            }
+        }
+        
+        /**
+         * 批量删除产品
+         */
+        async function batchDeleteProducts() {
+            try {
+                const selectedIds = getSelectedProductIds();
+                if (selectedIds.length === 0) {
+                    alert('请先选择要删除的产品');
+                    return;
+                }
+                
+                if (!confirm(`确定要永久删除选中的 ${selectedIds.length} 个产品吗？此操作将从数据库中彻底删除数据，无法恢复。`)) {
+                    return;
+                }
+                
+                console.log('开始批量删除产品，IDs:', selectedIds);
+                
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                // 跟踪删除结果
+                let hardDeletedCount = 0;  // 硬删除成功数量
+                let softDeletedCount = 0;  // 软删除成功数量
+                let failedCount = 0;       // 失败数量
+                let errors = [];           // 错误信息
+                
+                // 准备删除请求数据，添加硬删除标记
+                const deleteData = {
+                    farmerId: parseInt(user.userId),
+                    hardDelete: true  // 添加硬删除标记
+                };
+                
+                for (const productId of selectedIds) {
+                    try {
+                        // 使用现有的API删除产品
+                        const response = await http.delete(`/product/${productId}`, deleteData);
+                        
+                        if (response && response.code === 200) {
+                            // 根据后端返回的结果区分硬删除和软删除
+                            if (response.isHardDeleted) {
+                                hardDeletedCount++;
+                                // 从页面上移除产品行
+                                $(`tr[data-id="${productId}"]`).fadeOut(300, function() {
+                                    $(this).remove();
+                                });
+                            } else {
+                                softDeletedCount++;
+                                // 更新产品行状态为下架
+                                const $row = $(`tr[data-id="${productId}"]`);
+                                $row.attr('data-status', 'inactive');
+                                $row.find('td:nth-child(6) .badge')
+                                    .removeClass('badge-success')
+                                    .addClass('badge-secondary')
+                                    .text('下架');
+                            }
+                        } else {
+                            failedCount++;
+                            throw new Error(response.message || `删除产品${productId}失败`);
+                        }
+                    } catch (error) {
+                        failedCount++;
+                        console.error(`删除产品${productId}失败:`, error);
+                        errors.push(`产品ID ${productId}: ${error.message}`);
+                    }
+                }
+                
+                // 构建操作结果消息
+                let resultMessage = `批量删除操作完成：\n`;
+                if (hardDeletedCount > 0) {
+                    resultMessage += `- ${hardDeletedCount} 个产品已永久删除\n`;
+                }
+                if (softDeletedCount > 0) {
+                    resultMessage += `- ${softDeletedCount} 个产品因被订单引用而仅设置为下架状态\n`;
+                }
+                if (failedCount > 0) {
+                    resultMessage += `- ${failedCount} 个产品删除失败\n`;
+                    resultMessage += `\n失败原因:\n${errors.join('\n')}`;
+                }
+                
+                // 显示操作结果
+                alert(resultMessage);
+                
+                // 如果有产品已删除/更新，重新加载产品列表
+                if (hardDeletedCount > 0 || softDeletedCount > 0) {
+                    loadProducts();
+                }
+            } catch (error) {
+                console.error('批量删除失败:', error);
+                alert('批量删除操作失败: ' + error.message);
+            }
+        }
+        
+        /**
+         * 批量导出产品数据
+         */
+        function batchExportProducts() {
+            try {
+                const selectedIds = getSelectedProductIds();
+                if (selectedIds.length === 0) {
+                    alert('请先选择要导出的产品');
+                    return;
+                }
+                
+                console.log('准备导出产品，IDs:', selectedIds);
+                
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                // 构建导出URL
+                const exportUrl = `${http.defaults.baseURL}/product/export?farmerId=${user.userId}`;
+                
+                // 在新窗口或标签页中打开导出URL
+                window.open(exportUrl, '_blank');
+                
+                alert(`已开始导出 ${selectedIds.length} 个产品的数据，如果文件没有自动下载，请检查浏览器是否阻止了弹出窗口。`);
+            } catch (error) {
+                console.error('批量导出失败:', error);
+                alert('批量导出失败: ' + error.message);
+            }
+        }
+        
+        /**
+         * 筛选产品列表
+         */
+        function filterProducts() {
+            const statusFilter = $('#statusFilter').val();
+            const searchText = $('#searchProduct').val().toLowerCase().trim();
+            
+            console.log(`筛选产品 - 状态: ${statusFilter}, 搜索: ${searchText}`);
+            
+            // 遍历所有产品行
+            $('#productList tr').each(function() {
+                const $row = $(this);
+                const productId = $row.data('id');
+                
+                // 跳过非产品行（如加载提示行）
+                if (!productId) {
+                    return;
+                }
+                
+                // 获取产品状态和名称
+                const status = $row.data('status'); // active 或 inactive
+                const productName = $row.find('td:nth-child(3)').text().toLowerCase();
+                
+                // 状态筛选条件
+                let matchStatus = true;
+                if (statusFilter === 'active') {
+                    matchStatus = (status === 'active');
+                } else if (statusFilter === 'inactive') {
+                    matchStatus = (status === 'inactive');
+                }
+                
+                // 名称搜索条件
+                let matchName = true;
+                if (searchText) {
+                    matchName = productName.includes(searchText);
+                }
+                
+                // 同时满足状态和名称条件才显示
+                if (matchStatus && matchName) {
+                    $row.show();
+                } else {
+                    $row.hide();
+                }
+            });
+            
+            // 检查是否所有行都被隐藏
+            const visibleRows = $('#productList tr:visible').length;
+            const colSpan = $('.batch-column').is(':visible') ? 7 : 6;
+            
+            // 如果没有可见行，显示空提示
+            if (visibleRows === 0) {
+                // 移除可能存在的空提示行
+                $('#productList .empty-filter-result').remove();
+                // 添加空提示行
+                $('#productList').append(`
+                    <tr class="empty-filter-result">
+                        <td colspan="${colSpan}" class="text-center py-3">
+                            <i class="fas fa-filter mr-2"></i> 没有符合筛选条件的商品
+                        </td>
+                    </tr>
+                `);
+                // 隐藏空状态提示
+                $('#emptyProducts').hide();
+            } else {
+                // 移除可能存在的空提示行
+                $('#productList .empty-filter-result').remove();
+            }
+        }
+
+        /**
+         * 处理产品上下架状态变更
+         */
+        async function handleProductStatus(productId, makeActive) {
+            try {
+                console.log(`开始${makeActive ? '上架' : '下架'}产品，ID:`, productId);
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                
+                // 准备更新状态的请求数据
+                const updateData = {
+                    farmerId: parseInt(user.userId),
+                    isActive: makeActive,
+                };
+                
+                // 添加时间字段
+                if (makeActive) {
+                    updateData.activeTime = new Date().toISOString();
+                } else {
+                    updateData.inactiveTime = new Date().toISOString();
+                }
+                
+                console.log('状态更新请求数据:', updateData);
+                
+                // 使用Axios更新产品状态
+                const result = await http.put(`/product/${productId}`, updateData);
+                console.log('更新产品状态响应:', result);
+                
+                if (result && result.code === 200) {
+                    alert(`产品${makeActive ? '上架' : '下架'}成功`);
+                    await loadProducts(); // 重新加载产品列表
+                } else {
+                    throw new Error(result.message || `产品${makeActive ? '上架' : '下架'}失败`);
+                }
+            } catch (error) {
+                console.error(`产品${makeActive ? '上架' : '下架'}失败`, error);
+                alert(`产品${makeActive ? '上架' : '下架'}失败: ` + error.message);
             }
         }
     </script>

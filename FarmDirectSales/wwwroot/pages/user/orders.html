@@ -518,8 +518,8 @@
             
             // 重置当前页为第一页
             currentPage = 1;
-            
-            // 渲染订单列表
+        
+        // 渲染订单列表
             renderPaginatedOrders();
         }
         
@@ -590,20 +590,20 @@
                     
                     // 支付方式显示
                     const paymentMethod = '货到付款';
-                    
-                    // 添加操作按钮
-                    let actionButtons = '';
+                
+                // 添加操作按钮
+                let actionButtons = '';
                     
                     // 获取当前用户
                     const user = JSON.parse(localStorage.getItem('user') || '{}');
-                    
-                    // 根据订单状态添加不同的操作按钮
+                
+                // 根据订单状态添加不同的操作按钮
                     if (OrderManager.showConfirmReceiptButton(order, user.role)) {
                         actionButtons += `
-                                <button class="btn btn-sm btn-success" onclick="confirmReceiptDirect(${order.orderId})">
-                                    <i class="fas fa-check me-1"></i> 确认收货
-                                </button>
-                            `;
+                            <button class="btn btn-sm btn-success" onclick="confirmReceiptDirect(${order.orderId})">
+                                <i class="fas fa-check me-1"></i> 确认收货
+                            </button>
+                        `;
                     }
                     
                     // 取消订单按钮
@@ -615,7 +615,7 @@
                             <button class="btn btn-sm btn-danger ms-2" onclick="cancelOrderDirect(${order.orderId})">
                                 <i class="fas fa-times me-1"></i> 取消订单
                             </button>
-                                `;
+                            `;
                     }
                     
                     // 评分按钮 - 已完成且未评分的订单
@@ -625,14 +625,14 @@
                                 <i class="fas fa-star me-1"></i> 评分
                             </button>
                         `;
-                    }
-                    
-                    html += `
+                }
+                
+                html += `
                         <div class="card-body border-bottom py-3">
                             <div class="d-flex justify-content-between mb-2">
-                                <span class="fw-bold">订单号: ${order.orderId}</span>
+                                    <span class="fw-bold">订单号: ${order.orderId}</span>
                                 ${statusBadge}
-                            </div>
+                                </div>
                             <div class="row align-items-center">
                                 <div class="col-md-7">
                                     <div class="d-flex align-items-center">
@@ -653,11 +653,11 @@
                                         <i class="fas fa-file-alt me-1"></i> 详情
                                     </button>
                                     ${actionButtons}
-                                </div>
                             </div>
                         </div>
-                    `;
-                });
+                    </div>
+                `;
+            });
                 
                 html += `</div>`;
             });

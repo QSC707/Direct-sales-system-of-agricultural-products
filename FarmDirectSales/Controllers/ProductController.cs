@@ -38,22 +38,25 @@ namespace FarmDirectSales.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var userRole = User.FindFirstValue(ClaimTypes.Role);
                 
-                // 构建查询
-                var query = _context.Products
-                    .Include(p => p.Farmer)
-                    .Where(p => p.IsActive);
+                // 构建基础查询，不包括IsActive过滤
+                IQueryable<Product> query = _context.Products.Include(p => p.Farmer);
                 
-                // 如果请求中指定了farmerId参数，只返回该农户的产品
+                // 判断查询条件
                 if (farmerId.HasValue)
                 {
+                    // 如果指定了farmerId，查询该农户的所有产品（包括下架的）
                     query = query.Where(p => p.FarmerId == farmerId.Value);
                 }
-                // 如果是农户角色且没有指定farmerId，则只返回自己的产品
                 else if (userRole == "farmer" && int.TryParse(userId, out int currentFarmerId))
                 {
+                    // 如果是农户查看自己的产品，不过滤IsActive
                     query = query.Where(p => p.FarmerId == currentFarmerId);
                 }
-                // 其他情况（管理员或普通用户）返回所有产品
+                else
+                {
+                    // 其他情况（管理员或普通用户）只返回上架(IsActive)的产品
+                    query = query.Where(p => p.IsActive);
+                }
                 
                 var products = await query.ToListAsync();
 
@@ -77,7 +80,9 @@ namespace FarmDirectSales.Controllers
                         Farmer = new { p.Farmer.UserId, p.Farmer.Username },
                         p.CreateTime,
                         p.UpdateTime,
-                        p.IsActive
+                        p.IsActive,
+                        p.ActiveTime,
+                        p.InactiveTime
                     })
                 });
             }
@@ -98,7 +103,7 @@ namespace FarmDirectSales.Controllers
             {
                 var product = await _context.Products
                     .Include(p => p.Farmer)
-                    .FirstOrDefaultAsync(p => p.ProductId == id && p.IsActive);
+                    .FirstOrDefaultAsync(p => p.ProductId == id);
 
                 if (product == null)
                 {
@@ -117,6 +122,10 @@ namespace FarmDirectSales.Controllers
                         product.Price,
                         product.Stock,
                         product.ImageUrl,
+                        product.Category,
+                        product.IsActive,
+                        product.ActiveTime,
+                        product.InactiveTime,
                         Farmer = new { product.Farmer.UserId, product.Farmer.Username },
                         product.CreateTime,
                         product.UpdateTime
@@ -160,7 +169,8 @@ namespace FarmDirectSales.Controllers
                     Category = request.Category ?? "其他",
                     CreateTime = DateTime.Now,
                     UpdateTime = DateTime.Now,
-                    IsActive = true
+                    IsActive = true,
+                    ActiveTime = DateTime.Now
                 };
 
                 _context.Products.Add(product);
@@ -251,6 +261,21 @@ namespace FarmDirectSales.Controllers
                 // 处理上下架状态
                 if (request.IsActive.HasValue)
                 {
+                    // 如果状态有变化，记录时间
+                    if (product.IsActive != request.IsActive.Value)
+                    {
+                        if (request.IsActive.Value)
+                        {
+                            // 从下架变为上架
+                            product.ActiveTime = DateTime.Now;
+                        }
+                        else
+                        {
+                            // 从上架变为下架
+                            product.InactiveTime = DateTime.Now;
+                        }
+                    }
+                    
                     product.IsActive = request.IsActive.Value;
                 }
 
@@ -287,14 +312,14 @@ namespace FarmDirectSales.Controllers
         }
 
         /// <summary>
-        /// 删除产品（软删除）
+        /// 删除产品（智能判断是否可以硬删除）
         /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id, [FromBody] DeleteProductRequest request)
         {
             try
             {
-                var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == id && p.IsActive);
+                var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == id);
                 if (product == null)
                 {
                     return NotFound(new { code = 404, message = "产品不存在" });
@@ -306,16 +331,52 @@ namespace FarmDirectSales.Controllers
                     return BadRequest(new { code = 400, message = "只有产品所有者才能删除产品" });
                 }
 
-                // 软删除
-                product.IsActive = false;
-                product.UpdateTime = DateTime.Now;
+                // 检查产品是否被订单引用
+                bool hasOrderReferences = await _context.Orders.AnyAsync(o => o.ProductId == id);
 
-                await _context.SaveChangesAsync();
+                if (hasOrderReferences)
+                {
+                    // 如果产品已被订单引用，只能软删除
+                    product.IsActive = false;
+                    product.UpdateTime = DateTime.Now;
+                    product.InactiveTime = DateTime.Now;
 
-                return Ok(new { code = 200, message = "删除产品成功" });
+                    await _context.SaveChangesAsync();
+                    return Ok(new { 
+                        code = 200, 
+                        message = "产品已下架但无法永久删除，因为该产品已被订单引用",
+                        isHardDeleted = false
+                    });
+                }
+                else if (request.HardDelete)
+                {
+                    // 硬删除 - 从数据库中完全删除
+                    _context.Products.Remove(product);
+                    await _context.SaveChangesAsync();
+                    return Ok(new { 
+                        code = 200, 
+                        message = "产品已永久删除",
+                        isHardDeleted = true
+                    });
+                }
+                else
+                {
+                    // 软删除
+                    product.IsActive = false;
+                    product.UpdateTime = DateTime.Now;
+                    product.InactiveTime = DateTime.Now;
+
+                    await _context.SaveChangesAsync();
+                    return Ok(new { 
+                        code = 200, 
+                        message = "产品已下架",
+                        isHardDeleted = false
+                    });
+                }
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"删除产品时发生错误: {ex}");
                 return BadRequest(new { code = 400, message = ex.Message });
             }
         }
@@ -608,24 +669,24 @@ namespace FarmDirectSales.Controllers
         /// 产品名称
         /// </summary>
         public string? ProductName { get; set; }
-        
+
         /// <summary>
         /// 产品描述
         /// </summary>
         public string? Description { get; set; }
-        
+
         /// <summary>
         /// 价格
         /// </summary>
         [Range(0.01, double.MaxValue, ErrorMessage = "价格必须大于0")]
         public decimal? Price { get; set; }
-        
+
         /// <summary>
         /// 库存
         /// </summary>
         [Range(0, int.MaxValue, ErrorMessage = "库存不能为负数")]
         public int? Stock { get; set; }
-        
+
         /// <summary>
         /// 图片URL
         /// </summary>
@@ -635,7 +696,7 @@ namespace FarmDirectSales.Controllers
         /// 分类
         /// </summary>
         public string? Category { get; set; }
-        
+
         /// <summary>
         /// 农户ID
         /// </summary>
@@ -658,6 +719,11 @@ namespace FarmDirectSales.Controllers
         /// </summary>
         [Required(ErrorMessage = "农户ID不能为空")]
         public int FarmerId { get; set; }
+
+        /// <summary>
+        /// 是否硬删除
+        /// </summary>
+        public bool HardDelete { get; set; } = false;
     }
 } 
  

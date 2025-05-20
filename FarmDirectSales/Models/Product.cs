@@ -67,6 +67,16 @@ namespace FarmDirectSales.Models
         public bool IsActive { get; set; } = true;
         
         /// <summary>
+        /// 上架时间
+        /// </summary>
+        public DateTime? ActiveTime { get; set; }
+        
+        /// <summary>
+        /// 下架时间
+        /// </summary>
+        public DateTime? InactiveTime { get; set; }
+        
+        /// <summary>
         /// 产品分类
         /// </summary>
         public string Category { get; set; } = string.Empty;

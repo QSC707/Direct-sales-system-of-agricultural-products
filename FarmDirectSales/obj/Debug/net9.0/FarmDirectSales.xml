@@ -856,7 +856,7 @@
         </member>
         <member name="M:FarmDirectSales.Controllers.ProductController.DeleteProduct(System.Int32,FarmDirectSales.Controllers.DeleteProductRequest)">
             <summary>
-            删除产品（软删除）
+            删除产品（智能判断是否可以硬删除）
             </summary>
         </member>
         <member name="M:FarmDirectSales.Controllers.ProductController.ExportProducts(System.Nullable{System.Int32})">
@@ -867,16 +867,6 @@
         <member name="M:FarmDirectSales.Controllers.ProductController.ImportProducts(Microsoft.AspNetCore.Http.IFormFile,System.Int32)">
             <summary>
             批量导入产品
-            </summary>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.ProductController.UpdateProductsStatus(FarmDirectSales.Controllers.BatchUpdateStatusRequest)">
-            <summary>
-            批量更新产品状态
-            </summary>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.ProductController.DeleteProducts(FarmDirectSales.Controllers.BatchDeleteRequest)">
-            <summary>
-            批量删除产品
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.AddProductRequest">
@@ -974,39 +964,9 @@
             农户ID
             </summary>
         </member>
-        <member name="T:FarmDirectSales.Controllers.BatchUpdateStatusRequest">
+        <member name="P:FarmDirectSales.Controllers.DeleteProductRequest.HardDelete">
             <summary>
-            批量更新状态的请求模型
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Controllers.BatchUpdateStatusRequest.ProductIds">
-            <summary>
-            产品ID列表
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Controllers.BatchUpdateStatusRequest.Status">
-            <summary>
-            要更新的状态（上架/下架）
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Controllers.BatchUpdateStatusRequest.FarmerId">
-            <summary>
-            农户ID（如果是农户用户）
-            </summary>
-        </member>
-        <member name="T:FarmDirectSales.Controllers.BatchDeleteRequest">
-            <summary>
-            批量删除的请求模型
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Controllers.BatchDeleteRequest.ProductIds">
-            <summary>
-            产品ID列表
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Controllers.BatchDeleteRequest.FarmerId">
-            <summary>
-            农户ID（如果是农户用户）
+            是否硬删除
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.RatingController">
@@ -1679,6 +1639,42 @@
         <member name="M:FarmDirectSales.Migrations.AddOrderBatchId.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:FarmDirectSales.Migrations.AddProductActiveInactiveTimes">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddProductActiveInactiveTimes.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddProductActiveInactiveTimes.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddProductActiveInactiveTimes.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddSoftDelete">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddSoftDelete.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddSoftDelete.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddSoftDelete.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddOrderItemsTable">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderItemsTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderItemsTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderItemsTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:FarmDirectSales.Models.CartItem">
             <summary>
             购物车项模型
@@ -2072,6 +2068,16 @@
         <member name="P:FarmDirectSales.Models.Product.IsActive">
             <summary>
             产品状态（上架/下架）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.ActiveTime">
+            <summary>
+            上架时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.InactiveTime">
+            <summary>
+            下架时间
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.Product.Category">

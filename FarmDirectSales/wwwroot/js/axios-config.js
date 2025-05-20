@@ -138,11 +138,15 @@ const http = {
     /**
      * DELETE请求
      * @param {string} url 请求URL
+     * @param {Object} data 请求体数据
      * @param {Object} config 其他配置选项
      * @returns {Promise} 响应数据
      */
-    delete: (url, config = {}) => {
-        return axiosInstance.delete(url, config);
+    delete: (url, data = {}, config = {}) => {
+        return axiosInstance.delete(url, { 
+            ...config,
+            data: data  // 将数据放在config.data中，这是Axios DELETE请求的正确方式
+        });
     }
 };
 

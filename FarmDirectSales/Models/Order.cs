@@ -102,7 +102,7 @@ namespace FarmDirectSales.Models
         /// 是否已评价
         /// </summary>
         public bool IsReviewed { get; set; } = false;
-        
+
         /// <summary>
         /// 用户评分(1-5星)
         /// </summary>
