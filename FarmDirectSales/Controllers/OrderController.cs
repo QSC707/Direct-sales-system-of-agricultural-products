@@ -133,7 +133,7 @@ namespace FarmDirectSales.Controllers
                     .Include(o => o.Product)
                     .ThenInclude(p => p.Farmer)
                     .Include(o => o.Review)
-                    .Where(o => o.UserId == userId)
+                    .Where(o => o.UserId == userId && !o.IsDeleted) // 排除软删除的订单
                     .OrderByDescending(o => o.CreateTime)
                     .ToListAsync();
 
@@ -154,7 +154,8 @@ namespace FarmDirectSales.Controllers
                             Farmer = new
                             {
                                 o.Product.Farmer.UserId,
-                                o.Product.Farmer.Username
+                                o.Product.Farmer.Username,
+                                o.Product.Farmer.Phone
                             }
                         },
                         o.Quantity,
@@ -171,6 +172,8 @@ namespace FarmDirectSales.Controllers
                         o.ShippingAddress,
                         o.ContactPhone,
                         isReviewed = o.Review != null,
+                        isRated = o.IsRated,
+                        rating = o.Rating,
                         review = o.Review != null ? new
                         {
                             o.Review.Rating,
@@ -658,6 +661,61 @@ namespace FarmDirectSales.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"创建订单异常: {ex.Message}");
+                return BadRequest(new { code = 400, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// 删除订单（支持软删除和硬删除）
+        /// </summary>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrder(int id, [FromQuery] int userId)
+        {
+            try
+            {
+                Console.WriteLine($"收到删除订单请求: 订单ID={id}, 用户ID={userId}");
+                
+                // 查找订单
+                var order = await _context.Orders.FindAsync(id);
+                if (order == null)
+                {
+                    return NotFound(new { code = 404, message = "订单不存在" });
+                }
+
+                // 检查权限（只有订单所有者才能删除）
+                if (order.UserId != userId)
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new { code = 403, message = "无权删除此订单" });
+                }
+
+                // 检查是否满足硬删除条件：
+                // 1. 订单已取消
+                // 2. 取消人是当前用户
+                bool canHardDelete = order.Status == "已取消" && 
+                                    order.CancelByType == "user" && 
+                                    order.CancelBy == userId;
+
+                if (canHardDelete)
+                {
+                    // 硬删除 - 从数据库中完全删除
+                    _context.Orders.Remove(order);
+                    await _context.SaveChangesAsync();
+                    
+                    return Ok(new { code = 200, message = "订单已彻底删除" });
+                }
+                else
+                {
+                    // 软删除 - 仅标记为已删除
+                    order.IsDeleted = true;
+                    order.DeleteTime = DateTime.Now;
+                    
+                    await _context.SaveChangesAsync();
+                    
+                    return Ok(new { code = 200, message = "订单已删除（软删除）" });
+                }
+            }
+            catch (Exception ex)
+            {
                 return BadRequest(new { code = 400, message = ex.Message });
             }
         }

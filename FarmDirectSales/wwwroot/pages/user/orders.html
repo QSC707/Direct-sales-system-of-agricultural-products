@@ -618,6 +618,15 @@
                             `;
                     }
                     
+                    // 已取消订单显示删除按钮
+                    if (order.status === '已取消') {
+                        actionButtons += `
+                            <button class="btn btn-sm btn-outline-danger ms-2" onclick="showDeleteOrderConfirm(${order.orderId})">
+                                <i class="fas fa-trash-alt me-1"></i> 删除
+                            </button>
+                            `;
+                    }
+                    
                     // 评分按钮 - 已完成且未评分的订单
                     if (OrderManager.canRate(order)) {
                         actionButtons += `
@@ -1410,6 +1419,86 @@
                     star.classList.remove('text-warning');
                 }
             });
+        }
+        
+        // 显示删除订单确认对话框
+        function showDeleteOrderConfirm(orderId) {
+            // 如果模态框不存在，创建它
+            if (!document.getElementById('deleteOrderModal')) {
+                const modalHTML = `
+                <div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-labelledby="deleteOrderModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="deleteOrderModalLabel">删除订单</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning mb-3">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>确定要删除此订单吗？
+                                </div>
+                                <div id="delete-order-note" class="text-muted small">
+                                    <p>如果是您自己取消的订单，将会被彻底删除。</p>
+                                    <p>其他情况下，订单仅会对您隐藏，但商家和管理员仍可查看。</p>
+                                </div>
+                                <input type="hidden" id="deleteOrderId">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">返回</button>
+                                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+                
+                // 添加到页面
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+                
+                // 绑定确认删除按钮事件
+                document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+                    const orderId = document.getElementById('deleteOrderId').value;
+                    const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    
+                    try {
+                        // 禁用按钮并显示加载状态
+                        const btn = document.getElementById('confirmDeleteBtn');
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> 处理中...';
+                        
+                        // 调用API删除订单
+                        console.log(`正在调用删除API: /Order/${orderId}?userId=${user.userId}`);
+                        const result = await http.delete(`/Order/${orderId}?userId=${user.userId}`);
+                        
+                        if (result.code === 200) {
+                            // 关闭模态框
+                            bootstrap.Modal.getInstance(document.getElementById('deleteOrderModal')).hide();
+                            
+                            // 提示成功
+                            alert('删除订单成功');
+                            
+                            // 重新加载订单列表
+                            loadUserOrders();
+                        } else {
+                            throw new Error(result.message || '删除订单失败');
+                        }
+                    } catch (error) {
+                        console.error('删除订单失败:', error);
+                        alert(`删除订单失败: ${error.message}`);
+                    } finally {
+                        // 恢复按钮状态
+                        const btn = document.getElementById('confirmDeleteBtn');
+                        btn.disabled = false;
+                        btn.innerHTML = '确认删除';
+                    }
+                });
+            }
+            
+            // 设置订单ID并显示模态框
+            document.getElementById('deleteOrderId').value = orderId;
+            
+            // 显示模态框
+            new bootstrap.Modal(document.getElementById('deleteOrderModal')).show();
         }
     </script>
 </body>

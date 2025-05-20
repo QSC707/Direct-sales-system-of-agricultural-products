@@ -1055,7 +1055,7 @@
                 console.error('打开删除确认对话框失败:', error);
                 // 如果获取产品信息失败，仍然提供基本的确认对话框
                 if (confirm('确定要永久删除这个产品吗？此操作将从数据库中彻底删除数据，无法恢复。')) {
-                    deleteProduct(productId);
+                deleteProduct(productId);
                 }
             }
         }
@@ -1547,7 +1547,7 @@
                         // 添加上下架时间
                         if (isActive) {
                             updateData.activeTime = currentTime;
-                        } else {
+            } else {
                             updateData.inactiveTime = currentTime;
                         }
                         
@@ -1655,7 +1655,7 @@
                 
                 // 关闭所有可能打开的模态框，避免删除后出现404错误
                 $('#productDetailModal').modal('hide');
-                $('#editProductModal').modal('hide');
+                    $('#editProductModal').modal('hide');
                 $('#batchDeleteConfirmModal').modal('hide');
                 
                 console.log('开始批量删除产品，IDs:', selectedIds);

@@ -749,6 +749,11 @@
             从购物车创建订单
             </summary>
         </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.DeleteOrder(System.Int32,System.Int32)">
+            <summary>
+            删除订单（支持软删除和硬删除）
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.CreateOrderRequest">
             <summary>
             创建订单请求模型
@@ -1675,6 +1680,18 @@
         <member name="M:FarmDirectSales.Migrations.AddOrderItemsTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:FarmDirectSales.Migrations.AddSoftDeleteToOrders">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddSoftDeleteToOrders.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddSoftDeleteToOrders.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddSoftDeleteToOrders.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:FarmDirectSales.Models.CartItem">
             <summary>
             购物车项模型
@@ -1998,6 +2015,16 @@
         <member name="P:FarmDirectSales.Models.Order.RateTime">
             <summary>
             评分时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.IsDeleted">
+            <summary>
+            是否已被删除（软删除）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.DeleteTime">
+            <summary>
+            删除时间
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.Order.User">

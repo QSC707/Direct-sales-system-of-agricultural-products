@@ -117,6 +117,16 @@ namespace FarmDirectSales.Models
         /// 评分时间
         /// </summary>
         public DateTime? RateTime { get; set; }
+        
+        /// <summary>
+        /// 是否已被删除（软删除）
+        /// </summary>
+        public bool IsDeleted { get; set; } = false;
+        
+        /// <summary>
+        /// 删除时间
+        /// </summary>
+        public DateTime? DeleteTime { get; set; }
 
         // 导航属性
         /// <summary>
