@@ -10,6 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- 引入Font Awesome图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- 引入SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- API调用相关 -->
     <script src="../../js/api.js"></script>
     <!-- Axios配置 -->
@@ -502,6 +504,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-danger detail-delete-btn">删除产品</button>
                     <button type="button" class="btn btn-primary detail-edit-btn">编辑产品</button>
                 </div>
             </div>
@@ -514,6 +517,71 @@
             <p>© 2023 农产品直销平台 版权所有</p>
         </div>
     </footer>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel">确认删除</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <p>您确定要永久删除产品 <strong id="deleteProductName">此产品</strong> 吗？</p>
+                    <div class="alert alert-warning">
+                        <small>
+                            <i class="fas fa-info-circle mr-1"></i> 此操作将从数据库中彻底删除数据，无法恢复。
+                            如果产品已被订单引用，系统会自动将其设为下架状态而非删除。
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" id="deleteProductId" value="">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt mr-1"></i> 确认删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 批量删除确认模态框 -->
+    <div class="modal fade" id="batchDeleteConfirmModal" tabindex="-1" role="dialog" aria-labelledby="batchDeleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="batchDeleteConfirmModalLabel">批量删除确认</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <p>您确定要永久删除选中的 <strong id="batchDeleteCount">0</strong> 个产品吗？</p>
+                    <div class="alert alert-warning">
+                        <small>
+                            <i class="fas fa-info-circle mr-1"></i> 此操作将从数据库中彻底删除数据，无法恢复。
+                            已被订单引用的产品将会被设为下架状态而非删除。
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmBatchDeleteBtn">
+                        <i class="fas fa-trash-alt mr-1"></i> 确认批量删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- 自定义JS -->
     <script>
@@ -551,6 +619,20 @@
                     }
                 });
                 
+                // 绑定删除确认按钮事件
+                $('#confirmDeleteBtn').on('click', function() {
+                    const productId = $('#deleteProductId').val();
+                    if (productId) {
+                        $('#deleteConfirmModal').modal('hide');
+                        deleteProduct(productId);
+                    }
+                });
+                
+                // 绑定批量删除确认按钮事件
+                $('#confirmBatchDeleteBtn').on('click', function() {
+                    executeBatchDelete();
+                });
+                
                 // 绑定筛选事件
                 $('#statusFilter').on('change', filterProducts);
                 $('#searchBtn').on('click', filterProducts);
@@ -566,20 +648,22 @@
                 // 加载产品列表
                 loadProducts();
                 
-                // 动态绑定产品操作按钮事件
+                // 使用事件委托绑定所有动态生成的产品操作按钮
+                // 编辑按钮事件
                 $(document).on('click', '.edit-btn', function() {
                     const productId = $(this).data('id');
                     console.log('编辑按钮被点击，产品ID:', productId);
                     openEditModal(productId);
                 });
                 
+                // 删除按钮事件
                 $(document).on('click', '.delete-btn', function() {
                     const productId = $(this).data('id');
                     console.log('删除按钮被点击，产品ID:', productId);
                     confirmDeleteProduct(productId);
                 });
                 
-                // 添加详情按钮点击事件
+                // 详情按钮事件
                 $(document).on('click', '.product-detail-btn', function() {
                     const productId = $(this).data('id');
                     console.log('详情按钮被点击，产品ID:', productId);
@@ -735,12 +819,7 @@
                 }
             } catch (error) {
                 console.error('获取产品列表失败', error);
-                
-                // 避免在404错误时显示过多弹窗
-                if (!error.message.includes('404') && !error.message.includes('Not Found')) {
-                    alert('获取产品列表失败: ' + error.message);
-                }
-                
+                alert('获取产品列表失败: ' + error.message);
                 $('#productList').html('<tr><td colspan="7" class="text-center text-danger">加载失败: ' + error.message + '</td></tr>');
             }
         }
@@ -807,19 +886,21 @@
                             openEditModal(productId);
                         }, 500);
                     });
+                    
+                    // 设置删除按钮事件
+                    $('.detail-delete-btn').off('click').on('click', function() {
+                        $('#productDetailModal').modal('hide');
+                        setTimeout(() => {
+                            confirmDeleteProduct(productId);
+                        }, 500);
+                    });
                 } else {
                     throw new Error(result.message || '获取产品详情失败');
                 }
             } catch (error) {
                 console.error('加载产品详情失败', error);
-                // 检查是否是产品不存在错误
-                if (error.message.includes('产品不存在') || error.message.includes('404')) {
-                    $('#productDetailModal').modal('hide');
-                    setTimeout(() => alert('该产品不存在或已被删除'), 500);
-                } else {
-                    $('#detailProductName').text('加载失败');
-                    $('#detailDescription').text(`错误: ${error.message}`);
-                }
+                $('#detailProductName').text('加载失败');
+                $('#detailDescription').text(`错误: ${error.message}`);
             }
         }
         
@@ -903,17 +984,6 @@
                 $productList.append(row);
             });
             
-            // 绑定编辑和删除事件
-            $('.edit-btn').on('click', function() {
-                const productId = $(this).data('id');
-                openEditModal(productId);
-            });
-            
-            $('.delete-btn').on('click', function() {
-                const productId = $(this).data('id');
-                confirmDeleteProduct(productId);
-            });
-            
             // 初始化工具提示
             $('[data-toggle="tooltip"]').tooltip();
         }
@@ -971,8 +1041,22 @@
          * 确认删除产品
          */
         function confirmDeleteProduct(productId) {
-            if (confirm('确定要永久删除这个产品吗？此操作将从数据库中彻底删除数据，无法恢复。')) {
-                deleteProduct(productId);
+            try {
+                // 获取产品名称，用于显示在确认对话框中
+                const productName = $(`tr[data-id="${productId}"]`).find('td:nth-child(3)').text();
+                
+                // 设置模态框中的产品ID和名称
+                $('#deleteProductId').val(productId);
+                $('#deleteProductName').text(productName || '此产品');
+                
+                // 显示删除确认模态框
+                $('#deleteConfirmModal').modal('show');
+            } catch (error) {
+                console.error('打开删除确认对话框失败:', error);
+                // 如果获取产品信息失败，仍然提供基本的确认对话框
+                if (confirm('确定要永久删除这个产品吗？此操作将从数据库中彻底删除数据，无法恢复。')) {
+                    deleteProduct(productId);
+                }
             }
         }
         
@@ -992,23 +1076,47 @@
                 
                 console.log('删除请求数据:', deleteData);
                 
+                // 显示加载状态
+                Swal.fire({
+                    title: '正在删除',
+                    text: '请稍候...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
                 // 使用Axios删除产品
                 const result = await http.delete(`/product/${productId}`, deleteData);
                 console.log('删除产品响应:', result);
                 
                 if (result && result.code === 200) {
+                    // 关闭加载中提示
+                    Swal.close();
+                    
                     // 根据后端返回的结果显示不同的提示信息
                     if (result.isHardDeleted) {
-                        // 如果是硬删除，直接从DOM中移除该行，避免后续查询已删除的产品
-                        $(`tr[data-id="${productId}"]`).fadeOut(300, function() {
-                            $(this).remove();
+                        Swal.fire({
+                            title: '删除成功',
+                            text: '产品已永久删除',
+                            icon: 'success',
+                            confirmButtonText: '确定'
                         });
-                        alert('产品已永久删除');
                     } else {
-                        alert(result.message || '产品已下架但无法永久删除');
-                        // 只有对于软删除才重新加载，因为产品仍然存在
-                        await loadProducts();
+                        Swal.fire({
+                            title: '部分成功',
+                            text: '产品已被订单引用，已设置为下架状态但无法永久删除',
+                            icon: 'info',
+                            confirmButtonText: '确定'
+                        });
                     }
+                    
+                    // 确保关闭任何可能打开的模态框
+                    $('#productDetailModal').modal('hide');
+                    $('#editProductModal').modal('hide');
+                    
+                    // 重新加载产品列表
+                    await loadProducts();
                 } else {
                     throw new Error(result.message || '删除产品失败');
                 }
@@ -1017,15 +1125,28 @@
                 
                 // 更友好的错误提示
                 let errorMessage = error.message;
+                let iconType = 'error';
+                
                 if (errorMessage.includes('Network Error')) {
                     errorMessage = '网络错误，请检查您的网络连接';
                 } else if (errorMessage.includes('timeout')) {
                     errorMessage = '请求超时，请稍后再试';
                 } else if (errorMessage.includes('订单引用')) {
                     errorMessage = '该产品已被订单引用，无法永久删除，但已被设置为下架状态';
+                    iconType = 'warning';
+                } else if (errorMessage.includes('404') || errorMessage.includes('不存在')) {
+                    errorMessage = '产品已被删除';
+                    iconType = 'info';
+                    // 尝试重新加载产品列表
+                    await loadProducts();
                 }
                 
-                alert('删除产品失败: ' + errorMessage);
+                Swal.fire({
+                    title: '删除失败',
+                    text: errorMessage,
+                    icon: iconType,
+                    confirmButtonText: '确定'
+                });
             }
         }
         
@@ -1361,11 +1482,27 @@
             try {
                 const selectedIds = getSelectedProductIds();
                 if (selectedIds.length === 0) {
-                    alert('请先选择要操作的产品');
+                    Swal.fire({
+                        title: '提示',
+                        text: '请先选择要操作的产品',
+                        icon: 'info',
+                        confirmButtonText: '确定'
+                    });
                     return;
                 }
                 
-                if (!confirm(`确定要批量${isActive ? '上架' : '下架'}选中的 ${selectedIds.length} 个产品吗？`)) {
+                // 使用SweetAlert2确认
+                const result = await Swal.fire({
+                    title: `确认批量${isActive ? '上架' : '下架'}`,
+                    text: `确定要批量${isActive ? '上架' : '下架'}选中的 ${selectedIds.length} 个产品吗？`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: `确认${isActive ? '上架' : '下架'}`,
+                    cancelButtonText: '取消',
+                    confirmButtonColor: isActive ? '#28a745' : '#6c757d'
+                });
+                
+                if (!result.isConfirmed) {
                     return;
                 }
                 
@@ -1374,12 +1511,33 @@
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 const currentTime = new Date().toISOString();
                 
+                // 显示进度条
+                const $progressContainer = $('<div class="progress mt-2 mb-2"><div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>');
+                const $progressStatus = $('<div class="small text-center mb-2">正在处理：0/' + selectedIds.length + '</div>');
+                
+                Swal.fire({
+                    title: `正在${isActive ? '上架' : '下架'}产品`,
+                    html: $progressContainer[0].outerHTML + $progressStatus[0].outerHTML,
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            
                 // 逐个更新产品状态
                 let successCount = 0;
                 let errors = [];
                 
-                for (const productId of selectedIds) {
+                for (let i = 0; i < selectedIds.length; i++) {
                     try {
+                        const productId = selectedIds[i];
+                        
+                        // 更新进度
+                        const percent = Math.round(((i) / selectedIds.length) * 100);
+                        $('.progress-bar').css('width', percent + '%').attr('aria-valuenow', percent);
+                        $('.small.text-center').text('正在处理：' + (i + 1) + '/' + selectedIds.length);
+                        
                         // 使用现有的API更新产品状态
                         const updateData = {
                             farmerId: parseInt(user.userId),
@@ -1389,7 +1547,7 @@
                         // 添加上下架时间
                         if (isActive) {
                             updateData.activeTime = currentTime;
-            } else {
+                        } else {
                             updateData.inactiveTime = currentTime;
                         }
                         
@@ -1417,20 +1575,51 @@
                             throw new Error(response.message || `更新产品${productId}失败`);
                         }
                     } catch (error) {
-                        console.error(`更新产品${productId}失败:`, error);
-                        errors.push(`产品ID ${productId}: ${error.message}`);
+                        console.error(`更新产品${selectedIds[i]}失败:`, error);
+                        errors.push(`产品ID ${selectedIds[i]}: ${error.message}`);
                     }
                 }
                 
+                // 关闭进度对话框
+                Swal.close();
+                
                 // 显示操作结果
                 if (errors.length > 0) {
-                    alert(`批量${isActive ? '上架' : '下架'}完成，成功: ${successCount}，失败: ${errors.length}\n\n失败原因:\n${errors.join('\n')}`);
+                    let resultMessage = `<div class="text-left">批量${isActive ? '上架' : '下架'}完成：</div>
+                        <ul class="text-left my-2">
+                            <li><span class="text-success">成功: ${successCount} 个产品</span></li>
+                            <li><span class="text-danger">失败: ${errors.length} 个产品</span></li>
+                        </ul>`;
+                        
+                    if (errors.length > 0) {
+                        resultMessage += `<div class="mt-2 text-left"><strong>失败原因:</strong></div>
+                            <div class="small text-left text-danger mt-1" style="max-height: 150px; overflow-y: auto;">
+                                ${errors.join('<br>')}
+                            </div>`;
+                    }
+                    
+                    Swal.fire({
+                        title: `批量${isActive ? '上架' : '下架'}结果`,
+                        icon: 'warning',
+                        html: resultMessage,
+                        confirmButtonText: '确定'
+                    });
                 } else {
-                    alert(`成功批量${isActive ? '上架' : '下架'} ${successCount} 个产品`);
+                    Swal.fire({
+                        title: '操作成功',
+                        text: `成功批量${isActive ? '上架' : '下架'} ${successCount} 个产品`,
+                        icon: 'success',
+                        confirmButtonText: '确定'
+                    });
                 }
             } catch (error) {
                 console.error(`批量${isActive ? '上架' : '下架'}失败:`, error);
-                alert(`批量${isActive ? '上架' : '下架'}失败: ${error.message}`);
+                Swal.fire({
+                    title: '操作失败',
+                    text: `批量${isActive ? '上架' : '下架'}失败: ${error.message}`,
+                    icon: 'error',
+                    confirmButtonText: '确定'
+                });
             }
         }
         
@@ -1445,9 +1634,29 @@
                     return;
                 }
                 
-                if (!confirm(`确定要永久删除选中的 ${selectedIds.length} 个产品吗？此操作将从数据库中彻底删除数据，无法恢复。`)) {
+                // 设置批量删除数量并显示确认模态框
+                $('#batchDeleteCount').text(selectedIds.length);
+                $('#batchDeleteConfirmModal').modal('show');
+            } catch (error) {
+                console.error('批量删除失败:', error);
+                alert('批量删除操作失败: ' + error.message);
+            }
+        }
+        
+        /**
+         * 执行批量删除
+         */
+        async function executeBatchDelete() {
+            try {
+                const selectedIds = getSelectedProductIds();
+                if (selectedIds.length === 0) {
                     return;
                 }
+                
+                // 关闭所有可能打开的模态框，避免删除后出现404错误
+                $('#productDetailModal').modal('hide');
+                $('#editProductModal').modal('hide');
+                $('#batchDeleteConfirmModal').modal('hide');
                 
                 console.log('开始批量删除产品，IDs:', selectedIds);
                 
@@ -1465,8 +1674,29 @@
                     hardDelete: true  // 添加硬删除标记
                 };
                 
-                for (const productId of selectedIds) {
+                // 显示进度条或加载指示器
+                const $progressContainer = $('<div class="progress mt-2 mb-2"><div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>');
+                const $progressStatus = $('<div class="small text-center mb-2">正在处理：0/' + selectedIds.length + '</div>');
+                
+                // 使用sweetalert2显示进度
+                Swal.fire({
+                    title: '正在删除产品',
+                    html: $progressContainer[0].outerHTML + $progressStatus[0].outerHTML,
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                for (let i = 0; i < selectedIds.length; i++) {
+                    const productId = selectedIds[i];
                     try {
+                        // 更新进度
+                        const percent = Math.round((i / selectedIds.length) * 100);
+                        $('.progress-bar').css('width', percent + '%').attr('aria-valuenow', percent);
+                        $('.small.text-center').text('正在处理：' + (i + 1) + '/' + selectedIds.length);
+                        
                         // 使用现有的API删除产品
                         const response = await http.delete(`/product/${productId}`, deleteData);
                         
@@ -1495,33 +1725,68 @@
                     } catch (error) {
                         failedCount++;
                         console.error(`删除产品${productId}失败:`, error);
-                        errors.push(`产品ID ${productId}: ${error.message}`);
+                        
+                        // 更友好地处理404错误
+                        let errorMessage = error.message;
+                        if (errorMessage.includes('404') || errorMessage.includes('不存在')) {
+                            // 产品可能已被删除，从DOM中移除对应行
+                            $(`tr[data-id="${productId}"]`).fadeOut(300, function() {
+                                $(this).remove();
+                            });
+                            errorMessage = `产品ID ${productId}: 产品不存在或已被删除`;
+                        } else {
+                            errorMessage = `产品ID ${productId}: ${error.message}`;
+                        }
+                        
+                        errors.push(errorMessage);
                     }
                 }
                 
+                // 关闭进度对话框
+                Swal.close();
+                
                 // 构建操作结果消息
-                let resultMessage = `批量删除操作完成：\n`;
+                let resultMessage = `<div class="text-left">批量删除操作完成：</div><ul class="text-left mt-2 mb-0">`;
                 if (hardDeletedCount > 0) {
-                    resultMessage += `- ${hardDeletedCount} 个产品已永久删除\n`;
+                    resultMessage += `<li><span class="text-success">${hardDeletedCount} 个产品已永久删除</span></li>`;
                 }
                 if (softDeletedCount > 0) {
-                    resultMessage += `- ${softDeletedCount} 个产品因被订单引用而仅设置为下架状态\n`;
+                    resultMessage += `<li><span class="text-warning">${softDeletedCount} 个产品因被订单引用而仅设置为下架状态</span></li>`;
                 }
                 if (failedCount > 0) {
-                    resultMessage += `- ${failedCount} 个产品删除失败\n`;
-                    resultMessage += `\n失败原因:\n${errors.join('\n')}`;
+                    resultMessage += `<li><span class="text-danger">${failedCount} 个产品删除失败</span></li>`;
+                }
+                resultMessage += `</ul>`;
+                
+                if (failedCount > 0 && errors.length > 0) {
+                    resultMessage += `<div class="mt-2 text-left"><strong>失败原因:</strong></div><div class="small text-left text-danger mt-1" style="max-height: 150px; overflow-y: auto;">`;
+                    errors.forEach(err => {
+                        resultMessage += `${err}<br>`;
+                    });
+                    resultMessage += `</div>`;
                 }
                 
-                // 显示操作结果
-                alert(resultMessage);
-                
+                // 使用SweetAlert2显示结果
+                Swal.fire({
+                    title: '批量删除结果',
+                    icon: failedCount > 0 ? 'warning' : 'success',
+                    html: resultMessage,
+                    confirmButtonText: '确定'
+                });
+            
                 // 如果有产品已删除/更新，重新加载产品列表
                 if (hardDeletedCount > 0 || softDeletedCount > 0) {
+                    // 完全重新加载产品列表，确保UI状态一致
                     loadProducts();
                 }
             } catch (error) {
                 console.error('批量删除失败:', error);
-                alert('批量删除操作失败: ' + error.message);
+                Swal.fire({
+                    title: '操作失败',
+                    text: '批量删除操作失败: ' + error.message,
+                    icon: 'error',
+                    confirmButtonText: '确定'
+                });
             }
         }
         
@@ -1550,7 +1815,7 @@
             } catch (error) {
                 console.error('批量导出失败:', error);
                 alert('批量导出失败: ' + error.message);
-            }
+                }
         }
         
         /**
@@ -1619,9 +1884,9 @@
             } else {
                 // 移除可能存在的空提示行
                 $('#productList .empty-filter-result').remove();
-            }
+                }
         }
-
+        
         /**
          * 处理产品上下架状态变更
          */
