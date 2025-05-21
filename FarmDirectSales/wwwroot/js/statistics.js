@@ -44,18 +44,18 @@ const mockQuantityRankingData = [
     { productId: 11, productName: '生态大米', quantity: 87, revenue: 1305.00 }
 ];
 
-// 模拟评分排名数据（实际应由后端API提供）
-const mockRatingRankingData = [
-    { productId: 15, productName: '野生蓝莓', averageRating: 4.9, reviewCount: 28 },
-    { productId: 9, productName: '散养土鸡', averageRating: 4.8, reviewCount: 15 },
-    { productId: 5, productName: '新鲜猕猴桃', averageRating: 4.7, reviewCount: 32 },
-    { productId: 11, productName: '生态大米', averageRating: 4.6, reviewCount: 21 },
-    { productId: 8, productName: '东北黑木耳', averageRating: 4.5, reviewCount: 18 },
-    { productId: 3, productName: '生态土鸡蛋', averageRating: 4.4, reviewCount: 25 },
-    { productId: 1, productName: '有机胡萝卜', averageRating: 4.3, reviewCount: 42 },
-    { productId: 12, productName: '有机西红柿', averageRating: 4.2, reviewCount: 19 },
-    { productId: 20, productName: '农家红薯', averageRating: 4.1, reviewCount: 12 },
-    { productId: 7, productName: '山地小香葱', averageRating: 4.0, reviewCount: 9 }
+// 销售排名数据 - 按销售额排序
+const mockSalesRankingData = [
+    { productId: 9, productName: '散养土鸡', totalSales: 4900.00, orderCount: 98 },
+    { productId: 5, productName: '新鲜猕猴桃', totalSales: 2580.00, orderCount: 215 },
+    { productId: 15, productName: '野生蓝莓', totalSales: 2520.00, orderCount: 126 },
+    { productId: 8, productName: '东北黑木耳', totalSales: 1890.00, orderCount: 189 },
+    { productId: 1, productName: '有机胡萝卜', totalSales: 1312.00, orderCount: 328 },
+    { productId: 11, productName: '生态大米', totalSales: 1305.00, orderCount: 87 },
+    { productId: 3, productName: '生态土鸡蛋', totalSales: 936.00, orderCount: 156 },
+    { productId: 12, productName: '有机西红柿', totalSales: 710.00, orderCount: 142 },
+    { productId: 7, productName: '山地小香葱', totalSales: 414.00, orderCount: 138 },
+    { productId: 20, productName: '农家红薯', totalSales: 380.00, orderCount: 95 }
 ];
 
 // 扩展API对象，添加统计相关接口
@@ -130,19 +130,19 @@ api.statistics = {
                     // 根据排序类型返回不同的模拟数据
                     switch (sortBy) {
                         case 'quantity':
-                            data = [...mockQuantityRankingData];
+                            data = [...mockQuantityRankingData].sort((a, b) => b.quantity - a.quantity);
                             break;
                         case 'revenue':
-                            data = [...mockQuantityRankingData].sort((a, b) => b.revenue - a.revenue);
+                            data = [...mockSalesRankingData];
                             break;
-                        case 'rating':
-                            data = [...mockRatingRankingData];
+                        case 'sales':
+                            data = [...mockSalesRankingData];
                             break;
-                        case 'reviews':
-                            data = [...mockRatingRankingData].sort((a, b) => b.reviewCount - a.reviewCount);
+                        case 'orders':
+                            data = [...mockSalesRankingData].sort((a, b) => b.orderCount - a.orderCount);
                             break;
                         default:
-                            data = sortBy.includes('rating') ? mockRatingRankingData : mockQuantityRankingData;
+                            data = [...mockSalesRankingData];
                     }
                     
                     resolve({
@@ -221,11 +221,11 @@ async function loadSalesOverview(containerId) {
                     <div class="stats-card">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div class="text-muted">客户满意度</div>
-                                <div class="icon"><i class="fas fa-smile"></i></div>
+                                <div class="text-muted">平均订单价值</div>
+                                <div class="icon"><i class="fas fa-receipt"></i></div>
                             </div>
-                            <div class="stats-value">${(overview.avgRating || 0).toFixed(1)}</div>
-                            <div class="text-muted mt-2">平均评分</div>
+                            <div class="stats-value">￥${(overview.avgOrderValue || 0).toFixed(2)}</div>
+                            <div class="text-muted mt-2">订单均价</div>
                         </div>
                     </div>
                 </div>
@@ -413,7 +413,6 @@ async function loadSalesRanking(containerId, sortBy = 'sales') {
         // 生成表格行
         rankings.forEach((item, index) => {
             const name = isProductRanking ? item.productName : item.farmerName;
-            const starRating = renderStarRating(item.avgRating);
             
             tableHtml += `
                 <tr>
@@ -421,7 +420,7 @@ async function loadSalesRanking(containerId, sortBy = 'sales') {
                     <td>${name}</td>
                     <td>￥${item.totalSales.toFixed(2)}</td>
                     <td>${item.orderCount}</td>
-                    <td>${starRating}</td>
+                    <td>${item.orderCount}</td>
                 </tr>
             `;
         });
@@ -449,22 +448,7 @@ function getBadgeClass(index) {
 }
 
 // 渲染星级评分
-function renderStarRating(rating) {
-    if (!rating) return '无评分';
-    
-    const stars = Math.round(rating);
-    let html = '';
-    
-    for (let i = 1; i <= 5; i++) {
-        if (i <= stars) {
-            html += '<i class="fas fa-star text-warning"></i>';
-        } else {
-            html += '<i class="fas fa-star text-muted"></i>';
-        }
-    }
-    
-    return `${html} (${rating.toFixed(1)})`;
-}
+
 
 // 全局导出
 window.statisticsModule = {

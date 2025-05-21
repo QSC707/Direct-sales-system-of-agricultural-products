@@ -80,17 +80,6 @@ namespace FarmDirectSales.Models
         /// 产品分类
         /// </summary>
         public string Category { get; set; } = string.Empty;
-        
-        /// <summary>
-        /// 平均评分
-        /// </summary>
-        [Column(TypeName = "decimal(3,1)")]
-        public decimal AverageRating { get; set; } = 0;
-        
-        /// <summary>
-        /// 评价数量
-        /// </summary>
-        public int ReviewCount { get; set; } = 0;
 
         // 导航属性
         /// <summary>
@@ -113,11 +102,6 @@ namespace FarmDirectSales.Models
         /// 产品图片集合（导航属性）
         /// </summary>
         public virtual ICollection<Upload>? Uploads { get; set; }
-        
-        /// <summary>
-        /// 商品评价集合（导航属性）
-        /// </summary>
-        public virtual ICollection<Review>? Reviews { get; set; }
     }
 } 
  

@@ -179,15 +179,6 @@ const OrderManager = {
     },
     
     /**
-     * 判断订单是否可以评分
-     * @param {object} order - 订单对象
-     * @returns {boolean} 是否可以评分
-     */
-    canRate(order) {
-        return order.status === '已完成' && !order.isRated;
-    },
-    
-    /**
      * 判断是否显示确认收货按钮
      * @param {object} order - 订单对象
      * @param {string} userRole - 用户角色

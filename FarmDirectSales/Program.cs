@@ -25,7 +25,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<IUploadService, UploadService>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
+
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 
 // 配置CORS

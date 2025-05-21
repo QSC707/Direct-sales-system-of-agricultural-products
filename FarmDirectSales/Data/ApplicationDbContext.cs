@@ -45,10 +45,7 @@ namespace FarmDirectSales.Data
         /// </summary>
         public DbSet<Upload> Uploads { get; set; }
         
-        /// <summary>
-        /// 商品评价表
-        /// </summary>
-        public DbSet<Review> Reviews { get; set; }
+
         
         /// <summary>
         /// 购物车项表
@@ -120,33 +117,7 @@ namespace FarmDirectSales.Data
                 .HasForeignKey(l => l.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
                 
-            // 产品-评价关系
-            modelBuilder.Entity<Review>()
-                .HasOne(r => r.Product)
-                .WithMany(p => p.Reviews)
-                .HasForeignKey(r => r.ProductId)
-                .OnDelete(DeleteBehavior.Cascade);
-                
-            // 用户-评价关系
-            modelBuilder.Entity<Review>()
-                .HasOne(r => r.User)
-                .WithMany(u => u.Reviews)
-                .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
-                
-            // 订单-评价关系
-            modelBuilder.Entity<Review>()
-                .HasOne(r => r.Order)
-                .WithMany()
-                .HasForeignKey(r => r.OrderId)
-                .OnDelete(DeleteBehavior.SetNull);
-                
-            // 订单-评价关系（一对一）
-            modelBuilder.Entity<Order>()
-                .HasOne(o => o.Review)
-                .WithOne()
-                .HasForeignKey<Review>(r => r.OrderId)
-                .OnDelete(DeleteBehavior.SetNull);
+
             
             // 用户-购物车项关系
             modelBuilder.Entity<CartItem>()

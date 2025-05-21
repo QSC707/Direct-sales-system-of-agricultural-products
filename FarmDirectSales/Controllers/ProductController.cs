@@ -409,12 +409,12 @@ namespace FarmDirectSales.Controllers
                 var csv = new System.Text.StringBuilder();
                 
                 // 添加CSV标题行
-                csv.AppendLine("产品ID,产品名称,类别,描述,价格,库存,农户ID,农户名称,创建时间,上次更新时间,是否上架,平均评分,评价数量,图片URL");
+                csv.AppendLine("产品ID,产品名称,类别,描述,价格,库存,农户ID,农户名称,创建时间,上次更新时间,是否上架,图片URL");
                 
                 // 添加产品数据行
                 foreach (var product in products)
                 {
-                    csv.AppendLine($"{product.ProductId},{EscapeCsvField(product.ProductName)},{EscapeCsvField(product.Category)},{EscapeCsvField(product.Description)},{product.Price},{product.Stock},{product.FarmerId},{EscapeCsvField(product.Farmer?.Username ?? "未知")},{product.CreateTime},{product.UpdateTime},{product.IsActive},{product.AverageRating},{product.ReviewCount},{EscapeCsvField(product.ImageUrl)}");
+                    csv.AppendLine($"{product.ProductId},{EscapeCsvField(product.ProductName)},{EscapeCsvField(product.Category)},{EscapeCsvField(product.Description)},{product.Price},{product.Stock},{product.FarmerId},{EscapeCsvField(product.Farmer?.Username ?? "未知")},{product.CreateTime},{product.UpdateTime},{product.IsActive},{EscapeCsvField(product.ImageUrl)}");
                 }
 
                 // 设置文件名
@@ -496,8 +496,6 @@ namespace FarmDirectSales.Controllers
                                 CreateTime = DateTime.Now,
                                 UpdateTime = DateTime.Now,
                                 IsActive = true,
-                                AverageRating = 0,
-                                ReviewCount = 0,
                                 ImageUrl = fields.Length > 5 ? fields[5] : null
                             };
 

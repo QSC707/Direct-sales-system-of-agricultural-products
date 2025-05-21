@@ -145,8 +145,6 @@ namespace FarmDirectSales.Controllers
                         p.Price,
                         p.Stock,
                         p.ImageUrl,
-                        p.AverageRating,
-                        p.ReviewCount,
                         p.CreateTime,
                         p.UpdateTime
                     })

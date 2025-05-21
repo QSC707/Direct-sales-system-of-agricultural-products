@@ -974,112 +974,6 @@
             是否硬删除
             </summary>
         </member>
-        <member name="T:FarmDirectSales.Controllers.RatingController">
-            <summary>
-            评分管理控制器
-            </summary>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.RatingController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
-            <summary>
-            构造函数
-            </summary>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.RatingController.SubmitRating(FarmDirectSales.Controllers.RatingRequest)">
-            <summary>
-            提交订单评分
-            </summary>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.RatingController.GetOrderRating(System.Int32)">
-            <summary>
-            获取订单评分
-            </summary>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.RatingController.GetProductRatings(System.Int32)">
-            <summary>
-            获取产品评分统计
-            </summary>
-        </member>
-        <member name="T:FarmDirectSales.Controllers.RatingRequest">
-            <summary>
-            评分请求参数
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Controllers.RatingRequest.OrderId">
-            <summary>
-            订单ID
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Controllers.RatingRequest.UserId">
-            <summary>
-            用户ID
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Controllers.RatingRequest.Rating">
-            <summary>
-            评分(1-5)
-            </summary>
-        </member>
-        <member name="T:FarmDirectSales.Controllers.ReviewController">
-            <summary>
-            商品评价控制器
-            </summary>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.ReviewController.#ctor(FarmDirectSales.Services.IReviewService,FarmDirectSales.Services.ILogService)">
-            <summary>
-            构造函数
-            </summary>
-            <param name="reviewService">评价服务</param>
-            <param name="logService">日志服务</param>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.ReviewController.GetProductReviews(System.Int32)">
-            <summary>
-            获取产品的所有评价
-            </summary>
-            <param name="productId">产品ID</param>
-            <returns>评价列表</returns>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.ReviewController.GetUserReviews">
-            <summary>
-            获取用户的所有评价
-            </summary>
-            <returns>评价列表</returns>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.ReviewController.GetOrderReview(System.Int32)">
-            <summary>
-            获取订单的评价
-            </summary>
-            <param name="orderId">订单ID</param>
-            <returns>评价信息</returns>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.ReviewController.AddReview(FarmDirectSales.Models.Review)">
-            <summary>
-            添加产品评价
-            </summary>
-            <param name="review">评价信息</param>
-            <returns>操作结果</returns>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.ReviewController.UpdateReview(System.Int32,FarmDirectSales.Models.Review)">
-            <summary>
-            更新产品评价
-            </summary>
-            <param name="id">评价ID</param>
-            <param name="review">评价信息</param>
-            <returns>操作结果</returns>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.ReviewController.DeleteReview(System.Int32)">
-            <summary>
-            删除产品评价
-            </summary>
-            <param name="id">评价ID</param>
-            <returns>操作结果</returns>
-        </member>
-        <member name="M:FarmDirectSales.Controllers.ReviewController.GetProductRating(System.Int32)">
-            <summary>
-            计算产品平均评分
-            </summary>
-            <param name="productId">产品ID</param>
-            <returns>平均评分</returns>
-        </member>
         <member name="T:FarmDirectSales.Controllers.StatisticsController">
             <summary>
             销售统计分析控制器
@@ -1389,11 +1283,6 @@
             上传文件表
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Data.ApplicationDbContext.Reviews">
-            <summary>
-            商品评价表
-            </summary>
-        </member>
         <member name="P:FarmDirectSales.Data.ApplicationDbContext.CartItems">
             <summary>
             购物车项表
@@ -1690,6 +1579,18 @@
             <inheritdoc />
         </member>
         <member name="M:FarmDirectSales.Migrations.AddSoftDeleteToOrders.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.RemoveReviewRelatedFields">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.RemoveReviewRelatedFields.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.RemoveReviewRelatedFields.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.RemoveReviewRelatedFields.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
         <member name="T:FarmDirectSales.Models.CartItem">
@@ -1997,26 +1898,6 @@
             联系电话
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Models.Order.IsReviewed">
-            <summary>
-            是否已评价
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Order.Rating">
-            <summary>
-            用户评分(1-5星)
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Order.IsRated">
-            <summary>
-            是否已评分
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Order.RateTime">
-            <summary>
-            评分时间
-            </summary>
-        </member>
         <member name="P:FarmDirectSales.Models.Order.IsDeleted">
             <summary>
             是否已被删除（软删除）
@@ -2035,11 +1916,6 @@
         <member name="P:FarmDirectSales.Models.Order.Product">
             <summary>
             产品信息（导航属性）
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Order.Review">
-            <summary>
-            订单评价（导航属性）
             </summary>
         </member>
         <member name="T:FarmDirectSales.Models.Product">
@@ -2112,16 +1988,6 @@
             产品分类
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Models.Product.AverageRating">
-            <summary>
-            平均评分
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Product.ReviewCount">
-            <summary>
-            评价数量
-            </summary>
-        </member>
         <member name="P:FarmDirectSales.Models.Product.Farmer">
             <summary>
             农户信息（导航属性）
@@ -2140,71 +2006,6 @@
         <member name="P:FarmDirectSales.Models.Product.Uploads">
             <summary>
             产品图片集合（导航属性）
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Product.Reviews">
-            <summary>
-            商品评价集合（导航属性）
-            </summary>
-        </member>
-        <member name="T:FarmDirectSales.Models.Review">
-            <summary>
-            商品评价模型类
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Review.ReviewId">
-            <summary>
-            评价ID
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Review.ProductId">
-            <summary>
-            产品ID（外键）
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Review.UserId">
-            <summary>
-            用户ID（外键）
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Review.OrderId">
-            <summary>
-            订单ID（外键）
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Review.Rating">
-            <summary>
-            评分（1-5）
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Review.Content">
-            <summary>
-            评价内容
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Review.IsAnonymous">
-            <summary>
-            是否匿名评价
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Review.CreateTime">
-            <summary>
-            评价时间
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Review.Product">
-            <summary>
-            关联产品（导航属性）
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Review.User">
-            <summary>
-            关联用户（导航属性）
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Models.Review.Order">
-            <summary>
-            关联订单（导航属性）
             </summary>
         </member>
         <member name="T:FarmDirectSales.Models.SalesOverview">
@@ -2502,11 +2303,6 @@
             用户操作日志
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Models.User.Reviews">
-            <summary>
-            用户发表的评价
-            </summary>
-        </member>
         <member name="P:FarmDirectSales.Models.User.FarmerProfile">
             <summary>
             农户资料（仅当用户是农户时有效）
@@ -2618,67 +2414,6 @@
             <param name="pageSize">每页数量</param>
             <param name="pageIndex">页码</param>
             <returns>日志列表</returns>
-        </member>
-        <member name="T:FarmDirectSales.Services.IReviewService">
-            <summary>
-            商品评价服务接口
-            </summary>
-        </member>
-        <member name="M:FarmDirectSales.Services.IReviewService.GetProductReviewsAsync(System.Int32)">
-            <summary>
-            获取产品的所有评价
-            </summary>
-            <param name="productId">产品ID</param>
-            <returns>评价列表</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.IReviewService.GetUserReviewsAsync(System.Int32)">
-            <summary>
-            获取用户的所有评价
-            </summary>
-            <param name="userId">用户ID</param>
-            <returns>评价列表</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.IReviewService.GetOrderReviewAsync(System.Int32)">
-            <summary>
-            获取订单的评价
-            </summary>
-            <param name="orderId">订单ID</param>
-            <returns>评价信息</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.IReviewService.AddReviewAsync(FarmDirectSales.Models.Review)">
-            <summary>
-            添加产品评价
-            </summary>
-            <param name="review">评价信息</param>
-            <returns>操作结果</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.IReviewService.UpdateReviewAsync(FarmDirectSales.Models.Review)">
-            <summary>
-            更新产品评价
-            </summary>
-            <param name="review">评价信息</param>
-            <returns>操作结果</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.IReviewService.DeleteReviewAsync(System.Int32)">
-            <summary>
-            删除产品评价
-            </summary>
-            <param name="reviewId">评价ID</param>
-            <returns>操作结果</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.IReviewService.CalculateAverageRatingAsync(System.Int32)">
-            <summary>
-            计算产品平均评分
-            </summary>
-            <param name="productId">产品ID</param>
-            <returns>平均评分</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.IReviewService.IsOrderReviewedAsync(System.Int32)">
-            <summary>
-            检查用户是否已评价订单
-            </summary>
-            <param name="orderId">订单ID</param>
-            <returns>是否已评价</returns>
         </member>
         <member name="T:FarmDirectSales.Services.IStatisticsService">
             <summary>
@@ -2831,79 +2566,6 @@
             <summary>
             根据操作类型查询日志
             </summary>
-        </member>
-        <member name="T:FarmDirectSales.Services.ReviewService">
-            <summary>
-            商品评价服务实现
-            </summary>
-        </member>
-        <member name="M:FarmDirectSales.Services.ReviewService.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
-            <summary>
-            构造函数
-            </summary>
-            <param name="context">数据库上下文</param>
-        </member>
-        <member name="M:FarmDirectSales.Services.ReviewService.GetProductReviewsAsync(System.Int32)">
-            <summary>
-            获取产品的所有评价
-            </summary>
-            <param name="productId">产品ID</param>
-            <returns>评价列表</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.ReviewService.GetUserReviewsAsync(System.Int32)">
-            <summary>
-            获取用户的所有评价
-            </summary>
-            <param name="userId">用户ID</param>
-            <returns>评价列表</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.ReviewService.GetOrderReviewAsync(System.Int32)">
-            <summary>
-            获取订单的评价
-            </summary>
-            <param name="orderId">订单ID</param>
-            <returns>评价信息</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.ReviewService.AddReviewAsync(FarmDirectSales.Models.Review)">
-            <summary>
-            添加产品评价
-            </summary>
-            <param name="review">评价信息</param>
-            <returns>操作结果</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.ReviewService.UpdateReviewAsync(FarmDirectSales.Models.Review)">
-            <summary>
-            更新产品评价
-            </summary>
-            <param name="review">评价信息</param>
-            <returns>操作结果</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.ReviewService.DeleteReviewAsync(System.Int32)">
-            <summary>
-            删除产品评价
-            </summary>
-            <param name="reviewId">评价ID</param>
-            <returns>操作结果</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.ReviewService.CalculateAverageRatingAsync(System.Int32)">
-            <summary>
-            计算产品平均评分
-            </summary>
-            <param name="productId">产品ID</param>
-            <returns>平均评分</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.ReviewService.IsOrderReviewedAsync(System.Int32)">
-            <summary>
-            检查用户是否已评价订单
-            </summary>
-            <param name="orderId">订单ID</param>
-            <returns>是否已评价</returns>
-        </member>
-        <member name="M:FarmDirectSales.Services.ReviewService.UpdateProductRatingAsync(System.Int32)">
-            <summary>
-            更新产品评分
-            </summary>
-            <param name="productId">产品ID</param>
         </member>
         <member name="T:FarmDirectSales.Services.StatisticsService">
             <summary>

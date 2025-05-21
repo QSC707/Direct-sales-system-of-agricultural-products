@@ -73,11 +73,6 @@ namespace FarmDirectSales.Models
         /// 用户操作日志
         /// </summary>
         public virtual ICollection<Log>? Logs { get; set; }
-        
-        /// <summary>
-        /// 用户发表的评价
-        /// </summary>
-        public virtual ICollection<Review>? Reviews { get; set; }
 
         /// <summary>
         /// 农户资料（仅当用户是农户时有效）

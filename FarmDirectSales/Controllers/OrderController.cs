@@ -132,7 +132,6 @@ namespace FarmDirectSales.Controllers
                 var orders = await _context.Orders
                     .Include(o => o.Product)
                     .ThenInclude(p => p.Farmer)
-                    .Include(o => o.Review)
                     .Where(o => o.UserId == userId && !o.IsDeleted) // 排除软删除的订单
                     .OrderByDescending(o => o.CreateTime)
                     .ToListAsync();
@@ -170,17 +169,7 @@ namespace FarmDirectSales.Controllers
                         o.CancelBy,
                         o.CancelByType,
                         o.ShippingAddress,
-                        o.ContactPhone,
-                        isReviewed = o.Review != null,
-                        isRated = o.IsRated,
-                        rating = o.Rating,
-                        review = o.Review != null ? new
-                        {
-                            o.Review.Rating,
-                            o.Review.Content,
-                            o.Review.CreateTime,
-                            o.Review.IsAnonymous
-                        } : null
+                        o.ContactPhone
                     })
                 });
             }

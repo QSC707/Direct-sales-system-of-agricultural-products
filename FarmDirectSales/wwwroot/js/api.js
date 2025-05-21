@@ -463,60 +463,7 @@ const api = {
         }
     },
     
-    // 评价相关
-    reviews: {
-        // 获取产品评价
-        getByProduct: async (productId) => {
-            const response = await fetch(`${window.API_BASE_URL}/review/product/${productId}`, {
-                method: 'GET',
-                headers: window.getHeaders()
-            });
-            
-            return handleResponse(response);
-        },
-        
-        // 获取用户评价
-        getByUser: async () => {
-            const response = await fetch(`${window.API_BASE_URL}/review/user`, {
-                method: 'GET',
-                headers: window.getHeaders()
-            });
-            
-            return handleResponse(response);
-        },
-        
-        // 添加评价
-        add: async (reviewData) => {
-            const response = await fetch(`${window.API_BASE_URL}/review`, {
-                method: 'POST',
-                headers: window.getHeaders(),
-                body: JSON.stringify(reviewData)
-            });
-            
-            return handleResponse(response);
-        },
-        
-        // 更新评价
-        update: async (reviewId, reviewData) => {
-            const response = await fetch(`${window.API_BASE_URL}/review/${reviewId}`, {
-                method: 'PUT',
-                headers: window.getHeaders(),
-                body: JSON.stringify(reviewData)
-            });
-            
-            return handleResponse(response);
-        },
-        
-        // 删除评价
-        delete: async (reviewId) => {
-            const response = await fetch(`${window.API_BASE_URL}/review/${reviewId}`, {
-                method: 'DELETE',
-                headers: window.getHeaders()
-            });
-            
-            return handleResponse(response);
-        }
-    },
+
     
     // 统计相关
     statistics: {
