@@ -230,6 +230,39 @@ const OrderManager = {
         
         const percent = Math.round((step / (standardFlow.length - 1)) * 100);
         return { percent, step, isSpecial: false, status };
+    },
+
+    getStatusBadge: function(status, cancelReason) {
+        // 特殊处理：如果是已取消状态且原因中包含"已批准"，显示为"已取消并退款"
+        if (status === '已取消' && cancelReason && cancelReason.includes('已批准')) {
+            return '<span class="badge badge-info"><i class="fa fa-undo"></i> 已取消并退款</span>';
+        }
+        
+        switch (status) {
+            case '待付款':
+            case '待支付':
+                return '<span class="badge badge-warning">待付款</span>';
+            case '待发货':
+                return '<span class="badge badge-primary">待发货</span>';
+            case '已发货':
+                return '<span class="badge badge-info">已发货</span>';
+            case '待收货':
+                return '<span class="badge badge-info">待收货</span>';
+            case '已完成':
+                return '<span class="badge badge-success"><i class="fa fa-check-circle"></i> 已完成</span>';
+            case '已取消':
+                return '<span class="badge badge-danger"><i class="fa fa-ban"></i> 已取消</span>';
+            case '货到付款待处理':
+                return '<span class="badge badge-primary"><i class="fa fa-box"></i> 待配送</span>';
+            case '货到付款配送中':
+                return '<span class="badge badge-info"><i class="fa fa-truck"></i> 配送中</span>';
+            case '申请退款中':
+                return '<span class="badge badge-warning"><i class="fa fa-undo"></i> 申请退款中</span>';
+            case '退款被拒绝': 
+                return '<span class="badge badge-secondary"><i class="fa fa-exclamation-circle"></i> 退款被拒绝</span>';
+            default:
+                return '<span class="badge badge-secondary">' + status + '</span>';
+        }
     }
 };
 

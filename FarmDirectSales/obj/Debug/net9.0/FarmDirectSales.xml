@@ -754,6 +754,16 @@
             删除订单（支持软删除和硬删除）
             </summary>
         </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.RequestRefund(System.Int32,FarmDirectSales.Controllers.RequestRefundDto)">
+            <summary>
+            申请退款
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.ProcessRefund(System.Int32,FarmDirectSales.Controllers.ProcessRefundDto)">
+            <summary>
+            处理退款（农户或管理员操作）
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.CreateOrderRequest">
             <summary>
             创建订单请求模型
@@ -827,6 +837,66 @@
         <member name="P:FarmDirectSales.Controllers.CancelOrderRequest.CancelReason">
             <summary>
             取消原因
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.RequestRefundDto">
+            <summary>
+            申请退款请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestRefundDto.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestRefundDto.RefundReason">
+            <summary>
+            退款原因
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestRefundDto.RefundType">
+            <summary>
+            退款类型（全额/部分）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestRefundDto.RefundAmount">
+            <summary>
+            退款金额（部分退款时使用）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.RequestRefundDto.Notes">
+            <summary>
+            备注说明
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.ProcessRefundDto">
+            <summary>
+            处理退款请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ProcessRefundDto.ProcessorId">
+            <summary>
+            处理人ID（农户或管理员）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ProcessRefundDto.IsApproved">
+            <summary>
+            是否同意退款
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ProcessRefundDto.RefundReason">
+            <summary>
+            退款原因/处理说明
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ProcessRefundDto.RefundAmount">
+            <summary>
+            退款金额
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ProcessRefundDto.Notes">
+            <summary>
+            备注说明
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.ProductController">

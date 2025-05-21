@@ -708,6 +708,124 @@ namespace FarmDirectSales.Controllers
                 return BadRequest(new { code = 400, message = ex.Message });
             }
         }
+
+        /// <summary>
+        /// 申请退款
+        /// </summary>
+        [HttpPost("{id}/refund-request")]
+        public async Task<IActionResult> RequestRefund(int id, [FromBody] RequestRefundDto request)
+        {
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.Product)
+                    .FirstOrDefaultAsync(o => o.OrderId == id);
+
+                if (order == null)
+                {
+                    return NotFound(new { code = 404, message = "订单不存在" });
+                }
+
+                // 验证是用户发起的申请
+                if (order.UserId != request.UserId)
+                {
+                    return BadRequest(new { code = 400, message = "只有订单用户才能申请退款" });
+                }
+
+                // 检查订单状态，只有已完成或配送中的订单可以申请退款
+                if (order.Status != "已完成" && order.Status != "货到付款配送中")
+                {
+                    return BadRequest(new { code = 400, message = $"订单状态为 {order.Status}，不能申请退款" });
+                }
+
+                // 更新订单状态为申请退款中
+                order.Status = "申请退款中";
+                
+                // 记录申请信息
+                order.CancelReason = request.RefundReason;
+                order.CancelBy = request.UserId;
+                order.CancelByType = "user";
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { code = 200, message = "退款申请提交成功，等待农户处理" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { code = 400, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// 处理退款（农户或管理员操作）
+        /// </summary>
+        [HttpPost("{id}/process-refund")]
+        public async Task<IActionResult> ProcessRefund(int id, [FromBody] ProcessRefundDto request)
+        {
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.Product)
+                    .FirstOrDefaultAsync(o => o.OrderId == id);
+
+                if (order == null)
+                {
+                    return NotFound(new { code = 404, message = "订单不存在" });
+                }
+
+                // 验证是农户或管理员操作
+                bool isFarmer = order.Product.FarmerId == request.ProcessorId;
+                var processor = await _context.Users.FirstOrDefaultAsync(u => u.UserId == request.ProcessorId);
+                bool isAdmin = processor?.Role == "admin";
+
+                if (!isFarmer && !isAdmin)
+                {
+                    return BadRequest(new { code = 400, message = "只有农户或管理员才能处理退款" });
+                }
+
+                // 检查订单状态，只有已完成、配送中或申请退款中的订单可以退款
+                if (order.Status != "已完成" && order.Status != "货到付款配送中" && order.Status != "申请退款中")
+                {
+                    return BadRequest(new { code = 400, message = $"订单状态为 {order.Status}，不能退款" });
+                }
+
+                // 处理退款
+                if (request.IsApproved)
+                {
+                    // 恢复库存
+                    if (order.Product != null)
+                    {
+                        order.Product.Stock += order.Quantity;
+                        order.Product.UpdateTime = DateTime.Now;
+                    }
+
+                    // 更新订单状态为已取消（而不是已退款）
+                    order.Status = "已取消";
+                }
+                else
+                {
+                    // 拒绝退款，恢复原状态
+                    order.Status = order.Status == "申请退款中" ? (order.CompleteTime.HasValue ? "已完成" : "货到付款配送中") : order.Status;
+                }
+                
+                // 记录处理信息
+                order.CancelReason = request.RefundReason + (request.IsApproved ? " (已批准)" : " (已拒绝)");
+                order.CancelBy = request.ProcessorId;
+                order.CancelByType = isFarmer ? "farmer" : "admin";
+                order.CancelTime = DateTime.Now;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { 
+                    code = 200, 
+                    message = request.IsApproved ? "退款处理完成，订单已取消" : "已拒绝退款申请"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { code = 400, message = ex.Message });
+            }
+        }
     }
 
     /// <summary>
@@ -819,6 +937,73 @@ namespace FarmDirectSales.Controllers
         
         // 选中的购物车项ID列表
         public List<int> SelectedItems { get; set; } = new List<int>();
+    }
+
+    /// <summary>
+    /// 申请退款请求模型
+    /// </summary>
+    public class RequestRefundDto
+    {
+        /// <summary>
+        /// 用户ID
+        /// </summary>
+        [Required(ErrorMessage = "用户ID不能为空")]
+        public int UserId { get; set; }
+        
+        /// <summary>
+        /// 退款原因
+        /// </summary>
+        [Required(ErrorMessage = "退款原因不能为空")]
+        public string RefundReason { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// 退款类型（全额/部分）
+        /// </summary>
+        public string RefundType { get; set; } = "full";
+        
+        /// <summary>
+        /// 退款金额（部分退款时使用）
+        /// </summary>
+        public decimal? RefundAmount { get; set; }
+        
+        /// <summary>
+        /// 备注说明
+        /// </summary>
+        public string? Notes { get; set; }
+    }
+    
+    /// <summary>
+    /// 处理退款请求模型
+    /// </summary>
+    public class ProcessRefundDto
+    {
+        /// <summary>
+        /// 处理人ID（农户或管理员）
+        /// </summary>
+        [Required(ErrorMessage = "处理人ID不能为空")]
+        public int ProcessorId { get; set; }
+        
+        /// <summary>
+        /// 是否同意退款
+        /// </summary>
+        [Required(ErrorMessage = "请指明是否同意退款")]
+        public bool IsApproved { get; set; }
+        
+        /// <summary>
+        /// 退款原因/处理说明
+        /// </summary>
+        [Required(ErrorMessage = "处理说明不能为空")]
+        public string RefundReason { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// 退款金额
+        /// </summary>
+        public decimal? RefundAmount { get; set; }
+        
+        /// <summary>
+        /// 备注说明
+        /// </summary>
+        public string? Notes { get; set; }
     }
 } 
  

@@ -463,8 +463,6 @@ const api = {
         }
     },
     
-
-    
     // 统计相关
     statistics: {
         // 获取总览数据
@@ -858,3 +856,36 @@ const api = {
 
 // 导出API对象
 window.api = api; 
+
+const API_ENDPOINTS = {
+    // 用户相关
+    LOGIN: '/api/auth/login',
+    REGISTER: '/api/user/register',
+    GET_USER_PROFILE: '/api/user/',
+    UPDATE_USER_PROFILE: '/api/user/update',
+    
+    // 订单相关
+    CREATE_ORDER: '/api/order',
+    GET_USER_ORDERS: '/api/order/user/',
+    COMPLETE_ORDER: '/api/order/{id}/complete',
+    CANCEL_ORDER: '/api/order/{id}/cancel',
+    REQUEST_REFUND: '/api/order/{id}/refund-request',
+    PROCESS_REFUND: '/api/order/{id}/process-refund',
+    
+    // 产品相关
+    GET_PRODUCTS: '/api/product',
+    GET_PRODUCT: '/api/product/{id}',
+    
+    // 购物车相关
+    GET_CART: '/api/cart',
+    ADD_TO_CART: '/api/cart',
+    UPDATE_CART_ITEM: '/api/cart/{id}',
+    REMOVE_FROM_CART: '/api/cart/{id}',
+    
+    // 农户相关
+    GET_FARMER_PROFILE: '/api/farmer/{id}',
+    GET_FARMER_PRODUCTS: '/api/farmer/{id}/products',
+
+    // 统计相关
+    GET_STATISTICS: '/api/statistics'
+}; 

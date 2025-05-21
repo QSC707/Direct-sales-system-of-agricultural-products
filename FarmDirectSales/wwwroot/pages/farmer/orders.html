@@ -271,10 +271,27 @@
                     ${orderDetail.status === '已取消' ? 
                     `<div class="mt-3">
                         <h6>取消信息</h6>
-                        <div class="alert alert-danger">
+                        <div class="alert ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 'alert-info' : 'alert-danger'}">
                             <div><strong>取消方：</strong> ${orderDetail.cancelByType === 'farmer' ? '农户取消（您）' : '用户取消'}</div>
                             <div><strong>取消原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
                             <div><strong>取消时间：</strong> ${orderDetail.cancelTime || '未知'}</div>
+                            ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 
+                                `<div class="mt-2 text-success"><i class="fa fa-check-circle"></i> <strong>您已同意退款申请并取消了此订单</strong></div>` : ''}
+                        </div>
+                    </div>` : ''}
+                    
+                    ${orderDetail.status === '申请退款中' ? 
+                    `<div class="mt-3">
+                        <h6>退款申请信息</h6>
+                        <div class="alert alert-warning">
+                            <div><strong>申请人：</strong> ${orderDetail.user ? orderDetail.user.username : '未知用户'}</div>
+                            <div><strong>申请原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
+                            <div><strong>申请时间：</strong> ${orderDetail.cancelTime || '未知'}</div>
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-sm btn-warning" onclick="openProcessRefundModal(${orderId})">
+                                    <i class="fa fa-undo"></i> 处理退款申请
+                                </button>
+                            </div>
                         </div>
                     </div>` : ''}
                 </div>
@@ -282,6 +299,8 @@
                     <div id="actionButtons" class="w-100 d-flex justify-content-between">
                         <div>
                             <button type="button" class="btn btn-danger" id="cancelOrderBtn" style="display: none;">取消订单</button>
+                            <button type="button" class="btn btn-warning" id="refundOrderBtn" style="display: none;">退款</button>
+                            <button type="button" class="btn btn-info" id="processRefundRequestBtn" style="display: none;">处理退款申请</button>
                         </div>
                         <div>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
@@ -618,9 +637,19 @@
                 let statusBadge = OrderManager.renderStatusBadge(order.status);
                 
                 // 如果订单已取消，显示取消方信息
-                if (order.status === '已取消' && order.cancelByType) {
+                if (order.status === '已取消') {
+                    // 根据取消原因判断是否为退款导致的取消
+                    statusBadge = OrderManager.getStatusBadge(order.status, order.cancelReason);
+                    
+                    // 添加取消方信息
                     const cancelByText = order.cancelByType === 'farmer' ? '（农户）' : '（用户）';
-                    statusBadge = `<span class="badge badge-danger"><i class="fa fa-ban"></i> 已取消${cancelByText}</span>`;
+                    
+                    // 如果是退款取消，则使用不同的显示
+                    if (order.cancelReason && order.cancelReason.includes('已批准')) {
+                        statusBadge = '<span class="badge badge-info"><i class="fa fa-undo"></i> 已取消并退款</span>';
+                    } else {
+                        statusBadge = `<span class="badge badge-danger"><i class="fa fa-ban"></i> 已取消${cancelByText}</span>`;
+                    }
                 }
                 
                 // 支付方式显示
@@ -668,6 +697,15 @@
                     actionButtons += `
                         <button class="btn btn-sm btn-danger cancel-order-btn" data-order-id="${order.orderId}">
                             <i class="fas fa-times me-1"></i> 取消
+                        </button>
+                    `;
+                }
+                
+                // 退款处理按钮 - 对于申请退款中的订单
+                if (order.status === '申请退款中') {
+                    actionButtons += `
+                        <button class="btn btn-sm btn-warning process-refund-btn" data-order-id="${order.orderId}">
+                            <i class="fas fa-undo me-1"></i> 处理退款
                         </button>
                     `;
                 }
@@ -723,6 +761,12 @@
             $('.refund-order-btn').on('click', function() {
                 const orderId = $(this).data('order-id');
                 openRefundModal(orderId);
+            });
+            
+            // 绑定处理退款申请按钮事件
+            $('.process-refund-btn').on('click', function() {
+                const orderId = $(this).data('order-id');
+                openProcessRefundModal(orderId);
             });
         }
         
@@ -878,10 +922,27 @@
                         ${orderDetail.status === '已取消' ? 
                         `<div class="mt-3">
                             <h6>取消信息</h6>
-                            <div class="alert alert-danger">
+                            <div class="alert ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 'alert-info' : 'alert-danger'}">
                                 <div><strong>取消方：</strong> ${orderDetail.cancelByType === 'farmer' ? '农户取消（您）' : '用户取消'}</div>
                                 <div><strong>取消原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
                                 <div><strong>取消时间：</strong> ${orderDetail.cancelTime || '未知'}</div>
+                                ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 
+                                    `<div class="mt-2 text-success"><i class="fa fa-check-circle"></i> <strong>您已同意退款申请并取消了此订单</strong></div>` : ''}
+                            </div>
+                        </div>` : ''}
+                        
+                        ${orderDetail.status === '申请退款中' ? 
+                        `<div class="mt-3">
+                            <h6>退款申请信息</h6>
+                            <div class="alert alert-warning">
+                                <div><strong>申请人：</strong> ${orderDetail.user ? orderDetail.user.username : '未知用户'}</div>
+                                <div><strong>申请原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
+                                <div><strong>申请时间：</strong> ${orderDetail.cancelTime || '未知'}</div>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-warning" onclick="openProcessRefundModal(${orderId})">
+                                        <i class="fa fa-undo"></i> 处理退款申请
+                                    </button>
+                                </div>
                             </div>
                         </div>` : ''}
                     `;
@@ -902,6 +963,12 @@
                     } else if (orderDetail.status === '货到付款配送中') {
                         // 配送中订单可以取消
                         $('#cancelOrderBtn').show().data('order-id', orderId).text('取消订单');
+                    } else if (orderDetail.status === '已完成') {
+                        // 已完成的订单可以申请退款
+                        $('#refundOrderBtn').show().data('order-id', orderId);
+                    } else if (orderDetail.status === '申请退款中') {
+                        // 申请退款中的订单可以处理
+                        $('#processRefundRequestBtn').show().data('order-id', orderId);
                     }
                     
                     // 绑定开始配送按钮点击事件
@@ -910,15 +977,22 @@
                         openShipModal($(this).data('order-id'));
                     });
                     
-                    // 绑定取消/退款按钮点击事件
+                    // 绑定取消按钮点击事件
                     $('#cancelOrderBtn').off('click').on('click', function() {
                         $('#orderDetailModal').modal('hide');
-                        const btnText = $(this).text().trim();
-                        if (btnText === '申请退款') {
-                            openRefundModal($(this).data('order-id'));
-                        } else {
                             openCancelOrderModal($(this).data('order-id'));
-                        }
+                    });
+                    
+                    // 绑定退款按钮点击事件
+                    $('#refundOrderBtn').off('click').on('click', function() {
+                        $('#orderDetailModal').modal('hide');
+                        openRefundModal($(this).data('order-id'));
+                    });
+                    
+                    // 绑定处理退款申请按钮点击事件
+                    $('#processRefundRequestBtn').off('click').on('click', function() {
+                        $('#orderDetailModal').modal('hide');
+                        openProcessRefundModal($(this).data('order-id'));
                     });
                 } else {
                     // 显示错误信息
@@ -1009,6 +1083,10 @@
                     return '<span class="badge badge-success"><i class="fa fa-check-circle"></i> 已完成</span>';
                 case '已取消':
                     return '<span class="badge badge-danger"><i class="fa fa-ban"></i> 已取消</span>';
+                case '申请退款中':
+                    return '<span class="badge badge-warning"><i class="fa fa-undo"></i> 申请退款中</span>';
+                case '已退款':
+                    return '<span class="badge badge-secondary"><i class="fa fa-undo"></i> 已退款</span>';
                 default:
                     return '<span class="badge badge-secondary">' + status + '</span>';
             }
@@ -1144,38 +1222,34 @@
             
             // 创建退款数据
             const refundData = {
-                farmerId: user.userId,
-                refundType: refundType,
+                processorId: user.userId,
+                isApproved: true, // 农户主动发起的退款默认批准
                 refundReason: refundReason,
+                refundAmount: refundType === 'partial' ? refundAmount : null,
                 notes: refundNotes
             };
-            
-            // 如果是部分退款，添加金额
-            if (refundType === 'partial') {
-                refundData.refundAmount = refundAmount;
-            }
             
             try {
                 // 显示加载状态
                 $('#confirmRefundBtn').attr('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> 处理中...');
                 
-                // 调用API申请退款
-                const response = await http.put(`/api/order/${orderId}/refund`, refundData);
+                // 调用API处理退款
+                const response = await http.post(`/api/order/${orderId}/process-refund`, refundData);
                 
                 if (response && response.code === 200) {
-                    // 退款申请成功
-                    alert('退款申请已提交成功！系统将通知客户并处理后续流程。');
+                    // 退款处理成功
+                    alert('退款处理成功！订单已被取消，系统将通知客户。');
                     $('#refundModal').modal('hide');
                     
                     // 重新加载订单列表
                     loadOrders(1);
                 } else {
                     // 处理API返回的错误
-                    alert(`申请退款失败: ${response ? response.message : '未知错误'}`);
+                    alert(`处理退款失败: ${response ? response.message : '未知错误'}`);
                 }
             } catch (error) {
-                console.error('申请退款失败:', error);
-                alert(`申请退款失败: ${error.message}`);
+                console.error('处理退款失败:', error);
+                alert(`处理退款失败: ${error.message}`);
             } finally {
                 // 恢复按钮状态
                 $('#confirmRefundBtn').attr('disabled', false).html('确认申请退款');
@@ -1212,6 +1286,154 @@
                 console.error('开始配送订单失败:', error);
                 alert('开始配送订单失败: ' + error.message);
             }
+        }
+
+        /**
+         * 打开处理退款申请模态框
+         */
+        function openProcessRefundModal(orderId) {
+            // 添加一个模态框用于处理退款申请
+            if (!$('#processRefundRequestModal').length) {
+                $('body').append(`
+                <div class="modal fade" id="processRefundRequestModal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title">处理退款申请</h5>
+                                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" id="processRefundId">
+                                <div class="alert alert-info mb-4" id="refundRequestInfo">
+                                    <i class="fa fa-info-circle mr-2"></i>用户申请了退款，请进行处理。
+                                </div>
+                                
+                                <div class="form-group mb-4">
+                                    <label class="fw-bold mb-2">处理方式</label>
+                                    <div class="card border-success mb-2">
+                                        <div class="card-body p-2">
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="approveRefund" name="refundApproval" class="custom-control-input" value="true" checked>
+                                                <label class="custom-control-label" for="approveRefund">
+                                                    <strong class="text-success">同意退款</strong> - 将取消订单并恢复库存
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card border-danger">
+                                        <div class="card-body p-2">
+                                            <div class="custom-control custom-radio">
+                                                <input type="radio" id="rejectRefund" name="refundApproval" class="custom-control-input" value="false">
+                                                <label class="custom-control-label" for="rejectRefund">
+                                                    <strong class="text-danger">拒绝退款</strong> - 订单将返回原状态
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-warning mt-3 mb-4">
+                                    <i class="fa fa-exclamation-triangle mr-2"></i>
+                                    <div><strong>注意事项：</strong></div>
+                                    <ul class="mb-0 pl-3 mt-1">
+                                        <li>同意退款：订单状态将变为"已取消"，库存自动恢复</li>
+                                        <li>拒绝退款：订单将返回原状态，用户会收到拒绝通知</li>
+                                        <li>请在处理说明中详细说明处理理由，用户可以看到这些信息</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="processRefundReason" class="fw-bold">处理说明（用户可见）</label>
+                                    <textarea class="form-control" id="processRefundReason" rows="4" placeholder="请输入退款处理说明，如：同意/拒绝的具体原因，退款金额说明等..."></textarea>
+                                    <small class="text-muted">请填写详细说明，这将直接显示给用户</small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" id="confirmProcessRefundBtn">确认处理</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `);
+                
+                // 绑定处理退款申请确认按钮事件
+                $('#confirmProcessRefundBtn').on('click', async function() {
+                    const orderId = $('#processRefundId').val();
+                    const isApproved = $('input[name="refundApproval"]:checked').val() === 'true';
+                    const refundReason = $('#processRefundReason').val();
+                    
+                    if (!refundReason) {
+                        alert('请输入处理说明');
+                        return;
+                    }
+                    
+                    const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    
+                    // 创建退款处理数据
+                    const processData = {
+                        processorId: user.userId,
+                        isApproved: isApproved,
+                        refundReason: refundReason
+                    };
+                    
+                    try {
+                        // 显示加载状态
+                        $('#confirmProcessRefundBtn').attr('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> 处理中...');
+                        
+                        // 调用API处理退款申请
+                        const response = await http.post(`/api/order/${orderId}/process-refund`, processData);
+                        
+                        if (response && response.code === 200) {
+                            // 处理成功
+                            alert(isApproved ? '已同意退款申请，订单已取消' : '已拒绝退款申请，用户将收到通知');
+                            $('#processRefundRequestModal').modal('hide');
+                            
+                            // 重新加载订单列表
+                            loadOrders(1);
+                        } else {
+                            // 处理API返回的错误
+                            alert(`处理退款申请失败: ${response ? response.message : '未知错误'}`);
+                        }
+                    } catch (error) {
+                        console.error('处理退款申请失败:', error);
+                        alert(`处理退款申请失败: ${error.message}`);
+                    } finally {
+                        // 恢复按钮状态
+                        $('#confirmProcessRefundBtn').attr('disabled', false).html('确认处理');
+                    }
+                });
+            }
+            
+            // 设置订单ID
+            $('#processRefundId').val(orderId);
+            
+            // 获取订单详情
+            http.get(`/api/order/${orderId}`).then(response => {
+                if (response && response.code === 200 && response.data) {
+                    const order = response.data;
+                    
+                    // 显示退款申请信息
+                    $('#refundRequestInfo').html(`
+                        <div class="d-flex">
+                            <i class="fa fa-info-circle mr-2 mt-1"></i>
+                            <div>
+                                <strong>用户退款申请信息</strong>
+                                <div>申请理由: ${order.cancelReason || '未提供'}</div>
+                                <div>申请时间: ${new Date(order.cancelTime || Date.now()).toLocaleString()}</div>
+                                <div>订单金额: ¥${order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}</div>
+                            </div>
+                        </div>
+                    `);
+                }
+            }).catch(error => {
+                console.error('获取订单详情失败:', error);
+            });
+            
+            // 打开模态框
+            $('#processRefundRequestModal').modal('show');
         }
     </script>
 </body>
