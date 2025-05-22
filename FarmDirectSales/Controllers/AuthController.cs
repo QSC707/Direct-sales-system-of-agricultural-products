@@ -87,8 +87,7 @@ namespace FarmDirectSales.Controllers
                                 location = user.FarmerProfile.Location,
                                 description = user.FarmerProfile.Description,
                                 productCategory = user.FarmerProfile.ProductCategory,
-                                licenseNumber = user.FarmerProfile.LicenseNumber,
-                                logoUrl = user.FarmerProfile.LogoUrl
+                                licenseNumber = user.FarmerProfile.LicenseNumber
                             } : null
                         };
                         

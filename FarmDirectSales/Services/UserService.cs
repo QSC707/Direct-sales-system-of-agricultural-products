@@ -190,7 +190,6 @@ namespace FarmDirectSales.Services
                     Description = user.FarmerProfile.Description,
                     ProductCategory = user.FarmerProfile.ProductCategory,
                     LicenseNumber = user.FarmerProfile.LicenseNumber,
-                    LogoUrl = user.FarmerProfile.LogoUrl,
                     EstablishedDate = user.FarmerProfile.EstablishedDate,
                     CreateTime = user.FarmerProfile.CreateTime,
                     UpdateTime = user.FarmerProfile.UpdateTime
@@ -370,7 +369,6 @@ namespace FarmDirectSales.Services
                 Description = description ?? string.Empty,
                 ProductCategory = productCategory ?? string.Empty,
                 LicenseNumber = licenseNumber ?? string.Empty,
-                LogoUrl = "/images/default-farm-logo.png", // 添加默认logo
                 CreateTime = DateTime.Now
             };
 

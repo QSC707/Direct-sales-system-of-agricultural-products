@@ -125,19 +125,6 @@
                             </div>
                             
                             <div class="form-group">
-                                <label for="logoUpload">农场LOGO</label>
-                                <div class="input-group">
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="logoUpload" accept="image/*">
-                                        <label class="custom-file-label" for="logoUpload">选择文件</label>
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <img id="logoPreview" src="../../img/default-farm-logo.png" alt="农场LOGO" class="img-thumbnail" style="max-width: 150px;">
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
                                 <label for="establishedDate">成立日期</label>
                                 <input type="date" class="form-control" id="establishedDate">
                             </div>
@@ -191,19 +178,6 @@
                     saveFarmerProfile();
                 });
                 
-                // Logo上传预览
-                $('#logoUpload').on('change', function() {
-                    const file = this.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            $('#logoPreview').attr('src', e.target.result);
-                        }
-                        reader.readAsDataURL(file);
-                        $('.custom-file-label').text(file.name);
-                    }
-                });
-                
                 // 退出登录按钮点击事件
                 $('#logoutBtn').on('click', function() {
                     logout();
@@ -236,11 +210,6 @@
                     $('#productCategory').val(result.data.productCategory || '');
                     $('#licenseNumber').val(result.data.licenseNumber || '');
                     $('#establishedDate').val(result.data.establishedDate ? result.data.establishedDate.substring(0, 10) : '');
-                    
-                    // 更新LOGO预览
-                    if (result.data.logoUrl) {
-                        $('#logoPreview').attr('src', result.data.logoUrl);
-                    }
                 } else {
                     console.log('农场资料不存在或为空，显示空表单');
                 }
@@ -273,54 +242,11 @@
                     establishedDate: $('#establishedDate').val()
                 };
                 
-                // 首先上传Logo（如果有选择文件）
-                const logoFile = $('#logoUpload')[0].files[0];
-                if (logoFile) {
-                    try {
-                        // 上传Logo成功后，保存农场资料
-                        const logoUrl = await uploadLogo(logoFile);
-                        farmData.logoUrl = logoUrl;
-                    } catch (error) {
-                        // 上传失败但不阻止保存其他资料
-                        console.warn('Logo上传失败，将继续保存其他农场资料');
-                    }
-                }
-                
                 // 保存农场资料
                 await saveProfileData(userId, farmData);
             } catch (error) {
                 console.error('保存过程中出错:', error);
                 alert('保存过程中出错: ' + error.message);
-            }
-        }
-        
-        /**
-         * 上传农场Logo
-         */
-        async function uploadLogo(file) {
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-                
-                console.log('开始上传农场Logo');
-                
-                // 使用Axios上传文件
-                const response = await http.post('farmerprofile/logo', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
-                
-                if (response && response.code === 200 && response.data) {
-                    console.log('Logo上传成功:', response.data);
-                    return response.data.filePath;
-                } else {
-                    throw new Error('Logo上传失败: ' + (response.message || '未知错误'));
-                }
-            } catch (error) {
-                console.error('上传Logo失败', error);
-                alert('上传Logo失败: ' + error.message);
-                throw error;
             }
         }
         
@@ -331,11 +257,19 @@
             try {
                 console.log('保存农场资料:', farmData);
                 
-                // 使用Axios发送请求
-                const response = await http.post('farmerprofile', {
+                // 格式化日期
+                const formattedData = {
                     userId: userId,
-                    ...farmData
-                });
+                    farmName: farmData.farmName,
+                    location: farmData.location,
+                    description: farmData.description || '',
+                    productCategory: farmData.productCategory || '',
+                    licenseNumber: farmData.licenseNumber || '',
+                    establishedDate: farmData.establishedDate ? new Date(farmData.establishedDate).toISOString() : null
+                };
+                
+                // 使用Axios发送请求
+                const response = await http.post('farmerprofile', formattedData);
                 
                 if (response && response.code === 200) {
                     console.log('农场资料保存成功');

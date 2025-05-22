@@ -619,11 +619,6 @@
             创建或更新农户资料
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Controllers.FarmerProfileController.UpdateLogo(System.Int32,Microsoft.AspNetCore.Http.IFormFile)">
-            <summary>
-            更新农户LOGO
-            </summary>
-        </member>
         <member name="T:FarmDirectSales.Controllers.FarmerProfileRequest">
             <summary>
             农户资料请求模型
@@ -662,11 +657,6 @@
         <member name="P:FarmDirectSales.Controllers.FarmerProfileRequest.LicenseNumber">
             <summary>
             农场营业执照号
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Controllers.FarmerProfileRequest.LogoUrl">
-            <summary>
-            农场LOGO或照片URL
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.LogController">
@@ -1689,6 +1679,54 @@
         <member name="M:FarmDirectSales.Migrations.AddRefundRequestTime.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:FarmDirectSales.Migrations.RemoveFarmerProfileLogo">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.RemoveFarmerProfileLogo.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.RemoveFarmerProfileLogo.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.RemoveFarmerProfileLogo.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddRefundRequestTimeField">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddRefundRequestTimeField.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddRefundRequestTimeField.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddRefundRequestTimeField.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.FixFarmerProfileColumns">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.FixFarmerProfileColumns.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.FixFarmerProfileColumns.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.FixFarmerProfileColumns.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.UpdateFarmerProfileColumns">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.UpdateFarmerProfileColumns.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.UpdateFarmerProfileColumns.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.UpdateFarmerProfileColumns.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:FarmDirectSales.Models.CartItem">
             <summary>
             购物车项模型
@@ -1834,11 +1872,6 @@
             农场营业执照号
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Models.FarmerProfile.LogoUrl">
-            <summary>
-            农场LOGO或照片URL
-            </summary>
-        </member>
         <member name="P:FarmDirectSales.Models.FarmerProfile.CreateTime">
             <summary>
             资料创建时间
@@ -1851,7 +1884,7 @@
         </member>
         <member name="P:FarmDirectSales.Models.FarmerProfile.User">
             <summary>
-            关联用户（导航属性）
+            用户（导航属性）
             </summary>
         </member>
         <member name="T:FarmDirectSales.Models.Log">

@@ -135,11 +135,6 @@ namespace FarmDirectSales.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("LogoUrl")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<string>("ProductCategory")
                         .IsRequired()
                         .HasMaxLength(100)

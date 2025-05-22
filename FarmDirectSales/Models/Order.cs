@@ -85,6 +85,11 @@ namespace FarmDirectSales.Models
         /// 取消人类型：user-用户取消，farmer-农户取消
         /// </summary>
         public string? CancelByType { get; set; }
+        
+        /// <summary>
+        /// 退款申请时间
+        /// </summary>
+        public DateTime? RefundRequestTime { get; set; }
 
         /// <summary>
         /// 收货地址

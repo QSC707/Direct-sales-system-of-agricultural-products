@@ -745,6 +745,7 @@ namespace FarmDirectSales.Controllers
                 order.CancelReason = request.RefundReason;
                 order.CancelBy = request.UserId;
                 order.CancelByType = "user";
+                order.RefundRequestTime = DateTime.Now;
 
                 await _context.SaveChangesAsync();
 

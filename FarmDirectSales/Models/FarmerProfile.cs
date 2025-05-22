@@ -57,12 +57,6 @@ namespace FarmDirectSales.Models
         /// </summary>
         [StringLength(50)]
         public string LicenseNumber { get; set; } = string.Empty;
-
-        /// <summary>
-        /// 农场LOGO或照片URL
-        /// </summary>
-        [StringLength(255)]
-        public string LogoUrl { get; set; } = string.Empty;
         
         /// <summary>
         /// 资料创建时间
@@ -75,9 +69,9 @@ namespace FarmDirectSales.Models
         public DateTime? UpdateTime { get; set; }
 
         /// <summary>
-        /// 关联用户（导航属性）
+        /// 用户（导航属性）
         /// </summary>
         [ForeignKey("UserId")]
-        public virtual User? User { get; set; }
+        public User? User { get; set; }
     }
 } 
