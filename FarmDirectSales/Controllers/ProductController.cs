@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
+using System.Linq;
 
 namespace FarmDirectSales.Controllers
 {
@@ -103,12 +104,17 @@ namespace FarmDirectSales.Controllers
             {
                 var product = await _context.Products
                     .Include(p => p.Farmer)
+                    .Include(p => p.Farmer.FarmerProfile)
+                    .Include(p => p.Traces) // 包含溯源信息
                     .FirstOrDefaultAsync(p => p.ProductId == id);
 
                 if (product == null)
                 {
                     return NotFound(new { code = 404, message = "产品不存在" });
                 }
+
+                // 获取最新的溯源信息
+                var traceInfo = product.Traces?.OrderByDescending(t => t.CreateTime).FirstOrDefault();
 
                 return Ok(new
                 {
@@ -126,9 +132,36 @@ namespace FarmDirectSales.Controllers
                         product.IsActive,
                         product.ActiveTime,
                         product.InactiveTime,
-                        Farmer = new { product.Farmer.UserId, product.Farmer.Username },
+                        // 添加规格信息
+                        product.Specification,
+                        // 添加其他农户填写的信息
+                        product.IsOrganic,
+                        product.HarvestDate,
+                        product.ShelfLife,
+                        Farmer = new { 
+                            product.Farmer.UserId, 
+                            product.Farmer.Username,
+                            product.Farmer.Phone,
+                            Location = product.Farmer.FarmerProfile != null ? product.Farmer.FarmerProfile.Location : "",
+                            Description = product.Farmer.FarmerProfile != null ? product.Farmer.FarmerProfile.Description : "",
+                            product.Farmer.CreateTime
+                        },
                         product.CreateTime,
-                        product.UpdateTime
+                        product.UpdateTime,
+                        // 添加溯源信息
+                        TraceInfo = traceInfo == null ? null : new
+                        {
+                            traceInfo.TraceId,
+                            traceInfo.SourcePlace,
+                            traceInfo.PlantingMethod,
+                            traceInfo.PlantingTime,
+                            traceInfo.HarvestTime,
+                            traceInfo.QualityLevel,
+                            traceInfo.IsOrganic,
+                            traceInfo.AdditionalInfo,
+                            traceInfo.CreateTime,
+                            traceInfo.UpdateTime
+                        }
                     }
                 });
             }
@@ -170,11 +203,36 @@ namespace FarmDirectSales.Controllers
                     CreateTime = DateTime.Now,
                     UpdateTime = DateTime.Now,
                     IsActive = true,
-                    ActiveTime = DateTime.Now
+                    ActiveTime = DateTime.Now,
+                    // 添加新字段信息
+                    Specification = request.Specification ?? "",
+                    IsOrganic = request.IsOrganic ?? false,
+                    HarvestDate = request.HarvestDate,
+                    ShelfLife = request.ShelfLife
                 };
 
                 _context.Products.Add(product);
                 await _context.SaveChangesAsync();
+
+                // 如果提供了溯源信息，则添加溯源记录
+                if (!string.IsNullOrEmpty(request.SourcePlace))
+                {
+                    var trace = new Trace
+                    {
+                        ProductId = product.ProductId,
+                        SourcePlace = request.SourcePlace,
+                        PlantingMethod = request.PlantingMethod ?? "",
+                        PlantingTime = request.PlantingTime ?? DateTime.Now,
+                        HarvestTime = request.HarvestDate ?? DateTime.Now,
+                        QualityLevel = request.QualityLevel ?? "标准",
+                        IsOrganic = request.IsOrganic ?? false,
+                        AdditionalInfo = request.TraceInfo ?? "",
+                        CreateTime = DateTime.Now
+                    };
+
+                    _context.Traces.Add(trace);
+                    await _context.SaveChangesAsync();
+                }
 
                 return Ok(new
                 {
@@ -188,6 +246,11 @@ namespace FarmDirectSales.Controllers
                         product.Price,
                         product.Stock,
                         product.ImageUrl,
+                        product.Category,
+                        product.Specification,
+                        product.IsOrganic,
+                        product.HarvestDate,
+                        product.ShelfLife,
                         product.FarmerId,
                         product.CreateTime,
                         product.UpdateTime
@@ -208,82 +271,85 @@ namespace FarmDirectSales.Controllers
         {
             try
             {
-                // 检查请求是否有效
-                if (request == null)
-                {
-                    return BadRequest(new { code = 400, message = "请求参数无效" });
-                }
-
-                // 查找产品
+                // 检查产品是否存在
                 var product = await _context.Products.FindAsync(id);
                 if (product == null)
                 {
-                    return NotFound(new { code = 404, message = "未找到指定的产品" });
+                    return NotFound(new { code = 404, message = "产品不存在" });
                 }
 
-                // 验证农户身份
-                if (product.FarmerId != request.FarmerId)
+                // 检查是否有权限修改（只有该产品的农户和管理员可以修改）
+                int farmerId = request.FarmerId;
+                var userRole = User.FindFirstValue(ClaimTypes.Role);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (userRole != "admin" && (product.FarmerId != farmerId || userId != farmerId.ToString()))
                 {
-                    return BadRequest(new { code = 400, message = "您没有权限更新此产品" });
+                    return Unauthorized(new { code = 401, message = "无权修改该产品" });
                 }
 
-                // 更新产品字段（仅当请求中提供了相应的值时）
-                if (!string.IsNullOrWhiteSpace(request.ProductName))
-                {
+                // 更新产品信息
+                if (request.ProductName != null)
                     product.ProductName = request.ProductName;
-                }
-
-                if (!string.IsNullOrWhiteSpace(request.Description))
-                {
+                if (request.Description != null)
                     product.Description = request.Description;
-                }
-
-                if (request.Price.HasValue && request.Price > 0)
-                {
+                if (request.Price.HasValue)
                     product.Price = request.Price.Value;
-                }
-
-                if (request.Stock.HasValue && request.Stock >= 0)
-                {
+                if (request.Stock.HasValue)
                     product.Stock = request.Stock.Value;
-                }
-
-                if (!string.IsNullOrWhiteSpace(request.ImageUrl))
-                {
+                if (request.ImageUrl != null)
                     product.ImageUrl = request.ImageUrl;
-                }
-
-                if (!string.IsNullOrWhiteSpace(request.Category))
-                {
+                if (request.Category != null)
                     product.Category = request.Category;
-                }
                 
+                // 更新新增字段
+                if (request.Specification != null)
+                    product.Specification = request.Specification;
+                if (request.IsOrganic.HasValue)
+                    product.IsOrganic = request.IsOrganic.Value;
+                if (request.HarvestDate.HasValue)
+                    product.HarvestDate = request.HarvestDate.Value;
+                if (request.ShelfLife.HasValue)
+                    product.ShelfLife = request.ShelfLife.Value;
+
                 // 处理上下架状态
-                if (request.IsActive.HasValue)
+                if (request.IsActive.HasValue && product.IsActive != request.IsActive.Value)
                 {
-                    // 如果状态有变化，记录时间
-                    if (product.IsActive != request.IsActive.Value)
-                    {
-                        if (request.IsActive.Value)
-                        {
-                            // 从下架变为上架
-                            product.ActiveTime = DateTime.Now;
-                        }
-                        else
-                        {
-                            // 从上架变为下架
-                            product.InactiveTime = DateTime.Now;
-                        }
-                    }
-                    
                     product.IsActive = request.IsActive.Value;
+                    if (request.IsActive.Value)
+                    {
+                        product.ActiveTime = DateTime.Now;
+                    }
+                    else
+                    {
+                        product.InactiveTime = DateTime.Now;
+                    }
                 }
 
-                // 更新修改时间
                 product.UpdateTime = DateTime.Now;
 
-                // 保存更改
+                _context.Products.Update(product);
                 await _context.SaveChangesAsync();
+
+                // 如果提供了溯源信息，则更新溯源记录
+                if (!string.IsNullOrEmpty(request.SourcePlace))
+                {
+                    var trace = new Trace
+                    {
+                        ProductId = product.ProductId,
+                        SourcePlace = request.SourcePlace,
+                        PlantingMethod = request.PlantingMethod ?? "",
+                        PlantingTime = request.PlantingTime ?? DateTime.Now,
+                        HarvestTime = request.HarvestDate ?? DateTime.Now,
+                        QualityLevel = request.QualityLevel ?? "标准",
+                        IsOrganic = request.IsOrganic ?? false,
+                        AdditionalInfo = request.TraceInfo ?? "",
+                        CreateTime = DateTime.Now
+                    };
+
+                    _context.Traces.Add(trace);
+                    await _context.SaveChangesAsync();
+                }
 
                 return Ok(new
                 {
@@ -298,16 +364,67 @@ namespace FarmDirectSales.Controllers
                         product.Stock,
                         product.ImageUrl,
                         product.Category,
+                        product.Specification,
+                        product.IsOrganic,
+                        product.HarvestDate,
+                        product.ShelfLife,
                         product.FarmerId,
-                        product.IsActive,
-                        Status = product.IsActive ? "上架" : "下架",
-                        product.UpdateTime
+                        product.CreateTime,
+                        product.UpdateTime,
+                        product.IsActive
                     }
                 });
             }
             catch (Exception ex)
             {
                 return BadRequest(new { code = 400, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// 获取产品销量
+        /// </summary>
+        [HttpGet("{id}/sales")]
+        public async Task<IActionResult> GetProductSales(int id)
+        {
+            try
+            {
+                // 验证产品是否存在
+                var product = await _context.Products.FindAsync(id);
+                if (product == null)
+                {
+                    return NotFound(new { code = 404, message = "产品不存在" });
+                }
+
+                // 记录日志
+                Console.WriteLine($"正在获取产品ID={id}的销量数据");
+
+                // 查询已完成的订单中该产品的总销量
+                var totalSales = await _context.Orders
+                    .Where(o => o.ProductId == id && o.Status == "已完成")
+                    .SumAsync(o => o.Quantity);
+
+                Console.WriteLine($"产品ID={id}的销量数据: {totalSales}");
+
+                // 即使销量为0也返回有效响应
+                return Ok(new
+                {
+                    code = 200,
+                    message = "获取产品销量成功",
+                    data = totalSales
+                });
+            }
+            catch (Exception ex)
+            {
+                // 记录详细错误信息
+                Console.WriteLine($"获取产品销量时发生错误: {ex.Message}");
+                Console.WriteLine($"错误详情: {ex}");
+                
+                // 返回错误响应
+                return BadRequest(new { 
+                    code = 400, 
+                    message = $"获取产品销量失败: {ex.Message}"
+                });
             }
         }
 
@@ -656,6 +773,51 @@ namespace FarmDirectSales.Controllers
         /// 产品类别
         /// </summary>
         public string? Category { get; set; }
+
+        /// <summary>
+        /// 规格
+        /// </summary>
+        public string? Specification { get; set; }
+
+        /// <summary>
+        /// 是否有机
+        /// </summary>
+        public bool? IsOrganic { get; set; }
+
+        /// <summary>
+        /// 收获日期
+        /// </summary>
+        public DateTime? HarvestDate { get; set; }
+
+        /// <summary>
+        /// 保质期
+        /// </summary>
+        public int? ShelfLife { get; set; }
+
+        /// <summary>
+        /// 溯源来源
+        /// </summary>
+        public string? SourcePlace { get; set; }
+
+        /// <summary>
+        /// 种植方法
+        /// </summary>
+        public string? PlantingMethod { get; set; }
+
+        /// <summary>
+        /// 种植时间
+        /// </summary>
+        public DateTime? PlantingTime { get; set; }
+
+        /// <summary>
+        /// 质量等级
+        /// </summary>
+        public string? QualityLevel { get; set; }
+
+        /// <summary>
+        /// 附加信息
+        /// </summary>
+        public string? TraceInfo { get; set; }
     }
 
     /// <summary>
@@ -705,6 +867,51 @@ namespace FarmDirectSales.Controllers
         /// 是否上架
         /// </summary>
         public bool? IsActive { get; set; }
+
+        /// <summary>
+        /// 规格
+        /// </summary>
+        public string? Specification { get; set; }
+
+        /// <summary>
+        /// 是否有机
+        /// </summary>
+        public bool? IsOrganic { get; set; }
+
+        /// <summary>
+        /// 收获日期
+        /// </summary>
+        public DateTime? HarvestDate { get; set; }
+
+        /// <summary>
+        /// 保质期
+        /// </summary>
+        public int? ShelfLife { get; set; }
+
+        /// <summary>
+        /// 溯源来源
+        /// </summary>
+        public string? SourcePlace { get; set; }
+
+        /// <summary>
+        /// 种植方法
+        /// </summary>
+        public string? PlantingMethod { get; set; }
+
+        /// <summary>
+        /// 种植时间
+        /// </summary>
+        public DateTime? PlantingTime { get; set; }
+
+        /// <summary>
+        /// 质量等级
+        /// </summary>
+        public string? QualityLevel { get; set; }
+
+        /// <summary>
+        /// 附加信息
+        /// </summary>
+        public string? TraceInfo { get; set; }
     }
 
     /// <summary>

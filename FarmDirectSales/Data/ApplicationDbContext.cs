@@ -68,6 +68,11 @@ namespace FarmDirectSales.Data
         public DbSet<DeliveryArea> DeliveryAreas { get; set; }
 
         /// <summary>
+        /// 运费配置表
+        /// </summary>
+        public DbSet<ShippingFee> ShippingFees { get; set; }
+
+        /// <summary>
         /// 模型创建
         /// </summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -146,6 +151,20 @@ namespace FarmDirectSales.Data
                 .WithMany()
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // 配送区域-运费规则关系
+            modelBuilder.Entity<ShippingFee>()
+                .HasOne(s => s.DeliveryArea)
+                .WithMany()
+                .HasForeignKey(s => s.DeliveryAreaId)
+                .OnDelete(DeleteBehavior.SetNull);
+                
+            // 订单-运费规则关系
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.ShippingFee)
+                .WithMany()
+                .HasForeignKey(o => o.ShippingFeeId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 } 

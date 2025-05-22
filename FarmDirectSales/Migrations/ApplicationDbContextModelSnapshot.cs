@@ -254,6 +254,12 @@ namespace FarmDirectSales.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("ShippingFeeAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("ShippingFeeId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -267,6 +273,8 @@ namespace FarmDirectSales.Migrations
                     b.HasKey("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("ShippingFeeId");
 
                     b.HasIndex("UserId");
 
@@ -298,6 +306,9 @@ namespace FarmDirectSales.Migrations
                     b.Property<int>("FarmerId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("HarvestDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -308,6 +319,9 @@ namespace FarmDirectSales.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsOrganic")
+                        .HasColumnType("bit");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -315,6 +329,13 @@ namespace FarmDirectSales.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("ShelfLife")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Specification")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Stock")
                         .HasColumnType("int");
@@ -327,6 +348,57 @@ namespace FarmDirectSales.Migrations
                     b.HasIndex("FarmerId");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("FarmDirectSales.Models.ShippingFee", b =>
+                {
+                    b.Property<int>("ShippingFeeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShippingFeeId"));
+
+                    b.Property<decimal>("BaseFee")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DeliveryAreaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<decimal?>("ExtraFeePerKg")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("FreeShippingThreshold")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UpdateBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdateTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ShippingFeeId");
+
+                    b.HasIndex("DeliveryAreaId");
+
+                    b.ToTable("ShippingFees");
                 });
 
             modelBuilder.Entity("FarmDirectSales.Models.Trace", b =>
@@ -560,6 +632,11 @@ namespace FarmDirectSales.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("FarmDirectSales.Models.ShippingFee", "ShippingFee")
+                        .WithMany()
+                        .HasForeignKey("ShippingFeeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("FarmDirectSales.Models.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
@@ -567,6 +644,8 @@ namespace FarmDirectSales.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+
+                    b.Navigation("ShippingFee");
 
                     b.Navigation("User");
                 });
@@ -580,6 +659,16 @@ namespace FarmDirectSales.Migrations
                         .IsRequired();
 
                     b.Navigation("Farmer");
+                });
+
+            modelBuilder.Entity("FarmDirectSales.Models.ShippingFee", b =>
+                {
+                    b.HasOne("FarmDirectSales.Models.DeliveryArea", "DeliveryArea")
+                        .WithMany()
+                        .HasForeignKey("DeliveryAreaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("DeliveryArea");
                 });
 
             modelBuilder.Entity("FarmDirectSales.Models.Trace", b =>

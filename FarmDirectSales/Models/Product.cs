@@ -80,6 +80,26 @@ namespace FarmDirectSales.Models
         /// 产品分类
         /// </summary>
         public string Category { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// 产品规格说明
+        /// </summary>
+        public string Specification { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// 是否有机认证
+        /// </summary>
+        public bool IsOrganic { get; set; } = false;
+        
+        /// <summary>
+        /// 收获日期
+        /// </summary>
+        public DateTime? HarvestDate { get; set; } = null;
+        
+        /// <summary>
+        /// 保质期(天)
+        /// </summary>
+        public int? ShelfLife { get; set; } = null;
 
         // 导航属性
         /// <summary>

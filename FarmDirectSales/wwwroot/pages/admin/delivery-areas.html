@@ -113,13 +113,14 @@
                                         <th>ID</th>
                                         <th colspan="3">配送区域</th>
                                         <th>服务状态</th>
-                                        <th>配送费用</th>
+                                        <th>基础费用</th>
+                                        <th>运费规则</th>
                                         <th>操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id="areas-list">
                                     <tr>
-                                        <td colspan="7" class="text-center py-4">
+                                        <td colspan="8" class="text-center py-4">
                                             <div class="spinner-border text-primary" role="status">
                                                 <span class="sr-only">正在加载...</span>
                                             </div>
@@ -144,7 +145,7 @@
 
     <!-- 添加配送区域模态框 -->
     <div class="modal fade" id="addAreaModal" tabindex="-1" aria-labelledby="addAreaModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="addAreaModalLabel">添加配送区域</h5>
@@ -154,41 +155,94 @@
                 </div>
                 <div class="modal-body">
                     <form id="addAreaForm">
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="isNationwide" name="isNationwide">
-                            <label class="form-check-label" for="isNationwide">
-                                <strong>全国配送</strong> (不限制区域)
-                            </label>
-                            <small class="form-text text-muted">勾选此项将忽略下方的地区设置</small>
-                        </div>
-                        
-                        <div id="area-fields">
-                            <div class="row mb-3">
-                                <div class="col-md-4">
-                                    <label for="province" class="form-label">省份</label>
-                                    <input type="text" class="form-control" id="province" placeholder="如：广东省">
-                                    <small class="form-text text-muted">留空表示不限制省份</small>
+                        <!-- 区域设置部分 -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">区域设置</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="isNationwide" name="isNationwide">
+                                    <label class="form-check-label" for="isNationwide">
+                                        <strong>全国配送</strong> (不限制区域)
+                                    </label>
+                                    <small class="form-text text-muted">勾选此项将忽略下方的地区设置</small>
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="city" class="form-label">城市</label>
-                                    <input type="text" class="form-control" id="city" placeholder="如：广州市">
-                                    <small class="form-text text-muted">留空表示不限制城市</small>
+                                
+                                <div id="area-fields">
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label for="province" class="form-label">省份</label>
+                                            <input type="text" class="form-control" id="province" placeholder="如：广东省">
+                                            <small class="form-text text-muted">留空表示不限制省份</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="city" class="form-label">城市</label>
+                                            <input type="text" class="form-control" id="city" placeholder="如：广州市">
+                                            <small class="form-text text-muted">留空表示不限制城市</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="district" class="form-label">区/县</label>
+                                            <input type="text" class="form-control" id="district" placeholder="如：天河区">
+                                            <small class="form-text text-muted">留空表示不限制区/县</small>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label for="district" class="form-label">区/县</label>
-                                    <input type="text" class="form-control" id="district" placeholder="如：天河区">
-                                    <small class="form-text text-muted">留空表示不限制区/县</small>
+                                
+                                <div class="row mb-0">
+                                    <div class="col-md-6">
+                                        <label for="deliveryFee" class="form-label">基础配送费用 (元) <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="deliveryFee" required min="0" step="0.1" value="15">
+                                    </div>
+                                    <!-- 移除当天配送选项，默认为启用 -->
+                                    <input type="hidden" name="supportSameDayDelivery" value="true">
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="deliveryFee" class="form-label">配送费用 (元) <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="deliveryFee" required min="0" step="0.1" value="15">
+                        <!-- 运费规则设置部分 -->
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">运费规则设置</h5>
                             </div>
-                            <!-- 移除当天配送选项，默认为启用 -->
-                            <input type="hidden" name="supportSameDayDelivery" value="true">
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="freeShippingThreshold" class="form-label">免运费订单金额 (元) <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="freeShippingThreshold" min="0" step="0.01" value="100.00" required>
+                                        <small class="form-text text-muted">订单金额超过此值将免运费</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="extraFeePerKg" class="form-label">每公斤额外费用 (元)</label>
+                                        <input type="number" class="form-control" id="extraFeePerKg" min="0" step="0.01" value="0.00">
+                                        <small class="form-text text-muted">按商品重量计算额外费用，留空表示不计重量</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="ruleName" class="form-label">规则名称 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ruleName" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="priority" class="form-label">规则优先级</label>
+                                        <input type="number" class="form-control" id="priority" min="0" max="100" value="0">
+                                        <small class="form-text text-muted">数字越大优先级越高，默认为0</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="ruleDescription" class="form-label">规则描述</label>
+                                    <textarea class="form-control" id="ruleDescription" rows="2"></textarea>
+                                </div>
+                                
+                                <div class="form-group mb-0">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="isRuleEnabled" checked>
+                                        <label class="custom-control-label" for="isRuleEnabled">启用此运费规则</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -204,7 +258,7 @@
 
     <!-- 编辑配送区域模态框 -->
     <div class="modal fade" id="editAreaModal" tabindex="-1" aria-labelledby="editAreaModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="editAreaModalLabel">编辑配送区域</h5>
@@ -215,55 +269,109 @@
                 <div class="modal-body">
                     <form id="editAreaForm">
                         <input type="hidden" id="edit-areaId">
+                        <input type="hidden" id="edit-shippingFeeId">
                         
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="edit-isNationwide" name="edit-isNationwide">
-                            <label class="form-check-label" for="edit-isNationwide">
-                                <strong>全国配送</strong> (不限制区域)
-                            </label>
-                            <small class="form-text text-muted">勾选此项将忽略下方的地区设置</small>
-                        </div>
-                        
-                        <div id="edit-area-fields">
-                            <div class="row mb-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">省份</label>
-                                    <input type="text" class="form-control" id="edit-province">
-                                    <small class="form-text text-muted">留空表示不限制省份</small>
+                        <!-- 区域设置部分 -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">区域设置</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="edit-isNationwide" name="edit-isNationwide">
+                                    <label class="form-check-label" for="edit-isNationwide">
+                                        <strong>全国配送</strong> (不限制区域)
+                                    </label>
+                                    <small class="form-text text-muted">勾选此项将忽略下方的地区设置</small>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">城市</label>
-                                    <input type="text" class="form-control" id="edit-city">
-                                    <small class="form-text text-muted">留空表示不限制城市</small>
+                                
+                                <div id="edit-area-fields">
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">省份</label>
+                                            <input type="text" class="form-control" id="edit-province">
+                                            <small class="form-text text-muted">留空表示不限制省份</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">城市</label>
+                                            <input type="text" class="form-control" id="edit-city">
+                                            <small class="form-text text-muted">留空表示不限制城市</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">区/县</label>
+                                            <input type="text" class="form-control" id="edit-district">
+                                            <small class="form-text text-muted">留空表示不限制区/县</small>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">区/县</label>
-                                    <input type="text" class="form-control" id="edit-district">
-                                    <small class="form-text text-muted">留空表示不限制区/县</small>
+                                
+                                <div class="row mb-0">
+                                    <div class="col-md-6">
+                                        <label for="edit-deliveryFee" class="form-label">基础配送费用 (元) <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="edit-deliveryFee" required min="0" step="0.1">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label d-block">配送服务状态</label>
+                                        <div class="form-check form-check-inline border rounded p-2 mr-2" style="min-width: 100px;">
+                                            <input class="form-check-input" type="radio" name="edit-supportSameDayDelivery" id="edit-supportTrue" value="true">
+                                            <label class="form-check-label" for="edit-supportTrue">
+                                                <span class="text-success"><i class="fas fa-check-circle mr-1"></i>启用</span>
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-check-inline border rounded p-2" style="min-width: 100px;">
+                                            <input class="form-check-input" type="radio" name="edit-supportSameDayDelivery" id="edit-supportFalse" value="false">
+                                            <label class="form-check-label" for="edit-supportFalse">
+                                                <span class="text-warning"><i class="fas fa-pause-circle mr-1"></i>暂停</span>
+                                            </label>
+                                        </div>
+                                        <small class="form-text text-muted mt-2">暂停状态下，该区域将不接收新订单</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="edit-deliveryFee" class="form-label">配送费用 (元) <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="edit-deliveryFee" required min="0" step="0.1">
+                        <!-- 运费规则设置部分 -->
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">运费规则设置</h5>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label d-block">配送服务状态</label>
-                                <div class="form-check form-check-inline border rounded p-2 mr-2" style="min-width: 100px;">
-                                    <input class="form-check-input" type="radio" name="edit-supportSameDayDelivery" id="edit-supportTrue" value="true">
-                                    <label class="form-check-label" for="edit-supportTrue">
-                                        <span class="text-success"><i class="fas fa-check-circle mr-1"></i>启用</span>
-                                    </label>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="edit-freeShippingThreshold" class="form-label">免运费订单金额 (元) <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="edit-freeShippingThreshold" min="0" step="0.01" value="100.00" required>
+                                        <small class="form-text text-muted">订单金额超过此值将免运费</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="edit-extraFeePerKg" class="form-label">每公斤额外费用 (元)</label>
+                                        <input type="number" class="form-control" id="edit-extraFeePerKg" min="0" step="0.01" value="0.00">
+                                        <small class="form-text text-muted">按商品重量计算额外费用，留空表示不计重量</small>
+                                    </div>
                                 </div>
-                                <div class="form-check form-check-inline border rounded p-2" style="min-width: 100px;">
-                                    <input class="form-check-input" type="radio" name="edit-supportSameDayDelivery" id="edit-supportFalse" value="false">
-                                    <label class="form-check-label" for="edit-supportFalse">
-                                        <span class="text-warning"><i class="fas fa-pause-circle mr-1"></i>暂停</span>
-                                    </label>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="edit-ruleName" class="form-label">规则名称 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="edit-ruleName" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="edit-priority" class="form-label">规则优先级</label>
+                                        <input type="number" class="form-control" id="edit-priority" min="0" max="100" value="0">
+                                        <small class="form-text text-muted">数字越大优先级越高，默认为0</small>
+                                    </div>
                                 </div>
-                                <small class="form-text text-muted mt-2">暂停状态下，该区域将不接收新订单</small>
+                                
+                                <div class="form-group">
+                                    <label for="edit-ruleDescription" class="form-label">规则描述</label>
+                                    <textarea class="form-control" id="edit-ruleDescription" rows="2"></textarea>
+                                </div>
+                                
+                                <div class="form-group mb-0">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="edit-isRuleEnabled" checked>
+                                        <label class="custom-control-label" for="edit-isRuleEnabled">启用此运费规则</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -372,6 +480,17 @@
                 
                 console.log('服务器响应:', response);
                 
+                // 加载运费规则数据
+                let shippingFeeRules = [];
+                try {
+                    const shippingFeeResponse = await http.get('/shipping-fee');
+                    if (shippingFeeResponse && shippingFeeResponse.code === 200) {
+                        shippingFeeRules = shippingFeeResponse.data || [];
+                    }
+                } catch (error) {
+                    console.error('加载运费规则失败:', error);
+                }
+                
                 const tableBody = document.getElementById('areas-list');
                 const noDataPlaceholder = document.getElementById('no-data-placeholder');
                 
@@ -390,6 +509,21 @@
                         // 获取区域显示文本
                         const areaText = getAreaDisplayText(area);
                         
+                        // 查找关联的运费规则
+                        const shippingFeeRule = shippingFeeRules.find(rule => rule.deliveryAreaId === area.deliveryAreaId);
+                        
+                        // 构建运费规则显示文本
+                        let shippingFeeText = '<span class="text-muted">未设置</span>';
+                        if (shippingFeeRule) {
+                            shippingFeeText = `
+                                <span class="d-block"><strong>${shippingFeeRule.name}</strong></span>
+                                <small class="text-muted d-block">免运费: ¥${shippingFeeRule.freeShippingThreshold.toFixed(2)}</small>
+                                ${shippingFeeRule.extraFeePerKg ? 
+                                    `<small class="text-muted d-block">额外: ¥${shippingFeeRule.extraFeePerKg.toFixed(2)}/kg</small>` : 
+                                    ''}
+                            `;
+                        }
+                        
                         row.innerHTML = `
                             <td>${area.deliveryAreaId}</td>
                             <td colspan="3">${areaText}</td>
@@ -401,9 +535,12 @@
                                 </span>
                             </td>
                             <td>¥${area.deliveryFee.toFixed(2)}</td>
+                            <td>${shippingFeeText}</td>
                             <td>
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-sm btn-outline-primary edit-btn" data-area-id="${area.deliveryAreaId}">
+                                    <button type="button" class="btn btn-sm btn-outline-primary edit-btn" 
+                                        data-area-id="${area.deliveryAreaId}" 
+                                        data-shipping-fee-id="${shippingFeeRule ? shippingFeeRule.shippingFeeId : ''}">
                                         <i class="fas fa-edit"></i> 编辑
                                     </button>
                                     <button type="button" class="btn btn-sm btn-outline-danger delete-btn ml-1" data-area-id="${area.deliveryAreaId}">
@@ -419,7 +556,8 @@
                     // 绑定编辑按钮事件
                     $('.edit-btn').on('click', function() {
                         const areaId = $(this).data('area-id');
-                        openEditModal(areaId, response.data);
+                        const shippingFeeId = $(this).data('shipping-fee-id');
+                        openEditModal(areaId, response.data, shippingFeeId, shippingFeeRules);
                     });
                     
                     // 绑定删除按钮事件
@@ -523,6 +661,14 @@
             // 新增配送区域默认启用配送服务
             const supportSameDayDelivery = true;
             
+            // 获取运费规则数据
+            const freeShippingThreshold = parseFloat($('#freeShippingThreshold').val());
+            const extraFeePerKg = parseFloat($('#extraFeePerKg').val()) || null;
+            const ruleName = $('#ruleName').val().trim();
+            const priority = parseInt($('#priority').val());
+            const ruleDescription = $('#ruleDescription').val().trim();
+            const isRuleEnabled = $('#isRuleEnabled').prop('checked');
+            
             // 表单验证
             if (!isNationwide && !province && !city && !district) {
                 alert('请填写至少一个地区信息或选择全国配送');
@@ -531,6 +677,16 @@
             
             if (isNaN(deliveryFee) || deliveryFee < 0) {
                 alert('请输入有效的配送费用');
+                return;
+            }
+            
+            if (!ruleName) {
+                alert('请输入运费规则名称');
+                return;
+            }
+            
+            if (isNaN(freeShippingThreshold) || freeShippingThreshold < 0) {
+                alert('请输入有效的免运费订单金额');
                 return;
             }
             
@@ -624,14 +780,44 @@
                     throw new Error('请先登录');
                 }
                 
-                // 直接使用正确的路径
+                // 添加配送区域
                 console.log('发送请求到: /delivery-area');
                 const response = await http.post('/delivery-area', requestData);
                 
                 console.log('服务器响应:', response);
                 
-                // 修正条件判断，适配实际响应结构
                 if (response && response.code === 200) {
+                    // 获取新创建的配送区域ID
+                    const newAreaId = response.data.deliveryAreaId;
+                    
+                    // 创建对应的运费规则
+                    const shippingFeeData = {
+                        deliveryAreaId: newAreaId,
+                        baseFee: deliveryFee,
+                        freeShippingThreshold: freeShippingThreshold,
+                        extraFeePerKg: extraFeePerKg,
+                        isEnabled: isRuleEnabled,
+                        priority: priority,
+                        name: ruleName,
+                        description: ruleDescription
+                    };
+                    
+                    try {
+                        // 添加运费规则
+                        console.log('发送请求到: /shipping-fee');
+                        const shippingFeeResponse = await http.post('/shipping-fee', shippingFeeData);
+                        
+                        console.log('运费规则创建响应:', shippingFeeResponse);
+                        
+                        if (shippingFeeResponse && shippingFeeResponse.code === 200) {
+                            console.log('运费规则创建成功，ID:', shippingFeeResponse.data.shippingFeeId);
+                        } else {
+                            console.error('运费规则创建失败:', shippingFeeResponse.message);
+                        }
+                    } catch (shippingFeeError) {
+                        console.error('创建运费规则失败:', shippingFeeError);
+                    }
+                    
                     // 关闭模态框
                     $('#addAreaModal').modal('hide');
                     
@@ -642,7 +828,7 @@
                     await loadDeliveryAreas();
                     
                     // 显示成功消息
-                    alert('配送区域添加成功');
+                    alert('配送区域和运费规则添加成功');
                 } else {
                     throw new Error(response.message || '添加配送区域失败');
                 }
@@ -659,7 +845,7 @@
         /**
          * 打开编辑模态框
          */
-        function openEditModal(areaId, areasData) {
+        function openEditModal(areaId, areasData, shippingFeeId, shippingFeeRules) {
             // 查找对应的区域数据
             const area = areasData.find(a => a.deliveryAreaId == areaId);
             if (!area) {
@@ -667,8 +853,15 @@
                 return;
             }
             
+            // 查找对应的运费规则
+            let shippingFeeRule = null;
+            if (shippingFeeId) {
+                shippingFeeRule = shippingFeeRules.find(rule => rule.shippingFeeId == shippingFeeId);
+            }
+            
             // 填充表单
             $('#edit-areaId').val(area.deliveryAreaId);
+            $('#edit-shippingFeeId').val(shippingFeeId || '');
             
             // 设置全国配送选项
             const isNationwide = area.isNationwide || (!area.province && !area.city && !area.district);
@@ -689,8 +882,46 @@
                 $('#edit-supportFalse').prop('checked', true);
             }
             
+            // 填充运费规则信息
+            if (shippingFeeRule) {
+                $('#edit-freeShippingThreshold').val(shippingFeeRule.freeShippingThreshold);
+                $('#edit-extraFeePerKg').val(shippingFeeRule.extraFeePerKg || 0);
+                $('#edit-ruleName').val(shippingFeeRule.name);
+                $('#edit-priority').val(shippingFeeRule.priority);
+                $('#edit-ruleDescription').val(shippingFeeRule.description || '');
+                $('#edit-isRuleEnabled').prop('checked', shippingFeeRule.isEnabled);
+            } else {
+                // 使用默认值
+                $('#edit-freeShippingThreshold').val(100.00);
+                $('#edit-extraFeePerKg').val(0);
+                $('#edit-ruleName').val(getDefaultRuleName(area));
+                $('#edit-priority').val(0);
+                $('#edit-ruleDescription').val('');
+                $('#edit-isRuleEnabled').prop('checked', true);
+            }
+            
             // 显示模态框
             $('#editAreaModal').modal('show');
+        }
+        
+        /**
+         * 生成默认规则名称
+         */
+        function getDefaultRuleName(area) {
+            if (area.isNationwide) {
+                return '全国配送运费';
+            }
+            
+            const parts = [];
+            if (area.province) parts.push(area.province);
+            if (area.city) parts.push(area.city);
+            if (area.district) parts.push(area.district);
+            
+            if (parts.length === 0) {
+                return '默认运费规则';
+            }
+            
+            return parts.join('') + '运费';
         }
         
         /**
@@ -698,12 +929,21 @@
          */
         async function updateDeliveryArea() {
             const areaId = $('#edit-areaId').val();
+            const shippingFeeId = $('#edit-shippingFeeId').val();
             const isNationwide = $('#edit-isNationwide').prop('checked');
             const province = isNationwide ? '' : $('#edit-province').val().trim();
             const city = isNationwide ? '' : $('#edit-city').val().trim();
             const district = isNationwide ? '' : $('#edit-district').val().trim();
             const deliveryFee = parseFloat($('#edit-deliveryFee').val());
             const supportSameDayDelivery = $('input[name="edit-supportSameDayDelivery"]:checked').val() === 'true';
+            
+            // 获取运费规则数据
+            const freeShippingThreshold = parseFloat($('#edit-freeShippingThreshold').val());
+            const extraFeePerKg = parseFloat($('#edit-extraFeePerKg').val()) || null;
+            const ruleName = $('#edit-ruleName').val().trim();
+            const priority = parseInt($('#edit-priority').val());
+            const ruleDescription = $('#edit-ruleDescription').val().trim();
+            const isRuleEnabled = $('#edit-isRuleEnabled').prop('checked');
             
             // 表单验证
             if (!isNationwide && !province && !city && !district) {
@@ -713,6 +953,16 @@
             
             if (isNaN(deliveryFee) || deliveryFee < 0) {
                 alert('请输入有效的配送费用');
+                return;
+            }
+            
+            if (!ruleName) {
+                alert('请输入运费规则名称');
+                return;
+            }
+            
+            if (isNaN(freeShippingThreshold) || freeShippingThreshold < 0) {
+                alert('请输入有效的免运费订单金额');
                 return;
             }
             
@@ -735,7 +985,7 @@
                         if (existingNationwide) {
                             alert('已存在全国配送区域，不能设置多个全国配送');
                             updateBtn.prop('disabled', false);
-                            updateBtn.html('更新');
+                            updateBtn.html('<i class="fas fa-save mr-1"></i>更新');
                             return;
                         }
                     }
@@ -752,7 +1002,7 @@
                         if (existingSameArea) {
                             alert(`已存在相同的配送区域: ${province} ${city} ${district}`);
                             updateBtn.prop('disabled', false);
-                            updateBtn.html('更新');
+                            updateBtn.html('<i class="fas fa-save mr-1"></i>更新');
                             return;
                         }
                         
@@ -768,7 +1018,7 @@
                             if (existingProvince) {
                                 alert(`已存在相同的省级配送区域: ${province}`);
                                 updateBtn.prop('disabled', false);
-                                updateBtn.html('更新');
+                                updateBtn.html('<i class="fas fa-save mr-1"></i>更新');
                                 return;
                             }
                         }
@@ -785,7 +1035,7 @@
                             if (existingCity) {
                                 alert(`已存在相同的市级配送区域: ${province} ${city}`);
                                 updateBtn.prop('disabled', false);
-                                updateBtn.html('更新');
+                                updateBtn.html('<i class="fas fa-save mr-1"></i>更新');
                                 return;
                             }
                         }
@@ -801,14 +1051,55 @@
                     supportSameDayDelivery
                 };
                 
-                // 直接使用正确的路径
+                // 更新配送区域
                 console.log(`发送请求到: /delivery-area/${areaId}`);
                 const response = await http.put(`/delivery-area/${areaId}`, requestData);
                 
-                console.log('服务器响应:', response);
+                console.log('配送区域更新响应:', response);
                 
-                // 修正条件判断，适配实际响应结构
                 if (response && response.code === 200) {
+                    // 更新或创建运费规则
+                    const shippingFeeData = {
+                        deliveryAreaId: areaId,
+                        baseFee: deliveryFee,
+                        freeShippingThreshold: freeShippingThreshold,
+                        extraFeePerKg: extraFeePerKg,
+                        isEnabled: isRuleEnabled,
+                        priority: priority,
+                        name: ruleName,
+                        description: ruleDescription
+                    };
+                    
+                    try {
+                        if (shippingFeeId) {
+                            // 更新现有运费规则
+                            console.log(`发送请求到: /shipping-fee/${shippingFeeId}`);
+                            const shippingFeeResponse = await http.put(`/shipping-fee/${shippingFeeId}`, shippingFeeData);
+                            
+                            console.log('运费规则更新响应:', shippingFeeResponse);
+                            
+                            if (shippingFeeResponse && shippingFeeResponse.code === 200) {
+                                console.log('运费规则更新成功');
+                            } else {
+                                console.error('运费规则更新失败:', shippingFeeResponse.message);
+                            }
+                        } else {
+                            // 创建新运费规则
+                            console.log('发送请求到: /shipping-fee');
+                            const shippingFeeResponse = await http.post('/shipping-fee', shippingFeeData);
+                            
+                            console.log('运费规则创建响应:', shippingFeeResponse);
+                            
+                            if (shippingFeeResponse && shippingFeeResponse.code === 200) {
+                                console.log('运费规则创建成功，ID:', shippingFeeResponse.data.shippingFeeId);
+                            } else {
+                                console.error('运费规则创建失败:', shippingFeeResponse.message);
+                            }
+                        }
+                    } catch (shippingFeeError) {
+                        console.error('处理运费规则失败:', shippingFeeError);
+                    }
+                    
                     // 关闭模态框
                     $('#editAreaModal').modal('hide');
                     
@@ -816,7 +1107,7 @@
                     await loadDeliveryAreas();
                     
                     // 显示成功消息
-                    alert('配送区域更新成功');
+                    alert('配送区域和运费规则更新成功');
                 } else {
                     throw new Error(response.message || '更新配送区域失败');
                 }
@@ -826,7 +1117,7 @@
             } finally {
                 // 恢复更新按钮
                 updateBtn.prop('disabled', false);
-                updateBtn.html('更新');
+                updateBtn.html('<i class="fas fa-save mr-1"></i>更新');
             }
         }
         
@@ -872,14 +1163,45 @@
             deleteBtn.html('<i class="fas fa-spinner fa-spin mr-1"></i>删除中...');
             
             try {
-                // 直接使用正确的路径
+                // 查找关联的运费规则
+                let shippingFeeId = null;
+                try {
+                    const shippingFeeResponse = await http.get('/shipping-fee');
+                    if (shippingFeeResponse && shippingFeeResponse.code === 200) {
+                        const shippingFeeRule = shippingFeeResponse.data.find(rule => rule.deliveryAreaId == areaId);
+                        if (shippingFeeRule) {
+                            shippingFeeId = shippingFeeRule.shippingFeeId;
+                        }
+                    }
+                } catch (error) {
+                    console.error('查找关联运费规则失败:', error);
+                }
+                
+                // 删除配送区域
                 console.log(`发送请求到: /delivery-area/${areaId}`);
                 const response = await http.delete(`/delivery-area/${areaId}`);
                 
-                console.log('服务器响应:', response);
+                console.log('配送区域删除响应:', response);
                 
-                // 修正条件判断，适配实际响应结构
                 if (response && response.code === 200) {
+                    // 如果有关联的运费规则，尝试删除
+                    if (shippingFeeId) {
+                        try {
+                            console.log(`发送请求到: /shipping-fee/${shippingFeeId}`);
+                            const shippingFeeResponse = await http.delete(`/shipping-fee/${shippingFeeId}`);
+                            
+                            console.log('运费规则删除响应:', shippingFeeResponse);
+                            
+                            if (shippingFeeResponse && shippingFeeResponse.code === 200) {
+                                console.log('运费规则删除成功');
+                            } else {
+                                console.error('运费规则删除失败:', shippingFeeResponse.message);
+                            }
+                        } catch (shippingFeeError) {
+                            console.error('删除运费规则失败:', shippingFeeError);
+                        }
+                    }
+                    
                     // 关闭模态框
                     $('#deleteConfirmModal').modal('hide');
                     
@@ -897,7 +1219,7 @@
             } finally {
                 // 恢复删除按钮
                 deleteBtn.prop('disabled', false);
-                deleteBtn.html('确认删除');
+                deleteBtn.html('<i class="fas fa-trash-alt mr-1"></i>确认删除');
             }
         }
         

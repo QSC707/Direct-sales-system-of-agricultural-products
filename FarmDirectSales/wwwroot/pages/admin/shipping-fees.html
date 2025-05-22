@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>运费管理 - 农产品直销平台</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <script src="../../js/dependencies.js"></script>
+    <!-- 引入Axios库 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- API调用相关 -->
+    <script src="../../js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="../../js/axios-config.js"></script>
+    <script src="../../js/auth.js"></script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.html">管理中心</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">管理首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="users.html">用户管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="products.html">产品管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="orders.html">订单管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="statistics.html">统计分析</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="delivery-areas.html">配送区域管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="shipping-fees.html">运费管理</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown" id="userDropdown" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
+                            <span id="currentUsername">管理员</span>
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="dashboard.html">管理中心</a>
+                            <a class="dropdown-item" href="users.html">用户管理</a>
+                            <a class="dropdown-item" href="products.html">产品管理</a>
+                            <a class="dropdown-item" href="orders.html">订单管理</a>
+                            <a class="dropdown-item" href="logs.html">系统日志</a>
+                            <a class="dropdown-item" href="profile.html">个人信息</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="../../index.html">返回网站首页</a>
+                            <a class="dropdown-item" href="#" id="logoutBtn">退出登录</a>
+                        </div>
+                    </li>
+                    <li class="nav-item" id="loginItem">
+                        <a class="nav-link" href="../login.html">登录</a>
+                    </li>
+                    <li class="nav-item" id="registerItem">
+                        <a class="nav-link" href="../register.html">注册</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container my-4">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-3">
+                <div class="list-group">
+                    <a href="dashboard.html" class="list-group-item list-group-item-action">管理中心</a>
+                    <a href="users.html" class="list-group-item list-group-item-action">用户管理</a>
+                    <a href="products.html" class="list-group-item list-group-item-action">产品管理</a>
+                    <a href="orders.html" class="list-group-item list-group-item-action">订单管理</a>
+                    <a href="statistics.html" class="list-group-item list-group-item-action">统计分析</a>
+                    <a href="delivery-areas.html" class="list-group-item list-group-item-action">配送区域管理</a>
+                    <a href="shipping-fees.html" class="list-group-item list-group-item-action active">运费管理</a>
+                    <a href="logs.html" class="list-group-item list-group-item-action">系统日志</a>
+                    <a href="profile.html" class="list-group-item list-group-item-action">个人信息</a>
+                </div>
+            </div>
+
+            <!-- 内容主体区域 -->
+            <div class="col-md-9">
+                <!-- 运费规则卡片 -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">运费规则管理</h4>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <button class="btn btn-light" data-toggle="modal" data-target="#addFeeModal">
+                                <i class="fas fa-plus"></i> 添加运费规则
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- 运费规则表格 -->
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>规则名称</th>
+                                        <th>配送区域</th>
+                                        <th>基础运费</th>
+                                        <th>免运费金额</th>
+                                        <th>状态</th>
+                                        <th>优先级</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fees-list">
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="sr-only">正在加载...</span>
+                                            </div>
+                                            <p class="mt-2 mb-0">正在加载数据...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- 无数据提示 -->
+                        <div id="no-data-placeholder" class="text-center py-5 d-none">
+                            <i class="fas fa-exclamation-circle fa-4x text-muted mb-3"></i>
+                            <p class="mb-0">暂无运费规则数据</p>
+                            <p class="text-muted">点击右上角"添加运费规则"按钮添加新规则</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 运费统计卡片 -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">运费统计</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- 日期选择 -->
+                        <div class="row mb-4">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">统计周期</span>
+                                    </div>
+                                    <input type="date" class="form-control" id="start-date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">至</span>
+                                    </div>
+                                    <input type="date" class="form-control" id="end-date">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" id="query-stats-btn">
+                                            <i class="fas fa-search"></i> 查询
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="btn-group w-100">
+                                    <button class="btn btn-outline-secondary" data-days="7">最近7天</button>
+                                    <button class="btn btn-outline-secondary" data-days="30">最近30天</button>
+                                    <button class="btn btn-outline-secondary" data-days="90">最近90天</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 统计信息 -->
+                        <div id="stats-container" class="d-none">
+                            <div class="row mb-4">
+                                <!-- 统计卡片 -->
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">总订单数</h5>
+                                            <h2 class="card-text text-primary" id="total-orders">0</h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">总运费</h5>
+                                            <h2 class="card-text text-primary" id="total-shipping-fee">¥0.00</h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">免运费订单</h5>
+                                            <h2 class="card-text text-primary" id="free-shipping-orders">0</h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">平均运费</h5>
+                                            <h2 class="card-text text-primary" id="average-shipping-fee">¥0.00</h2>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 规则使用统计 -->
+                            <h5>规则使用统计</h5>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>规则名称</th>
+                                            <th>订单数量</th>
+                                            <th>总运费</th>
+                                            <th>平均运费</th>
+                                            <th>占比</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="rule-stats-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- 加载中 -->
+                        <div id="stats-loading" class="text-center py-4 d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">正在加载...</span>
+                            </div>
+                            <p class="mt-2 mb-0">正在加载统计数据...</p>
+                        </div>
+                        
+                        <!-- 无数据提示 -->
+                        <div id="stats-no-data" class="text-center py-4">
+                            <i class="fas fa-chart-bar fa-4x text-muted mb-3"></i>
+                            <p class="mb-0">暂无统计数据</p>
+                            <p class="text-muted">请选择日期范围查询运费统计</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加运费规则模态框 -->
+    <div class="modal fade" id="addFeeModal" tabindex="-1" role="dialog" aria-labelledby="addFeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addFeeModalLabel">添加运费规则</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addFeeForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="name">规则名称 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="deliveryAreaId">关联配送区域</label>
+                                    <select class="form-control" id="deliveryAreaId">
+                                        <option value="">全局默认规则</option>
+                                        <!-- 配送区域选项将通过JavaScript动态加载 -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="baseFee">基础运费 (元) <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="baseFee" min="0" step="0.01" value="10.00" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="freeShippingThreshold">免运费订单金额 (元) <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="freeShippingThreshold" min="0" step="0.01" value="100.00" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="extraFeePerKg">每公斤额外费用 (元)</label>
+                                    <input type="number" class="form-control" id="extraFeePerKg" min="0" step="0.01" value="0.00">
+                                    <small class="form-text text-muted">按重量计算附加费用，可选</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="priority">优先级</label>
+                                    <input type="number" class="form-control" id="priority" min="0" max="100" value="0">
+                                    <small class="form-text text-muted">数字越大优先级越高，默认为0</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="description">规则描述</label>
+                            <textarea class="form-control" id="description" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="isEnabled" checked>
+                                <label class="custom-control-label" for="isEnabled">启用此规则</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveFeeBtn">
+                        <i class="fas fa-save mr-1"></i> 保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑运费规则模态框 -->
+    <div class="modal fade" id="editFeeModal" tabindex="-1" role="dialog" aria-labelledby="editFeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editFeeModalLabel">编辑运费规则</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editFeeForm">
+                        <input type="hidden" id="edit-feeId">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="edit-name">规则名称 <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="edit-name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="edit-deliveryAreaId">关联配送区域</label>
+                                    <select class="form-control" id="edit-deliveryAreaId">
+                                        <option value="">全局默认规则</option>
+                                        <!-- 配送区域选项将通过JavaScript动态加载 -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="edit-baseFee">基础运费 (元) <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="edit-baseFee" min="0" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="edit-freeShippingThreshold">免运费订单金额 (元) <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="edit-freeShippingThreshold" min="0" step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="edit-extraFeePerKg">每公斤额外费用 (元)</label>
+                                    <input type="number" class="form-control" id="edit-extraFeePerKg" min="0" step="0.01">
+                                    <small class="form-text text-muted">按重量计算附加费用，可选</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="edit-priority">优先级</label>
+                                    <input type="number" class="form-control" id="edit-priority" min="0" max="100">
+                                    <small class="form-text text-muted">数字越大优先级越高，默认为0</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit-description">规则描述</label>
+                            <textarea class="form-control" id="edit-description" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="edit-isEnabled">
+                                <label class="custom-control-label" for="edit-isEnabled">启用此规则</label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="updateFeeBtn">
+                        <i class="fas fa-save mr-1"></i> 更新
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div class="modal fade" id="deleteFeeModal" tabindex="-1" role="dialog" aria-labelledby="deleteFeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteFeeModalLabel">删除运费规则</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="delete-feeId">
+                    <p>您确定要删除此运费规则吗？此操作不可恢复。</p>
+                    <p><strong>规则名称：</strong><span id="delete-feeName"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt mr-1"></i> 确认删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">© 2025 农产品直销平台. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-right">
+                    <a href="../admin/dashboard.html" class="text-muted">管理中心</a> |
+                    <a href="../about.html" class="text-muted">关于我们</a> |
+                    <a href="../contact.html" class="text-muted">联系我们</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 加载 FontAwesome 图标库 -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <!-- 自定义 JavaScript -->
+    <script src="../../js/common.js"></script>
+    
+    <script>
+        // 检查登录状态和权限
+        $(document).ready(function() {
+            // 检查是否有登录用户
+            checkAuth(function(user) {
+                if (!user || user.role !== 'admin') {
+                    // 非管理员，跳转到登录页
+                    window.location.href = '../login.html?redirect=' + encodeURIComponent(window.location.href);
+                    return;
+                }
+                
+                // 管理员已登录，执行初始化
+                initPage();
+            });
+            
+            // 登出按钮事件
+            $('#logoutBtn').click(function(e) {
+                e.preventDefault();
+                logout();
+            });
+        });
+        
+        // 页面初始化
+        function initPage() {
+            // 加载运费规则列表
+            loadShippingFees();
+            
+            // 加载配送区域选项
+            loadDeliveryAreas();
+            
+            // 设置默认日期范围（最近30天）
+            setDateRange(30);
+            
+            // 添加事件处理
+            bindEvents();
+        }
+        
+        // 绑定事件处理
+        function bindEvents() {
+            // 添加运费规则
+            $('#saveFeeBtn').click(addShippingFee);
+            
+            // 更新运费规则
+            $('#updateFeeBtn').click(updateShippingFee);
+            
+            // 确认删除
+            $('#confirmDeleteBtn').click(deleteShippingFee);
+            
+            // 查询统计数据
+            $('#query-stats-btn').click(loadStatistics);
+            
+            // 快捷日期范围选择
+            $('.btn-group .btn[data-days]').click(function() {
+                const days = $(this).data('days');
+                setDateRange(days);
+                loadStatistics();
+                
+                // 高亮选中的按钮
+                $(this).siblings().removeClass('active');
+                $(this).addClass('active');
+            });
+            
+            // 表格中的编辑按钮点击事件通过事件委托处理
+            $('#fees-list').on('click', '.edit-btn', function() {
+                const feeId = $(this).data('fee-id');
+                openEditModal(feeId);
+            });
+            
+            // 表格中的删除按钮点击事件通过事件委托处理
+            $('#fees-list').on('click', '.delete-btn', function() {
+                const feeId = $(this).data('fee-id');
+                const feeName = $(this).data('fee-name');
+                openDeleteModal(feeId, feeName);
+            });
+        }
+        
+        // 加载运费规则列表
+        async function loadShippingFees() {
+            try {
+                // 显示加载中状态
+                $('#fees-list').html(`
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">正在加载...</span>
+                            </div>
+                            <p class="mt-2 mb-0">正在加载数据...</p>
+                        </td>
+                    </tr>
+                `);
+                
+                // 调用API获取数据
+                const response = await api.shippingFee.getAll();
+                
+                // 检查响应状态
+                if (response && response.code === 200 && response.data && response.data.length > 0) {
+                    // 有数据，渲染表格
+                    $('#fees-list').empty();
+                    $('#no-data-placeholder').addClass('d-none');
+                    
+                    // 遍历数据并添加到表格
+                    response.data.forEach(fee => {
+                        const row = document.createElement('tr');
+                        
+                        // 配送区域显示
+                        let areaName = '全局默认规则';
+                        if (fee.deliveryArea) {
+                            if (fee.deliveryArea.isNationwide) {
+                                areaName = '全国配送';
+                            } else {
+                                const province = fee.deliveryArea.province || '';
+                                const city = fee.deliveryArea.city || '';
+                                const district = fee.deliveryArea.district || '';
+                                areaName = [province, city, district].filter(Boolean).join(' / ');
+                            }
+                        }
+                        
+                        row.innerHTML = `
+                            <td>${fee.shippingFeeId}</td>
+                            <td>${fee.name}</td>
+                            <td>${areaName}</td>
+                            <td>¥${fee.baseFee.toFixed(2)}</td>
+                            <td>¥${fee.freeShippingThreshold.toFixed(2)}</td>
+                            <td>
+                                <span class="badge ${fee.isEnabled ? 'badge-success' : 'badge-secondary'}">
+                                    ${fee.isEnabled ? '启用' : '禁用'}
+                                </span>
+                            </td>
+                            <td>${fee.priority}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary edit-btn" data-fee-id="${fee.shippingFeeId}">
+                                        <i class="fas fa-edit"></i> 编辑
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger delete-btn" data-fee-id="${fee.shippingFeeId}" data-fee-name="${fee.name}">
+                                        <i class="fas fa-trash-alt"></i> 删除
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        
+                        $('#fees-list').append(row);
+                    });
+                } else {
+                    // 无数据，显示提示
+                    $('#fees-list').empty();
+                    $('#no-data-placeholder').removeClass('d-none');
+                }
+            } catch (error) {
+                console.error('加载运费规则失败:', error);
+                $('#fees-list').html(`
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-danger">
+                            <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+                            <p class="mb-0">加载运费规则失败</p>
+                            <p class="text-muted small mb-0">${error.message || '服务器错误'}</p>
+                        </td>
+                    </tr>
+                `);
+            }
+        }
+        
+        // 加载配送区域选项
+        async function loadDeliveryAreas() {
+            try {
+                const response = await api.deliveryArea.getAll();
+                
+                if (response && response.code === 200 && response.data && response.data.length > 0) {
+                    // 清空现有选项
+                    $('#deliveryAreaId option:not(:first)').remove();
+                    $('#edit-deliveryAreaId option:not(:first)').remove();
+                    
+                    // 添加新选项
+                    response.data.forEach(area => {
+                        let areaName = '';
+                        if (area.isNationwide) {
+                            areaName = '全国配送';
+                        } else {
+                            const province = area.province || '';
+                            const city = area.city || '';
+                            const district = area.district || '';
+                            areaName = [province, city, district].filter(Boolean).join(' / ');
+                        }
+                        
+                        const option = `<option value="${area.deliveryAreaId}">${areaName}</option>`;
+                        $('#deliveryAreaId').append(option);
+                        $('#edit-deliveryAreaId').append(option);
+                    });
+                }
+            } catch (error) {
+                console.error('加载配送区域失败:', error);
+                alert('加载配送区域失败: ' + (error.message || '服务器错误'));
+            }
+        }
+        
+        // 添加运费规则
+        async function addShippingFee() {
+            try {
+                // 获取表单数据
+                const formData = {
+                    name: $('#name').val().trim(),
+                    deliveryAreaId: $('#deliveryAreaId').val() ? parseInt($('#deliveryAreaId').val()) : null,
+                    baseFee: parseFloat($('#baseFee').val()),
+                    freeShippingThreshold: parseFloat($('#freeShippingThreshold').val()),
+                    extraFeePerKg: $('#extraFeePerKg').val() ? parseFloat($('#extraFeePerKg').val()) : null,
+                    priority: parseInt($('#priority').val()),
+                    description: $('#description').val().trim(),
+                    isEnabled: $('#isEnabled').prop('checked')
+                };
+                
+                // 表单验证
+                if (!formData.name) {
+                    alert('请输入规则名称');
+                    return;
+                }
+                
+                // 禁用按钮，防止重复提交
+                $('#saveFeeBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> 保存中...');
+                
+                // 调用API添加规则
+                const response = await api.shippingFee.add(formData);
+                
+                // 处理响应
+                if (response && response.code === 200) {
+                    // 添加成功，关闭模态框并刷新列表
+                    $('#addFeeModal').modal('hide');
+                    loadShippingFees();
+                    
+                    // 重置表单
+                    $('#addFeeForm')[0].reset();
+                    
+                    // 显示成功消息
+                    alert('添加运费规则成功');
+                } else {
+                    // 添加失败，显示错误消息
+                    alert('添加运费规则失败: ' + (response.message || '服务器错误'));
+                }
+            } catch (error) {
+                console.error('添加运费规则失败:', error);
+                alert('添加运费规则失败: ' + (error.message || '服务器错误'));
+            } finally {
+                // 恢复按钮状态
+                $('#saveFeeBtn').prop('disabled', false).html('<i class="fas fa-save mr-1"></i> 保存');
+            }
+        }
+        
+        // 打开编辑模态框
+        async function openEditModal(feeId) {
+            try {
+                // 显示加载状态
+                $('#editFeeModal .modal-body').html(`
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">正在加载...</span>
+                        </div>
+                        <p class="mt-2 mb-0">正在加载规则数据...</p>
+                    </div>
+                `);
+                
+                // 显示模态框
+                $('#editFeeModal').modal('show');
+                
+                // 获取运费规则详情
+                const response = await api.shippingFee.getById(feeId);
+                
+                // 检查响应状态
+                if (response && response.code === 200 && response.data) {
+                    // 恢复模态框内容
+                    $('#editFeeModal .modal-body').html($('#editFeeForm').parent().html());
+                    
+                    // 填充表单数据
+                    const fee = response.data;
+                    $('#edit-feeId').val(fee.shippingFeeId);
+                    $('#edit-name').val(fee.name);
+                    $('#edit-deliveryAreaId').val(fee.deliveryAreaId || '');
+                    $('#edit-baseFee').val(fee.baseFee);
+                    $('#edit-freeShippingThreshold').val(fee.freeShippingThreshold);
+                    $('#edit-extraFeePerKg').val(fee.extraFeePerKg || '');
+                    $('#edit-priority').val(fee.priority);
+                    $('#edit-description').val(fee.description || '');
+                    $('#edit-isEnabled').prop('checked', fee.isEnabled);
+                } else {
+                    // 获取详情失败
+                    $('#editFeeModal .modal-body').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            加载规则详情失败: ${response.message || '服务器错误'}
+                        </div>
+                    `);
+                }
+            } catch (error) {
+                console.error('获取运费规则详情失败:', error);
+                $('#editFeeModal .modal-body').html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        加载规则详情失败: ${error.message || '服务器错误'}
+                    </div>
+                `);
+            }
+        }
+        
+        // 更新运费规则
+        async function updateShippingFee() {
+            try {
+                // 获取表单数据
+                const feeId = $('#edit-feeId').val();
+                const formData = {
+                    name: $('#edit-name').val().trim(),
+                    deliveryAreaId: $('#edit-deliveryAreaId').val() ? parseInt($('#edit-deliveryAreaId').val()) : null,
+                    baseFee: parseFloat($('#edit-baseFee').val()),
+                    freeShippingThreshold: parseFloat($('#edit-freeShippingThreshold').val()),
+                    extraFeePerKg: $('#edit-extraFeePerKg').val() ? parseFloat($('#edit-extraFeePerKg').val()) : null,
+                    priority: parseInt($('#edit-priority').val()),
+                    description: $('#edit-description').val().trim(),
+                    isEnabled: $('#edit-isEnabled').prop('checked')
+                };
+                
+                // 表单验证
+                if (!formData.name) {
+                    alert('请输入规则名称');
+                    return;
+                }
+                
+                // 禁用按钮，防止重复提交
+                $('#updateFeeBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> 更新中...');
+                
+                // 调用API更新规则
+                const response = await api.shippingFee.update(feeId, formData);
+                
+                // 处理响应
+                if (response && response.code === 200) {
+                    // 更新成功，关闭模态框并刷新列表
+                    $('#editFeeModal').modal('hide');
+                    loadShippingFees();
+                    
+                    // 显示成功消息
+                    alert('更新运费规则成功');
+                } else {
+                    // 更新失败，显示错误消息
+                    alert('更新运费规则失败: ' + (response.message || '服务器错误'));
+                }
+            } catch (error) {
+                console.error('更新运费规则失败:', error);
+                alert('更新运费规则失败: ' + (error.message || '服务器错误'));
+            } finally {
+                // 恢复按钮状态
+                $('#updateFeeBtn').prop('disabled', false).html('<i class="fas fa-save mr-1"></i> 更新');
+            }
+        }
+        
+        // 打开删除确认模态框
+        function openDeleteModal(feeId, feeName) {
+            $('#delete-feeId').val(feeId);
+            $('#delete-feeName').text(feeName);
+            $('#deleteFeeModal').modal('show');
+        }
+        
+        // 删除运费规则
+        async function deleteShippingFee() {
+            try {
+                const feeId = $('#delete-feeId').val();
+                
+                // 禁用按钮，防止重复提交
+                $('#confirmDeleteBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> 删除中...');
+                
+                // 调用API删除规则
+                const response = await api.shippingFee.delete(feeId);
+                
+                // 处理响应
+                if (response && response.code === 200) {
+                    // 删除成功，关闭模态框并刷新列表
+                    $('#deleteFeeModal').modal('hide');
+                    loadShippingFees();
+                    
+                    // 显示成功消息
+                    alert('删除运费规则成功');
+                } else {
+                    // 删除失败，显示错误消息
+                    alert('删除运费规则失败: ' + (response.message || '服务器错误'));
+                }
+            } catch (error) {
+                console.error('删除运费规则失败:', error);
+                alert('删除运费规则失败: ' + (error.message || '服务器错误'));
+            } finally {
+                // 恢复按钮状态
+                $('#confirmDeleteBtn').prop('disabled', false).html('<i class="fas fa-trash-alt mr-1"></i> 确认删除');
+            }
+        }
+        
+        // 设置日期范围
+        function setDateRange(days) {
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - days);
+            
+            $('#end-date').val(formatDate(endDate));
+            $('#start-date').val(formatDate(startDate));
+        }
+        
+        // 格式化日期为YYYY-MM-DD
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // 加载统计数据
+        async function loadStatistics() {
+            try {
+                // 获取日期范围
+                const startDate = new Date($('#start-date').val());
+                const endDate = new Date($('#end-date').val());
+                
+                // 验证日期
+                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                    alert('请选择有效的日期范围');
+                    return;
+                }
+                
+                // 显示加载状态
+                $('#stats-no-data').addClass('d-none');
+                $('#stats-container').addClass('d-none');
+                $('#stats-loading').removeClass('d-none');
+                
+                // 调用API获取统计数据
+                const response = await api.shippingFee.getStatistics(startDate, endDate);
+                
+                // 处理响应
+                if (response && response.code === 200 && response.data) {
+                    const stats = response.data;
+                    
+                    // 填充统计卡片
+                    $('#total-orders').text(stats.summary.totalOrders);
+                    $('#total-shipping-fee').text('¥' + stats.summary.totalShippingFee.toFixed(2));
+                    $('#free-shipping-orders').text(stats.summary.freeShippingOrders);
+                    $('#average-shipping-fee').text('¥' + stats.summary.averageShippingFee.toFixed(2));
+                    
+                    // 渲染规则使用统计
+                    const ruleStatsBody = $('#rule-stats-body');
+                    ruleStatsBody.empty();
+                    
+                    if (stats.ruleStatistics && stats.ruleStatistics.length > 0) {
+                        stats.ruleStatistics.forEach(rule => {
+                            const percentage = (rule.orderCount / stats.summary.totalOrders * 100).toFixed(1);
+                            const row = `
+                                <tr>
+                                    <td>${rule.ruleName}</td>
+                                    <td>${rule.orderCount}</td>
+                                    <td>¥${rule.totalShippingFee.toFixed(2)}</td>
+                                    <td>¥${rule.averageFee.toFixed(2)}</td>
+                                    <td>${percentage}%</td>
+                                </tr>
+                            `;
+                            ruleStatsBody.append(row);
+                        });
+                    } else {
+                        ruleStatsBody.html(`
+                            <tr>
+                                <td colspan="5" class="text-center py-3">
+                                    <p class="mb-0 text-muted">暂无规则使用数据</p>
+                                </td>
+                            </tr>
+                        `);
+                    }
+                    
+                    // 显示统计内容
+                    $('#stats-loading').addClass('d-none');
+                    $('#stats-container').removeClass('d-none');
+                } else {
+                    // 无数据
+                    $('#stats-loading').addClass('d-none');
+                    $('#stats-no-data').removeClass('d-none');
+                }
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+                $('#stats-loading').addClass('d-none');
+                $('#stats-no-data').removeClass('d-none').html(`
+                    <i class="fas fa-exclamation-circle fa-4x text-danger mb-3"></i>
+                    <p class="mb-0">加载统计数据失败</p>
+                    <p class="text-muted">${error.message || '服务器错误'}</p>
+                `);
+            }
+        }
+    </script>
+</body>
+</html> 

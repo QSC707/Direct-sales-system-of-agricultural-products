@@ -103,6 +103,16 @@ namespace FarmDirectSales.Models
         [Required]
         public string ContactPhone { get; set; } = string.Empty;
 
+        /// <summary>
+        /// 运费
+        /// </summary>
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal ShippingFeeAmount { get; set; } = 0;
+        
+        /// <summary>
+        /// 运费规则ID
+        /// </summary>
+        public int? ShippingFeeId { get; set; }
         
         /// <summary>
         /// 是否已被删除（软删除）
@@ -126,6 +136,12 @@ namespace FarmDirectSales.Models
         /// </summary>
         [ForeignKey("ProductId")]
         public virtual Product? Product { get; set; }
+        
+        /// <summary>
+        /// 运费规则（导航属性）
+        /// </summary>
+        [ForeignKey("ShippingFeeId")]
+        public virtual ShippingFee? ShippingFee { get; set; }
     }
 } 
  

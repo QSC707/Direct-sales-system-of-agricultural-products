@@ -322,8 +322,9 @@
                 const sortBy = sortOrderElement ? sortOrderElement.value : 'default';
                 
                 // 调用产品API
-                const response = await api.products.getAll();
-                let products = response.data || [];
+                const response = await api.product.getProducts();
+                // response结构是 {code: 200, message: "...", data: [...]}
+                let products = response && response.data ? response.data : [];
                 
                 // 应用筛选器
                 if (category) {

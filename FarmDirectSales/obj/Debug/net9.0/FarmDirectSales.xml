@@ -929,6 +929,11 @@
             更新产品
             </summary>
         </member>
+        <member name="M:FarmDirectSales.Controllers.ProductController.GetProductSales(System.Int32)">
+            <summary>
+            获取产品销量
+            </summary>
+        </member>
         <member name="M:FarmDirectSales.Controllers.ProductController.DeleteProduct(System.Int32,FarmDirectSales.Controllers.DeleteProductRequest)">
             <summary>
             删除产品（智能判断是否可以硬删除）
@@ -984,6 +989,51 @@
             产品类别
             </summary>
         </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.Specification">
+            <summary>
+            规格
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.IsOrganic">
+            <summary>
+            是否有机
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.HarvestDate">
+            <summary>
+            收获日期
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.ShelfLife">
+            <summary>
+            保质期
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.SourcePlace">
+            <summary>
+            溯源来源
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.PlantingMethod">
+            <summary>
+            种植方法
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.PlantingTime">
+            <summary>
+            种植时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.QualityLevel">
+            <summary>
+            质量等级
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddProductRequest.TraceInfo">
+            <summary>
+            附加信息
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.UpdateProductRequest">
             <summary>
             更新产品请求模型
@@ -1029,6 +1079,51 @@
             是否上架
             </summary>
         </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.Specification">
+            <summary>
+            规格
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.IsOrganic">
+            <summary>
+            是否有机
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.HarvestDate">
+            <summary>
+            收获日期
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.ShelfLife">
+            <summary>
+            保质期
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.SourcePlace">
+            <summary>
+            溯源来源
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.PlantingMethod">
+            <summary>
+            种植方法
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.PlantingTime">
+            <summary>
+            种植时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.QualityLevel">
+            <summary>
+            质量等级
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateProductRequest.TraceInfo">
+            <summary>
+            附加信息
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.DeleteProductRequest">
             <summary>
             删除产品请求模型
@@ -1042,6 +1137,161 @@
         <member name="P:FarmDirectSales.Controllers.DeleteProductRequest.HardDelete">
             <summary>
             是否硬删除
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.ShippingFeeController">
+            <summary>
+            运费管理控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ShippingFeeController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ShippingFeeController.GetAllShippingFees">
+            <summary>
+            获取所有运费规则
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ShippingFeeController.GetShippingFee(System.Int32)">
+            <summary>
+            获取单个运费规则
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ShippingFeeController.AddShippingFee(FarmDirectSales.Controllers.AddShippingFeeRequest)">
+            <summary>
+            添加运费规则（仅管理员）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ShippingFeeController.UpdateShippingFee(System.Int32,FarmDirectSales.Controllers.UpdateShippingFeeRequest)">
+            <summary>
+            更新运费规则（仅管理员）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ShippingFeeController.DeleteShippingFee(System.Int32)">
+            <summary>
+            删除运费规则（仅管理员）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ShippingFeeController.CalculateShippingFee(FarmDirectSales.Controllers.CalculateShippingFeeRequest)">
+            <summary>
+            计算运费
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.ShippingFeeController.GetShippingFeeStatistics(System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            获取运费相关的订单统计
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.AddShippingFeeRequest">
+            <summary>
+            添加运费规则请求
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddShippingFeeRequest.DeliveryAreaId">
+            <summary>
+            配送区域ID（可空，为空表示默认运费）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddShippingFeeRequest.BaseFee">
+            <summary>
+            基础运费
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddShippingFeeRequest.FreeShippingThreshold">
+            <summary>
+            免运费订单金额（订单金额超过此值免运费）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddShippingFeeRequest.ExtraFeePerKg">
+            <summary>
+            每公斤额外费用（按重量计费时使用）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddShippingFeeRequest.IsEnabled">
+            <summary>
+            是否启用（禁用则不使用此运费规则）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddShippingFeeRequest.Priority">
+            <summary>
+            规则优先级（数字越大优先级越高）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddShippingFeeRequest.Name">
+            <summary>
+            规则名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddShippingFeeRequest.Description">
+            <summary>
+            规则描述
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.UpdateShippingFeeRequest">
+            <summary>
+            更新运费规则请求
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateShippingFeeRequest.DeliveryAreaId">
+            <summary>
+            配送区域ID（可空，为空表示默认运费）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateShippingFeeRequest.BaseFee">
+            <summary>
+            基础运费
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateShippingFeeRequest.FreeShippingThreshold">
+            <summary>
+            免运费订单金额（订单金额超过此值免运费）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateShippingFeeRequest.ExtraFeePerKg">
+            <summary>
+            每公斤额外费用（按重量计费时使用）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateShippingFeeRequest.IsEnabled">
+            <summary>
+            是否启用（禁用则不使用此运费规则）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateShippingFeeRequest.Priority">
+            <summary>
+            规则优先级（数字越大优先级越高）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateShippingFeeRequest.Name">
+            <summary>
+            规则名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateShippingFeeRequest.Description">
+            <summary>
+            规则描述
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.CalculateShippingFeeRequest">
+            <summary>
+            计算运费请求
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CalculateShippingFeeRequest.OrderAmount">
+            <summary>
+            订单金额
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CalculateShippingFeeRequest.DeliveryAreaId">
+            <summary>
+            配送区域ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.CalculateShippingFeeRequest.Weight">
+            <summary>
+            商品总重量（公斤）
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.StatisticsController">
@@ -1371,6 +1621,11 @@
         <member name="P:FarmDirectSales.Data.ApplicationDbContext.DeliveryAreas">
             <summary>
             配送区域表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.ShippingFees">
+            <summary>
+            运费配置表
             </summary>
         </member>
         <member name="M:FarmDirectSales.Data.ApplicationDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
@@ -1759,6 +2014,78 @@
         <member name="M:FarmDirectSales.Migrations.AddIsNationwideToDeliveryArea.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:FarmDirectSales.Migrations.AddShippingFeeModel">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddShippingFeeModel.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddShippingFeeModel.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddShippingFeeModel.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddSpecificationToProduct">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddSpecificationToProduct.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddSpecificationToProduct.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddSpecificationToProduct.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddShippingFeeToOrder">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddShippingFeeToOrder.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddShippingFeeToOrder.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddShippingFeeToOrder.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.UpdateOrderShippingFeeFields">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.UpdateOrderShippingFeeFields.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.UpdateOrderShippingFeeFields.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.UpdateOrderShippingFeeFields.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddShippingFeeFieldsToOrder">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddShippingFeeFieldsToOrder.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddShippingFeeFieldsToOrder.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddShippingFeeFieldsToOrder.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddShippingFeeAmountToOrder">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddShippingFeeAmountToOrder.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddShippingFeeAmountToOrder.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddShippingFeeAmountToOrder.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:FarmDirectSales.Models.CartItem">
             <summary>
             购物车项模型
@@ -2069,6 +2396,16 @@
             联系电话
             </summary>
         </member>
+        <member name="P:FarmDirectSales.Models.Order.ShippingFeeAmount">
+            <summary>
+            运费
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.ShippingFeeId">
+            <summary>
+            运费规则ID
+            </summary>
+        </member>
         <member name="P:FarmDirectSales.Models.Order.IsDeleted">
             <summary>
             是否已被删除（软删除）
@@ -2087,6 +2424,11 @@
         <member name="P:FarmDirectSales.Models.Order.Product">
             <summary>
             产品信息（导航属性）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.ShippingFee">
+            <summary>
+            运费规则（导航属性）
             </summary>
         </member>
         <member name="T:FarmDirectSales.Models.Product">
@@ -2157,6 +2499,26 @@
         <member name="P:FarmDirectSales.Models.Product.Category">
             <summary>
             产品分类
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.Specification">
+            <summary>
+            产品规格说明
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.IsOrganic">
+            <summary>
+            是否有机认证
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.HarvestDate">
+            <summary>
+            收获日期
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Product.ShelfLife">
+            <summary>
+            保质期(天)
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.Product.Farmer">
@@ -2307,6 +2669,76 @@
         <member name="P:FarmDirectSales.Models.SalesFilter.FarmerId">
             <summary>
             农户ID
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.ShippingFee">
+            <summary>
+            运费配置模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.ShippingFeeId">
+            <summary>
+            运费配置ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.DeliveryAreaId">
+            <summary>
+            配送区域ID（可空，为空表示默认运费）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.BaseFee">
+            <summary>
+            基础运费
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.FreeShippingThreshold">
+            <summary>
+            免运费订单金额（订单金额超过此值免运费）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.ExtraFeePerKg">
+            <summary>
+            每公斤额外费用（按重量计费时使用）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.IsEnabled">
+            <summary>
+            是否启用（禁用则不使用此运费规则）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.Priority">
+            <summary>
+            规则优先级（数字越大优先级越高）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.Name">
+            <summary>
+            规则名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.Description">
+            <summary>
+            规则描述
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.CreateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.UpdateTime">
+            <summary>
+            最后更新时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.UpdateBy">
+            <summary>
+            更新人（管理员ID）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ShippingFee.DeliveryArea">
+            <summary>
+            关联的配送区域（导航属性）
             </summary>
         </member>
         <member name="T:FarmDirectSales.Models.Trace">

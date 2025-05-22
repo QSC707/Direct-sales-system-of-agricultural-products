@@ -347,6 +347,27 @@
                 // 使用Axios请求产品数据 - 修正API路径
                 const response = await http.get(`/api/product/${productId}`);
                 const product = response.data;
+                
+                // 获取产品销量数据
+                let salesCount = 0;
+                try {
+                    console.log(`正在获取产品ID=${productId}的销量数据...`);
+                    const salesResponse = await api.product.getProductSales(productId);
+                    console.log('销量数据响应:', salesResponse);
+                    
+                    if (salesResponse && salesResponse.code === 200) {
+                        salesCount = salesResponse.data || 0;
+                        console.log(`成功获取销量数据: ${salesCount}`);
+                    } else {
+                        console.warn('销量数据响应格式不正确:', salesResponse);
+                    }
+                } catch (error) {
+                    console.error('获取销量信息失败:', error);
+                    // 失败时使用默认值0，不影响页面其他部分加载
+                }
+                
+                // 将销量信息添加到产品对象中
+                product.salesCount = salesCount;
                 currentProduct = product;
                 
                 if (!product) {
@@ -369,15 +390,36 @@
                         <div class="mb-3">
                             <span class="badge bg-success">农户：${product.farmer?.username || '未知'}</span>
                             <span class="badge bg-secondary ms-2">库存：${product.stock} 件</span>
+                            <span class="badge bg-info ms-2">销量：${product.salesCount || 0} 件</span>
                             ${product.stock <= 0 ? '<span class="badge bg-danger ms-2">已售罄</span>' : ''}
                             ${product.avgRating ? `<span class="badge bg-warning text-dark ms-2">评分：${product.avgRating.toFixed(1)}分</span>` : ''}
+                            ${product.isOrganic ? '<span class="badge bg-success ms-2"><i class="fas fa-leaf me-1"></i>有机认证</span>' : ''}
                         </div>
                         <div class="mb-4">
                             <h3 class="text-danger">￥${product.price.toFixed(2)}</h3>
+                            ${product.specification ? `<p class="text-muted"><i class="fas fa-box me-2"></i>规格：${product.specification}</p>` : ''}
+                            
+                            <!-- 销量信息 -->
+                            <div class="d-flex align-items-center mt-2">
+                                <i class="fas fa-chart-line text-primary me-2"></i>
+                                <span>销量: <strong class="text-primary">${product.salesCount || 0}</strong> 件</span>
+                            </div>
                         </div>
                         <div class="mb-4">
                             <h5>产品描述：</h5>
                             <p>${product.description}</p>
+                        </div>
+                        <div class="mb-4 row">
+                            ${product.harvestDate ? `
+                            <div class="col-md-6">
+                                <small class="text-muted"><i class="fas fa-calendar-alt me-2"></i>收获日期：${new Date(product.harvestDate).toLocaleDateString()}</small>
+                            </div>
+                            ` : ''}
+                            ${product.shelfLife ? `
+                            <div class="col-md-6">
+                                <small class="text-muted"><i class="fas fa-hourglass-half me-2"></i>保质期：${product.shelfLife}天</small>
+                            </div>
+                            ` : ''}
                         </div>
                         <div class="mb-4">
                             <div class="d-flex align-items-center">
@@ -423,10 +465,6 @@
                 const farmerInfoContent = document.getElementById('farmer-info-content');
                 if (product.farmer) {
                     const farmerInfo = `
-                        <div class="text-center mb-4">
-                            <img src="${product.farmer.avatarUrl || '/img/farmer-placeholder.jpg'}" alt="${product.farmer.username}" 
-                                class="rounded-circle img-thumbnail" style="width: 120px; height: 120px; object-fit: cover;">
-                        </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <h6><i class="fas fa-user text-success me-2"></i>农户名称</h6>
@@ -462,37 +500,65 @@
                 // 初始化溯源信息标签页内容
                 const traceInfoContent = document.getElementById('trace-info-content');
                 if (product.traceInfo) {
+                    // 溯源信息存在，显示详细信息
                     const traceInfo = `
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <h6><i class="fas fa-map-marker-alt text-success me-2"></i>产地</h6>
-                                <p>${product.traceInfo.source || '未提供'}</p>
+                                <p>${product.traceInfo.sourcePlace || '未提供'}</p>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <h6><i class="fas fa-calendar-day text-success me-2"></i>生产日期</h6>
-                                <p>${product.traceInfo.productionDate ? new Date(product.traceInfo.productionDate).toLocaleDateString() : '未提供'}</p>
+                                <h6><i class="fas fa-calendar-day text-success me-2"></i>种植时间</h6>
+                                <p>${product.traceInfo.plantingTime ? new Date(product.traceInfo.plantingTime).toLocaleDateString() : '未提供'}</p>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <h6><i class="fas fa-hourglass-half text-success me-2"></i>保质期</h6>
-                                <p>${product.traceInfo.shelfLife || '未提供'}</p>
+                                <h6><i class="fas fa-calendar-check text-success me-2"></i>收获时间</h6>
+                                <p>${product.traceInfo.harvestTime ? new Date(product.traceInfo.harvestTime).toLocaleDateString() : '未提供'}</p>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <h6><i class="fas fa-certificate text-success me-2"></i>认证情况</h6>
-                                <p>${product.traceInfo.certification || '未提供'}</p>
+                                <h6><i class="fas fa-certificate text-success me-2"></i>质量等级</h6>
+                                <p>${product.traceInfo.qualityLevel || '未提供'}</p>
                             </div>
-                            <div class="col-12 mb-3">
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="fas fa-leaf text-success me-2"></i>有机认证</h6>
+                                <p>${product.traceInfo.isOrganic ? '<span class="badge bg-success">已认证</span>' : '<span class="badge bg-secondary">未认证</span>'}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
                                 <h6><i class="fas fa-seedling text-success me-2"></i>种植/养殖方式</h6>
-                                <p>${product.traceInfo.farmingMethod || '未提供'}</p>
+                                <p>${product.traceInfo.plantingMethod || '未提供'}</p>
                             </div>
                             <div class="col-12">
-                                <h6><i class="fas fa-info-circle text-success me-2"></i>详细描述</h6>
-                                <p>${product.traceInfo.description || '暂无更多溯源信息'}</p>
+                                <h6><i class="fas fa-info-circle text-success me-2"></i>附加信息</h6>
+                                <p>${product.traceInfo.additionalInfo || '暂无更多溯源信息'}</p>
                             </div>
                         </div>
                     `;
                     traceInfoContent.innerHTML = traceInfo;
                 } else {
-                    traceInfoContent.innerHTML = '<div class="alert alert-warning">暂无溯源信息</div>';
+                    // 尝试从产品信息中提取溯源相关信息
+                    const basicTraceInfo = `
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="fas fa-calendar-day text-success me-2"></i>收获日期</h6>
+                                <p>${product.harvestDate ? new Date(product.harvestDate).toLocaleDateString() : '未提供'}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="fas fa-hourglass-half text-success me-2"></i>保质期</h6>
+                                <p>${product.shelfLife ? `${product.shelfLife}天` : '未提供'}</p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6><i class="fas fa-leaf text-success me-2"></i>有机认证</h6>
+                                <p>${product.isOrganic ? '<span class="badge bg-success">已认证</span>' : '<span class="badge bg-secondary">未认证</span>'}</p>
+                            </div>
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    该产品暂无详细溯源信息，仅显示基本信息。
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    traceInfoContent.innerHTML = basicTraceInfo;
                 }
                 
                 // 添加导航标签页的样式设置

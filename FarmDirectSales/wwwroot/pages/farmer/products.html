@@ -381,9 +381,6 @@
                                 <label class="custom-file-label" for="editProductImage">选择新图片</label>
                             </div>
                             <small class="form-text text-muted">如不需更换图片请勿上传</small>
-                            <div class="mt-2">
-                                <img id="editImagePreview" src="../../img/no-image.png" alt="产品图片预览" class="img-thumbnail" style="max-width: 200px;">
-                            </div>
                             <div id="editUploadStatus" class="mt-2 small" style="display: none;"></div>
                         </div>
                         
@@ -1012,6 +1009,12 @@
                     // 设置产品分类
                     $('#editProductCategory').val(product.category || '其他');
                     
+                    // 加载规格、有机认证、收获日期和保质期
+                    $('#editProductSpecification').val(product.specification || '');
+                    $('#editIsOrganic').prop('checked', product.isOrganic || false);
+                    $('#editHarvestDate').val(product.harvestDate ? product.harvestDate.substring(0, 10) : '');
+                    $('#editShelfLife').val(product.shelfLife || '');
+                    
                     // 设置图片预览
                     if (product.imageUrl) {
                         // 确保图片路径正确
@@ -1328,7 +1331,12 @@
                     price: parseFloat($('#productPrice').val()) || 0,  // 确保价格有效
                     stock: parseInt($('#productStock').val()) || 0,    // 确保库存为整数
                     imageUrl: imageUrl,
-                    category: $('#productCategory').val() || '其他'
+                    category: $('#productCategory').val() || '其他',
+                    // 添加规格、有机认证、收获日期和保质期信息
+                    specification: $('#productSpecification').val().trim(),
+                    isOrganic: $('#isOrganic').prop('checked'),
+                    harvestDate: $('#harvestDate').val() || null,
+                    shelfLife: $('#shelfLife').val() ? parseInt($('#shelfLife').val()) : null
                 };
                 
                 // 验证必填字段
@@ -1412,7 +1420,12 @@
                     price: parseFloat($('#editProductPrice').val()),
                     stock: parseFloat($('#editProductStock').val()),
                     category: $('#editProductCategory').val() || '其他',
-                    isActive: isActive
+                    isActive: isActive,
+                    // 添加规格、有机认证、收获日期和保质期信息
+                    specification: $('#editProductSpecification').val().trim(),
+                    isOrganic: $('#editIsOrganic').prop('checked'),
+                    harvestDate: $('#editHarvestDate').val() || null,
+                    shelfLife: $('#editShelfLife').val() ? parseInt($('#editShelfLife').val()) : null
                 };
                 
                 // 如果有新图片URL，则更新

@@ -285,79 +285,197 @@ const api = {
     },
     
     // 产品相关
-    products: {
+    product: {
         // 获取产品列表
-        getAll: async () => {
-            const response = await fetch(`${window.API_BASE_URL}/product`, {
-                method: 'GET',
-                headers: window.getHeaders()
-            });
-            
-            return handleResponse(response);
+        getProducts: async () => {
+            try {
+                const response = await fetch(`${window.API_BASE_URL}/product`, {
+                    method: 'GET',
+                    headers: window.getHeaders()
+                });
+                return await handleResponse(response);
+            } catch (error) {
+                throw new Error('获取产品列表失败');
+            }
+        },
+        
+        // 获取农户的产品列表
+        getFarmerProducts: async (farmerId) => {
+            try {
+                const response = await fetch(`${window.API_BASE_URL}/product?farmerId=${farmerId}`, {
+                    method: 'GET',
+                    headers: window.getHeaders()
+                });
+                return await handleResponse(response);
+            } catch (error) {
+                throw new Error('获取农户的产品列表失败');
+            }
         },
         
         // 获取产品详情
-        getById: async (productId) => {
-            const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
-                method: 'GET',
-                headers: window.getHeaders()
-            });
-            
-            return handleResponse(response);
+        getProduct: async (productId) => {
+            try {
+                const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
+                    method: 'GET',
+                    headers: window.getHeaders()
+                });
+                return await handleResponse(response);
+            } catch (error) {
+                throw new Error('获取产品详情失败');
+            }
         },
         
         // 添加产品
-        add: async (productData) => {
-            const response = await fetch(`${window.API_BASE_URL}/product`, {
-                method: 'POST',
-                headers: window.getHeaders(),
-                body: JSON.stringify(productData)
-            });
-            
-            return handleResponse(response);
+        addProduct: async (productData) => {
+            try {
+                // 确保包含所有必要字段
+                const formattedData = {
+                    productName: productData.productName,
+                    description: productData.description,
+                    price: productData.price,
+                    stock: productData.stock,
+                    imageUrl: productData.imageUrl,
+                    farmerId: productData.farmerId,
+                    category: productData.category,
+                    // 添加扩展字段
+                    specification: productData.specification,
+                    isOrganic: productData.isOrganic,
+                    harvestDate: productData.harvestDate,
+                    shelfLife: productData.shelfLife,
+                    // 添加溯源信息
+                    sourcePlace: productData.sourcePlace,
+                    plantingMethod: productData.plantingMethod,
+                    plantingTime: productData.plantingTime,
+                    qualityLevel: productData.qualityLevel,
+                    traceInfo: productData.traceInfo
+                };
+                
+                const response = await fetch(`${window.API_BASE_URL}/product`, {
+                    method: 'POST',
+                    headers: window.getHeaders(),
+                    body: JSON.stringify(formattedData)
+                });
+                return response;
+            } catch (error) {
+                throw new Error('添加产品失败');
+            }
         },
         
         // 更新产品
-        update: async (productId, productData) => {
-            const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
-                method: 'PUT',
-                headers: window.getHeaders(),
-                body: JSON.stringify(productData)
-            });
-            
-            return handleResponse(response);
+        updateProduct: async (productId, productData) => {
+            try {
+                // 确保包含所有必要字段
+                const formattedData = {
+                    productName: productData.productName,
+                    description: productData.description,
+                    price: productData.price,
+                    stock: productData.stock,
+                    imageUrl: productData.imageUrl,
+                    farmerId: productData.farmerId,
+                    category: productData.category,
+                    isActive: productData.isActive,
+                    // 添加扩展字段
+                    specification: productData.specification,
+                    isOrganic: productData.isOrganic,
+                    harvestDate: productData.harvestDate,
+                    shelfLife: productData.shelfLife,
+                    // 添加溯源信息
+                    sourcePlace: productData.sourcePlace,
+                    plantingMethod: productData.plantingMethod,
+                    plantingTime: productData.plantingTime,
+                    qualityLevel: productData.qualityLevel,
+                    traceInfo: productData.traceInfo
+                };
+                
+                const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
+                    method: 'PUT',
+                    headers: window.getHeaders(),
+                    body: JSON.stringify(formattedData)
+                });
+                return response;
+            } catch (error) {
+                throw new Error('更新产品失败');
+            }
         },
         
         // 删除产品
-        delete: async (productId) => {
-            const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
-                method: 'DELETE',
-                headers: window.getHeaders()
-            });
-            
-            return handleResponse(response);
+        deleteProduct: async (productId, farmerId, hardDelete = false) => {
+            try {
+                const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
+                    method: 'DELETE',
+                    headers: window.getHeaders(),
+                    body: JSON.stringify({
+                        farmerId: farmerId,
+                        hardDelete: hardDelete
+                    })
+                });
+                return response;
+            } catch (error) {
+                throw new Error('删除产品失败');
+            }
         },
         
-        // 更新产品库存
-        updateStock: async (productId, stockChange) => {
-            const response = await fetch(`${window.API_BASE_URL}/product/${productId}/stock`, {
-                method: 'PUT',
-                headers: window.getHeaders(),
-                body: JSON.stringify({ stockChange })
-            });
-            
-            return handleResponse(response);
+        // 搜索产品
+        searchProducts: async (keyword) => {
+            try {
+                const response = await fetch(`${window.API_BASE_URL}/product/search?keyword=${encodeURIComponent(keyword)}`, {
+                    method: 'GET',
+                    headers: window.getHeaders()
+                });
+                return await handleResponse(response);
+            } catch (error) {
+                throw new Error('搜索产品失败');
+            }
         },
         
-        // 检查产品库存
-        checkStock: async (productId, quantity) => {
-            const response = await fetch(`${window.API_BASE_URL}/product/${productId}/stock/check`, {
-                method: 'POST',
-                headers: window.getHeaders(),
-                body: JSON.stringify({ quantity })
-            });
-            
-            return handleResponse(response);
+        // 获取分类产品
+        getCategoryProducts: async (category) => {
+            try {
+                const response = await fetch(`${window.API_BASE_URL}/product/category/${encodeURIComponent(category)}`, {
+                    method: 'GET',
+                    headers: window.getHeaders()
+                });
+                return await handleResponse(response);
+            } catch (error) {
+                throw new Error('获取分类产品失败');
+            }
+        },
+        
+        // 获取产品销量
+        getProductSales: async (productId) => {
+            try {
+                console.log(`调用销量API: 产品ID=${productId}`);
+                const response = await fetch(`${window.API_BASE_URL}/product/${productId}/sales`, {
+                    method: 'GET',
+                    headers: window.getHeaders()
+                });
+                
+                // 检查响应状态
+                if (!response.ok) {
+                    console.error(`销量API响应错误: HTTP ${response.status}`);
+                    return { code: response.status, message: "获取销量失败", data: 0 };
+                }
+                
+                // 检查响应内容
+                const text = await response.text();
+                if (!text) {
+                    console.error('销量API返回空响应');
+                    return { code: 200, message: "无销量数据", data: 0 };
+                }
+                
+                // 尝试解析JSON
+                try {
+                    const data = JSON.parse(text);
+                    console.log('销量API返回数据:', data);
+                    return data;
+                } catch (parseError) {
+                    console.error('解析销量数据失败:', parseError, '原始数据:', text);
+                    return { code: 200, message: "销量数据格式错误", data: 0 };
+                }
+            } catch (error) {
+                console.error('获取产品销量失败:', error);
+                return { code: 500, message: error.message, data: 0 }; // 返回友好的错误对象而不是抛出异常
+            }
         }
     },
     
@@ -821,6 +939,86 @@ const api = {
             });
             
             const response = await fetch(`${window.API_BASE_URL}/delivery-area/check?${params.toString()}`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        }
+    },
+    
+    // 运费管理相关
+    shippingFee: {
+        // 获取所有运费规则
+        getAll: async () => {
+            const response = await fetch(`${window.API_BASE_URL}/shipping-fee`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 获取单个运费规则
+        getById: async (feeId) => {
+            const response = await fetch(`${window.API_BASE_URL}/shipping-fee/${feeId}`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 添加运费规则（仅管理员）
+        add: async (feeData) => {
+            const response = await fetch(`${window.API_BASE_URL}/shipping-fee`, {
+                method: 'POST',
+                headers: window.getHeaders(),
+                body: JSON.stringify(feeData)
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 更新运费规则（仅管理员）
+        update: async (feeId, feeData) => {
+            const response = await fetch(`${window.API_BASE_URL}/shipping-fee/${feeId}`, {
+                method: 'PUT',
+                headers: window.getHeaders(),
+                body: JSON.stringify(feeData)
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 删除运费规则（仅管理员）
+        delete: async (feeId) => {
+            const response = await fetch(`${window.API_BASE_URL}/shipping-fee/${feeId}`, {
+                method: 'DELETE',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 计算运费
+        calculate: async (orderData) => {
+            const response = await fetch(`${window.API_BASE_URL}/shipping-fee/calculate`, {
+                method: 'POST',
+                headers: window.getHeaders(),
+                body: JSON.stringify(orderData)
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 获取运费统计数据（仅管理员）
+        getStatistics: async (startDate, endDate) => {
+            const params = new URLSearchParams();
+            if (startDate) params.append('startDate', startDate.toISOString());
+            if (endDate) params.append('endDate', endDate.toISOString());
+            
+            const response = await fetch(`${window.API_BASE_URL}/shipping-fee/statistics?${params.toString()}`, {
                 method: 'GET',
                 headers: window.getHeaders()
             });
