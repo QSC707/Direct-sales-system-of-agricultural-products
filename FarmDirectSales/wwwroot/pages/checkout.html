@@ -671,11 +671,17 @@
                 return false;
             }
             
+            // 先检查是否有全国配送选项
+            const hasNationwideDelivery = deliveryAreas.some(area => area.isNationwide);
+            if (hasNationwideDelivery) {
+                return true; // 如果有全国配送，任何地址都可以配送
+            }
+            
             return deliveryAreas.some(area => {
                 // 完全匹配
                 if (area.province === addressInfo.province && 
                     area.city === addressInfo.city && 
-                    (!area.district || area.district === addressInfo.district)) {
+                    area.district === addressInfo.district) {
                     return true;
                 }
                 
@@ -683,6 +689,12 @@
                 if (area.province === addressInfo.province && 
                     area.city === addressInfo.city && 
                     !area.district) {
+                    return true;
+                }
+                
+                // 只有省份匹配，城市为空（代表全省范围）
+                if (area.province === addressInfo.province && 
+                    !area.city) {
                     return true;
                 }
                 
@@ -983,7 +995,8 @@
         // 加载配送区域数据
         async function loadDeliveryAreas() {
             try {
-                const response = await api.delivery.getSameDayAreas();
+                // 使用deliveryArea API端点替代delivery API端点
+                const response = await api.deliveryArea.getSameDayAreas();
                 if (response.code === 200) {
                     deliveryAreas = response.data || [];
                     
@@ -992,16 +1005,38 @@
                     if (areasList) {
                         if (deliveryAreas.length > 0) {
                             areasList.innerHTML = '';
-                            deliveryAreas.forEach(area => {
+                            
+                            // 检查是否有全国配送选项
+                            const hasNationwideArea = deliveryAreas.some(area => area.isNationwide);
+                            if (hasNationwideArea) {
                                 const li = document.createElement('li');
-                                li.textContent = `${area.province}${area.city}${area.district || ''}`;
+                                li.className = 'text-success font-weight-bold';
+                                li.innerHTML = `<strong>全国配送</strong> (不限制区域)`;
                                 areasList.appendChild(li);
-                            });
-            } else {
+                            }
+                            
+                            // 显示具体的配送区域
+                            deliveryAreas
+                                .filter(area => !area.isNationwide) // 过滤掉全国配送，已单独显示
+                                .forEach(area => {
+                                    const li = document.createElement('li');
+                                    
+                                    // 根据不同的配送级别显示
+                                    if (area.province && !area.city) {
+                                        li.textContent = `${area.province} (全省范围)`;
+                                    } else if (area.province && area.city && !area.district) {
+                                        li.textContent = `${area.province}${area.city} (全市范围)`;
+                                    } else {
+                                        li.textContent = `${area.province}${area.city}${area.district}`;
+                                    }
+                                    
+                                    areasList.appendChild(li);
+                                });
+                        } else {
                             areasList.innerHTML = '<li>暂无配送区域信息</li>';
-            }
-        }
-            } else {
+                        }
+                    }
+                } else {
                     console.error('加载配送区域数据失败:', response.message);
                 }
             } catch (error) {

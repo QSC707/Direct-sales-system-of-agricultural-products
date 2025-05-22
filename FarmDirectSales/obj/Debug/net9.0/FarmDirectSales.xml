@@ -454,14 +454,14 @@
             批量导入配送区域（仅管理员）
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Controllers.DeliveryAreaController.InitializeDefaultAreas">
-            <summary>
-            初始化默认配送区域（仅管理员）
-            </summary>
-        </member>
         <member name="T:FarmDirectSales.Controllers.AddDeliveryAreaRequest">
             <summary>
             添加配送区域请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.AddDeliveryAreaRequest.IsNationwide">
+            <summary>
+            是否全国配送（不限制区域）
             </summary>
         </member>
         <member name="P:FarmDirectSales.Controllers.AddDeliveryAreaRequest.Province">
@@ -497,6 +497,26 @@
         <member name="T:FarmDirectSales.Controllers.UpdateDeliveryAreaRequest">
             <summary>
             更新配送区域请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateDeliveryAreaRequest.IsNationwide">
+            <summary>
+            是否全国配送（不限制区域）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateDeliveryAreaRequest.Province">
+            <summary>
+            省份
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateDeliveryAreaRequest.City">
+            <summary>
+            城市
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateDeliveryAreaRequest.District">
+            <summary>
+            区/县
             </summary>
         </member>
         <member name="P:FarmDirectSales.Controllers.UpdateDeliveryAreaRequest.SupportSameDayDelivery">
@@ -1029,11 +1049,11 @@
             销售统计分析控制器
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Controllers.StatisticsController.#ctor(FarmDirectSales.Services.IStatisticsService,FarmDirectSales.Services.ILogService)">
+        <member name="M:FarmDirectSales.Controllers.StatisticsController.#ctor(FarmDirectSales.Data.ApplicationDbContext,FarmDirectSales.Services.ILogService)">
             <summary>
             构造函数
             </summary>
-            <param name="statisticsService">统计服务</param>
+            <param name="context">数据库上下文</param>
             <param name="logService">日志服务</param>
         </member>
         <member name="M:FarmDirectSales.Controllers.StatisticsController.GetSalesOverview(FarmDirectSales.Models.SalesFilter)">
@@ -1727,6 +1747,18 @@
         <member name="M:FarmDirectSales.Migrations.UpdateFarmerProfileColumns.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:FarmDirectSales.Migrations.AddIsNationwideToDeliveryArea">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddIsNationwideToDeliveryArea.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddIsNationwideToDeliveryArea.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddIsNationwideToDeliveryArea.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:FarmDirectSales.Models.CartItem">
             <summary>
             购物车项模型
@@ -1780,6 +1812,11 @@
         <member name="P:FarmDirectSales.Models.DeliveryArea.DeliveryAreaId">
             <summary>
             配送区域ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryArea.IsNationwide">
+            <summary>
+            是否全国配送（不限制区域）
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.DeliveryArea.Province">
@@ -2210,6 +2247,11 @@
         <member name="P:FarmDirectSales.Models.ProductSalesRank.Quantity">
             <summary>
             销售量
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.ProductSalesRank.Category">
+            <summary>
+            产品类别
             </summary>
         </member>
         <member name="T:FarmDirectSales.Models.FarmerSalesRank">

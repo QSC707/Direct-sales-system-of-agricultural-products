@@ -86,12 +86,40 @@ namespace FarmDirectSales.Controllers
         {
             try
             {
-                // 查找匹配的配送区域
+                // 先查找精确匹配的配送区域
                 var area = await _context.DeliveryAreas
                     .Where(a => a.Province == request.Province && 
                            a.City == request.City && 
                            a.District == request.District)
                     .FirstOrDefaultAsync();
+
+                // 如果没找到精确匹配，尝试按层级查找
+                if (area == null)
+                {
+                    // 尝试查找市级匹配
+                    area = await _context.DeliveryAreas
+                        .Where(a => a.Province == request.Province && 
+                               a.City == request.City && 
+                               string.IsNullOrEmpty(a.District))
+                        .FirstOrDefaultAsync();
+
+                    // 尝试查找省级匹配
+                    if (area == null)
+                    {
+                        area = await _context.DeliveryAreas
+                            .Where(a => a.Province == request.Province && 
+                                   string.IsNullOrEmpty(a.City))
+                            .FirstOrDefaultAsync();
+                        
+                        // 最后尝试查找全国配送
+                        if (area == null)
+                        {
+                            area = await _context.DeliveryAreas
+                                .Where(a => a.IsNationwide)
+                                .FirstOrDefaultAsync();
+                        }
+                    }
+                }
 
                 bool isSameDayAvailable = false;
                 decimal deliveryFee = 0;
@@ -137,26 +165,63 @@ namespace FarmDirectSales.Controllers
                     return StatusCode(StatusCodes.Status403Forbidden, new { code = 403, message = "无权限访问此接口" });
                 }
 
-                // 检查是否已存在相同区域
-                var existingArea = await _context.DeliveryAreas
-                    .FirstOrDefaultAsync(a => a.Province == request.Province && 
-                                         a.City == request.City && 
-                                         a.District == request.District);
-
-                if (existingArea != null)
+                // 验证至少有一个区域信息或选择了全国配送
+                if (!request.IsNationwide && string.IsNullOrWhiteSpace(request.Province) && 
+                    string.IsNullOrWhiteSpace(request.City) && string.IsNullOrWhiteSpace(request.District))
                 {
-                    return BadRequest(new { code = 400, message = "该配送区域已存在" });
+                    return BadRequest(new { code = 400, message = "请填写至少一个地区信息或选择全国配送" });
+                }
+
+                // 如果是全国配送，清空区域信息
+                if (request.IsNationwide)
+                {
+                    request.Province = string.Empty;
+                    request.City = string.Empty;
+                    request.District = string.Empty;
+                }
+
+                // 检查是否已存在相同区域
+                var query = _context.DeliveryAreas.AsQueryable();
+
+                if (request.IsNationwide)
+                {
+                    // 检查是否已存在全国配送
+                    var existingArea = await query.FirstOrDefaultAsync(a => a.IsNationwide);
+                    if (existingArea != null)
+                    {
+                        return BadRequest(new { code = 400, message = "已存在全国配送区域" });
+                    }
+                }
+                else if (!string.IsNullOrWhiteSpace(request.Province))
+                {
+                    query = query.Where(a => a.Province == request.Province);
+                    
+                    if (!string.IsNullOrWhiteSpace(request.City))
+                    {
+                        query = query.Where(a => a.City == request.City);
+                        
+                        if (!string.IsNullOrWhiteSpace(request.District))
+                        {
+                            query = query.Where(a => a.District == request.District);
+                        }
+                    }
+                    
+                    var existingArea = await query.FirstOrDefaultAsync();
+                    if (existingArea != null)
+                    {
+                        return BadRequest(new { code = 400, message = "该配送区域已存在" });
+                    }
                 }
 
                 // 创建新配送区域
                 var newArea = new DeliveryArea
                 {
+                    IsNationwide = request.IsNationwide,
                     Province = request.Province,
                     City = request.City,
                     District = request.District,
                     SupportSameDayDelivery = request.SupportSameDayDelivery,
                     DeliveryFee = request.DeliveryFee,
-                    Description = request.Description,
                     CreateTime = DateTime.Now,
                     UpdateTime = DateTime.Now,
                     UpdateBy = currentUser.UserId
@@ -193,6 +258,13 @@ namespace FarmDirectSales.Controllers
                     return StatusCode(StatusCodes.Status403Forbidden, new { code = 403, message = "无权限访问此接口" });
                 }
 
+                // 验证至少有一个区域信息或选择了全国配送
+                if (!request.IsNationwide && string.IsNullOrWhiteSpace(request.Province) && 
+                    string.IsNullOrWhiteSpace(request.City) && string.IsNullOrWhiteSpace(request.District))
+                {
+                    return BadRequest(new { code = 400, message = "请填写至少一个地区信息或选择全国配送" });
+                }
+
                 // 查找配送区域
                 var area = await _context.DeliveryAreas.FindAsync(areaId);
                 if (area == null)
@@ -200,10 +272,56 @@ namespace FarmDirectSales.Controllers
                     return NotFound(new { code = 404, message = "配送区域不存在" });
                 }
 
+                // 如果是全国配送，清空区域信息
+                if (request.IsNationwide)
+                {
+                    request.Province = string.Empty;
+                    request.City = string.Empty;
+                    request.District = string.Empty;
+                }
+
+                // 检查是否与其他区域冲突
+                if (request.IsNationwide)
+                {
+                    // 检查是否已存在其他全国配送区域
+                    var existingArea = await _context.DeliveryAreas
+                        .Where(a => a.DeliveryAreaId != areaId && a.IsNationwide)
+                        .FirstOrDefaultAsync();
+                    
+                    if (existingArea != null)
+                    {
+                        return BadRequest(new { code = 400, message = "已存在全国配送区域" });
+                    }
+                }
+                else if (!string.IsNullOrWhiteSpace(request.Province))
+                {
+                    var query = _context.DeliveryAreas
+                        .Where(a => a.DeliveryAreaId != areaId && a.Province == request.Province);
+                    
+                    if (!string.IsNullOrWhiteSpace(request.City))
+                    {
+                        query = query.Where(a => a.City == request.City);
+                        
+                        if (!string.IsNullOrWhiteSpace(request.District))
+                        {
+                            query = query.Where(a => a.District == request.District);
+                        }
+                    }
+                    
+                    var existingArea = await query.FirstOrDefaultAsync();
+                    if (existingArea != null)
+                    {
+                        return BadRequest(new { code = 400, message = "该配送区域已存在" });
+                    }
+                }
+
                 // 更新配送区域信息
+                area.IsNationwide = request.IsNationwide;
+                area.Province = request.Province;
+                area.City = request.City;
+                area.District = request.District;
                 area.SupportSameDayDelivery = request.SupportSameDayDelivery;
                 area.DeliveryFee = request.DeliveryFee;
-                area.Description = request.Description;
                 area.UpdateTime = DateTime.Now;
                 area.UpdateBy = currentUser.UserId;
 
@@ -278,30 +396,67 @@ namespace FarmDirectSales.Controllers
 
                 int addedCount = 0;
                 int skippedCount = 0;
+                bool hasNationwide = await _context.DeliveryAreas.AnyAsync(a => a.IsNationwide);
 
                 foreach (var request in requests)
                 {
-                    // 检查是否已存在相同区域
-                    var existingArea = await _context.DeliveryAreas
-                        .FirstOrDefaultAsync(a => a.Province == request.Province && 
-                                            a.City == request.City && 
-                                            a.District == request.District);
-
-                    if (existingArea != null)
+                    // 验证至少有一个区域信息或选择了全国配送
+                    if (!request.IsNationwide && string.IsNullOrWhiteSpace(request.Province) && 
+                        string.IsNullOrWhiteSpace(request.City) && string.IsNullOrWhiteSpace(request.District))
                     {
                         skippedCount++;
                         continue;
+                    }
+                    
+                    // 如果是全国配送且已存在全国配送区域，则跳过
+                    if (request.IsNationwide && hasNationwide)
+                    {
+                        skippedCount++;
+                        continue;
+                    }
+                    
+                    // 如果是全国配送，清空区域信息
+                    if (request.IsNationwide)
+                    {
+                        request.Province = string.Empty;
+                        request.City = string.Empty;
+                        request.District = string.Empty;
+                    }
+
+                    // 检查是否已存在相同区域
+                    var query = _context.DeliveryAreas.AsQueryable();
+
+                    if (!request.IsNationwide && !string.IsNullOrWhiteSpace(request.Province))
+                    {
+                        query = query.Where(a => a.Province == request.Province);
+                        
+                        if (!string.IsNullOrWhiteSpace(request.City))
+                        {
+                            query = query.Where(a => a.City == request.City);
+                            
+                            if (!string.IsNullOrWhiteSpace(request.District))
+                            {
+                                query = query.Where(a => a.District == request.District);
+                            }
+                        }
+                        
+                        var existingArea = await query.FirstOrDefaultAsync();
+                        if (existingArea != null)
+                        {
+                            skippedCount++;
+                            continue;
+                        }
                     }
 
                     // 创建新配送区域
                     var newArea = new DeliveryArea
                     {
+                        IsNationwide = request.IsNationwide,
                         Province = request.Province,
                         City = request.City,
                         District = request.District,
                         SupportSameDayDelivery = request.SupportSameDayDelivery,
                         DeliveryFee = request.DeliveryFee,
-                        Description = request.Description,
                         CreateTime = DateTime.Now,
                         UpdateTime = DateTime.Now,
                         UpdateBy = currentUser.UserId
@@ -309,6 +464,12 @@ namespace FarmDirectSales.Controllers
 
                     _context.DeliveryAreas.Add(newArea);
                     addedCount++;
+                    
+                    // 如果添加了全国配送区域，记录标志
+                    if (request.IsNationwide)
+                    {
+                        hasNationwide = true;
+                    }
                 }
 
                 await _context.SaveChangesAsync();
@@ -326,172 +487,7 @@ namespace FarmDirectSales.Controllers
             }
         }
 
-        /// <summary>
-        /// 初始化默认配送区域（仅管理员）
-        /// </summary>
-        [HttpPost("initialize")]
-        public async Task<IActionResult> InitializeDefaultAreas()
-        {
-            try
-            {
-                // 验证当前用户是否为管理员
-                var currentUser = HttpContext.Items["User"] as User;
-                if (currentUser == null || currentUser.Role != "admin")
-                {
-                    return StatusCode(StatusCodes.Status403Forbidden, new { code = 403, message = "无权限访问此接口" });
-                }
 
-                // 定义默认配送区域
-                var defaultAreas = new List<DeliveryArea>
-                {
-                    // 广州
-                    new DeliveryArea 
-                    { 
-                        Province = "广东省", 
-                        City = "广州市", 
-                        District = "天河区", 
-                        SupportSameDayDelivery = true, 
-                        DeliveryFee = 15.0m,
-                        Description = "当天2小时内配送",
-                        CreateTime = DateTime.Now,
-                        UpdateTime = DateTime.Now,
-                        UpdateBy = currentUser.UserId
-                    },
-                    new DeliveryArea 
-                    { 
-                        Province = "广东省", 
-                        City = "广州市", 
-                        District = "越秀区", 
-                        SupportSameDayDelivery = true, 
-                        DeliveryFee = 15.0m,
-                        Description = "当天2小时内配送",
-                        CreateTime = DateTime.Now,
-                        UpdateTime = DateTime.Now,
-                        UpdateBy = currentUser.UserId
-                    },
-                    new DeliveryArea 
-                    { 
-                        Province = "广东省", 
-                        City = "广州市", 
-                        District = "海珠区", 
-                        SupportSameDayDelivery = true, 
-                        DeliveryFee = 15.0m,
-                        Description = "当天2小时内配送",
-                        CreateTime = DateTime.Now,
-                        UpdateTime = DateTime.Now,
-                        UpdateBy = currentUser.UserId
-                    },
-                    new DeliveryArea 
-                    { 
-                        Province = "广东省", 
-                        City = "广州市", 
-                        District = "荔湾区", 
-                        SupportSameDayDelivery = true, 
-                        DeliveryFee = 15.0m,
-                        Description = "当天2小时内配送",
-                        CreateTime = DateTime.Now,
-                        UpdateTime = DateTime.Now,
-                        UpdateBy = currentUser.UserId
-                    },
-                    new DeliveryArea 
-                    { 
-                        Province = "广东省", 
-                        City = "广州市", 
-                        District = "白云区", 
-                        SupportSameDayDelivery = true, 
-                        DeliveryFee = 15.0m,
-                        Description = "当天2小时内配送",
-                        CreateTime = DateTime.Now,
-                        UpdateTime = DateTime.Now,
-                        UpdateBy = currentUser.UserId
-                    },
-                    
-                    // 深圳
-                    new DeliveryArea 
-                    { 
-                        Province = "广东省", 
-                        City = "深圳市", 
-                        District = "福田区", 
-                        SupportSameDayDelivery = true, 
-                        DeliveryFee = 20.0m,
-                        Description = "当天4小时内配送",
-                        CreateTime = DateTime.Now,
-                        UpdateTime = DateTime.Now,
-                        UpdateBy = currentUser.UserId
-                    },
-                    new DeliveryArea 
-                    { 
-                        Province = "广东省", 
-                        City = "深圳市", 
-                        District = "南山区", 
-                        SupportSameDayDelivery = true, 
-                        DeliveryFee = 20.0m,
-                        Description = "当天4小时内配送",
-                        CreateTime = DateTime.Now,
-                        UpdateTime = DateTime.Now,
-                        UpdateBy = currentUser.UserId
-                    },
-                    new DeliveryArea 
-                    { 
-                        Province = "广东省", 
-                        City = "深圳市", 
-                        District = "罗湖区", 
-                        SupportSameDayDelivery = true, 
-                        DeliveryFee = 20.0m,
-                        Description = "当天4小时内配送",
-                        CreateTime = DateTime.Now,
-                        UpdateTime = DateTime.Now,
-                        UpdateBy = currentUser.UserId
-                    },
-                    new DeliveryArea 
-                    { 
-                        Province = "广东省", 
-                        City = "深圳市", 
-                        District = "宝安区", 
-                        SupportSameDayDelivery = true, 
-                        DeliveryFee = 20.0m,
-                        Description = "当天4小时内配送",
-                        CreateTime = DateTime.Now,
-                        UpdateTime = DateTime.Now,
-                        UpdateBy = currentUser.UserId
-                    }
-                };
-
-                int addedCount = 0;
-                int skippedCount = 0;
-
-                foreach (var area in defaultAreas)
-                {
-                    // 检查是否已存在相同区域
-                    var existingArea = await _context.DeliveryAreas
-                        .FirstOrDefaultAsync(a => a.Province == area.Province && 
-                                            a.City == area.City && 
-                                            a.District == area.District);
-
-                    if (existingArea != null)
-                    {
-                        skippedCount++;
-                        continue;
-                    }
-
-                    _context.DeliveryAreas.Add(area);
-                    addedCount++;
-                }
-
-                await _context.SaveChangesAsync();
-
-                return Ok(new
-                {
-                    code = 200,
-                    message = $"初始化配送区域成功，添加 {addedCount} 个，跳过 {skippedCount} 个",
-                    data = new { addedCount, skippedCount }
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { code = 400, message = ex.Message });
-            }
-        }
     }
 
     /// <summary>
@@ -500,23 +496,25 @@ namespace FarmDirectSales.Controllers
     public class AddDeliveryAreaRequest
     {
         /// <summary>
+        /// 是否全国配送（不限制区域）
+        /// </summary>
+        public bool IsNationwide { get; set; } = false;
+        
+        /// <summary>
         /// 省份
         /// </summary>
-        [Required(ErrorMessage = "省份不能为空")]
         [StringLength(20, ErrorMessage = "省份名称最多20个字符")]
         public string Province { get; set; } = string.Empty;
 
         /// <summary>
         /// 城市
         /// </summary>
-        [Required(ErrorMessage = "城市不能为空")]
         [StringLength(20, ErrorMessage = "城市名称最多20个字符")]
         public string City { get; set; } = string.Empty;
 
         /// <summary>
         /// 区/县
         /// </summary>
-        [Required(ErrorMessage = "区/县不能为空")]
         [StringLength(20, ErrorMessage = "区/县名称最多20个字符")]
         public string District { get; set; } = string.Empty;
 
@@ -543,6 +541,29 @@ namespace FarmDirectSales.Controllers
     /// </summary>
     public class UpdateDeliveryAreaRequest
     {
+        /// <summary>
+        /// 是否全国配送（不限制区域）
+        /// </summary>
+        public bool IsNationwide { get; set; } = false;
+        
+        /// <summary>
+        /// 省份
+        /// </summary>
+        [StringLength(20, ErrorMessage = "省份名称最多20个字符")]
+        public string Province { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 城市
+        /// </summary>
+        [StringLength(20, ErrorMessage = "城市名称最多20个字符")]
+        public string City { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 区/县
+        /// </summary>
+        [StringLength(20, ErrorMessage = "区/县名称最多20个字符")]
+        public string District { get; set; } = string.Empty;
+        
         /// <summary>
         /// 是否支持当天配送
         /// </summary>

@@ -75,6 +75,11 @@ namespace FarmDirectSales.Models
         /// 销售量
         /// </summary>
         public int Quantity { get; set; }
+        
+        /// <summary>
+        /// 产品类别
+        /// </summary>
+        public string Category { get; set; } = string.Empty;
     }
     
     /// <summary>

@@ -15,23 +15,25 @@ namespace FarmDirectSales.Models
         public int DeliveryAreaId { get; set; }
 
         /// <summary>
+        /// 是否全国配送（不限制区域）
+        /// </summary>
+        public bool IsNationwide { get; set; } = false;
+        
+        /// <summary>
         /// 省份
         /// </summary>
-        [Required]
         [StringLength(20)]
         public string Province { get; set; } = string.Empty;
 
         /// <summary>
         /// 城市
         /// </summary>
-        [Required]
         [StringLength(20)]
         public string City { get; set; } = string.Empty;
 
         /// <summary>
         /// 区/县
         /// </summary>
-        [Required]
         [StringLength(20)]
         public string District { get; set; } = string.Empty;
 

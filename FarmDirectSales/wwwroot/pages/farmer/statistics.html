@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../../css/style.css">
     <script src="../../js/dependencies.js"></script>
     <script src="../../js/auth.js"></script>
+    <script src="../../js/axios-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -107,8 +108,16 @@
                     </div>
                 </div>
                 
+                <!-- 加载指示器 -->
+                <div id="loadingIndicator" class="text-center my-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">加载中...</span>
+                    </div>
+                    <p class="mt-2">正在加载数据，请稍候...</p>
+                </div>
+                
                 <!-- 销售概览 -->
-                <div class="row">
+                <div class="row" id="overviewContainer">
                     <div class="col-md-3">
                         <div class="card mb-4 text-center">
                             <div class="card-body">
@@ -128,8 +137,8 @@
                     <div class="col-md-3">
                         <div class="card mb-4 text-center">
                             <div class="card-body">
-                                <h2 class="text-info" id="totalCustomers">0</h2>
-                                <p class="text-muted mb-0">客户数量</p>
+                                <h2 class="text-info" id="totalQuantity">0</h2>
+                                <p class="text-muted mb-0">销售数量</p>
                             </div>
                         </div>
                     </div>
@@ -144,7 +153,7 @@
                 </div>
                 
                 <!-- 销售趋势图 -->
-                <div class="card mb-4">
+                <div class="card mb-4" id="salesTrendContainer">
                     <div class="card-header">
                         <h5 class="mb-0">销售趋势</h5>
                     </div>
@@ -154,7 +163,7 @@
                 </div>
                 
                 <!-- 产品销售统计 -->
-                <div class="row">
+                <div class="row" id="productChartsContainer">
                     <div class="col-md-6">
                         <div class="card mb-4">
                             <div class="card-header">
@@ -178,7 +187,7 @@
                 </div>
                 
                 <!-- 热销产品表格 -->
-                <div class="card mb-4">
+                <div class="card mb-4" id="productTableContainer">
                     <div class="card-header">
                         <h5 class="mb-0">产品销售明细</h5>
                     </div>
@@ -191,17 +200,31 @@
                                         <th>销售数量</th>
                                         <th>销售额</th>
                                         <th>占比</th>
-                                        <th>趋势</th>
                                     </tr>
                                 </thead>
                                 <tbody id="productSalesTable">
                                     <!-- 产品销售数据将通过JS动态加载 -->
                                     <tr>
-                                        <td colspan="5" class="text-center">暂无销售数据</td>
+                                        <td colspan="4" class="text-center">暂无销售数据</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+                
+                <!-- 无数据提示 -->
+                <div id="noDataMessage" class="card mb-4" style="display: none;">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-bar fa-4x text-muted"></i>
+                        </div>
+                        <h4>暂无销售数据</h4>
+                        <p class="text-muted">所选时间范围内没有任何销售记录。</p>
+                        <p>请尝试选择其他时间范围，或者创建一些产品并尝试销售。</p>
+                        <a href="products.html" class="btn btn-primary mt-2">
+                            <i class="fas fa-plus mr-1"></i> 管理产品
+                        </a>
                     </div>
                 </div>
             </div>
@@ -217,6 +240,9 @@
 
     <!-- 自定义JS -->
     <script>
+        // 用户ID
+        let currentUserId = 0;
+        
         /**
          * 页面加载完成后执行
          */
@@ -228,17 +254,20 @@
                     $('#userDropdown').show();
                     $('#currentUsername').text(user.username);
                     
+                    // 保存用户ID
+                    currentUserId = user.userId;
+                    
+                    // 设置默认日期范围为过去7天
+                    setDateRange('week');
+                    
                     // 初始化统计数据
-                    initStatistics();
+                    refreshStatistics();
                 } else {
                     // 如果不是农户，跳转到登录页面并显示提示
                     alert('您需要以农户身份登录才能访问此页面');
                     window.location.href = '../login.html?role=farmer&redirect=' + encodeURIComponent(window.location.href);
                 }
             });
-            
-            // 设置默认日期范围为过去7天
-            setDateRange('week');
             
             // 绑定时间范围按钮点击事件
             $('.btn-group .btn').on('click', function() {
@@ -252,6 +281,12 @@
             $('#customRangeBtn').on('click', function() {
                 $('.btn-group .btn').removeClass('active');
                 refreshStatistics();
+            });
+            
+            // 绑定退出登录按钮点击事件
+            $('#logoutBtn').on('click', function() {
+                logout();
+                window.location.href = '../login.html';
             });
         });
         
@@ -292,20 +327,6 @@
         }
         
         /**
-         * 初始化统计数据
-         */
-        function initStatistics() {
-            // 初始化销售趋势图
-            initSalesTrendChart();
-            
-            // 初始化畅销产品图
-            initTopProductsChart();
-            
-            // 初始化产品类别销售分布图
-            initCategorySalesChart();
-        }
-        
-        /**
          * 刷新统计数据
          */
         function refreshStatistics() {
@@ -322,88 +343,128 @@
                 return;
             }
             
-            // 更新销售概览数据
-            updateSalesOverview(startDate, endDate);
+            // 显示加载指示器
+            $('#loadingIndicator').show();
+            $('#overviewContainer, #salesTrendContainer, #productChartsContainer, #productTableContainer, #noDataMessage').hide();
             
-            // 更新图表
-            updateCharts(startDate, endDate);
+            // 准备筛选条件
+            const filter = {
+                startDate: startDate,
+                endDate: endDate,
+                farmerId: currentUserId
+            };
+            
+            // 发送请求获取销售总览数据
+            fetchSalesOverview(filter);
         }
         
         /**
-         * 更新销售概览数据
+         * 获取销售总览数据
          */
-        function updateSalesOverview(startDate, endDate) {
-            // 模拟从API获取数据，这里仅使用模拟数据
-            setTimeout(function() {
-                // 随机生成模拟数据
-                const totalOrders = Math.floor(Math.random() * 50) + 30; // 30~79
-                const totalSales = Math.floor(Math.random() * 5000) + 3000; // 3000~7999
-                const totalCustomers = Math.floor(Math.random() * 20) + 15; // 15~34
-                const averageOrderValue = Math.round(totalSales / totalOrders);
+        async function fetchSalesOverview(filter) {
+            try {
+                const response = await http.post('statistics/overview', filter);
                 
-                // 更新显示
-                $('#totalOrders').text(totalOrders);
-                $('#totalSales').text('¥' + totalSales.toLocaleString());
-                $('#totalCustomers').text(totalCustomers);
-                $('#averageOrderValue').text('¥' + averageOrderValue);
-                
-                // 动画效果
-                $('#totalOrders, #totalSales, #totalCustomers, #averageOrderValue').each(function() {
-                    $(this).addClass('highlight');
-                    setTimeout(function() {
-                        $('.highlight').removeClass('highlight');
-                    }, 1000);
-                });
-            }, 500);
+                if (response && response.code === 200) {
+                    const data = response.data;
+                    
+                    // 更新显示
+                    $('#totalOrders').text(data.totalOrders);
+                    $('#totalSales').text('¥' + data.totalSales.toLocaleString());
+                    $('#totalQuantity').text(data.totalQuantity);
+                    $('#averageOrderValue').text('¥' + data.averageOrderValue.toLocaleString());
+                    
+                    // 如果有销售数据，显示概览容器
+                    if (data.totalOrders > 0) {
+                        $('#overviewContainer').show();
+                        
+                        // 获取其他统计数据
+                        fetchSalesTrend(filter);
+                        fetchProductRanking(filter);
+                    } else {
+                        // 如果没有销售数据，显示无数据消息
+                        showNoDataMessage();
+                    }
+                } else {
+                    showErrorMessage('获取销售总览数据失败: ' + (response.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('获取销售总览数据出错:', error);
+                showErrorMessage('获取销售总览数据出错: ' + error.message);
+            }
         }
         
         /**
-         * 更新图表
+         * 获取销售趋势数据
          */
-        function updateCharts(startDate, endDate) {
+        async function fetchSalesTrend(filter) {
+            try {
+                const response = await http.post('statistics/trend/daily', filter);
+                
+                if (response && response.code === 200) {
+                    const trendData = response.data;
+                    
+                    if (trendData && trendData.length > 0) {
+                        // 显示销售趋势容器
+                        $('#salesTrendContainer').show();
+                        
+                        // 处理数据并绘制图表
+                        const labels = trendData.map(item => item.period);
+                        const salesData = trendData.map(item => item.sales);
+                        const ordersData = trendData.map(item => item.orders);
+                        
+                        renderSalesTrendChart(labels, salesData, ordersData);
+                    }
+                } else {
+                    console.error('获取销售趋势失败:', response.message);
+                }
+            } catch (error) {
+                console.error('获取销售趋势出错:', error);
+            }
+        }
+        
+        /**
+         * 获取产品销售排名数据
+         */
+        async function fetchProductRanking(filter) {
+            try {
+                const response = await http.post('statistics/products/top/10', filter);
+                
+                if (response && response.code === 200) {
+                    const products = response.data;
+                    
+                    if (products && products.length > 0) {
+                        // 显示产品统计容器
+                        $('#productChartsContainer, #productTableContainer').show();
+                        
+                        // 渲染畅销产品图表
+                        renderTopProductsChart(products);
+                        
+                        // 渲染产品类别销售分布图
+                        renderCategorySalesChart(products);
+                        
+                        // 渲染产品销售表格
+                        renderProductSalesTable(products);
+                    }
+                } else {
+                    console.error('获取产品销售排名失败:', response.message);
+                }
+            } catch (error) {
+                console.error('获取产品销售排名出错:', error);
+            } finally {
+                // 隐藏加载指示器
+                $('#loadingIndicator').hide();
+            }
+        }
+        
+        /**
+         * 渲染销售趋势图表
+         */
+        function renderSalesTrendChart(labels, salesData, ordersData) {
             // 获取图表实例并销毁
-            const charts = [
-                Chart.getChart('salesTrendChart'),
-                Chart.getChart('topProductsChart'),
-                Chart.getChart('categorySalesChart')
-            ];
-            
-            charts.forEach(chart => {
-                if (chart) chart.destroy();
-            });
-            
-            // 重新初始化图表
-            initSalesTrendChart(startDate, endDate);
-            initTopProductsChart(startDate, endDate);
-            initCategorySalesChart(startDate, endDate);
-        }
-        
-        /**
-         * 初始化销售趋势图
-         */
-        function initSalesTrendChart(startDate, endDate) {
-            // 模拟生成数据
-            const days = 30;
-            const labels = [];
-            const salesData = [];
-            const ordersData = [];
-            
-            const now = new Date();
-            for (let i = days - 1; i >= 0; i--) {
-                const date = new Date(now);
-                date.setDate(date.getDate() - i);
-                
-                // 格式化日期为MM-DD
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                labels.push(`${month}-${day}`);
-                
-                // 生成随机销售额和订单数
-                const sales = Math.floor(Math.random() * 300) + 100;
-                const orders = Math.floor(Math.random() * 4) + 1;
-                
-                salesData.push(sales);
-                ordersData.push(orders);
+            const existingChart = Chart.getChart('salesTrendChart');
+            if (existingChart) {
+                existingChart.destroy();
             }
             
             // 创建图表
@@ -465,38 +526,53 @@
         }
         
         /**
-         * 初始化畅销产品图
+         * 渲染畅销产品图表
          */
-        function initTopProductsChart(startDate, endDate) {
-            // 模拟数据
-            const data = {
-                labels: ['有机胡萝卜', '新鲜西红柿', '有机土豆', '黄瓜', '青椒'],
-                datasets: [{
-                    label: '销售量(kg)',
-                    data: [240, 180, 150, 120, 95],
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.7)',
-                        'rgba(54, 162, 235, 0.7)',
-                        'rgba(255, 206, 86, 0.7)',
-                        'rgba(75, 192, 192, 0.7)',
-                        'rgba(153, 102, 255, 0.7)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            };
+        function renderTopProductsChart(products) {
+            // 获取图表实例并销毁
+            const existingChart = Chart.getChart('topProductsChart');
+            if (existingChart) {
+                existingChart.destroy();
+            }
+            
+            // 限制最多显示5个产品
+            const topProducts = products.slice(0, 5);
+            
+            // 处理数据
+            const labels = topProducts.map(p => p.productName);
+            const data = topProducts.map(p => p.quantity);
+            
+            // 颜色配置
+            const backgroundColors = [
+                'rgba(255, 99, 132, 0.7)',
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(255, 206, 86, 0.7)',
+                'rgba(75, 192, 192, 0.7)',
+                'rgba(153, 102, 255, 0.7)'
+            ];
+            
+            const borderColors = [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)'
+            ];
             
             // 创建图表
             const ctx = document.getElementById('topProductsChart').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
-                data: data,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '销售量',
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1
+                    }]
+                },
                 options: {
                     responsive: true,
                     plugins: {
@@ -517,38 +593,64 @@
         }
         
         /**
-         * 初始化产品类别销售分布图
+         * 渲染产品类别销售分布图
          */
-        function initCategorySalesChart(startDate, endDate) {
-            // 模拟数据
-            const data = {
-                labels: ['蔬菜', '水果', '谷物', '肉类', '其他'],
-                datasets: [{
-                    label: '销售额占比',
-                    data: [45, 25, 15, 10, 5],
-                    backgroundColor: [
-                        'rgba(75, 192, 192, 0.7)',
-                        'rgba(255, 99, 132, 0.7)',
-                        'rgba(255, 206, 86, 0.7)',
-                        'rgba(54, 162, 235, 0.7)',
-                        'rgba(153, 102, 255, 0.7)'
-                    ],
-                    borderColor: [
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(153, 102, 255, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            };
+        function renderCategorySalesChart(products) {
+            // 获取图表实例并销毁
+            const existingChart = Chart.getChart('categorySalesChart');
+            if (existingChart) {
+                existingChart.destroy();
+            }
+            
+            // 按产品类别分组
+            const categories = {};
+            products.forEach(product => {
+                const category = product.category || '未分类';
+                if (!categories[category]) {
+                    categories[category] = 0;
+                }
+                categories[category] += product.sales;
+            });
+            
+            // 转换为数组
+            const categoryLabels = Object.keys(categories);
+            const categoryData = Object.values(categories);
+            
+            // 颜色配置
+            const backgroundColors = [
+                'rgba(75, 192, 192, 0.7)',
+                'rgba(255, 99, 132, 0.7)',
+                'rgba(255, 206, 86, 0.7)',
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(153, 102, 255, 0.7)',
+                'rgba(255, 159, 64, 0.7)',
+                'rgba(201, 203, 207, 0.7)'
+            ];
+            
+            const borderColors = [
+                'rgba(75, 192, 192, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(201, 203, 207, 1)'
+            ];
             
             // 创建图表
             const ctx = document.getElementById('categorySalesChart').getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
-                data: data,
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        label: '销售额占比',
+                        data: categoryData,
+                        backgroundColor: backgroundColors.slice(0, categoryLabels.length),
+                        borderColor: borderColors.slice(0, categoryLabels.length),
+                        borderWidth: 1
+                    }]
+                },
                 options: {
                     responsive: true,
                     plugins: {
@@ -558,6 +660,60 @@
                     }
                 }
             });
+        }
+        
+        /**
+         * 渲染产品销售表格
+         */
+        function renderProductSalesTable(products) {
+            const tableBody = $('#productSalesTable');
+            tableBody.empty();
+            
+            if (!products || products.length === 0) {
+                tableBody.html('<tr><td colspan="4" class="text-center">暂无销售数据</td></tr>');
+                return;
+            }
+            
+            // 计算总销售额
+            const totalSales = products.reduce((sum, product) => sum + product.sales, 0);
+            
+            // 添加每个产品行
+            products.forEach(product => {
+                const percentage = ((product.sales / totalSales) * 100).toFixed(2);
+                
+                const row = `
+                    <tr>
+                        <td>${product.productName}</td>
+                        <td>${product.quantity}</td>
+                        <td>¥${product.sales.toLocaleString()}</td>
+                        <td>${percentage}%</td>
+                    </tr>
+                `;
+                
+                tableBody.append(row);
+            });
+        }
+        
+        /**
+         * 显示无数据消息
+         */
+        function showNoDataMessage() {
+            // 隐藏加载指示器和数据容器
+            $('#loadingIndicator, #overviewContainer, #salesTrendContainer, #productChartsContainer, #productTableContainer').hide();
+            
+            // 显示无数据消息
+            $('#noDataMessage').show();
+        }
+        
+        /**
+         * 显示错误消息
+         */
+        function showErrorMessage(message) {
+            // 隐藏加载指示器
+            $('#loadingIndicator').hide();
+            
+            // 显示错误消息
+            alert(message);
         }
     </script>
 </body>
