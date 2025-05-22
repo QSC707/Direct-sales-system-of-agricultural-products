@@ -210,10 +210,6 @@
                                     <th>收货地址:</th>
                                     <td id="detailShippingAddress"></td>
                                 </tr>
-                                <tr>
-                                    <th>备注:</th>
-                                    <td id="detailCustomerNotes"></td>
-                                </tr>
                             </table>
                         </div>
                     </div>
@@ -328,10 +324,6 @@
                         <div class="alert alert-info">
                             <i class="fa fa-info-circle mr-2"></i>确认开始配送此订单吗？订单状态将更新为"货到付款配送中"。
                         </div>
-                        <div class="form-group">
-                            <label for="shippingNotes">配送备注（可选）</label>
-                            <textarea class="form-control" id="shippingNotes" rows="3" placeholder="可以输入送货时间、联系方式等备注信息"></textarea>
-                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -414,20 +406,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="refundReason">退款原因</label>
-                        <select class="form-control" id="refundReason">
-                            <option value="无法配送">无法配送</option>
-                            <option value="缺货">缺货</option>
-                            <option value="客户要求退款">客户要求退款</option>
-                            <option value="商品质量问题">商品质量问题</option>
-                            <option value="配送问题">配送问题</option>
-                            <option value="其他原因">其他原因</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="refundNotes">备注说明</label>
-                        <textarea class="form-control" id="refundNotes" rows="3" placeholder="请输入退款相关说明..."></textarea>
+                        <label for="refundReason">处理说明</label>
+                        <textarea class="form-control" id="refundReason" rows="3" placeholder="请输入退款处理原因..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1019,11 +999,10 @@
         }
         
         /**
-         * 开始配送处理
+         * 处理发货请求
          */
         async function shipOrder() {
             const orderId = $('#shipOrderId').val();
-            const shippingNotes = $('#shippingNotes').val();
             
             // 获取当前用户
             const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -1034,8 +1013,7 @@
             
             // 创建配送数据
             const shipData = {
-                farmerId: user.userId,
-                shippingNotes: shippingNotes
+                farmerId: user.userId
             };
             
             try {
@@ -1158,7 +1136,7 @@
          */
         function openRefundModal(orderId) {
             // 清空表单
-            $('#refundNotes').val('');
+            $('#refundReason').val('');
             $('#refundAmount').val('');
             $('#refundType').val('full');
             $('#partialRefundAmountGroup').hide();
@@ -1202,7 +1180,7 @@
             const orderId = $('#refundOrderId').val();
             const refundType = $('#refundType').val();
             const refundReason = $('#refundReason').val();
-            const refundNotes = $('#refundNotes').val();
+            
             let refundAmount = null;
             
             if (refundType === 'partial') {
@@ -1225,8 +1203,7 @@
                 processorId: user.userId,
                 isApproved: true, // 农户主动发起的退款默认批准
                 refundReason: refundReason,
-                refundAmount: refundType === 'partial' ? refundAmount : null,
-                notes: refundNotes
+                refundAmount: refundType === 'partial' ? refundAmount : null
             };
             
             try {

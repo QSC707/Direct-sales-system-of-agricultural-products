@@ -965,11 +965,6 @@ namespace FarmDirectSales.Controllers
         /// 退款金额（部分退款时使用）
         /// </summary>
         public decimal? RefundAmount { get; set; }
-        
-        /// <summary>
-        /// 备注说明
-        /// </summary>
-        public string? Notes { get; set; }
     }
     
     /// <summary>
@@ -999,11 +994,6 @@ namespace FarmDirectSales.Controllers
         /// 退款金额
         /// </summary>
         public decimal? RefundAmount { get; set; }
-        
-        /// <summary>
-        /// 备注说明
-        /// </summary>
-        public string? Notes { get; set; }
     }
 } 
  
