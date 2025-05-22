@@ -864,11 +864,6 @@
             退款金额（部分退款时使用）
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.RequestRefundDto.Notes">
-            <summary>
-            备注说明
-            </summary>
-        </member>
         <member name="T:FarmDirectSales.Controllers.ProcessRefundDto">
             <summary>
             处理退款请求模型
@@ -892,11 +887,6 @@
         <member name="P:FarmDirectSales.Controllers.ProcessRefundDto.RefundAmount">
             <summary>
             退款金额
-            </summary>
-        </member>
-        <member name="P:FarmDirectSales.Controllers.ProcessRefundDto.Notes">
-            <summary>
-            备注说明
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.ProductController">
@@ -1687,6 +1677,18 @@
         <member name="M:FarmDirectSales.Migrations.RemoveNotesFromOrder.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:FarmDirectSales.Migrations.AddRefundRequestTime">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddRefundRequestTime.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddRefundRequestTime.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddRefundRequestTime.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:FarmDirectSales.Models.CartItem">
             <summary>
             购物车项模型
@@ -1980,6 +1982,11 @@
         <member name="P:FarmDirectSales.Models.Order.CancelByType">
             <summary>
             取消人类型：user-用户取消，farmer-农户取消
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.RefundRequestTime">
+            <summary>
+            退款申请时间
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.Order.ShippingAddress">

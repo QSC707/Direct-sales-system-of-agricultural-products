@@ -169,127 +169,189 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h6>基本信息</h6>
-                            <table class="table table-sm table-borderless">
-                                <tr>
-                                    <th width="120">订单号:</th>
-                                    <td id="detailOrderNumber"></td>
-                                </tr>
-                                <tr>
-                                    <th>创建时间:</th>
-                                    <td id="detailCreateTime"></td>
-                                </tr>
-                                <tr>
-                                    <th>状态:</th>
-                                    <td id="detailStatus"></td>
-                                </tr>
-                                <tr>
-                                    <th>支付方式:</th>
-                                    <td id="detailPaymentMethod"></td>
-                                </tr>
-                                <tr>
-                                    <th>支付时间:</th>
-                                    <td id="detailPaymentTime"></td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>客户信息</h6>
-                            <table class="table table-sm table-borderless">
-                                <tr>
-                                    <th width="120">客户名称:</th>
-                                    <td id="detailCustomerName"></td>
-                                </tr>
-                                <tr>
-                                    <th>联系电话:</th>
-                                    <td id="detailCustomerPhone"></td>
-                                </tr>
-                                <tr>
-                                    <th>收货地址:</th>
-                                    <td id="detailShippingAddress"></td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <h6>订单项目</h6>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>产品</th>
-                                    <th>单价</th>
-                                    <th>数量</th>
-                                    <th>小计</th>
-                                </tr>
-                            </thead>
-                            <tbody id="orderItemsList">
-                                <!-- 订单项将通过JS动态加载 -->
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <th colspan="3" class="text-right">商品总额:</th>
-                                    <td id="detailSubtotal"></td>
-                                </tr>
-                                <tr>
-                                    <th colspan="3" class="text-right">运费:</th>
-                                    <td id="detailShippingFee"></td>
-                                </tr>
-                                <tr class="table-success">
-                                    <th colspan="3" class="text-right">订单总额:</th>
-                                    <td id="detailTotalAmount" class="font-weight-bold"></td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                    
-                    <div id="deliverySection" class="mt-3">
-                        <h6>配送信息</h6>
-                        <div id="noDeliveryInfo" class="alert alert-warning">
-                            <i class="fa fa-exclamation-triangle mr-2"></i>该订单尚未开始配送
-                        </div>
-                        <div id="deliveryInfo" style="display: none;">
-                            <table class="table table-sm table-borderless">
-                                <tr>
-                                    <th width="120">配送方式:</th>
-                                    <td>货到付款</td>
-                                </tr>
-                                <tr>
-                                    <th>开始配送时间:</th>
-                                    <td id="detailShippingTime"></td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    ${orderDetail.status === '已取消' ? 
-                    `<div class="mt-3">
-                        <h6>取消信息</h6>
-                        <div class="alert ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 'alert-info' : 'alert-danger'}">
-                            <div><strong>取消方：</strong> ${orderDetail.cancelByType === 'farmer' ? '农户取消（您）' : '用户取消'}</div>
-                            <div><strong>取消原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
-                            <div><strong>取消时间：</strong> ${orderDetail.cancelTime || '未知'}</div>
-                            ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 
-                                `<div class="mt-2 text-success"><i class="fa fa-check-circle"></i> <strong>您已同意退款申请并取消了此订单</strong></div>` : ''}
-                        </div>
-                    </div>` : ''}
-                    
-                    ${orderDetail.status === '申请退款中' ? 
-                    `<div class="mt-3">
-                        <h6>退款申请信息</h6>
-                        <div class="alert alert-warning">
-                            <div><strong>申请人：</strong> ${orderDetail.user ? orderDetail.user.username : '未知用户'}</div>
-                            <div><strong>申请原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
-                            <div><strong>申请时间：</strong> ${orderDetail.cancelTime || '未知'}</div>
-                            <div class="mt-2">
-                                <button type="button" class="btn btn-sm btn-warning" onclick="openProcessRefundModal(${orderId})">
-                                    <i class="fa fa-undo"></i> 处理退款申请
-                                </button>
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-light py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 text-primary">
+                                    <i class="fa fa-info-circle me-2"></i>订单 #${orderDetail.orderId} 详情
+                                </h5>
+                                <span class="badge ${orderDetail.status === '已完成' ? 'bg-success' : orderDetail.status === '已取消' ? 'bg-danger' : 'bg-primary'} fs-6 py-2">
+                                    ${getStatusBadge(orderDetail.status)}
+                                </span>
                             </div>
                         </div>
-                    </div>` : ''}
+                        <div class="card-body p-4">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h6 class="border-bottom pb-2 mb-3 text-primary">
+                                        <i class="fa fa-clipboard-list me-2"></i>基本信息
+                                    </h6>
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <th width="120" class="text-muted">订单号:</th>
+                                            <td class="fw-bold">${orderDetail.orderId || '未知'}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">创建时间:</th>
+                                            <td>${formatFriendlyDateTime(orderDetail.createTime)}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">状态:</th>
+                                            <td>${getStatusBadge(orderDetail.status)}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">支付方式:</th>
+                                            <td>货到付款</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="border-bottom pb-2 mb-3 text-primary">
+                                        <i class="fa fa-user me-2"></i>客户信息
+                                    </h6>
+                                    <table class="table table-sm table-borderless">
+                                        <tr>
+                                            <th width="120" class="text-muted">客户名称:</th>
+                                            <td class="fw-bold">${orderDetail.user ? orderDetail.user.username : '未知'}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">联系电话:</th>
+                                            <td>${orderDetail.contactPhone || '未提供'}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">收货地址:</th>
+                                            <td>${orderDetail.shippingAddress || '未提供'}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <h6 class="border-bottom pb-2 mb-3 text-primary">
+                                <i class="fa fa-shopping-basket me-2"></i>订单项目
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>产品</th>
+                                            <th>单价</th>
+                                            <th>数量</th>
+                                            <th>小计</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="${orderDetail.product ? orderDetail.product.imageUrl : '/img/no-image.jpg'}" class="me-2" style="width:40px;height:40px;object-fit:cover;border-radius:4px">
+                                                    <span>${orderDetail.product ? orderDetail.product.productName : '未知产品'}</span>
+                                                </div>
+                                            </td>
+                                            <td>¥${orderDetail.product && orderDetail.product.price ? orderDetail.product.price.toFixed(2) : '0.00'}</td>
+                                            <td>${orderDetail.quantity || 0}</td>
+                                            <td class="fw-bold">¥${orderDetail.totalPrice ? orderDetail.totalPrice.toFixed(2) : '0.00'}</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="3" class="text-end">商品总额:</th>
+                                            <td>¥${orderDetail.totalPrice ? orderDetail.totalPrice.toFixed(2) : '0.00'}</td>
+                                        </tr>
+                                        <tr>
+                                            <th colspan="3" class="text-end">运费:</th>
+                                            <td>¥0.00</td>
+                                        </tr>
+                                        <tr class="table-success">
+                                            <th colspan="3" class="text-end">订单总额:</th>
+                                            <td class="fw-bold fs-5">¥${orderDetail.totalPrice ? orderDetail.totalPrice.toFixed(2) : '0.00'}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h6 class="border-bottom pb-2 mb-3 text-primary">
+                                    <i class="fa fa-truck me-2"></i>配送信息
+                                </h6>
+                                ${orderDetail.shipTime ? 
+                                    `<table class="table table-sm table-borderless">
+                                        <tr>
+                                            <th width="120" class="text-muted">配送方式:</th>
+                                            <td>货到付款</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">配送状态:</th>
+                                            <td>${getStatusBadge(orderDetail.status)}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">开始配送时间:</th>
+                                            <td>${formatFriendlyDateTime(orderDetail.shipTime)}</td>
+                                        </tr>
+                                        ${orderDetail.completeTime ? 
+                                        `<tr>
+                                            <th class="text-muted">完成时间:</th>
+                                            <td>${formatFriendlyDateTime(orderDetail.completeTime)}</td>
+                                        </tr>` : ''}
+                                    </table>` :
+                                    '<div class="alert alert-warning"><i class="fa fa-exclamation-triangle me-2"></i>该订单尚未开始配送</div>'
+                                }
+                            </div>
+                            
+                            ${orderDetail.status === '已取消' ? 
+                            `<div class="mt-4">
+                                <h6 class="border-bottom pb-2 mb-3 text-danger">
+                                    <i class="fa fa-ban me-2"></i>取消信息
+                                </h6>
+                                <div class="card ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 'border-info' : 'border-danger'} mb-3">
+                                    <div class="card-body">
+                                        <div class="d-flex">
+                                            <i class="fa fa-${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 'undo text-info' : 'times-circle text-danger'} fa-2x me-3 mt-1"></i>
+                                            <div>
+                                                <h5 class="${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 'text-info' : 'text-danger'} mb-3">
+                                                    ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? '订单已退款并取消' : '订单已取消'}
+                                                </h5>
+                                                <div><strong>取消方：</strong> ${orderDetail.cancelByType === 'farmer' ? '农户取消（您）' : '用户取消'}</div>
+                                                <div><strong>取消原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
+                                                <div><strong>取消时间：</strong> ${formatFriendlyDateTime(orderDetail.cancelTime)}</div>
+                                                ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 
+                                                    `<div class="mt-3 alert alert-success py-2">
+                                                        <i class="fa fa-check-circle me-2"></i> <strong>您已同意退款申请并取消了此订单</strong>
+                                                    </div>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>` : ''}
+                            
+                            ${orderDetail.status === '申请退款中' ? 
+                            `<div class="mt-4">
+                                <h6 class="border-bottom pb-2 mb-3 text-warning">
+                                    <i class="fa fa-undo me-2"></i>退款申请信息
+                                </h6>
+                                <div class="card border-warning">
+                                    <div class="card-body">
+                                        <div class="d-flex">
+                                            <i class="fa fa-exclamation-circle text-warning fa-2x me-3 mt-1"></i>
+                                            <div>
+                                                <h5 class="text-warning mb-3">用户申请退款，等待处理</h5>
+                                                <div><i class="fa fa-user text-primary me-1"></i><strong>申请人：</strong> ${orderDetail.user ? orderDetail.user.username : '未知用户'}</div>
+                                                <div><i class="fa fa-comment text-info me-1"></i><strong>申请原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
+                                                <div><i class="fa fa-clock text-warning me-1"></i><strong>申请时间：</strong> ${orderDetail.shipTime ? formatFriendlyDateTime(orderDetail.shipTime) : '未知'}</div>
+                                                <div class="mt-3 alert alert-info py-2">
+                                                    <i class="fa fa-info-circle me-1"></i>请尽快处理退款申请，保持良好的客户关系
+                                                </div>
+                                                <div class="mt-3">
+                                                    <button type="button" class="btn btn-warning refund-process-btn" data-order-id="${orderDetail.orderId}">
+                                                        <i class="fa fa-undo me-1"></i> 处理退款申请
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>` : ''}
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <div id="actionButtons" class="w-100 d-flex justify-content-between">
@@ -428,11 +490,60 @@
     <!-- 自定义JS -->
     <script>
         /**
+         * 格式化时间为友好的显示格式
+         * @param {string} dateTimeStr - 日期时间字符串
+         * @returns {string} 格式化后的日期时间
+         */
+        function formatFriendlyDateTime(dateTimeStr) {
+            if (!dateTimeStr) return '未知';
+            
+            try {
+                const date = new Date(dateTimeStr);
+                if (isNaN(date.getTime())) return '日期无效';
+                
+                // 格式化为简洁的日期时间格式
+                return date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                });
+            } catch (e) {
+                console.error('日期格式化错误:', e);
+                return dateTimeStr || '未知';
+            }
+        }
+        
+        /**
          * 页面加载完成后执行
          */
         document.addEventListener('DOMContentLoaded', function() {
             // 使用initDependencies确保jQuery加载
             window.initDependencies(function() {
+                // 添加自定义样式
+                const style = document.createElement('style');
+                style.textContent = `
+                    /* 修复模态框滚动问题 */
+                    .modal-dialog {
+                        overflow-y: initial !important;
+                    }
+                    .modal-body {
+                        max-height: 70vh;
+                        overflow-y: auto;
+                    }
+                    /* 防止退款表单内容超出 */
+                    #processRefundRequestModal .modal-body {
+                        overflow-y: auto;
+                        max-height: 70vh;
+                    }
+                    #refundRequestInfo {
+                        overflow-wrap: break-word;
+                    }
+                `;
+                document.head.appendChild(style);
+                
                 // jQuery已加载完成，可以安全使用
                 
                 // 检查用户是否登录，并且是农户角色
@@ -696,7 +807,7 @@
                         <td>${order.orderId}</td>
                         <td>${customerName} ${paymentBadge}</td>
                         <td>¥${totalPrice}</td>
-                        <td>${order.createTime || '未知'}</td>
+                        <td>${formatFriendlyDateTime(order.createTime)}</td>
                         <td>${statusBadge}</td>
                         <td>${actionButtons}</td>
                     </tr>
@@ -792,143 +903,200 @@
                     
                     // 重建完整的模态框内容
                     const modalContent = `
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <h6>基本信息</h6>
-                                <table class="table table-sm table-borderless">
-                                    <tr>
-                                        <th width="120">订单号:</th>
-                                        <td>${orderDetail.orderId || '未知'}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>创建时间:</th>
-                                        <td>${orderDetail.createTime || '未知'}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>状态:</th>
-                                        <td>${getStatusBadge(orderDetail.status)}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>支付方式:</th>
-                                        <td>在线支付</td>
-                                    </tr>
-                                    <tr>
-                                        <th>支付时间:</th>
-                                        <td>${orderDetail.payTime || '未支付'}</td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <div class="col-md-6">
-                                <h6>客户信息</h6>
-                                <table class="table table-sm table-borderless">
-                                    <tr>
-                                        <th width="120">客户名称:</th>
-                                        <td>${orderDetail.user ? orderDetail.user.username : '未知'}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>联系电话:</th>
-                                        <td>${orderDetail.contactPhone || '未提供'}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>收货地址:</th>
-                                        <td>${orderDetail.shippingAddress || '未提供'}</td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                        
-                        <h6>订单项目</h6>
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-sm">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>产品</th>
-                                        <th>单价</th>
-                                        <th>数量</th>
-                                        <th>小计</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>${orderDetail.product ? orderDetail.product.productName : '未知产品'}</td>
-                                        <td>¥${orderDetail.product && orderDetail.product.price ? orderDetail.product.price.toFixed(2) : '0.00'}</td>
-                                        <td>${orderDetail.quantity || 0}</td>
-                                        <td>¥${orderDetail.totalPrice ? orderDetail.totalPrice.toFixed(2) : '0.00'}</td>
-                                    </tr>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th colspan="3" class="text-right">商品总额:</th>
-                                        <td>¥${orderDetail.totalPrice ? orderDetail.totalPrice.toFixed(2) : '0.00'}</td>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="3" class="text-right">运费:</th>
-                                        <td>¥0.00</td>
-                                    </tr>
-                                    <tr class="table-success">
-                                        <th colspan="3" class="text-right">订单总额:</th>
-                                        <td class="font-weight-bold">¥${orderDetail.totalPrice ? orderDetail.totalPrice.toFixed(2) : '0.00'}</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                        
-                        <div class="mt-3">
-                            <h6>配送信息</h6>
-                            ${orderDetail.shipTime ? 
-                                `<table class="table table-sm table-borderless">
-                                    <tr>
-                                        <th width="120">配送方式:</th>
-                                        <td>货到付款</td>
-                                    </tr>
-                                    <tr>
-                                        <th>配送状态:</th>
-                                        <td>${getStatusBadge(orderDetail.status)}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>开始配送时间:</th>
-                                        <td>${orderDetail.shipTime}</td>
-                                    </tr>
-                                    ${orderDetail.completeTime ? 
-                                    `<tr>
-                                        <th>完成时间:</th>
-                                        <td>${orderDetail.completeTime}</td>
-                                    </tr>` : ''}
-                                </table>` :
-                                '<div class="alert alert-warning"><i class="fa fa-exclamation-triangle mr-2"></i>该订单尚未开始配送</div>'
-                            }
-                        </div>
-                        
-                        ${orderDetail.status === '已取消' ? 
-                        `<div class="mt-3">
-                            <h6>取消信息</h6>
-                            <div class="alert ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 'alert-info' : 'alert-danger'}">
-                                <div><strong>取消方：</strong> ${orderDetail.cancelByType === 'farmer' ? '农户取消（您）' : '用户取消'}</div>
-                                <div><strong>取消原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
-                                <div><strong>取消时间：</strong> ${orderDetail.cancelTime || '未知'}</div>
-                                ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 
-                                    `<div class="mt-2 text-success"><i class="fa fa-check-circle"></i> <strong>您已同意退款申请并取消了此订单</strong></div>` : ''}
-                            </div>
-                        </div>` : ''}
-                        
-                        ${orderDetail.status === '申请退款中' ? 
-                        `<div class="mt-3">
-                            <h6>退款申请信息</h6>
-                            <div class="alert alert-warning">
-                                <div><strong>申请人：</strong> ${orderDetail.user ? orderDetail.user.username : '未知用户'}</div>
-                                <div><strong>申请原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
-                                <div><strong>申请时间：</strong> ${orderDetail.cancelTime || '未知'}</div>
-                                <div class="mt-2">
-                                    <button type="button" class="btn btn-sm btn-warning" onclick="openProcessRefundModal(${orderId})">
-                                        <i class="fa fa-undo"></i> 处理退款申请
-                                    </button>
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0 text-primary">
+                                        <i class="fa fa-info-circle me-2"></i>订单 #${orderDetail.orderId} 详情
+                                    </h5>
+                                    <span class="badge ${orderDetail.status === '已完成' ? 'bg-success' : orderDetail.status === '已取消' ? 'bg-danger' : 'bg-primary'} fs-6 py-2">
+                                        ${getStatusBadge(orderDetail.status)}
+                                    </span>
                                 </div>
                             </div>
-                        </div>` : ''}
+                            <div class="card-body p-4">
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <h6 class="border-bottom pb-2 mb-3 text-primary">
+                                            <i class="fa fa-clipboard-list me-2"></i>基本信息
+                                        </h6>
+                                        <table class="table table-sm table-borderless">
+                                            <tr>
+                                                <th width="120" class="text-muted">订单号:</th>
+                                                <td class="fw-bold">${orderDetail.orderId || '未知'}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">创建时间:</th>
+                                                <td>${formatFriendlyDateTime(orderDetail.createTime)}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">状态:</th>
+                                                <td>${getStatusBadge(orderDetail.status)}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">支付方式:</th>
+                                                <td>货到付款</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="border-bottom pb-2 mb-3 text-primary">
+                                            <i class="fa fa-user me-2"></i>客户信息
+                                        </h6>
+                                        <table class="table table-sm table-borderless">
+                                            <tr>
+                                                <th width="120" class="text-muted">客户名称:</th>
+                                                <td class="fw-bold">${orderDetail.user ? orderDetail.user.username : '未知'}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">联系电话:</th>
+                                                <td>${orderDetail.contactPhone || '未提供'}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">收货地址:</th>
+                                                <td>${orderDetail.shippingAddress || '未提供'}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <h6 class="border-bottom pb-2 mb-3 text-primary">
+                                    <i class="fa fa-shopping-basket me-2"></i>订单项目
+                                </h6>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>产品</th>
+                                                <th>单价</th>
+                                                <th>数量</th>
+                                                <th>小计</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="${orderDetail.product ? orderDetail.product.imageUrl : '/img/no-image.jpg'}" class="me-2" style="width:40px;height:40px;object-fit:cover;border-radius:4px">
+                                                        <span>${orderDetail.product ? orderDetail.product.productName : '未知产品'}</span>
+                                                    </div>
+                                                </td>
+                                                <td>¥${orderDetail.product && orderDetail.product.price ? orderDetail.product.price.toFixed(2) : '0.00'}</td>
+                                                <td>${orderDetail.quantity || 0}</td>
+                                                <td class="fw-bold">¥${orderDetail.totalPrice ? orderDetail.totalPrice.toFixed(2) : '0.00'}</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="3" class="text-end">商品总额:</th>
+                                                <td>¥${orderDetail.totalPrice ? orderDetail.totalPrice.toFixed(2) : '0.00'}</td>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="3" class="text-end">运费:</th>
+                                                <td>¥0.00</td>
+                                            </tr>
+                                            <tr class="table-success">
+                                                <th colspan="3" class="text-end">订单总额:</th>
+                                                <td class="fw-bold fs-5">¥${orderDetail.totalPrice ? orderDetail.totalPrice.toFixed(2) : '0.00'}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                
+                                <div class="mt-4">
+                                    <h6 class="border-bottom pb-2 mb-3 text-primary">
+                                        <i class="fa fa-truck me-2"></i>配送信息
+                                    </h6>
+                                    ${orderDetail.shipTime ? 
+                                        `<table class="table table-sm table-borderless">
+                                            <tr>
+                                                <th width="120" class="text-muted">配送方式:</th>
+                                                <td>货到付款</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">配送状态:</th>
+                                                <td>${getStatusBadge(orderDetail.status)}</td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-muted">开始配送时间:</th>
+                                                <td>${formatFriendlyDateTime(orderDetail.shipTime)}</td>
+                                            </tr>
+                                            ${orderDetail.completeTime ? 
+                                            `<tr>
+                                                <th class="text-muted">完成时间:</th>
+                                                <td>${formatFriendlyDateTime(orderDetail.completeTime)}</td>
+                                            </tr>` : ''}
+                                        </table>` :
+                                        '<div class="alert alert-warning"><i class="fa fa-exclamation-triangle me-2"></i>该订单尚未开始配送</div>'
+                                    }
+                                </div>
+                                
+                                ${orderDetail.status === '已取消' ? 
+                                `<div class="mt-4">
+                                    <h6 class="border-bottom pb-2 mb-3 text-danger">
+                                        <i class="fa fa-ban me-2"></i>取消信息
+                                    </h6>
+                                    <div class="card ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 'border-info' : 'border-danger'} mb-3">
+                                        <div class="card-body">
+                                            <div class="d-flex">
+                                                <i class="fa fa-${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 'undo text-info' : 'times-circle text-danger'} fa-2x me-3 mt-1"></i>
+                                                <div>
+                                                    <h5 class="${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 'text-info' : 'text-danger'} mb-3">
+                                                        ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? '订单已退款并取消' : '订单已取消'}
+                                                    </h5>
+                                                    <div><strong>取消方：</strong> ${orderDetail.cancelByType === 'farmer' ? '农户取消（您）' : '用户取消'}</div>
+                                                    <div><strong>取消原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
+                                                    <div><strong>取消时间：</strong> ${formatFriendlyDateTime(orderDetail.cancelTime)}</div>
+                                                    ${orderDetail.cancelReason && orderDetail.cancelReason.includes('已批准') ? 
+                                                        `<div class="mt-3 alert alert-success py-2">
+                                                            <i class="fa fa-check-circle me-2"></i> <strong>您已同意退款申请并取消了此订单</strong>
+                                                        </div>` : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>` : ''}
+                                
+                                ${orderDetail.status === '申请退款中' ? 
+                                `<div class="mt-4">
+                                    <h6 class="border-bottom pb-2 mb-3 text-warning">
+                                        <i class="fa fa-undo me-2"></i>退款申请信息
+                                    </h6>
+                                    <div class="card border-warning">
+                                        <div class="card-body">
+                                            <div class="d-flex">
+                                                <i class="fa fa-exclamation-circle text-warning fa-2x me-3 mt-1"></i>
+                                                <div>
+                                                    <h5 class="text-warning mb-3">用户申请退款，等待处理</h5>
+                                                    <div><i class="fa fa-user text-primary me-1"></i><strong>申请人：</strong> ${orderDetail.user ? orderDetail.user.username : '未知用户'}</div>
+                                                    <div><i class="fa fa-comment text-info me-1"></i><strong>申请原因：</strong> ${orderDetail.cancelReason || '未提供原因'}</div>
+                                                    <div><i class="fa fa-clock text-warning me-1"></i><strong>申请时间：</strong> ${orderDetail.shipTime ? formatFriendlyDateTime(orderDetail.shipTime) : '未知'}</div>
+                                                    <div class="mt-3 alert alert-info py-2">
+                                                        <i class="fa fa-info-circle me-1"></i>请尽快处理退款申请，保持良好的客户关系
+                                                    </div>
+                                                    <div class="mt-3">
+                                                        <button type="button" class="btn btn-warning refund-process-btn" data-order-id="${orderDetail.orderId}">
+                                                            <i class="fa fa-undo me-1"></i> 处理退款申请
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>` : ''}
+                            </div>
+                        </div>
                     `;
                     
                     // 更新模态框内容
                     $('#orderDetailModal .modal-body').html(modalContent);
+                    
+                    // 绑定退款处理按钮点击事件
+                    $('.refund-process-btn').on('click', function() {
+                        const refundOrderId = $(this).data('order-id');
+                        $('#orderDetailModal').modal('hide');
+                        openProcessRefundModal(refundOrderId);
+                    });
                     
                     // 显示/隐藏操作按钮
                     $('#cancelOrderBtn').hide();
@@ -1273,68 +1441,174 @@
             if (!$('#processRefundRequestModal').length) {
                 $('body').append(`
                 <div class="modal fade" id="processRefundRequestModal" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
+                    <div class="modal-dialog modal-lg" role="document">
                         <div class="modal-content">
-                            <div class="modal-header bg-primary text-white">
-                                <h5 class="modal-title">处理退款申请</h5>
+                            <div class="modal-header bg-gradient-primary text-white">
+                                <h5 class="modal-title"><i class="fa fa-undo me-2"></i>处理退款申请</h5>
                                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
                             <div class="modal-body">
                                 <input type="hidden" id="processRefundId">
-                                <div class="alert alert-info mb-4" id="refundRequestInfo">
-                                    <i class="fa fa-info-circle mr-2"></i>用户申请了退款，请进行处理。
-                                </div>
                                 
-                                <div class="form-group mb-4">
-                                    <label class="fw-bold mb-2">处理方式</label>
-                                    <div class="card border-success mb-2">
-                                        <div class="card-body p-2">
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" id="approveRefund" name="refundApproval" class="custom-control-input" value="true" checked>
-                                                <label class="custom-control-label" for="approveRefund">
-                                                    <strong class="text-success">同意退款</strong> - 将取消订单并恢复库存
-                                                </label>
+                                <div class="row">
+                                    <!-- 左侧：退款申请信息 -->
+                                    <div class="col-md-5">
+                                        <div class="card border-primary h-100">
+                                            <div class="card-header bg-primary text-white">
+                                                <h6 class="mb-0"><i class="fa fa-info-circle me-2"></i>退款申请详情</h6>
+                                            </div>
+                                            <div class="card-body" id="refundRequestInfo">
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border text-primary" role="status"></div>
+                                                    <p class="mt-2">正在加载申请信息...</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="card border-danger">
-                                        <div class="card-body p-2">
-                                            <div class="custom-control custom-radio">
-                                                <input type="radio" id="rejectRefund" name="refundApproval" class="custom-control-input" value="false">
-                                                <label class="custom-control-label" for="rejectRefund">
-                                                    <strong class="text-danger">拒绝退款</strong> - 订单将返回原状态
-                                                </label>
+                                    
+                                    <!-- 右侧：处理表单 -->
+                                    <div class="col-md-7">
+                                        <div class="card border-info h-100">
+                                            <div class="card-header bg-info text-white">
+                                                <h6 class="mb-0"><i class="fa fa-tasks me-2"></i>处理决定</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <!-- 处理选项 -->
+                                                <div class="row mb-4">
+                                                    <div class="col-md-6 mb-3 mb-md-0">
+                                                        <div class="card border-success h-100 option-card" id="approveOption">
+                                                            <div class="card-body text-center p-3">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="radio" name="refundApproval" id="approveRefund" value="true" checked>
+                                                                    <label class="form-check-label w-100" for="approveRefund">
+                                                                        <i class="fa fa-check-circle text-success fa-3x mb-2"></i>
+                                                                        <h5 class="text-success">同意退款</h5>
+                                                                        <p class="text-muted small mb-0">订单将被取消，库存自动恢复</p>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="card border-danger h-100 option-card" id="rejectOption">
+                                                            <div class="card-body text-center p-3">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="radio" name="refundApproval" id="rejectRefund" value="false">
+                                                                    <label class="form-check-label w-100" for="rejectRefund">
+                                                                        <i class="fa fa-times-circle text-danger fa-3x mb-2"></i>
+                                                                        <h5 class="text-danger">拒绝退款</h5>
+                                                                        <p class="text-muted small mb-0">订单将返回原状态</p>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="alert alert-info p-2 small">
+                                                    <i class="fa fa-info-circle me-1"></i>
+                                                    请填写处理说明，用户将能看到这些内容
+                                                </div>
+                                                
+                                                <!-- 处理说明输入 -->
+                                                <div class="form-group">
+                                                    <label for="processRefundReason" class="form-label fw-bold">
+                                                        <i class="fa fa-comment me-1"></i>处理说明
+                                                    </label>
+                                                    <textarea class="form-control" id="processRefundReason" rows="4" 
+                                                        placeholder="请输入处理说明（例如：同意退款的原因/拒绝退款的理由）..."></textarea>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                
-                                <div class="alert alert-warning mt-3 mb-4">
-                                    <i class="fa fa-exclamation-triangle mr-2"></i>
-                                    <div><strong>注意事项：</strong></div>
-                                    <ul class="mb-0 pl-3 mt-1">
-                                        <li>同意退款：订单状态将变为"已取消"，库存自动恢复</li>
-                                        <li>拒绝退款：订单将返回原状态，用户会收到拒绝通知</li>
-                                        <li>请在处理说明中详细说明处理理由，用户可以看到这些信息</li>
-                                    </ul>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="processRefundReason" class="fw-bold">处理说明（用户可见）</label>
-                                    <textarea class="form-control" id="processRefundReason" rows="4" placeholder="请输入退款处理说明，如：同意/拒绝的具体原因，退款金额说明等..."></textarea>
-                                    <small class="text-muted">请填写详细说明，这将直接显示给用户</small>
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-                                <button type="button" class="btn btn-primary" id="confirmProcessRefundBtn">确认处理</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                    <i class="fa fa-times me-1"></i>取消
+                                </button>
+                                <button type="button" class="btn btn-primary" id="confirmProcessRefundBtn">
+                                    <i class="fa fa-check me-1"></i>确认处理
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
                 `);
+                
+                // 添加自定义样式
+                const style = document.createElement('style');
+                style.textContent = `
+                    #processRefundRequestModal .option-card {
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        border-width: 2px;
+                    }
+                    
+                    #processRefundRequestModal .option-card:hover {
+                        transform: translateY(-5px);
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                    }
+                    
+                    #processRefundRequestModal .option-card.selected {
+                        transform: translateY(-5px);
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                    }
+                    
+                    #processRefundRequestModal .form-check-input {
+                        position: absolute;
+                        opacity: 0;
+                    }
+                    
+                    #processRefundRequestModal .form-check-label {
+                        cursor: pointer;
+                        display: block;
+                    }
+                    
+                    #processRefundRequestModal .card-header {
+                        font-weight: 500;
+                    }
+                    
+                    #processRefundRequestModal .modal-content {
+                        border: none;
+                        border-radius: 8px;
+                        overflow: hidden;
+                    }
+                    
+                    .bg-gradient-primary {
+                        background: linear-gradient(to right, #4e73df, #224abe);
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // 绑定卡片点击选择效果
+                $(document).on('click', '#approveOption', function() {
+                    $('#approveRefund').prop('checked', true);
+                    updateOptionCards();
+                });
+                
+                $(document).on('click', '#rejectOption', function() {
+                    $('#rejectRefund').prop('checked', true);
+                    updateOptionCards();
+                });
+                
+                // 监听单选按钮变化
+                $(document).on('change', 'input[name="refundApproval"]', function() {
+                    updateOptionCards();
+                });
+                
+                // 更新卡片选中状态
+                function updateOptionCards() {
+                    if ($('#approveRefund').is(':checked')) {
+                        $('#approveOption').addClass('selected').css('border-color', '#28a745');
+                        $('#rejectOption').removeClass('selected').css('border-color', '#dc3545');
+                    } else {
+                        $('#rejectOption').addClass('selected').css('border-color', '#dc3545');
+                        $('#approveOption').removeClass('selected').css('border-color', '#28a745');
+                    }
+                }
                 
                 // 绑定处理退款申请确认按钮事件
                 $('#confirmProcessRefundBtn').on('click', async function() {
@@ -1379,7 +1653,7 @@
                         alert(`处理退款申请失败: ${error.message}`);
                     } finally {
                         // 恢复按钮状态
-                        $('#confirmProcessRefundBtn').attr('disabled', false).html('确认处理');
+                        $('#confirmProcessRefundBtn').attr('disabled', false).html('<i class="fa fa-check me-1"></i>确认处理');
                     }
                 });
             }
@@ -1394,19 +1668,67 @@
                     
                     // 显示退款申请信息
                     $('#refundRequestInfo').html(`
-                        <div class="d-flex">
-                            <i class="fa fa-info-circle mr-2 mt-1"></i>
-                            <div>
-                                <strong>用户退款申请信息</strong>
-                                <div>申请理由: ${order.cancelReason || '未提供'}</div>
-                                <div>申请时间: ${new Date(order.cancelTime || Date.now()).toLocaleString()}</div>
-                                <div>订单金额: ¥${order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}</div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item px-0">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">申请用户：</span>
+                                    <span class="fw-bold">${order.user ? order.user.username : '未知用户'}</span>
+                                </div>
+                            </li>
+                            <li class="list-group-item px-0">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">订单编号：</span>
+                                    <span class="fw-bold">#${order.orderId}</span>
+                                </div>
+                            </li>
+                            <li class="list-group-item px-0">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">订单金额：</span>
+                                    <span class="fw-bold text-danger">¥${order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}</span>
+                                </div>
+                            </li>
+                            <li class="list-group-item px-0">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">申请时间：</span>
+                                    <span class="fw-bold">${order.shipTime ? formatFriendlyDateTime(order.shipTime) : '未知'}</span>
+                                </div>
+                            </li>
+                        </ul>
+                        
+                        <div class="mt-3">
+                            <label class="text-muted mb-1 d-block">申请理由：</label>
+                            <div class="p-3 bg-light rounded">
+                                ${order.cancelReason || '用户未提供申请理由'}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" style="width: 50%"></div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <small class="text-muted">已申请</small>
+                                <small class="text-primary fw-bold">处理中</small>
+                                <small class="text-muted">已完成</small>
                             </div>
                         </div>
                     `);
+                    
+                    // 初始化卡片选中状态
+                    setTimeout(updateOptionCards, 100);
+                    
+                    // 重置表单字段
+                    $('input[name="refundApproval"][value="true"]').prop('checked', true);
+                    $('#processRefundReason').val('');
                 }
             }).catch(error => {
                 console.error('获取订单详情失败:', error);
+                $('#refundRequestInfo').html(`
+                    <div class="alert alert-danger">
+                        <i class="fa fa-exclamation-circle me-2"></i>
+                        获取订单详情失败: ${error.message}
+                    </div>
+                `);
             });
             
             // 打开模态框
