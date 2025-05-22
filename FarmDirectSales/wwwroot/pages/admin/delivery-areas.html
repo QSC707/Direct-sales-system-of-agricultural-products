@@ -100,6 +100,11 @@
                         </div>
                     </div>
                     <div class="card-body">
+                        <!-- 区域数量统计 -->
+                        <div id="area-count-info" class="mb-3 text-muted">
+                            <i class="fas fa-info-circle mr-1"></i> 当前已配置 <span id="current-area-count">0</span> 个配送区域，最多可配置 50 个区域
+                        </div>
+                        
                         <!-- 配送区域列表 -->
                         <div class="table-responsive">
                             <table class="table table-striped table-hover">
@@ -107,7 +112,7 @@
                                     <tr>
                                         <th>ID</th>
                                         <th colspan="3">配送区域</th>
-                                        <th>当天配送</th>
+                                        <th>服务状态</th>
                                         <th>配送费用</th>
                                         <th>操作</th>
                                     </tr>
@@ -182,17 +187,8 @@
                                 <label for="deliveryFee" class="form-label">配送费用 (元) <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control" id="deliveryFee" required min="0" step="0.1" value="15">
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label d-block">是否支持当天配送</label>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="supportSameDayDelivery" id="supportTrue" value="true" checked>
-                                    <label class="form-check-label" for="supportTrue">支持</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="supportSameDayDelivery" id="supportFalse" value="false">
-                                    <label class="form-check-label" for="supportFalse">不支持</label>
-                                </div>
-                            </div>
+                            <!-- 移除当天配送选项，默认为启用 -->
+                            <input type="hidden" name="supportSameDayDelivery" value="true">
                         </div>
                     </form>
                 </div>
@@ -254,15 +250,20 @@
                                 <input type="number" class="form-control" id="edit-deliveryFee" required min="0" step="0.1">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label d-block">是否支持当天配送</label>
-                                <div class="form-check form-check-inline">
+                                <label class="form-label d-block">配送服务状态</label>
+                                <div class="form-check form-check-inline border rounded p-2 mr-2" style="min-width: 100px;">
                                     <input class="form-check-input" type="radio" name="edit-supportSameDayDelivery" id="edit-supportTrue" value="true">
-                                    <label class="form-check-label" for="edit-supportTrue">支持</label>
+                                    <label class="form-check-label" for="edit-supportTrue">
+                                        <span class="text-success"><i class="fas fa-check-circle mr-1"></i>启用</span>
+                                    </label>
                                 </div>
-                                <div class="form-check form-check-inline">
+                                <div class="form-check form-check-inline border rounded p-2" style="min-width: 100px;">
                                     <input class="form-check-input" type="radio" name="edit-supportSameDayDelivery" id="edit-supportFalse" value="false">
-                                    <label class="form-check-label" for="edit-supportFalse">不支持</label>
+                                    <label class="form-check-label" for="edit-supportFalse">
+                                        <span class="text-warning"><i class="fas fa-pause-circle mr-1"></i>暂停</span>
+                                    </label>
                                 </div>
+                                <small class="form-text text-muted mt-2">暂停状态下，该区域将不接收新订单</small>
                             </div>
                         </div>
                     </form>
@@ -380,6 +381,9 @@
                     tableBody.innerHTML = '';
                     noDataPlaceholder.classList.add('d-none');
                     
+                    // 更新区域计数
+                    document.getElementById('current-area-count').textContent = response.data.length;
+                    
                     response.data.forEach(area => {
                         const row = document.createElement('tr');
                         
@@ -390,8 +394,10 @@
                             <td>${area.deliveryAreaId}</td>
                             <td colspan="3">${areaText}</td>
                             <td>
-                                <span class="badge ${area.supportSameDayDelivery ? 'badge-success' : 'badge-secondary'}">
-                                    ${area.supportSameDayDelivery ? '支持' : '不支持'}
+                                <span class="badge ${area.supportSameDayDelivery ? 'badge-success' : 'badge-warning'} py-2 px-3">
+                                    ${area.supportSameDayDelivery 
+                                        ? '<i class="fas fa-check-circle mr-1"></i>已启用' 
+                                        : '<i class="fas fa-pause-circle mr-1"></i>已暂停'}
                                 </span>
                             </td>
                             <td>¥${area.deliveryFee.toFixed(2)}</td>
@@ -421,10 +427,61 @@
                         const areaId = $(this).data('area-id');
                         openDeleteConfirmModal(areaId, response.data);
                     });
+                    
+                    // 检查配送区域数量是否达到限制
+                    const addButton = document.querySelector('button[data-toggle="modal"][data-target="#addAreaModal"]');
+                    if (response.data.length >= 50) {
+                        // 达到上限，禁用添加按钮并添加提示
+                        addButton.disabled = true;
+                        addButton.title = '已达到最大配送区域数量限制(50条)';
+                        addButton.classList.add('disabled');
+                        
+                        // 添加提示信息
+                        const limitWarning = document.createElement('div');
+                        limitWarning.id = 'limit-warning';
+                        limitWarning.className = 'alert alert-warning mt-3';
+                        limitWarning.innerHTML = `
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            <strong>已达到最大配送区域数量限制!</strong>
+                            <p class="mb-0 mt-1">当前配送区域数量: <strong>${response.data.length}</strong>, 最大限制: <strong>50</strong></p>
+                            <p class="mb-0">如需添加新区域，请先删除不需要的区域</p>
+                        `;
+                        
+                        // 避免重复添加提示
+                        if (!document.getElementById('limit-warning')) {
+                            document.querySelector('.card-body').prepend(limitWarning);
+                        }
+                    } else {
+                        // 未达到上限，确保按钮可用
+                        addButton.disabled = false;
+                        addButton.title = '添加配送区域';
+                        addButton.classList.remove('disabled');
+                        
+                        // 移除提示信息
+                        const limitWarning = document.getElementById('limit-warning');
+                        if (limitWarning) {
+                            limitWarning.remove();
+                        }
+                    }
                 } else {
                     // 无数据，显示占位符
                     tableBody.innerHTML = '';
                     noDataPlaceholder.classList.remove('d-none');
+                    
+                    // 更新区域计数为0
+                    document.getElementById('current-area-count').textContent = '0';
+                    
+                    // 重置添加按钮状态
+                    const addButton = document.querySelector('button[data-toggle="modal"][data-target="#addAreaModal"]');
+                    addButton.disabled = false;
+                    addButton.title = '添加配送区域';
+                    addButton.classList.remove('disabled');
+                    
+                    // 移除提示信息
+                    const limitWarning = document.getElementById('limit-warning');
+                    if (limitWarning) {
+                        limitWarning.remove();
+                    }
                 }
             } catch (error) {
                 console.error('加载配送区域失败:', error);
@@ -463,7 +520,8 @@
             const city = $('#city').val().trim();
             const district = $('#district').val().trim();
             const deliveryFee = parseFloat($('#deliveryFee').val());
-            const supportSameDayDelivery = $('input[name="supportSameDayDelivery"]:checked').val() === 'true';
+            // 新增配送区域默认启用配送服务
+            const supportSameDayDelivery = true;
             
             // 表单验证
             if (!isNationwide && !province && !city && !district) {
@@ -486,11 +544,19 @@
                 const existingAreas = await http.get('/delivery-area');
                 
                 if (existingAreas && existingAreas.code === 200 && existingAreas.data) {
+                    // 检查配送区域数量是否超过限制
+                    if (existingAreas.data.length >= 50) {
+                        alert(`配送区域数量已达到上限(当前:${existingAreas.data.length}/最大:50)，如需添加新区域，请先删除不需要的区域`);
+                        saveBtn.prop('disabled', false);
+                        saveBtn.html('<i class="fas fa-save mr-1"></i> 保存');
+                        return;
+                    }
+                    
                     // 检查是否有全国配送
                     if (isNationwide && existingAreas.data.some(area => area.isNationwide)) {
                         alert('已存在全国配送区域，不能重复添加');
                         saveBtn.prop('disabled', false);
-                        saveBtn.html('保存');
+                        saveBtn.html('<i class="fas fa-save mr-1"></i> 保存');
                         return;
                     }
                     
@@ -505,7 +571,7 @@
                         if (existingSameArea) {
                             alert(`已存在相同的配送区域: ${province} ${city} ${district}`);
                             saveBtn.prop('disabled', false);
-                            saveBtn.html('保存');
+                            saveBtn.html('<i class="fas fa-save mr-1"></i> 保存');
                             return;
                         }
                         
@@ -520,7 +586,7 @@
                             if (existingProvince) {
                                 alert(`已存在相同的省级配送区域: ${province}`);
                                 saveBtn.prop('disabled', false);
-                                saveBtn.html('保存');
+                                saveBtn.html('<i class="fas fa-save mr-1"></i> 保存');
                                 return;
                             }
                         }
@@ -536,7 +602,7 @@
                             if (existingCity) {
                                 alert(`已存在相同的市级配送区域: ${province} ${city}`);
                                 saveBtn.prop('disabled', false);
-                                saveBtn.html('保存');
+                                saveBtn.html('<i class="fas fa-save mr-1"></i> 保存');
                                 return;
                             }
                         }
@@ -586,7 +652,7 @@
             } finally {
                 // 恢复保存按钮
                 saveBtn.prop('disabled', false);
-                saveBtn.html('保存');
+                saveBtn.html('<i class="fas fa-save mr-1"></i> 保存');
             }
         }
         
