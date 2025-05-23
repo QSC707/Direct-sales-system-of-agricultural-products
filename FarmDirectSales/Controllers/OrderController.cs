@@ -655,6 +655,96 @@ namespace FarmDirectSales.Controllers
         }
 
         /// <summary>
+        /// 直接购买创建订单
+        /// </summary>
+        [HttpPost("direct-buy")]
+        public async Task<IActionResult> CreateDirectOrder([FromBody] DirectBuyOrderRequest request)
+        {
+            try
+            {
+                Console.WriteLine($"CreateDirectOrder接口被调用：userId={request.UserId}, productId={request.ProductId}, quantity={request.Quantity}");
+                
+                // 检查用户是否存在
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == request.UserId);
+                if (user == null)
+                {
+                    Console.WriteLine($"用户ID {request.UserId} 不存在");
+                    return NotFound(new { code = 404, message = "用户不存在" });
+                }
+
+                Console.WriteLine($"找到用户：{user.Username}");
+
+                // 检查产品是否存在且激活
+                var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == request.ProductId && p.IsActive);
+                if (product == null)
+                {
+                    Console.WriteLine($"产品ID {request.ProductId} 不存在或未激活");
+                    return NotFound(new { code = 404, message = "产品不存在或已下架" });
+                }
+
+                Console.WriteLine($"找到产品：{product.ProductName}，库存：{product.Stock}，请求数量：{request.Quantity}");
+
+                // 检查库存是否充足
+                if (product.Stock < request.Quantity)
+                {
+                    Console.WriteLine("库存不足");
+                    return BadRequest(new { code = 400, message = "库存不足", data = new { product.ProductId, product.ProductName, product.Stock, RequestQuantity = request.Quantity } });
+                }
+
+                // 计算订单总价
+                decimal totalPrice = product.Price * request.Quantity;
+                
+                // 创建订单
+                var order = new Order
+                {
+                    UserId = request.UserId,
+                    ProductId = request.ProductId,
+                    Quantity = request.Quantity,
+                    TotalPrice = totalPrice,
+                    Status = "货到付款待处理",
+                    CreateTime = DateTime.Now,
+                    PayTime = null,
+                    ShipTime = null,
+                    CompleteTime = null,
+                    ShippingAddress = request.ShippingAddress,
+                    ContactPhone = request.ContactPhone,
+                    ShippingFeeAmount = request.ShippingFee
+                };
+
+                // 减少库存
+                product.Stock -= request.Quantity;
+                product.UpdateTime = DateTime.Now;
+
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine($"创建订单成功，订单ID：{order.OrderId}，总金额：{totalPrice}");
+
+                return Ok(new
+                {
+                    code = 200,
+                    message = "创建订单成功",
+                    data = new
+                    {
+                        order.OrderId,
+                        order.ProductId,
+                        order.Quantity,
+                        order.TotalPrice,
+                        order.Status,
+                        order.CreateTime,
+                        ProductName = product.ProductName,
+                        ProductImage = product.ImageUrl
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"创建直接购买订单异常: {ex.Message}");
+                return BadRequest(new { code = 400, message = ex.Message });
+            }
+        }
+
+        /// <summary>
         /// 删除订单（支持软删除和硬删除）
         /// </summary>
         [HttpDelete("{id}")]
@@ -810,7 +900,7 @@ namespace FarmDirectSales.Controllers
                 }
                 
                 // 记录处理信息
-                order.CancelReason = request.RefundReason + (request.IsApproved ? " (已批准)" : " (已拒绝)");
+                order.CancelReason = request.ProcessDescription + (request.IsApproved ? " (已批准)" : " (已拒绝)");
                 order.CancelBy = request.ProcessorId;
                 order.CancelByType = isFarmer ? "farmer" : "admin";
                 order.CancelTime = DateTime.Now;
@@ -986,15 +1076,54 @@ namespace FarmDirectSales.Controllers
         public bool IsApproved { get; set; }
         
         /// <summary>
-        /// 退款原因/处理说明
+        /// 处理说明
         /// </summary>
         [Required(ErrorMessage = "处理说明不能为空")]
+        [StringLength(500, ErrorMessage = "处理说明最多500字")]
+        public string ProcessDescription { get; set; }
+        
+        /// <summary>
+        /// 退款原因
+        /// </summary>
         public string RefundReason { get; set; } = string.Empty;
         
         /// <summary>
         /// 退款金额
         /// </summary>
         public decimal? RefundAmount { get; set; }
+    }
+    
+    public class DirectBuyOrderRequest
+    {
+        [Required(ErrorMessage = "用户ID不能为空")]
+        public int UserId { get; set; }
+        
+        [Required(ErrorMessage = "产品ID不能为空")]
+        public int ProductId { get; set; }
+        
+        [Required(ErrorMessage = "购买数量不能为空")]
+        [Range(1, int.MaxValue, ErrorMessage = "购买数量必须大于0")]
+        public int Quantity { get; set; }
+        
+        [Required(ErrorMessage = "收货地址不能为空")]
+        [StringLength(200, ErrorMessage = "收货地址最多200字")]
+        public string ShippingAddress { get; set; }
+        
+        [Required(ErrorMessage = "联系电话不能为空")]
+        [StringLength(20, ErrorMessage = "联系电话最多20字")]
+        public string ContactPhone { get; set; }
+        
+        [Required(ErrorMessage = "联系人姓名不能为空")]
+        [StringLength(50, ErrorMessage = "联系人姓名最多50字")]
+        public string ContactName { get; set; }
+        
+        [Required(ErrorMessage = "配送方式不能为空")]
+        [StringLength(20, ErrorMessage = "配送方式最多20字")]
+        public string DeliveryMethod { get; set; }
+        
+        public decimal ShippingFee { get; set; }
+        
+        public int? ShippingFeeId { get; set; }
     }
 } 
  

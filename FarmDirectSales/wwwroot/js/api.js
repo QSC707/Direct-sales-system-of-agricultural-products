@@ -540,6 +540,27 @@ const api = {
             return handleResponse(response);
         },
         
+        // 创建直接购买订单
+        createDirectOrder: async (orderData) => {
+            if (!orderData.userId) {
+                throw new Error('用户未登录');
+            }
+            
+            // 检查必要的参数
+            if (!orderData.productId || !orderData.quantity) {
+                throw new Error('商品信息不完整');
+            }
+            
+            // 发送请求创建直接购买订单
+            const response = await fetch(`${window.API_BASE_URL}/order/direct-buy`, {
+                method: 'POST',
+                headers: window.getHeaders(),
+                body: JSON.stringify(orderData)
+            });
+            
+            return handleResponse(response);
+        },
+        
         // 更新订单状态
         updateStatus: async (orderId, status, remark = '') => {
             const response = await fetch(`${window.API_BASE_URL}/order/${orderId}/status`, {

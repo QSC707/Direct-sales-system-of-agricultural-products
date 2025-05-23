@@ -759,6 +759,11 @@
             从购物车创建订单
             </summary>
         </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.CreateDirectOrder(FarmDirectSales.Controllers.DirectBuyOrderRequest)">
+            <summary>
+            直接购买创建订单
+            </summary>
+        </member>
         <member name="M:FarmDirectSales.Controllers.OrderController.DeleteOrder(System.Int32,System.Int32)">
             <summary>
             删除订单（支持软删除和硬删除）
@@ -889,9 +894,14 @@
             是否同意退款
             </summary>
         </member>
+        <member name="P:FarmDirectSales.Controllers.ProcessRefundDto.ProcessDescription">
+            <summary>
+            处理说明
+            </summary>
+        </member>
         <member name="P:FarmDirectSales.Controllers.ProcessRefundDto.RefundReason">
             <summary>
-            退款原因/处理说明
+            退款原因
             </summary>
         </member>
         <member name="P:FarmDirectSales.Controllers.ProcessRefundDto.RefundAmount">

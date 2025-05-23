@@ -477,20 +477,39 @@
             // 更新导航栏状态
             checkAuthStatus();
             
-            // 从sessionStorage获取选中的商品ID
-            const selectedItemsStr = sessionStorage.getItem('selectedCartItems');
-            if (selectedItemsStr) {
-                try {
-                    selectedCartItems = JSON.parse(selectedItemsStr);
-                    console.log('从购物车获取选中商品ID:', selectedCartItems);
-                } catch (e) {
-                    console.error('解析选中商品ID失败:', e);
-                    selectedCartItems = [];
-                }
-            }
+            // 检查是否是直接购买模式
+            const urlParams = new URLSearchParams(window.location.search);
+            const isDirectBuy = urlParams.get('direct') === 'true';
+            const buyNowItemStr = sessionStorage.getItem('buyNowItem');
             
-            // 加载购物车数据
-            loadCartData();
+            if (isDirectBuy && buyNowItemStr) {
+                // 直接购买模式
+                try {
+                    const buyNowItem = JSON.parse(buyNowItemStr);
+                    console.log('直接购买模式，商品:', buyNowItem);
+                    // 直接加载单个商品
+                    loadDirectBuyItem(buyNowItem);
+                } catch (e) {
+                    console.error('解析立即购买商品数据失败:', e);
+                    // 降级到普通购物车模式
+                    loadCartData();
+                }
+            } else {
+                // 从sessionStorage获取选中的商品ID
+                const selectedItemsStr = sessionStorage.getItem('selectedCartItems');
+                if (selectedItemsStr) {
+                    try {
+                        selectedCartItems = JSON.parse(selectedItemsStr);
+                        console.log('从购物车获取选中商品ID:', selectedCartItems);
+                    } catch (e) {
+                        console.error('解析选中商品ID失败:', e);
+                        selectedCartItems = [];
+                    }
+                }
+                
+                // 加载购物车数据
+                loadCartData();
+            }
             
                 // 加载配送区域数据
                 loadDeliveryAreas();
@@ -988,8 +1007,58 @@
                 // 格式化地址
                 const shippingAddress = `${province} ${city} ${district} ${detailAddress}`;
                 
-                // 构建订单数据
-                const orderData = {
+                // 检查是否为直接购买模式
+                const urlParams = new URLSearchParams(window.location.search);
+                const isDirectBuy = urlParams.get('direct') === 'true';
+                const buyNowItemStr = sessionStorage.getItem('buyNowItem');
+                
+                let orderData;
+                
+                if (isDirectBuy && buyNowItemStr) {
+                    // 直接购买模式
+                    try {
+                        const buyNowItem = JSON.parse(buyNowItemStr);
+                        
+                        // 构建立即购买订单数据
+                        orderData = {
+                            userId: JSON.parse(localStorage.getItem('user') || '{}').userId,
+                            contactName: receiverName,
+                            contactPhone: contactPhone,
+                            shippingAddress: shippingAddress,
+                            deliveryMethod: 'express',
+                            directBuy: true, // 标记为直接购买
+                            productId: buyNowItem.productId,
+                            quantity: buyNowItem.quantity,
+                            shippingFee: shippingFeeInfo.shippingFee,
+                            shippingFeeId: shippingFeeInfo.appliedRuleId
+                        };
+                        
+                        // 提交直接购买订单
+                        const response = await api.orders.createDirectOrder(orderData);
+                        
+                        if (response.code === 200) {
+                            // 清除临时数据
+                            sessionStorage.removeItem('buyNowItem');
+                            
+                            // 提示成功并跳转
+                            showToast('订单提交成功！正在跳转...', 'success');
+                            setTimeout(() => {
+                                window.location.href = '/pages/user/orders.html';
+                            }, 1500);
+                        } else {
+                            showToast(`订单提交失败: ${response.message || '未知错误'}`, 'error');
+                            submitBtn.disabled = false;
+                        }
+                        
+                        return;
+                    } catch (error) {
+                        console.error('处理直接购买订单失败:', error);
+                        // 降级到标准购物车处理
+                    }
+                }
+                
+                // 标准购物车订单处理
+                orderData = {
                     userId: JSON.parse(localStorage.getItem('user') || '{}').userId,
                     contactName: receiverName,
                     contactPhone: contactPhone,
@@ -1424,6 +1493,136 @@
                 
                 // 否则使用全部商品
                 updateOrderSummary(cartData);
+            }
+        }
+
+        // 添加缺失的loadDistricts函数
+        function loadDistricts() {
+            const citySelect = document.getElementById('city');
+            const districtInput = document.getElementById('district');
+            const selectedCity = citySelect.value;
+            
+            // 更新当前地址信息
+            currentAddressInfo.city = selectedCity;
+            currentAddressInfo.district = '';
+            
+            // 由于使用文本输入框而不是选择框，只需要清空区/县输入框
+            districtInput.value = '';
+            
+            // 更新配送状态和运费
+            updateDeliveryStatus();
+            updateShippingFeeOnAddressChange();
+        }
+
+        // 加载直接购买商品
+        async function loadDirectBuyItem(buyNowItem) {
+            try {
+                if (!buyNowItem || !buyNowItem.productId) {
+                    throw new Error('无效的商品数据');
+                }
+                
+                // 检查是否已包含完整的商品信息
+                if (buyNowItem.productInfo) {
+                    console.log('使用直接提供的商品信息:', buyNowItem.productInfo);
+                    
+                    // 构造商品对象
+                    const product = {
+                        productId: buyNowItem.productId,
+                        productName: buyNowItem.productInfo.name,
+                        price: buyNowItem.productInfo.price,
+                        imageUrl: buyNowItem.productInfo.imageUrl,
+                        stock: buyNowItem.productInfo.stock,
+                        // 添加基本信息确保渲染不会出错
+                        farmer: { username: '直接购买' }
+                    };
+                    
+                    // 构造购物车数据结构
+                    const directBuyCart = {
+                        items: [{
+                            product: product,
+                            quantity: buyNowItem.quantity,
+                            productId: product.productId,
+                            price: product.price
+                        }]
+                    };
+                    
+                    // 保存到全局变量
+                    cartData = directBuyCart;
+                    
+                    // 渲染页面
+                    renderCartItems(directBuyCart.items);
+                    updateOrderSummary(directBuyCart);
+                    
+                    // 更新返回链接
+                    updatePageForDirectBuy(product.productId);
+                    
+                    return;
+                }
+                
+                // 如果没有完整的商品信息，则通过API获取
+                console.log('通过API获取商品信息:', buyNowItem.productId);
+                const response = await api.product.getProduct(buyNowItem.productId);
+                
+                if (response.code !== 200 || !response.data) {
+                    throw new Error('获取商品数据失败');
+                }
+                
+                const product = response.data;
+                
+                // 构造购物车数据结构
+                const directBuyCart = {
+                    items: [{
+                        product: product,
+                        quantity: buyNowItem.quantity,
+                        productId: product.productId,
+                        price: product.price
+                    }]
+                };
+                
+                // 保存到全局变量
+                cartData = directBuyCart;
+                
+                // 渲染页面
+                renderCartItems(directBuyCart.items);
+                updateOrderSummary(directBuyCart);
+                
+                // 更新返回链接和页面标题
+                updatePageForDirectBuy(product.productId);
+                
+            } catch (error) {
+                console.error('加载直接购买商品数据失败:', error);
+                showToast('加载商品数据失败，请返回重试', 'error');
+                
+                // 显示错误提示
+                document.getElementById('checkout-items').innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-4">
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i> 加载商品数据失败: ${error.message}
+                            </div>
+                            <a href="javascript:history.back()" class="btn btn-outline-secondary mt-2">
+                                <i class="fas fa-arrow-left me-1"></i>返回上一页
+                            </a>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('place-order-btn').disabled = true;
+            }
+        }
+
+        // 更新页面UI，适配直接购买模式
+        function updatePageForDirectBuy(productId) {
+            // 更新返回链接
+            const backToCartLink = document.querySelector('a[href="/pages/cart.html"]');
+            if (backToCartLink) {
+                backToCartLink.href = '/pages/product-detail.html?id=' + productId;
+                backToCartLink.innerHTML = '<i class="fas fa-arrow-left me-1"></i>返回商品详情';
+            }
+            
+            // 更新页面标题
+            const pageTitle = document.querySelector('h2.mb-4');
+            if (pageTitle) {
+                pageTitle.textContent = '确认订单 - 立即购买';
             }
         }
     </script>

@@ -740,40 +740,61 @@
             buyNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>处理中...';
             
             try {
-            // 显示提示消息
-            const notification = document.getElementById('cart-notification');
-            const notificationText = document.getElementById('cart-notification-text');
-            notificationText.textContent = '正在添加到购物车并跳转...';
-            notification.classList.remove('d-none');
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 10);
-            
-                // 先添加到购物车，然后跳转到结算页面 - 修正API路径
-                await http.post('/api/cart', {
-                    userId: user.userId,
-                    productId: currentProductId,
-                    quantity: quantity
-                });
+                // 显示提示消息
+                const notification = document.getElementById('cart-notification');
+                const notificationText = document.getElementById('cart-notification-text');
+                notificationText.textContent = '正在准备订单...';
+                notification.classList.remove('d-none');
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
                 
-                    // 短暂延迟后跳转，让用户看到提示
-                    setTimeout(() => {
-                        window.location.href = '/pages/cart.html';
-                    }, 500);
+                // 创建直接购买数据
+                const directBuyData = {
+                    productId: currentProduct.productId,
+                    quantity: quantity,
+                    productInfo: {
+                        name: currentProduct.productName,
+                        price: currentProduct.price,
+                        imageUrl: currentProduct.imageUrl,
+                        stock: currentProduct.stock
+                    }
+                };
+                
+                // 清除任何旧的直接购买数据
+                sessionStorage.removeItem('buyNowItem');
+                
+                // 保存直接购买数据
+                sessionStorage.setItem('buyNowItem', JSON.stringify(directBuyData));
+                
+                // 添加时间戳参数确保页面不会从缓存加载
+                const timestamp = new Date().getTime();
+                
+                // 短暂延迟后跳转，让用户看到提示
+                setTimeout(() => {
+                    // 使用replace而不是href，防止通过后退按钮返回导致状态错误
+                    window.location.replace(`/pages/checkout.html?direct=true&t=${timestamp}`);
+                }, 500);
             } catch (error) {
-                    console.error('添加购物车失败', error);
+                console.error('处理立即购买请求失败', error);
                 
                 const notification = document.getElementById('cart-notification');
-                    notification.classList.remove('show');
-                    setTimeout(() => {
-                        notification.classList.add('d-none');
-                    }, 300);
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.classList.add('d-none');
+                }, 300);
                 
-                    alert(`添加购物车失败: ${error.message}`);
+                alert(`处理请求失败: ${error.message}`);
                     
-                    // 恢复按钮状态
+                // 恢复按钮状态
+                buyNowBtn.disabled = false;
+                buyNowBtn.innerHTML = originalBuyNowText;
+            } finally {
+                // 即使在没有错误的情况下，最终也会移除加载状态并启用按钮
+                setTimeout(() => {
                     buyNowBtn.disabled = false;
                     buyNowBtn.innerHTML = originalBuyNowText;
+                }, 2000); // 2秒后恢复按钮，避免用户多次点击
             }
         }
         

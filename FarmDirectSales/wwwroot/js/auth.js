@@ -29,12 +29,12 @@ function checkLogin(callback) {
             // 使用API中的用户信息
             updateNavbar(user);
             if (callback) callback(user);
-            return;
+            return true; // 表示已登录
         } else {
             // 回退到localStorage中的信息
             updateNavbar(user);
             if (callback) callback(user);
-            return;
+            return true; // 表示已登录
         }
     }
     
@@ -50,9 +50,25 @@ function checkLogin(callback) {
         
         updateNavbar(user);
         if (callback) callback(user);
+        return true; // 表示已登录
     } else {
         updateNavbar(null);
         if (callback) callback(null);
+        
+        // 检查是否为直接购买模式 - 避免重定向覆盖立即购买流程
+        const urlParams = new URLSearchParams(window.location.search);
+        const isDirectBuy = urlParams.get('direct') === 'true';
+        
+        // 在未登录状态下，不要干扰直接购买模式的重定向
+        if (!isDirectBuy) {
+            // 获取当前URL，用于登录后重定向
+            const currentPath = window.location.pathname + window.location.search;
+            if (currentPath && !currentPath.includes('login.html')) {
+                localStorage.setItem('redirectAfterLogin', currentPath);
+            }
+        }
+        
+        return false; // 表示未登录
     }
 }
 
