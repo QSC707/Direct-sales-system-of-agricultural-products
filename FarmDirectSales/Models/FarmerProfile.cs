@@ -59,6 +59,24 @@ namespace FarmDirectSales.Models
         public string LicenseNumber { get; set; } = string.Empty;
 
         /// <summary>
+        /// 农场照片1
+        /// </summary>
+        [StringLength(500)]
+        public string? FarmPhoto1 { get; set; }
+
+        /// <summary>
+        /// 农场照片2
+        /// </summary>
+        [StringLength(500)]
+        public string? FarmPhoto2 { get; set; }
+
+        /// <summary>
+        /// 农场照片3
+        /// </summary>
+        [StringLength(500)]
+        public string? FarmPhoto3 { get; set; }
+
+        /// <summary>
         /// 资料创建时间
         /// </summary>
         public DateTime CreateTime { get; set; } = DateTime.Now;

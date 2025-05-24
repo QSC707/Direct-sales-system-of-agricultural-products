@@ -479,6 +479,66 @@ const api = {
         }
     },
     
+    // 农户相关
+    farmers: {
+        // 获取所有农户列表
+        getAll: async () => {
+            try {
+                const response = await fetch(`${window.API_BASE_URL}/farmer`, {
+                    method: 'GET',
+                    headers: window.getHeaders()
+                });
+                return await handleResponse(response);
+            } catch (error) {
+                throw new Error('获取农户列表失败');
+            }
+        },
+        
+        // 获取农户详情
+        getById: async (farmerId) => {
+            try {
+                const response = await fetch(`${window.API_BASE_URL}/farmer/${farmerId}`, {
+                    method: 'GET',
+                    headers: window.getHeaders()
+                });
+                return await handleResponse(response);
+            } catch (error) {
+                throw new Error('获取农户详情失败');
+            }
+        },
+        
+        // 获取农户的产品列表
+        getProducts: async (farmerId) => {
+            try {
+                const response = await fetch(`${window.API_BASE_URL}/farmer/${farmerId}/products`, {
+                    method: 'GET',
+                    headers: window.getHeaders()
+                });
+                return await handleResponse(response);
+            } catch (error) {
+                throw new Error('获取农户产品列表失败');
+            }
+        },
+        
+        // 获取农户的订单列表（需要权限）
+        getOrders: async (farmerId, status = null, page = 1, pageSize = 10) => {
+            try {
+                let url = `${window.API_BASE_URL}/farmer/${farmerId}/orders?page=${page}&pageSize=${pageSize}`;
+                if (status) {
+                    url += `&status=${status}`;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: window.getHeaders()
+                });
+                return await handleResponse(response);
+            } catch (error) {
+                throw new Error('获取农户订单列表失败');
+            }
+        }
+    },
+    
     // 订单相关
     orders: {
         // 获取订单列表

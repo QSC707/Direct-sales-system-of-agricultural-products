@@ -1091,7 +1091,7 @@
             构造函数
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Controllers.ProductController.GetProducts(System.Nullable{System.Int32})">
+        <member name="M:FarmDirectSales.Controllers.ProductController.GetProducts(System.Nullable{System.Int32},System.String,System.String,System.String,System.String,System.String)">
             <summary>
             获取所有产品
             </summary>
@@ -1708,7 +1708,22 @@
         </member>
         <member name="M:FarmDirectSales.Controllers.UploadController.DeleteUpload(System.Int32)">
             <summary>
-            删除图片
+            删除上传的文件
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UploadController.UploadSingleFarmPhoto(System.Int32,System.Int32,Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>
+            上传单张农场照片到指定位置
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UploadController.UploadFarmPhotos(System.Int32,System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile})">
+            <summary>
+            上传农场照片
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.UploadController.DeleteFarmPhoto(System.Int32,System.Int32)">
+            <summary>
+            删除农场照片
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.UserAddressController">
@@ -2354,6 +2369,30 @@
         <member name="M:FarmDirectSales.Migrations.AddDeliveryPresets.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:FarmDirectSales.Migrations.AddProductIndexes">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddProductIndexes.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddProductIndexes.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddProductIndexes.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddFarmPhotosToFarmerProfile">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddFarmPhotosToFarmerProfile.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddFarmPhotosToFarmerProfile.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddFarmPhotosToFarmerProfile.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:FarmDirectSales.Models.CartItem">
             <summary>
             购物车项模型
@@ -2637,6 +2676,21 @@
         <member name="P:FarmDirectSales.Models.FarmerProfile.LicenseNumber">
             <summary>
             农场营业执照号
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.FarmPhoto1">
+            <summary>
+            农场照片1
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.FarmPhoto2">
+            <summary>
+            农场照片2
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.FarmerProfile.FarmPhoto3">
+            <summary>
+            农场照片3
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.FarmerProfile.CreateTime">

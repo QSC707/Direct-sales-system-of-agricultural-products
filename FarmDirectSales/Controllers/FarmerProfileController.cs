@@ -56,7 +56,10 @@ namespace FarmDirectSales.Controllers
                         fp.LicenseNumber,
                         fp.EstablishedDate,
                         fp.CreateTime,
-                        fp.UpdateTime
+                        fp.UpdateTime,
+                        fp.FarmPhoto1,
+                        fp.FarmPhoto2,
+                        fp.FarmPhoto3
                     })
                     .FirstOrDefaultAsync();
                 
@@ -76,15 +79,19 @@ namespace FarmDirectSales.Controllers
                     message = "获取农户资料成功",
                     data = new
                     {
-                        userId = user.UserId,
-                        farmName = profile.FarmName,
-                        location = profile.Location,
-                        description = profile.Description,
-                        productCategory = profile.ProductCategory,
-                        licenseNumber = profile.LicenseNumber,
-                        establishedDate = profile.EstablishedDate,
-                        createTime = profile.CreateTime,
-                        updateTime = profile.UpdateTime
+                        profile.UserId,
+                        profile.FarmName,
+                        profile.Location,
+                        profile.Description,
+                        profile.ProductCategory,
+                        profile.LicenseNumber,
+                        profile.EstablishedDate,
+                        profile.CreateTime,
+                        profile.UpdateTime,
+                        // 农场照片
+                        FarmPhoto1 = profile.FarmPhoto1,
+                        FarmPhoto2 = profile.FarmPhoto2,
+                        FarmPhoto3 = profile.FarmPhoto3
                     }
                 });
             }

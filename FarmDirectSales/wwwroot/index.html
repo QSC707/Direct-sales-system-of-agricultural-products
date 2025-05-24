@@ -444,57 +444,68 @@
         
         // 加载优质农户
         async function loadFeaturedFarmers() {
-            // 这里应该调用实际的API获取农户数据
-            // 由于当前没有专门的农户列表API，我们使用模拟数据
-            
             const farmersContainer = document.getElementById('featured-farmers');
             
-            // 模拟数据
-            const farmers = [
-                {
-                    id: 1,
-                    name: '绿野农场',
-                    description: '专注有机蔬菜种植20年，坚持生态农业理念',
-                    imageUrl: '/img/placeholder.jpg'
-                },
-                {
-                    id: 2,
-                    name: '阳光果园',
-                    description: '精心培育各类水果，品质卓越，口感一流',
-                    imageUrl: '/img/placeholder.jpg'
-                },
-                {
-                    id: 3,
-                    name: '山林土特产',
-                    description: '深山野趣，带来纯天然农家特产，品味自然的馈赠',
-                    imageUrl: '/img/placeholder.jpg'
-                },
-                {
-                    id: 4,
-                    name: '鲜美家禽',
-                    description: '生态散养家禽，安全健康，肉质鲜美',
-                    imageUrl: '/img/placeholder.jpg'
+            try {
+                // 从API获取农户数据
+                const response = await api.farmers.getAll();
+                
+                if (response.code !== 200) {
+                    throw new Error(response.message || '获取农户数据失败');
                 }
-            ];
-            
-            let farmersHtml = '';
-            
-            farmers.forEach(farmer => {
-                farmersHtml += `
-                    <div class="col-lg-3 col-md-6">
-                        <div class="card h-100">
-                            <img src="${farmer.imageUrl}" class="card-img-top" alt="${farmer.name}" style="height: 180px; object-fit: cover;">
-                            <div class="card-body">
-                                <h5 class="card-title">${farmer.name}</h5>
-                                <p class="card-text">${farmer.description}</p>
-                                <a href="/pages/farmer-detail.html?id=${farmer.id}" class="btn btn-outline-success">查看详情</a>
+                
+                let farmers = response.data || [];
+                
+                // 只显示前4个农户作为优质农户
+                farmers = farmers.slice(0, 4);
+                
+                if (farmers.length === 0) {
+                    farmersContainer.innerHTML = '<div class="col-12 text-center">暂无农户数据</div>';
+                    return;
+                }
+                
+                let farmersHtml = '';
+                
+                farmers.forEach(farmer => {
+                    const name = farmer.farmName || farmer.username || '未知农户';
+                    const description = farmer.description || '专业农户，提供优质农产品';
+                    const imageUrl = farmer.imageUrl || '/img/placeholder.jpg';
+                    const farmerId = farmer.userId;
+                    const location = farmer.location || '未知地区';
+                    const category = farmer.productCategory || '未分类';
+                    
+                    // 使用农场照片，如果有的话
+                    let farmImageUrl = '/img/placeholder.jpg';
+                    if (farmer.farmPhotos && farmer.farmPhotos.length > 0) {
+                        farmImageUrl = farmer.farmPhotos[0]; // 使用第一张农场照片
+                    } else if (imageUrl) {
+                        farmImageUrl = imageUrl; // 备用图片
+                    }
+                    
+                    farmersHtml += `
+                        <div class="col-lg-3 col-md-6">
+                            <div class="card h-100">
+                                <img src="${farmImageUrl}" class="card-img-top" alt="${name}" style="height: 180px; object-fit: cover;">
+                                <div class="card-body">
+                                    <h5 class="card-title">${name}</h5>
+                                    <div class="mb-2">
+                                        <span class="badge bg-success">${category}</span>
+                                        <span class="badge bg-light text-dark">${location}</span>
+                                    </div>
+                                    <p class="card-text">${description}</p>
+                                    <a href="/pages/farmer-detail.html?id=${farmerId}" class="btn btn-outline-success">查看详情</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-            });
-            
-            farmersContainer.innerHTML = farmersHtml;
+                    `;
+                });
+                
+                farmersContainer.innerHTML = farmersHtml;
+                
+            } catch (error) {
+                console.error('加载农户数据失败:', error);
+                farmersContainer.innerHTML = '<div class="col-12 text-center text-danger">加载农户数据失败，请稍后再试</div>';
+            }
         }
     </script>
 </body>

@@ -33,8 +33,9 @@ namespace FarmDirectSales.Controllers
         {
             try
             {
-                // 获取农户信息
+                // 获取农户信息，包含FarmerProfile
                 var farmer = await _context.Users
+                    .Include(u => u.FarmerProfile)
                     .Where(u => u.UserId == farmerId && u.Role == "farmer")
                     .FirstOrDefaultAsync();
 
@@ -67,7 +68,21 @@ namespace FarmDirectSales.Controllers
                         farmer.CreateTime,
                         farmer.LastLoginTime,
                         ProductCount = productCount,
-                        OrderCount = orderCount
+                        OrderCount = orderCount,
+                        // 农户资料信息
+                        FarmName = farmer.FarmerProfile?.FarmName,
+                        Location = farmer.FarmerProfile?.Location,
+                        Description = farmer.FarmerProfile?.Description,
+                        ProductCategory = farmer.FarmerProfile?.ProductCategory,
+                        LicenseNumber = farmer.FarmerProfile?.LicenseNumber,
+                        EstablishedDate = farmer.FarmerProfile?.EstablishedDate,
+                        // 农场照片
+                        FarmPhotos = new string?[]
+                        {
+                            farmer.FarmerProfile?.FarmPhoto1,
+                            farmer.FarmerProfile?.FarmPhoto2,
+                            farmer.FarmerProfile?.FarmPhoto3
+                        }.Where(p => !string.IsNullOrEmpty(p)).ToArray()
                     }
                 });
             }
@@ -85,8 +100,9 @@ namespace FarmDirectSales.Controllers
         {
             try
             {
-                // 获取所有农户
+                // 获取所有农户，包含FarmerProfile
                 var farmers = await _context.Users
+                    .Include(u => u.FarmerProfile)
                     .Where(u => u.Role == "farmer")
                     .ToListAsync();
 
@@ -100,7 +116,21 @@ namespace FarmDirectSales.Controllers
                         f.Username,
                         f.Email,
                         f.Phone,
-                        f.CreateTime
+                        f.CreateTime,
+                        // 农户资料信息
+                        FarmName = f.FarmerProfile?.FarmName,
+                        Location = f.FarmerProfile?.Location,
+                        Description = f.FarmerProfile?.Description,
+                        ProductCategory = f.FarmerProfile?.ProductCategory,
+                        LicenseNumber = f.FarmerProfile?.LicenseNumber,
+                        EstablishedDate = f.FarmerProfile?.EstablishedDate,
+                        // 农场照片
+                        FarmPhotos = new string?[]
+                        {
+                            f.FarmerProfile?.FarmPhoto1,
+                            f.FarmerProfile?.FarmPhoto2,
+                            f.FarmerProfile?.FarmPhoto3
+                        }.Where(p => !string.IsNullOrEmpty(p)).ToArray()
                     })
                 });
             }

@@ -202,106 +202,6 @@
         let currentPage = 1;
         const pageSize = 12;
         
-        // 模拟农户数据（实际应从API获取）
-        const farmersData = [
-            {
-                id: 1,
-                name: '绿野农场',
-                owner: '张三',
-                region: '广东',
-                category: '蔬菜',
-                description: '专注有机蔬菜种植20年，坚持生态农业理念。我们的农场位于远离城市污染的山区，采用纯天然农耕方法，确保产品绿色健康。',
-                imageUrl: 'https://source.unsplash.com/500x300/?farm',
-                rating: 4.8,
-                reviewCount: 125,
-                productCount: 15
-            },
-            {
-                id: 2,
-                name: '阳光果园',
-                owner: '李四',
-                region: '广东',
-                category: '水果',
-                description: '精心培育各类水果，品质卓越，口感一流。我们的果园种植多种时令水果，全年供应不同品种，保证新鲜直达您家。',
-                imageUrl: 'https://source.unsplash.com/500x300/?orchard',
-                rating: 4.6,
-                reviewCount: 98,
-                productCount: 12
-            },
-            {
-                id: 3,
-                name: '山林土特产',
-                owner: '王五',
-                region: '广西',
-                category: '特产',
-                description: '深山野趣，带来纯天然农家特产，品味自然的馈赠。我们的特产来自深山老林，保留了传统工艺和原汁原味。',
-                imageUrl: 'https://source.unsplash.com/500x300/?mountains',
-                rating: 4.9,
-                reviewCount: 75,
-                productCount: 8
-            },
-            {
-                id: 4,
-                name: '鲜美家禽',
-                owner: '赵六',
-                region: '云南',
-                category: '家禽',
-                description: '生态散养家禽，安全健康，肉质鲜美。我们的家禽采用传统方式放养，吃天然粮食，不使用激素和抗生素。',
-                imageUrl: 'https://source.unsplash.com/500x300/?poultry',
-                rating: 4.7,
-                reviewCount: 112,
-                productCount: 6
-            },
-            {
-                id: 5,
-                name: '福田蔬菜基地',
-                owner: '钱七',
-                region: '福建',
-                category: '蔬菜',
-                description: '现代化种植技术与传统农耕相结合，提供多种新鲜蔬菜。我们引进先进技术，确保蔬菜品质稳定，全年供应无忧。',
-                imageUrl: 'https://source.unsplash.com/500x300/?vegetables',
-                rating: 4.5,
-                reviewCount: 87,
-                productCount: 20
-            },
-            {
-                id: 6,
-                name: '荣华果业',
-                owner: '孙八',
-                region: '云南',
-                category: '水果',
-                description: '热带水果种植专家，甜蜜多汁，口感极佳。我们的水果从采摘到您收到，保证不超过48小时，新鲜度满分。',
-                imageUrl: 'https://source.unsplash.com/500x300/?tropical',
-                rating: 4.4,
-                reviewCount: 63,
-                productCount: 10
-            },
-            {
-                id: 7,
-                name: '溪水养殖场',
-                owner: '周九',
-                region: '广西',
-                category: '家禽',
-                description: '山泉水养殖家禽，肉质细嫩，风味独特。我们的养殖场建在山泉水旁，家禽喝天然山泉，肉质更加鲜美可口。',
-                imageUrl: 'https://source.unsplash.com/500x300/?stream',
-                rating: 4.7,
-                reviewCount: 92,
-                productCount: 7
-            },
-            {
-                id: 8,
-                name: '老山特产',
-                owner: '吴十',
-                region: '福建',
-                category: '特产',
-                description: '传统手工艺制作各类特产，延续百年工艺。我们的产品都是按照祖传配方手工制作，保留了原汁原味的地道风味。',
-                imageUrl: 'https://source.unsplash.com/500x300/?craft',
-                rating: 4.8,
-                reviewCount: 118,
-                productCount: 14
-            }
-        ];
-
         document.addEventListener('DOMContentLoaded', function() {
             // 检查用户登录状态
             checkAuthStatus();
@@ -384,7 +284,7 @@
         }
         
         // 加载农户数据
-        function loadFarmers() {
+        async function loadFarmers() {
             // 显示加载状态
             document.getElementById('loading').classList.remove('d-none');
             document.getElementById('no-farmers').classList.add('d-none');
@@ -394,28 +294,68 @@
             const region = document.getElementById('filter-region').value;
             const category = document.getElementById('filter-category').value;
             
-            // 筛选数据
-            let filteredFarmers = farmersData.filter(farmer => {
-                const matchesKeyword = keyword === '' || 
-                    farmer.name.toLowerCase().includes(keyword) || 
-                    farmer.description.toLowerCase().includes(keyword);
-                const matchesRegion = region === '' || farmer.region === region;
-                const matchesCategory = category === '' || farmer.category === category;
+            try {
+                // 从API获取农户数据
+                const response = await api.farmers.getAll();
                 
-                return matchesKeyword && matchesRegion && matchesCategory;
-            });
-            
-            // 计算分页
-            const totalItems = filteredFarmers.length;
-            const totalPages = Math.ceil(totalItems / pageSize);
-            
-            // 获取当前页数据
-            const start = (currentPage - 1) * pageSize;
-            const end = start + pageSize;
-            const currentPageData = filteredFarmers.slice(start, end);
-            
-            // 模拟网络延迟
-            setTimeout(() => {
+                if (response.code !== 200) {
+                    throw new Error(response.message || '获取农户数据失败');
+                }
+                
+                let farmers = response.data || [];
+                
+                // 为每个农户添加额外信息（产品数量等）
+                for (let farmer of farmers) {
+                    try {
+                        // 获取农户的产品数量
+                        const productsResponse = await api.farmers.getProducts(farmer.userId);
+                        farmer.productCount = productsResponse.data ? productsResponse.data.length : 0;
+                        
+                        // 设置显示信息，优先使用FarmerProfile中的信息
+                        farmer.displayName = farmer.farmName || farmer.username || '未知农户';
+                        farmer.id = farmer.userId;
+                        farmer.owner = farmer.username;
+                        farmer.region = farmer.location || '未知地区';
+                        farmer.category = farmer.productCategory || '未分类';
+                        farmer.description = farmer.description || '专业农户，提供优质农产品';
+                        farmer.imageUrl = farmer.imageUrl || '/img/placeholder.jpg';
+                        farmer.rating = farmer.rating || 4.5;
+                        farmer.reviewCount = farmer.reviewCount || 0;
+                    } catch (error) {
+                        console.error(`获取农户 ${farmer.userId} 的产品数据失败:`, error);
+                        farmer.productCount = 0;
+                        farmer.displayName = farmer.farmName || farmer.username || '未知农户';
+                        farmer.id = farmer.userId;
+                        farmer.owner = farmer.username;
+                        farmer.region = farmer.location || '未知地区';
+                        farmer.category = farmer.productCategory || '未分类';
+                        farmer.description = farmer.description || '专业农户，提供优质农产品';
+                        farmer.imageUrl = '/img/placeholder.jpg';
+                        farmer.rating = 4.5;
+                        farmer.reviewCount = 0;
+                    }
+                }
+                
+                // 客户端筛选数据
+                let filteredFarmers = farmers.filter(farmer => {
+                    const matchesKeyword = keyword === '' || 
+                        farmer.displayName.toLowerCase().includes(keyword) || 
+                        (farmer.description && farmer.description.toLowerCase().includes(keyword));
+                    const matchesRegion = region === '' || farmer.region.includes(region);
+                    const matchesCategory = category === '' || farmer.category.includes(category);
+                    
+                    return matchesKeyword && matchesRegion && matchesCategory;
+                });
+                
+                // 计算分页
+                const totalItems = filteredFarmers.length;
+                const totalPages = Math.ceil(totalItems / pageSize);
+                
+                // 获取当前页数据
+                const start = (currentPage - 1) * pageSize;
+                const end = start + pageSize;
+                const currentPageData = filteredFarmers.slice(start, end);
+                
                 // 隐藏加载状态
                 document.getElementById('loading').classList.add('d-none');
                 
@@ -428,7 +368,25 @@
                 
                 // 渲染分页
                 renderPagination(totalPages);
-            }, 500);
+                
+            } catch (error) {
+                console.error('加载农户数据失败:', error);
+                
+                // 隐藏加载状态
+                document.getElementById('loading').classList.add('d-none');
+                
+                // 显示错误状态
+                const container = document.getElementById('farmers-container');
+                container.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="alert alert-danger">
+                            <h5>加载失败</h5>
+                            <p>无法获取农户数据: ${error.message}</p>
+                            <button class="btn btn-outline-danger" onclick="loadFarmers()">重试</button>
+                        </div>
+                    </div>
+                `;
+            }
         }
         
         // 渲染农户数据
@@ -442,11 +400,20 @@
             farmers.forEach(farmer => {
                 const farmerCard = document.createElement('div');
                 farmerCard.className = 'col-lg-3 col-md-4 col-sm-6 farmer-card';
+                
+                // 使用农场照片，如果有的话
+                let farmImageUrl = '/img/placeholder.jpg';
+                if (farmer.farmPhotos && farmer.farmPhotos.length > 0) {
+                    farmImageUrl = farmer.farmPhotos[0]; // 使用第一张农场照片
+                } else if (farmer.imageUrl) {
+                    farmImageUrl = farmer.imageUrl; // 备用图片
+                }
+                
                 farmerCard.innerHTML = `
                     <div class="card h-100 shadow-sm" onclick="window.location.href='/pages/farmer-detail.html?id=${farmer.id}'">
-                        <img src="${farmer.imageUrl}" class="card-img-top" alt="${farmer.name}" style="height: 180px; object-fit: cover;">
+                        <img src="${farmImageUrl}" class="card-img-top" alt="${farmer.displayName}" style="height: 180px; object-fit: cover;">
                         <div class="card-body">
-                            <h5 class="card-title">${farmer.name}</h5>
+                            <h5 class="card-title">${farmer.displayName}</h5>
                             <p class="text-muted small mb-2">经营人：${farmer.owner} | 地区：${farmer.region}</p>
                             <div class="mb-2">
                                 <span class="badge bg-success">${farmer.category}</span>

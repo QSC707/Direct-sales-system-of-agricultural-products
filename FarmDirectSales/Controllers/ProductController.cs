@@ -31,13 +31,24 @@ namespace FarmDirectSales.Controllers
         /// 获取所有产品
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetProducts([FromQuery] int? farmerId = null)
+        public async Task<IActionResult> GetProducts(
+            [FromQuery] int? farmerId = null,
+            [FromQuery] string? category = null,
+            [FromQuery] string? status = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortOrder = "desc",
+            [FromQuery] string? keyword = null)
         {
             try
             {
                 // 检查用户身份和权限
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var userRole = User.FindFirstValue(ClaimTypes.Role);
+                
+                // 添加详细调试日志
+                Console.WriteLine($"=== GetProducts 开始调试 ===");
+                Console.WriteLine($"用户角色: '{userRole}', 用户ID: '{userId}', 农户ID参数: '{farmerId}'");
+                Console.WriteLine($"筛选参数 - 分类: '{category}', 状态: '{status}', 排序字段: '{sortBy}', 排序顺序: '{sortOrder}', 关键词: '{keyword}'");
                 
                 // 构建基础查询，不包括IsActive过滤
                 IQueryable<Product> query = _context.Products.Include(p => p.Farmer);
@@ -47,23 +58,96 @@ namespace FarmDirectSales.Controllers
                 {
                     // 如果指定了farmerId，查询该农户的所有产品（包括下架的）
                     query = query.Where(p => p.FarmerId == farmerId.Value);
+                    Console.WriteLine($"应用农户筛选: farmerId = {farmerId.Value}");
                 }
                 else if (userRole == "farmer" && int.TryParse(userId, out int currentFarmerId))
                 {
                     // 如果是农户查看自己的产品，不过滤IsActive
                     query = query.Where(p => p.FarmerId == currentFarmerId);
+                    Console.WriteLine($"应用当前农户筛选: currentFarmerId = {currentFarmerId}");
                 }
                 else
                 {
                     // 其他情况（管理员或普通用户）只返回上架(IsActive)的产品
                     query = query.Where(p => p.IsActive);
+                    Console.WriteLine("应用默认筛选: 只返回上架产品");
+                }
+                
+                // 分类筛选
+                if (!string.IsNullOrEmpty(category) && category != "all")
+                {
+                    query = query.Where(p => p.Category == category);
+                    Console.WriteLine($"应用分类筛选: category = '{category}'");
+                }
+                else
+                {
+                    Console.WriteLine("跳过分类筛选");
+                }
+                
+                // 状态筛选
+                if (!string.IsNullOrEmpty(status) && status != "all")
+                {
+                    if (status == "active")
+                    {
+                        query = query.Where(p => p.IsActive);
+                        Console.WriteLine("应用状态筛选: 只返回上架产品");
+                    }
+                    else if (status == "inactive")
+                    {
+                        query = query.Where(p => !p.IsActive);
+                        Console.WriteLine("应用状态筛选: 只返回下架产品");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("跳过状态筛选");
+                }
+                
+                // 关键词搜索
+                if (!string.IsNullOrEmpty(keyword))
+                {
+                    query = query.Where(p => p.ProductName.Contains(keyword) || 
+                                           p.Description.Contains(keyword));
+                    Console.WriteLine($"应用关键词搜索: keyword = '{keyword}'");
+                }
+                else
+                {
+                    Console.WriteLine("跳过关键词搜索");
+                }
+                
+                // 排序
+                if (!string.IsNullOrEmpty(sortBy))
+                {
+                    bool isDescending = sortOrder?.ToLower() == "desc";
+                    
+                    query = sortBy.ToLower() switch
+                    {
+                        "name" => isDescending ? query.OrderByDescending(p => p.ProductName) : query.OrderBy(p => p.ProductName),
+                        "price" => isDescending ? query.OrderByDescending(p => p.Price) : query.OrderBy(p => p.Price),
+                        "stock" => isDescending ? query.OrderByDescending(p => p.Stock) : query.OrderBy(p => p.Stock),
+                        "createtime" => isDescending ? query.OrderByDescending(p => p.CreateTime) : query.OrderBy(p => p.CreateTime),
+                        "updatetime" => isDescending ? query.OrderByDescending(p => p.UpdateTime) : query.OrderBy(p => p.UpdateTime),
+                        "category" => isDescending ? query.OrderByDescending(p => p.Category) : query.OrderBy(p => p.Category),
+                        _ => query.OrderByDescending(p => p.CreateTime) // 默认按创建时间降序
+                    };
+                    Console.WriteLine($"应用排序: {sortBy} {sortOrder}");
+                }
+                else
+                {
+                    // 默认排序：按创建时间降序
+                    query = query.OrderByDescending(p => p.CreateTime);
+                    Console.WriteLine("应用默认排序: 按创建时间降序");
                 }
                 
                 var products = await query.ToListAsync();
-
-                // 添加日志
-                Console.WriteLine($"用户角色: {userRole}, 用户ID: {userId}, 农户ID参数: {farmerId}");
-                Console.WriteLine($"查询到 {products.Count} 个产品");
+                Console.WriteLine($"查询结果: 找到 {products.Count} 个产品");
+                
+                // 打印每个产品的基本信息用于调试
+                foreach (var p in products)
+                {
+                    Console.WriteLine($"  产品: {p.ProductName}, 分类: {p.Category}, 状态: {(p.IsActive ? "上架" : "下架")}");
+                }
+                Console.WriteLine($"=== GetProducts 调试结束 ===");
 
                 return Ok(new
                 {
