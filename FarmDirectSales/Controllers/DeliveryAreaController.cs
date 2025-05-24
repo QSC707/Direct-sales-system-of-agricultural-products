@@ -207,9 +207,9 @@ namespace FarmDirectSales.Controllers
                     }
                     
                     var existingArea = await query.FirstOrDefaultAsync();
-                    if (existingArea != null)
-                    {
-                        return BadRequest(new { code = 400, message = "该配送区域已存在" });
+                if (existingArea != null)
+                {
+                    return BadRequest(new { code = 400, message = "该配送区域已存在" });
                     }
                 }
 

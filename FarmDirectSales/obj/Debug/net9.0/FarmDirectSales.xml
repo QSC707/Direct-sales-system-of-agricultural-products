@@ -589,6 +589,53 @@
             获取预计送达时间
             </summary>
         </member>
+        <member name="T:FarmDirectSales.Controllers.DeliveryPresetController">
+            <summary>
+            配送预设管理控制器
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryPresetController.GetFarmerDeliveryPresets(System.Int32)">
+            <summary>
+            获取农户的配送预设列表
+            </summary>
+            <param name="farmerId">农户ID</param>
+            <returns>配送预设列表</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryPresetController.CreateDeliveryPreset(FarmDirectSales.Models.DTOs.CreateDeliveryPresetRequest)">
+            <summary>
+            创建配送预设
+            </summary>
+            <param name="request">创建请求</param>
+            <returns>创建结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryPresetController.UpdateDeliveryPreset(System.Int32,FarmDirectSales.Models.DTOs.UpdateDeliveryPresetRequest)">
+            <summary>
+            更新配送预设
+            </summary>
+            <param name="presetId">预设ID</param>
+            <param name="request">更新请求</param>
+            <returns>更新结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryPresetController.DeleteDeliveryPreset(System.Int32)">
+            <summary>
+            删除配送预设
+            </summary>
+            <param name="presetId">预设ID</param>
+            <returns>删除结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryPresetController.SetDefaultPreset(System.Int32)">
+            <summary>
+            设置默认配送预设
+            </summary>
+            <param name="presetId">预设ID</param>
+            <returns>设置结果</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.DeliveryPresetController.GetCurrentUserId">
+            <summary>
+            获取当前用户ID
+            </summary>
+            <returns>用户ID</returns>
+        </member>
         <member name="T:FarmDirectSales.Controllers.FarmerController">
             <summary>
             农户控制器
@@ -724,7 +771,7 @@
             获取用户订单列表
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Controllers.OrderController.GetFarmerOrders(System.Int32,System.String,System.String)">
+        <member name="M:FarmDirectSales.Controllers.OrderController.GetFarmerOrders(System.Int32,System.String,System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
             <summary>
             获取农户订单列表
             </summary>
@@ -759,6 +806,11 @@
             从购物车创建订单
             </summary>
         </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.GenerateOrderGroupNumber">
+            <summary>
+            生成订单组编号
+            </summary>
+        </member>
         <member name="M:FarmDirectSales.Controllers.OrderController.CreateDirectOrder(FarmDirectSales.Controllers.DirectBuyOrderRequest)">
             <summary>
             直接购买创建订单
@@ -777,6 +829,16 @@
         <member name="M:FarmDirectSales.Controllers.OrderController.ProcessRefund(System.Int32,FarmDirectSales.Controllers.ProcessRefundDto)">
             <summary>
             处理退款（农户或管理员操作）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.BatchShipOrders(FarmDirectSales.Controllers.BatchShipOrdersRequest)">
+            <summary>
+            批量发货
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderController.UpdateDeliveryInfo(System.Int32,FarmDirectSales.Controllers.UpdateDeliveryInfoRequest)">
+            <summary>
+            更新配送信息
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.CreateOrderRequest">
@@ -827,6 +889,26 @@
         <member name="P:FarmDirectSales.Controllers.ShipOrderRequest.FarmerId">
             <summary>
             农户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ShipOrderRequest.DeliveryInfo">
+            <summary>
+            配送信息备注
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ShipOrderRequest.DeliveryContact">
+            <summary>
+            配送联系人
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ShipOrderRequest.DeliveryPhone">
+            <summary>
+            配送联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.ShipOrderRequest.EstimatedDeliveryTime">
+            <summary>
+            预计送达时间
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.CompleteOrderRequest">
@@ -907,6 +989,96 @@
         <member name="P:FarmDirectSales.Controllers.ProcessRefundDto.RefundAmount">
             <summary>
             退款金额
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.BatchShipOrdersRequest">
+            <summary>
+            批量发货请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.BatchShipOrdersRequest.FarmerId">
+            <summary>
+            农户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.BatchShipOrdersRequest.OrderIds">
+            <summary>
+            订单ID列表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.BatchShipOrdersRequest.DeliveryInfo">
+            <summary>
+            配送信息备注
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.BatchShipOrdersRequest.DeliveryContact">
+            <summary>
+            配送联系人
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.BatchShipOrdersRequest.DeliveryPhone">
+            <summary>
+            配送联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.BatchShipOrdersRequest.EstimatedDeliveryTime">
+            <summary>
+            预计送达时间
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.UpdateDeliveryInfoRequest">
+            <summary>
+            更新配送信息请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateDeliveryInfoRequest.FarmerId">
+            <summary>
+            农户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateDeliveryInfoRequest.DeliveryInfo">
+            <summary>
+            配送信息备注
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateDeliveryInfoRequest.DeliveryContact">
+            <summary>
+            配送联系人
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateDeliveryInfoRequest.DeliveryPhone">
+            <summary>
+            配送联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateDeliveryInfoRequest.EstimatedDeliveryTime">
+            <summary>
+            预计送达时间
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.OrderGroupController">
+            <summary>
+            订单组控制器，用于处理订单组相关的API请求
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderGroupController.#ctor(FarmDirectSales.Data.ApplicationDbContext)">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderGroupController.GetUserOrderGroups(System.Int32)">
+            <summary>
+            获取用户的订单组列表
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderGroupController.GetOrderGroupById(System.Int32)">
+            <summary>
+            获取订单组详情
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.OrderGroupController.GetOrdersInGroup(System.Int32)">
+            <summary>
+            获取订单组内的所有订单
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.ProductController">
@@ -1353,6 +1525,22 @@
             <param name="top">返回数量</param>
             <returns>农户销售排名</returns>
         </member>
+        <member name="M:FarmDirectSales.Controllers.StatisticsController.GetProductSalesDetails(System.Nullable{System.Int32},FarmDirectSales.Models.SalesFilter)">
+            <summary>
+            获取农户商品销量详情
+            </summary>
+            <param name="farmerId">农户ID，如果不提供则使用当前登录用户ID</param>
+            <param name="filter">筛选条件</param>
+            <returns>农户所有商品的销量统计</returns>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.StatisticsController.GetPriceAnalysis(System.Int32,FarmDirectSales.Models.SalesFilter)">
+            <summary>
+            获取商品价格分析数据
+            </summary>
+            <param name="productId">商品ID</param>
+            <param name="filter">筛选条件</param>
+            <returns>商品价格与销量分析数据</returns>
+        </member>
         <member name="T:FarmDirectSales.Controllers.TraceController">
             <summary>
             溯源信息控制器
@@ -1598,6 +1786,11 @@
             订单表
             </summary>
         </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.OrderGroups">
+            <summary>
+            订单组表
+            </summary>
+        </member>
         <member name="P:FarmDirectSales.Data.ApplicationDbContext.Traces">
             <summary>
             溯源表
@@ -1636,6 +1829,11 @@
         <member name="P:FarmDirectSales.Data.ApplicationDbContext.ShippingFees">
             <summary>
             运费配置表
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Data.ApplicationDbContext.DeliveryPresets">
+            <summary>
+            配送信息预设表
             </summary>
         </member>
         <member name="M:FarmDirectSales.Data.ApplicationDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
@@ -2096,6 +2294,66 @@
         <member name="M:FarmDirectSales.Migrations.AddShippingFeeAmountToOrder.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:FarmDirectSales.Migrations.AddOrderGroup">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderGroup.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderGroup.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderGroup.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddOrderGroupIdToOrder">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderGroupIdToOrder.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderGroupIdToOrder.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddOrderGroupIdToOrder.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddDeliveryInfoToOrder">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddDeliveryInfoToOrder.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddDeliveryInfoToOrder.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddDeliveryInfoToOrder.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddDeliveryInfoToOrderFinal">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddDeliveryInfoToOrderFinal.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddDeliveryInfoToOrderFinal.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddDeliveryInfoToOrderFinal.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:FarmDirectSales.Migrations.AddDeliveryPresets">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddDeliveryPresets.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddDeliveryPresets.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:FarmDirectSales.Migrations.AddDeliveryPresets.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:FarmDirectSales.Models.CartItem">
             <summary>
             购物车项模型
@@ -2199,6 +2457,141 @@
         <member name="P:FarmDirectSales.Models.DeliveryArea.UpdateBy">
             <summary>
             更新人（管理员ID）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.DeliveryPreset">
+            <summary>
+            配送信息预设模型类
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryPreset.PresetId">
+            <summary>
+            预设ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryPreset.FarmerId">
+            <summary>
+            农户ID（外键）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryPreset.PresetName">
+            <summary>
+            预设名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryPreset.DeliveryInfo">
+            <summary>
+            配送信息备注
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryPreset.DeliveryContact">
+            <summary>
+            配送联系人
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryPreset.DeliveryPhone">
+            <summary>
+            配送联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryPreset.EstimatedDeliveryTime">
+            <summary>
+            预计送达时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryPreset.IsSystemDefault">
+            <summary>
+            是否为系统默认预设
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryPreset.IsUserDefault">
+            <summary>
+            是否为用户默认预设
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryPreset.CreateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryPreset.UpdateTime">
+            <summary>
+            更新时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DeliveryPreset.Farmer">
+            <summary>
+            农户信息（导航属性）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.DTOs.CreateDeliveryPresetRequest">
+            <summary>
+            创建配送预设请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DTOs.CreateDeliveryPresetRequest.PresetName">
+            <summary>
+            预设名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DTOs.CreateDeliveryPresetRequest.DeliveryInfo">
+            <summary>
+            配送信息备注
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DTOs.CreateDeliveryPresetRequest.DeliveryContact">
+            <summary>
+            配送联系人
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DTOs.CreateDeliveryPresetRequest.DeliveryPhone">
+            <summary>
+            配送联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DTOs.CreateDeliveryPresetRequest.EstimatedDeliveryTime">
+            <summary>
+            预计送达时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DTOs.CreateDeliveryPresetRequest.SetAsDefault">
+            <summary>
+            是否设为默认预设
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.DTOs.UpdateDeliveryPresetRequest">
+            <summary>
+            更新配送预设请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DTOs.UpdateDeliveryPresetRequest.PresetName">
+            <summary>
+            预设名称
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DTOs.UpdateDeliveryPresetRequest.DeliveryInfo">
+            <summary>
+            配送信息备注
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DTOs.UpdateDeliveryPresetRequest.DeliveryContact">
+            <summary>
+            配送联系人
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DTOs.UpdateDeliveryPresetRequest.DeliveryPhone">
+            <summary>
+            配送联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DTOs.UpdateDeliveryPresetRequest.EstimatedDeliveryTime">
+            <summary>
+            预计送达时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.DTOs.UpdateDeliveryPresetRequest.SetAsDefault">
+            <summary>
+            是否设为默认预设
             </summary>
         </member>
         <member name="T:FarmDirectSales.Models.FarmerProfile">
@@ -2336,6 +2729,11 @@
             产品ID（外键）
             </summary>
         </member>
+        <member name="P:FarmDirectSales.Models.Order.OrderGroupId">
+            <summary>
+            订单组ID（外键）
+            </summary>
+        </member>
         <member name="P:FarmDirectSales.Models.Order.Quantity">
             <summary>
             购买数量
@@ -2364,6 +2762,26 @@
         <member name="P:FarmDirectSales.Models.Order.ShipTime">
             <summary>
             发货时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.DeliveryInfo">
+            <summary>
+            配送信息备注
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.DeliveryContact">
+            <summary>
+            配送联系人
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.DeliveryPhone">
+            <summary>
+            配送联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.EstimatedDeliveryTime">
+            <summary>
+            预计送达时间
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.Order.CompleteTime">
@@ -2408,7 +2826,7 @@
         </member>
         <member name="P:FarmDirectSales.Models.Order.ShippingFeeAmount">
             <summary>
-            运费
+            单个订单的运费（通常为0，因为运费在OrderGroup中统一计算）
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.Order.ShippingFeeId">
@@ -2437,6 +2855,96 @@
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.Order.ShippingFee">
+            <summary>
+            运费规则（导航属性）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.Order.OrderGroup">
+            <summary>
+            所属订单组（导航属性）
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Models.OrderGroup">
+            <summary>
+            订单组模型，用于将多个订单关联到同一个提交批次
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.OrderGroupId">
+            <summary>
+            订单组ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.UserId">
+            <summary>
+            用户ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.CreateTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.GroupNumber">
+            <summary>
+            订单组编号，方便前端展示
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.OrderCount">
+            <summary>
+            订单总数
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.TotalProductAmount">
+            <summary>
+            商品总金额（不含运费）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.ShippingFeeAmount">
+            <summary>
+            运费总金额
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.TotalAmount">
+            <summary>
+            订单总金额（含运费）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.ShippingAddress">
+            <summary>
+            配送地址
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.ContactPhone">
+            <summary>
+            联系电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.ReceiverName">
+            <summary>
+            收货人姓名
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.DeliveryAreaId">
+            <summary>
+            配送区域ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.ShippingFeeId">
+            <summary>
+            运费规则ID
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.User">
+            <summary>
+            用户信息（导航属性）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.Orders">
+            <summary>
+            该组中的所有订单（导航属性）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.OrderGroup.ShippingFee">
             <summary>
             运费规则（导航属性）
             </summary>
@@ -2563,7 +3071,17 @@
         </member>
         <member name="P:FarmDirectSales.Models.SalesOverview.TotalSales">
             <summary>
-            总销售额
+            总销售额（不含运费）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesOverview.ShippingFeeAmount">
+            <summary>
+            总运费金额（仅管理员可见）
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Models.SalesOverview.ShowShippingFees">
+            <summary>
+            是否显示运费信息（对于农户统计默认为false）
             </summary>
         </member>
         <member name="P:FarmDirectSales.Models.SalesOverview.TotalQuantity">
@@ -3201,7 +3719,7 @@
             获取销售总览数据
             </summary>
             <param name="filter">筛选条件</param>
-            <returns>销售总览数据</returns>
+            <returns>销售总览数据（注意：销售额不包含运费，仅包含产品金额）</returns>
         </member>
         <member name="M:FarmDirectSales.Services.StatisticsService.GetDailySalesTrendAsync(FarmDirectSales.Models.SalesFilter)">
             <summary>

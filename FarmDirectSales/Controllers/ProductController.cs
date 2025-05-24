@@ -78,6 +78,10 @@ namespace FarmDirectSales.Controllers
                         p.Stock,
                         p.ImageUrl,
                         p.Category,
+                        p.Specification,
+                        p.IsOrganic,
+                        p.HarvestDate,
+                        p.ShelfLife,
                         Farmer = new { p.Farmer.UserId, p.Farmer.Username },
                         p.CreateTime,
                         p.UpdateTime,
@@ -311,18 +315,18 @@ namespace FarmDirectSales.Controllers
                     product.HarvestDate = request.HarvestDate.Value;
                 if (request.ShelfLife.HasValue)
                     product.ShelfLife = request.ShelfLife.Value;
-
+                
                 // 处理上下架状态
                 if (request.IsActive.HasValue && product.IsActive != request.IsActive.Value)
                 {
                     product.IsActive = request.IsActive.Value;
                     if (request.IsActive.Value)
                     {
-                        product.ActiveTime = DateTime.Now;
-                    }
-                    else
-                    {
-                        product.InactiveTime = DateTime.Now;
+                            product.ActiveTime = DateTime.Now;
+                        }
+                        else
+                        {
+                            product.InactiveTime = DateTime.Now;
                     }
                 }
 

@@ -49,6 +49,88 @@
         .badge-secondary {
             background-color: #6c757d;
         }
+        
+        /* 库存和规格信息优化样式 */
+        .stock-info {
+            min-width: 120px;
+        }
+        
+        .spec-info {
+            min-width: 100px;
+        }
+        
+        /* 库存数量动态颜色 */
+        .stock-high {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+        }
+        
+        .stock-medium {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: white;
+            box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
+        }
+        
+        .stock-low {
+            background: linear-gradient(135deg, #dc3545, #e74c3c);
+            color: white;
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+        }
+        
+        /* 规格说明样式 */
+        .spec-badge {
+            background: linear-gradient(135deg, #17a2b8, #6f42c1);
+            color: white;
+            box-shadow: 0 2px 4px rgba(23, 162, 184, 0.3);
+        }
+        
+        /* 表格行hover效果 */
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        
+        /* 产品名称和分类样式 */
+        .product-name {
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+        
+        .product-category {
+            font-size: 0.8rem;
+            color: #6c757d;
+            background-color: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+        
+        /* 价格显示优化 */
+        .price-display {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        /* 状态时间信息样式 */
+        .status-time {
+            font-size: 0.75rem;
+            margin-top: 3px;
+        }
+        
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+            
+            .stock-info, .spec-info {
+                min-width: 80px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -120,8 +202,14 @@
             <div class="col-md-9">
                 <div class="card mb-4">
                     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0">我的产品</h4>
                         <div>
+                            <h4 class="mb-0">我的产品</h4>
+                            <small id="lastUpdateTime" class="text-light opacity-75">最后更新: --</small>
+                        </div>
+                        <div>
+                            <button class="btn btn-light btn-sm mr-2" id="refreshBtn" title="刷新数据">
+                                <i class="fa fa-sync"></i> 刷新
+                            </button>
                             <button class="btn btn-light mr-2" id="batchManageBtn">
                                 <i class="fa fa-tasks"></i> 批量管理
                             </button>
@@ -182,8 +270,9 @@
                                         </th>
                                         <th>产品图片</th>
                                         <th>名称</th>
-                                        <th>价格(元/kg)</th>
-                                        <th>库存(kg)</th>
+                                        <th>价格</th>
+                                        <th class="text-center"><i class="fa fa-box text-info"></i> 库存数量</th>
+                                        <th class="text-center"><i class="fa fa-info-circle text-warning"></i> 规格说明</th>
                                         <th>状态</th>
                                         <th>操作</th>
                                     </tr>
@@ -191,7 +280,7 @@
                                 <tbody id="productList">
                                     <!-- 产品列表将通过JS动态加载 -->
                                     <tr>
-                                        <td colspan="7" class="text-center">正在加载产品...</td>
+                                        <td colspan="8" class="text-center">正在加载产品...</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -248,12 +337,12 @@
                         
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label for="productPrice">价格(元/kg) <span class="text-danger">*</span></label>
+                                <label for="productPrice">价格(元/个) <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control" id="productPrice" min="0.01" step="0.01" required>
                             </div>
                             <div class="form-group col-md-6">
-                                <label for="productStock">库存(kg) <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="productStock" min="0" step="0.1" required>
+                                <label for="productStock">库存(个) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="productStock" min="0" step="1" required>
                             </div>
                         </div>
                         
@@ -352,12 +441,12 @@
                         
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label for="editProductPrice">价格(元/kg) <span class="text-danger">*</span></label>
+                                <label for="editProductPrice">价格(元/个) <span class="text-danger">*</span></label>
                                 <input type="number" class="form-control" id="editProductPrice" min="0.01" step="0.01" required>
                             </div>
                             <div class="form-group col-md-6">
-                                <label for="editProductStock">库存(kg) <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" id="editProductStock" min="0" step="0.1" required>
+                                <label for="editProductStock">库存(个) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="editProductStock" min="0" step="1" required>
                             </div>
                         </div>
                         
@@ -441,10 +530,10 @@
                             </div>
                             <div class="row mb-3">
                                 <div class="col-6">
-                                    <strong>价格：</strong> <span id="detailProductPrice">¥0.00</span> 元/kg
+                                    <strong>价格：</strong> <span id="detailProductPrice">¥0.00</span> 元/个
                                 </div>
                                 <div class="col-6">
-                                    <strong>库存：</strong> <span id="detailProductStock">0</span> kg
+                                    <strong>库存：</strong> <span id="detailProductStock">0</span> 个
                                 </div>
                             </div>
                         </div>
@@ -487,12 +576,23 @@
                                             <td id="detailIsOrganic">否</td>
                                         </tr>
                                         <tr>
-                                            <th>评价信息</th>
-                                            <td>
-                                                <div>平均评分: <span id="detailRating">-</span></div>
-                                                <div>评价数量: <span id="detailReviewCount">0</span></div>
+                                            <th style="background-color: #e8f5e9;">原库存</th>
+                                            <td id="detailOriginalStock" style="background-color: #e8f5e9;">
+                                                <span class="badge badge-info">-</span>
+                                                <small class="text-muted ml-2">添加产品时的初始库存</small>
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <th style="background-color: #fff3e0;">销量统计</th>
+                                            <td id="detailSalesInfo" style="background-color: #fff3e0;">
+                                                <div class="d-flex justify-content-between">
+                                                    <span>已售出: <span id="detailSalesCount" class="badge badge-success">-</span> 个</span>
+                                                    <span>剩余库存: <span id="detailCurrentStock" class="badge badge-warning">-</span> 个</span>
+                                                </div>
+                                                <small class="text-muted d-block mt-1">销量 = 原库存 - 当前库存</small>
+                                            </td>
+                                        </tr>
+                                        <tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -634,6 +734,25 @@
                 $('#statusFilter').on('change', filterProducts);
                 $('#searchBtn').on('click', filterProducts);
                 
+                // 添加刷新按钮事件
+                $('#refreshBtn').on('click', function() {
+                    const $refreshIcon = $(this).find('i');
+                    
+                    // 添加旋转动画
+                    $refreshIcon.addClass('fa-spin');
+                    $(this).prop('disabled', true);
+                    
+                    // 执行刷新
+                    loadProducts().finally(() => {
+                        // 移除旋转动画并启用按钮
+                        $refreshIcon.removeClass('fa-spin');
+                        $(this).prop('disabled', false);
+                        
+                        // 更新最后刷新时间
+                        updateLastUpdateTime();
+                    });
+                });
+                
                 // 绑定搜索框回车事件
                 $('#searchProduct').on('keypress', function(e) {
                     if (e.which === 13) { // 回车键的键值是13
@@ -644,6 +763,12 @@
                 
                 // 加载产品列表
                 loadProducts();
+                
+                // 设置自动刷新（每5分钟更新一次库存数据）
+                setInterval(function() {
+                    console.log('自动刷新产品库存数据...');
+                    loadProducts();
+                }, 5 * 60 * 1000); // 5分钟 = 5 * 60 * 1000毫秒
                 
                 // 使用事件委托绑定所有动态生成的产品操作按钮
                 // 编辑按钮事件
@@ -802,7 +927,7 @@
                 console.log('当前用户ID:', userId);
                 
                 // 显示加载状态
-                $('#productList').html('<tr><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">加载中...</span></div></td></tr>');
+                $('#productList').html('<tr><td colspan="8" class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">加载中...</span></div></td></tr>');
                 
                 // 使用Axios获取农户产品，确保传递farmerId参数
                 // 明确添加farmerId参数，确保只加载当前农户的产品
@@ -811,14 +936,32 @@
                 
                 if (result && result.code === 200 && result.data) {
                     renderProductList(result.data);
+                    // 更新最后更新时间
+                    updateLastUpdateTime();
                 } else {
                     throw new Error(result.message || '获取产品列表失败');
                 }
             } catch (error) {
                 console.error('获取产品列表失败', error);
                 alert('获取产品列表失败: ' + error.message);
-                $('#productList').html('<tr><td colspan="7" class="text-center text-danger">加载失败: ' + error.message + '</td></tr>');
+                $('#productList').html('<tr><td colspan="8" class="text-center text-danger">加载失败: ' + error.message + '</td></tr>');
             }
+        }
+        
+        /**
+         * 更新最后更新时间显示
+         */
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit', 
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            $('#lastUpdateTime').text(`最后更新: ${timeStr}`);
         }
         
         /**
@@ -849,9 +992,22 @@
                     $('#detailSpecification').text(product.specification || '-');
                     $('#detailIsOrganic').text(product.isOrganic ? '是' : '否');
                     
-                    // 设置评分信息
-                    $('#detailRating').text(product.averageRating ? product.averageRating.toFixed(1) : '-');
-                    $('#detailReviewCount').text(product.reviewCount || 0);
+                    // 加载销量数据
+                    try {
+                        const salesResult = await http.get(`/product/${productId}/sales`);
+                        const salesCount = salesResult && salesResult.code === 200 ? salesResult.data : 0;
+                        const originalStock = (product.stock || 0) + salesCount;
+                        
+                        // 设置原库存和销量信息
+                        $('#detailOriginalStock').html(`<span class="badge badge-info">${originalStock} 个</span><small class="text-muted ml-2">添加产品时的初始库存</small>`);
+                        $('#detailSalesCount').text(salesCount);
+                        $('#detailCurrentStock').text(product.stock || 0);
+                    } catch (salesError) {
+                        console.error('获取销量数据失败:', salesError);
+                        $('#detailOriginalStock').html(`<span class="badge badge-secondary">-</span><small class="text-muted ml-2">无法获取数据</small>`);
+                        $('#detailSalesCount').text('-');
+                        $('#detailCurrentStock').text(product.stock || 0);
+                    }
                     
                     // 设置状态
                     const statusClass = product.isActive ? 'badge-success' : 'badge-secondary';
@@ -911,7 +1067,7 @@
             if (!products || products.length === 0) {
                 // 显示空状态
                 $('#emptyProducts').show();
-                const colSpan = $('.batch-column').is(':visible') ? 7 : 6;
+                const colSpan = $('.batch-column').is(':visible') ? 8 : 7;
                 $productList.append(`<tr><td colspan="${colSpan}" class="text-center">暂无产品数据</td></tr>`);
                 return;
             }
@@ -964,11 +1120,35 @@
                         <td>
                             <img src="${imageUrl}" alt="${product.productName}" class="img-thumbnail" style="max-width: 80px; max-height: 80px;">
                         </td>
-                        <td>${product.productName}</td>
-                        <td>¥${product.price.toFixed(2)}</td>
-                        <td>${product.stock} kg</td>
                         <td>
+                            <div class="product-name">${product.productName}</div>
+                            <span class="product-category">${product.category || '未分类'}</span>
+                        </td>
+                        <td>
+                            <span class="price-display text-primary">¥${product.price.toFixed(2)}</span>
+                            <small class="text-muted d-block">每个</small>
+                        </td>
+                        <td class="text-center stock-info">
+                            <div class="d-flex flex-column align-items-center">
+                                <span class="badge ${product.stock > 50 ? 'stock-high' : product.stock > 10 ? 'stock-medium' : 'stock-low'} mb-1" style="font-size: 0.9rem; padding: 0.4rem 0.6rem;">
+                                    <i class="fa fa-cube mr-1"></i>${product.stock || 0} 个
+                                </span>
+                                <small class="text-muted" style="font-size: 0.7rem;">
+                                    ${product.stock > 50 ? '库存充足' : product.stock > 10 ? '库存适中' : product.stock > 0 ? '库存不足' : '无库存'}
+                                </small>
+                            </div>
+                        </td>
+                        <td class="text-center spec-info">
+                            <div class="d-flex flex-column align-items-center">
+                                <span class="badge spec-badge mb-1" style="font-size: 0.9rem; padding: 0.4rem 0.6rem;">
+                                    <i class="fa fa-weight-hanging mr-1"></i>${product.specification || '按个销售'}
+                                </span>
+                                <small class="text-muted" style="font-size: 0.7rem;">规格说明</small>
+                            </div>
+                        </td>
+                        <td class="text-center">
                             <span class="badge ${statusClass}">${statusText}</span>
+                            ${formattedTime}
                         </td>
                         <td>
                             <button class="btn btn-sm btn-info product-detail-btn" data-id="${product.productId}" data-toggle="tooltip" title="查看详情"><i class="fa fa-info-circle"></i></button>
@@ -1418,7 +1598,7 @@
                     productName: $('#editProductName').val(),
                     description: $('#editProductDescription').val() || '',
                     price: parseFloat($('#editProductPrice').val()),
-                    stock: parseFloat($('#editProductStock').val()),
+                    stock: parseInt($('#editProductStock').val()),
                     category: $('#editProductCategory').val() || '其他',
                     isActive: isActive,
                     // 添加规格、有机认证、收获日期和保质期信息
@@ -1878,7 +2058,7 @@
             
             // 检查是否所有行都被隐藏
             const visibleRows = $('#productList tr:visible').length;
-            const colSpan = $('.batch-column').is(':visible') ? 7 : 6;
+            const colSpan = $('.batch-column').is(':visible') ? 8 : 7;
             
             // 如果没有可见行，显示空提示
             if (visibleRows === 0) {

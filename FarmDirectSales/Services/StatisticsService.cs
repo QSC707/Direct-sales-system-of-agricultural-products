@@ -25,7 +25,7 @@ namespace FarmDirectSales.Services
         /// 获取销售总览数据
         /// </summary>
         /// <param name="filter">筛选条件</param>
-        /// <returns>销售总览数据</returns>
+        /// <returns>销售总览数据（注意：销售额不包含运费，仅包含产品金额）</returns>
         public async Task<SalesOverview> GetSalesOverviewAsync(SalesFilter filter)
         {
             var query = GetFilteredOrdersQuery(filter);
@@ -39,12 +39,13 @@ namespace FarmDirectSales.Services
                     TotalOrders = 0,
                     TotalSales = 0,
                     TotalQuantity = 0,
-                    AverageOrderValue = 0
+                    AverageOrderValue = 0,
+                    ShowShippingFees = false // 默认不显示运费
                 };
             }
             
             var totalOrders = orders.Count;
-            var totalSales = orders.Sum(o => o.TotalPrice);
+            var totalSales = orders.Sum(o => o.TotalPrice); // 注意：这里只包含产品金额，不包含运费
             var totalQuantity = orders.Sum(o => o.Quantity);
             var averageOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
             
@@ -53,7 +54,8 @@ namespace FarmDirectSales.Services
                 TotalOrders = totalOrders,
                 TotalSales = totalSales,
                 TotalQuantity = totalQuantity,
-                AverageOrderValue = averageOrderValue
+                AverageOrderValue = averageOrderValue,
+                ShowShippingFees = false // 农户查看时不显示运费，因为运费不是农户收入
             };
         }
         

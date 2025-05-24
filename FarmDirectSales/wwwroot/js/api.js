@@ -289,10 +289,10 @@ const api = {
         // 获取产品列表
         getProducts: async () => {
             try {
-                const response = await fetch(`${window.API_BASE_URL}/product`, {
-                    method: 'GET',
-                    headers: window.getHeaders()
-                });
+            const response = await fetch(`${window.API_BASE_URL}/product`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
                 return await handleResponse(response);
             } catch (error) {
                 throw new Error('获取产品列表失败');
@@ -315,10 +315,10 @@ const api = {
         // 获取产品详情
         getProduct: async (productId) => {
             try {
-                const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
-                    method: 'GET',
-                    headers: window.getHeaders()
-                });
+            const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
                 return await handleResponse(response);
             } catch (error) {
                 throw new Error('获取产品详情失败');
@@ -350,11 +350,11 @@ const api = {
                     traceInfo: productData.traceInfo
                 };
                 
-                const response = await fetch(`${window.API_BASE_URL}/product`, {
-                    method: 'POST',
-                    headers: window.getHeaders(),
+            const response = await fetch(`${window.API_BASE_URL}/product`, {
+                method: 'POST',
+                headers: window.getHeaders(),
                     body: JSON.stringify(formattedData)
-                });
+            });
                 return response;
             } catch (error) {
                 throw new Error('添加产品失败');
@@ -387,11 +387,11 @@ const api = {
                     traceInfo: productData.traceInfo
                 };
                 
-                const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
-                    method: 'PUT',
-                    headers: window.getHeaders(),
+            const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
+                method: 'PUT',
+                headers: window.getHeaders(),
                     body: JSON.stringify(formattedData)
-                });
+            });
                 return response;
             } catch (error) {
                 throw new Error('更新产品失败');
@@ -401,8 +401,8 @@ const api = {
         // 删除产品
         deleteProduct: async (productId, farmerId, hardDelete = false) => {
             try {
-                const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
-                    method: 'DELETE',
+            const response = await fetch(`${window.API_BASE_URL}/product/${productId}`, {
+                method: 'DELETE',
                     headers: window.getHeaders(),
                     body: JSON.stringify({
                         farmerId: farmerId,
@@ -434,7 +434,7 @@ const api = {
                 const response = await fetch(`${window.API_BASE_URL}/product/category/${encodeURIComponent(category)}`, {
                     method: 'GET',
                     headers: window.getHeaders()
-                });
+            });
                 return await handleResponse(response);
             } catch (error) {
                 throw new Error('获取分类产品失败');
@@ -518,47 +518,55 @@ const api = {
         },
         
         // 从购物车创建订单
-        createFromCart: async (addressInfo) => {
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            if (!user.userId) {
-                throw new Error('用户未登录');
+        createFromCart: async function(data) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${window.API_BASE_URL}/order/from-cart`, {
+                    method: 'POST',
+                    headers: window.getHeaders(),
+                    body: JSON.stringify({
+                        userId: data.userId,
+                        shippingAddress: data.shippingAddress,
+                        contactPhone: data.contactPhone,
+                        receiverName: data.receiverName,
+                        selectedItems: data.selectedItems || [],
+                        shippingFeeId: data.shippingFeeId,
+                        deliveryAreaId: data.deliveryAreaId
+                    })
+                });
+                
+                return handleResponse(response);
+            } catch (error) {
+                console.error('创建订单失败', error);
+                throw error;
             }
-            
-            const response = await fetch(`${window.API_BASE_URL}/order/from-cart`, {
+        },
+        
+        // 立即购买创建订单
+        createDirectOrder: async function(data) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${window.API_BASE_URL}/order/direct-buy`, {
                 method: 'POST',
                 headers: window.getHeaders(),
                 body: JSON.stringify({
-                    userId: user.userId,
-                    contactName: addressInfo.contactName,
-                    contactPhone: addressInfo.contactPhone,
-                    shippingAddress: addressInfo.shippingAddress,
-                    deliveryMethod: addressInfo.deliveryMethod || 'express',
-                    selectedItems: addressInfo.selectedItems || [] // 添加选中的商品ID列表
+                        userId: data.userId,
+                        productId: data.productId,
+                        quantity: data.quantity,
+                        shippingAddress: data.shippingAddress,
+                        contactPhone: data.contactPhone,
+                        receiverName: data.receiverName,
+                        deliveryMethod: data.deliveryMethod,
+                        shippingFee: data.shippingFee,
+                        shippingFeeId: data.shippingFeeId
                 })
             });
             
             return handleResponse(response);
-        },
-        
-        // 创建直接购买订单
-        createDirectOrder: async (orderData) => {
-            if (!orderData.userId) {
-                throw new Error('用户未登录');
+            } catch (error) {
+                console.error('创建订单失败', error);
+                throw error;
             }
-            
-            // 检查必要的参数
-            if (!orderData.productId || !orderData.quantity) {
-                throw new Error('商品信息不完整');
-            }
-            
-            // 发送请求创建直接购买订单
-            const response = await fetch(`${window.API_BASE_URL}/order/direct-buy`, {
-                method: 'POST',
-                headers: window.getHeaders(),
-                body: JSON.stringify(orderData)
-            });
-            
-            return handleResponse(response);
         },
         
         // 更新订单状态
@@ -594,6 +602,39 @@ const api = {
             }
             
             const response = await fetch(url, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        }
+    },
+    
+    // 订单组相关API
+    orderGroups: {
+        // 获取用户的订单组列表
+        getUserOrderGroups: async (userId) => {
+            const response = await fetch(`${window.API_BASE_URL}/ordergroup/user/${userId}`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 获取订单组详情
+        getOrderGroupById: async (groupId) => {
+            const response = await fetch(`${window.API_BASE_URL}/ordergroup/${groupId}`, {
+                method: 'GET',
+                headers: window.getHeaders()
+            });
+            
+            return handleResponse(response);
+        },
+        
+        // 获取订单组的所有订单
+        getOrdersInGroup: async (groupId) => {
+            const response = await fetch(`${window.API_BASE_URL}/ordergroup/${groupId}/orders`, {
                 method: 'GET',
                 headers: window.getHeaders()
             });

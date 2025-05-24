@@ -444,9 +444,13 @@
     <!-- 主要脚本 -->
     <script>
         // 全局变量
-        let cartData = null;
-        let deliveryAreas = [];
-        let currentAddressInfo = {
+        let cartData = null; // 购物车数据
+        let deliveryAreas = []; // 配送区域
+        // 添加缺失的变量
+        let currentShippingFee = 0; // 当前的运费
+        let currentShippingFeeId = null; // 当前的运费ID
+        let selectedDeliveryAreaId = null; // 选择的配送区域ID
+        const currentAddressInfo = {
             province: '',
             city: '',
             district: ''
@@ -479,10 +483,10 @@
             
             // 检查是否是直接购买模式
             const urlParams = new URLSearchParams(window.location.search);
-            const isDirectBuy = urlParams.get('direct') === 'true';
+            const isDirect = urlParams.get('direct') === 'true';
             const buyNowItemStr = sessionStorage.getItem('buyNowItem');
             
-            if (isDirectBuy && buyNowItemStr) {
+            if (isDirect && buyNowItemStr) {
                 // 直接购买模式
                 try {
                     const buyNowItem = JSON.parse(buyNowItemStr);
@@ -495,20 +499,20 @@
                     loadCartData();
                 }
             } else {
-                // 从sessionStorage获取选中的商品ID
-                const selectedItemsStr = sessionStorage.getItem('selectedCartItems');
-                if (selectedItemsStr) {
-                    try {
-                        selectedCartItems = JSON.parse(selectedItemsStr);
-                        console.log('从购物车获取选中商品ID:', selectedCartItems);
-                    } catch (e) {
-                        console.error('解析选中商品ID失败:', e);
-                        selectedCartItems = [];
-                    }
+            // 从sessionStorage获取选中的商品ID
+            const selectedItemsStr = sessionStorage.getItem('selectedCartItems');
+            if (selectedItemsStr) {
+                try {
+                    selectedCartItems = JSON.parse(selectedItemsStr);
+                    console.log('从购物车获取选中商品ID:', selectedCartItems);
+                } catch (e) {
+                    console.error('解析选中商品ID失败:', e);
+                    selectedCartItems = [];
                 }
-                
-                // 加载购物车数据
-                loadCartData();
+            }
+            
+            // 加载购物车数据
+            loadCartData();
             }
             
                 // 加载配送区域数据
@@ -521,7 +525,7 @@
                 initProvinceSelector();
                 
                 // 绑定事件
-            document.getElementById('place-order-btn').addEventListener('click', placeOrder);
+            document.getElementById('place-order-btn').addEventListener('click', submitOrder);
             document.getElementById('saved-addresses').addEventListener('change', function() {
                 fillAddressFromSelection();
                 // 不需要在这里显式调用updateShippingFeeOnAddressChange，
@@ -689,18 +693,69 @@
             });
         }
         
-        // 更新配送状态
-        function updateDeliveryStatus() {
-            const provinceSelect = document.getElementById('province');
-            const citySelect = document.getElementById('city');
-            const districtInput = document.getElementById('district');
+        // 地址变化时更新运费
+        function updateShippingFeeOnAddressChange() {
+            // 获取当前地址信息
+            const province = document.getElementById('province').value;
+            const city = document.getElementById('city').value;
+            const district = document.getElementById('district').value;
             
-            currentAddressInfo.province = provinceSelect.value;
-            currentAddressInfo.city = citySelect.value;
-            currentAddressInfo.district = districtInput.value;
+            // 当地址手动修改时，重置下拉框选择，避免使用旧的选择地址信息
+            if (document.getElementById('saved-addresses').selectedIndex > 0) {
+                // 如果当前地址与选中的保存地址不一致，则清除下拉框选择
+                const selectElement = document.getElementById('saved-addresses');
+                const selectedOption = selectElement.options[selectElement.selectedIndex];
+                
+                if (selectedOption && selectedOption.dataset.address) {
+                    try {
+                        const addressData = JSON.parse(selectedOption.dataset.address);
+                        if (addressData.province !== province || 
+                            addressData.city !== city || 
+                            addressData.district !== district) {
+                            // 地址被手动修改，清除选中状态
+                            document.getElementById('saved-addresses').selectedIndex = 0;
+                        }
+                    } catch (e) {
+                        console.error('解析地址数据错误:', e);
+                    }
+                }
+            }
             
-            // 移除实时检测配送可用性的代码，仅保留更新当前地址信息的逻辑
-            // 配送范围检测将只在提交订单时进行
+            // 更新配送区域可用性提示
+            if (province && city && district) {
+                const addressInfo = { province, city, district };
+                const isDeliverable = checkDeliveryAvailability(addressInfo);
+                
+                const statusElement = document.getElementById('delivery-status-message');
+                if (statusElement) {
+                    if (isDeliverable) {
+                        statusElement.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-2"></i>您的地址在配送范围内</span>';
+                        statusElement.className = 'mt-2 p-2 bg-success bg-opacity-10 rounded';
+                    } else {
+                        statusElement.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle me-2"></i>您选择的地区暂不支持配送，请选择其他地址</span>';
+                        statusElement.className = 'mt-2 p-2 bg-danger bg-opacity-10 rounded';
+                    }
+                    statusElement.classList.remove('d-none');
+                }
+            }
+            
+            // 如果购物车数据已加载，则更新订单摘要
+            if (cartData && cartData.items && cartData.items.length > 0) {
+                // 如果有选中的商品，则只使用选中的商品
+                if (selectedCartItems && selectedCartItems.length > 0) {
+                    const filteredItems = cartData.items.filter(item => 
+                        selectedCartItems.includes(item.cartItemId)
+                    );
+                    if (filteredItems.length > 0) {
+                        const filteredCart = {...cartData, items: filteredItems};
+                        updateOrderSummary(filteredCart);
+                        return;
+                    }
+                }
+                
+                // 否则使用全部商品
+                updateOrderSummary(cartData);
+            }
         }
         
         // 检查配送可用性
@@ -719,20 +774,20 @@
                 area.supportSameDayDelivery
             );
             if (hasProvinceDelivery) {
-                return true;
-            }
-            
+                    return true;
+                }
+                
             // 检查市级配送
             const hasCityDelivery = deliveryAreas.some(area => 
                 area.province === addressInfo.province && 
-                area.city === addressInfo.city && 
+                    area.city === addressInfo.city && 
                 !area.district && 
                 area.supportSameDayDelivery
             );
             if (hasCityDelivery) {
-                return true;
-            }
-            
+                    return true;
+                }
+                
             // 检查区/县级配送
             const hasDistrictDelivery = deliveryAreas.some(area => 
                 area.province === addressInfo.province && 
@@ -834,7 +889,7 @@
                     
                     for (const addr of existingAddresses) {
                         // 统一格式化地址进行比较（去除空格和标点符号）
-                        const normalizeString = (str) => str.replace(/[\s,，。.、；;：:!！?？\-]/g, '').toLowerCase();
+                        const normalizeString = (str) => str.replace(/[\s,，。.、；:!"！?？\-]/g, '').toLowerCase();
                         
                         // 比较关键部分是否相同
                         const isSameProvince = addr.province === province;
@@ -942,153 +997,125 @@
         }
         
         // 提交订单
-        async function placeOrder() {
+        async function submitOrder() {
             try {
-                // 禁用提交按钮，防止重复提交
-                const submitBtn = document.getElementById('place-order-btn');
-                submitBtn.disabled = true;
-            
-                // 获取收货地址信息
+                // 获取用户信息
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (!user || !user.userId) {
+                    throw new Error('用户未登录或会话已过期');
+                }
+                
+                // 获取所有的表单数据
                 const receiverName = document.getElementById('receiverName').value.trim();
                 const contactPhone = document.getElementById('contactPhone').value.trim();
-                const province = document.getElementById('province').value;
-                const city = document.getElementById('city').value;
-                const district = document.getElementById('district').value;
+                const province = document.getElementById('province').value.trim();
+                const city = document.getElementById('city').value.trim();
+                const district = document.getElementById('district').value.trim();
                 const detailAddress = document.getElementById('detailAddress').value.trim();
             
-                // 验证表单
-                if (!receiverName || !contactPhone || !province || !city || !district || !detailAddress) {
-                    showToast('请填写完整的收货地址信息', 'error');
-                    submitBtn.disabled = false;
-                    return;
+                // 表单验证
+                if (!receiverName) {
+                    throw new Error('请填写收货人姓名');
+                }
+                if (!contactPhone) {
+                    throw new Error('请填写联系电话');
+                }
+                if (!province || !city || !district) {
+                    throw new Error('请选择完整的收货地区');
+                }
+                if (!detailAddress) {
+                    throw new Error('请填写详细地址');
+                }
+                
+                // 在提交订单前重新计算运费，确保使用最新的地址信息
+                const currentCart = cartData;
+                let subtotal = 0;
+                if (currentCart && currentCart.items) {
+                    subtotal = currentCart.items.reduce((sum, item) => 
+                        sum + (item.product.price * item.quantity), 0);
                 }
             
-                // 验证手机号
-                if (!/^1[3-9]\d{9}$/.test(contactPhone)) {
-                    showToast('请输入正确的手机号码', 'error');
-                    submitBtn.disabled = false;
-                    return;
-                }
+                const shippingFeeResult = await calculateShippingFee(province, city, district, subtotal);
+                console.log('订单提交前重新计算运费:', shippingFeeResult);
                 
                 // 检查配送区域可用性
-                const addressInfo = {
-                    province: province,
-                    city: city,
-                    district: district
-                };
-                
-                const isDeliverable = checkDeliveryAvailability(addressInfo);
-                if (!isDeliverable) {
-                    showToast('您选择的区域暂不支持配送，请修改收货地址', 'error');
-                    
-                    // 显示配送区域提示
-                    const deliveryAreaInfo = document.getElementById('deliveryAreaInfo');
-                    if (deliveryAreaInfo) {
-                        deliveryAreaInfo.scrollIntoView({ behavior: 'smooth' });
-                        
-                        // 显示错误消息
-                        const statusElement = document.getElementById('delivery-status-message');
-                        if (statusElement) {
-                            statusElement.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle me-2"></i>您选择的地区暂不支持配送，请选择其他地址</span>';
-                            statusElement.className = 'mt-2 p-2 bg-danger bg-opacity-10 rounded';
-                        }
-                    }
-                    
-                    submitBtn.disabled = false;
-                    return;
-                }
-                
-                // 计算订单相关金额
-                const subtotal = cartData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                
-                // 获取运费信息
-                const shippingFeeInfo = await calculateShippingFee(province, city, district, subtotal);
-                
-                // 格式化地址
-                const shippingAddress = `${province} ${city} ${district} ${detailAddress}`;
-                
-                // 检查是否为直接购买模式
-                const urlParams = new URLSearchParams(window.location.search);
-                const isDirectBuy = urlParams.get('direct') === 'true';
-                const buyNowItemStr = sessionStorage.getItem('buyNowItem');
-                
-                let orderData;
-                
-                if (isDirectBuy && buyNowItemStr) {
-                    // 直接购买模式
-                    try {
-                        const buyNowItem = JSON.parse(buyNowItemStr);
-                        
-                        // 构建立即购买订单数据
-                        orderData = {
-                            userId: JSON.parse(localStorage.getItem('user') || '{}').userId,
-                            contactName: receiverName,
-                            contactPhone: contactPhone,
-                            shippingAddress: shippingAddress,
-                            deliveryMethod: 'express',
-                            directBuy: true, // 标记为直接购买
-                            productId: buyNowItem.productId,
-                            quantity: buyNowItem.quantity,
-                            shippingFee: shippingFeeInfo.shippingFee,
-                            shippingFeeId: shippingFeeInfo.appliedRuleId
-                        };
-                        
-                        // 提交直接购买订单
-                        const response = await api.orders.createDirectOrder(orderData);
-                        
-                        if (response.code === 200) {
-                            // 清除临时数据
-                            sessionStorage.removeItem('buyNowItem');
-                            
-                            // 提示成功并跳转
-                            showToast('订单提交成功！正在跳转...', 'success');
-                            setTimeout(() => {
-                                window.location.href = '/pages/user/orders.html';
-                            }, 1500);
-                        } else {
-                            showToast(`订单提交失败: ${response.message || '未知错误'}`, 'error');
-                            submitBtn.disabled = false;
-                        }
-                        
+                const addressInfo = { province, city, district };
+                if (!checkDeliveryAvailability(addressInfo)) {
+                    if (!confirm('您选择的地区暂不支持配送，确定要继续下单吗？')) {
                         return;
-                    } catch (error) {
-                        console.error('处理直接购买订单失败:', error);
-                        // 降级到标准购物车处理
                     }
                 }
                 
-                // 标准购物车订单处理
-                orderData = {
-                    userId: JSON.parse(localStorage.getItem('user') || '{}').userId,
-                    contactName: receiverName,
+                // 构建地址字符串
+                const fullAddress = `${province} ${city} ${district} ${detailAddress}`;
+                        
+                // 禁用提交按钮，显示加载状态
+                const orderButton = document.getElementById('place-order-btn');
+                orderButton.disabled = true;
+                orderButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 提交中...';
+                
+                // 准备参数
+                const orderData = {
+                    userId: user.userId,
+                    shippingAddress: fullAddress,
                     contactPhone: contactPhone,
-                    shippingAddress: shippingAddress,
-                    deliveryMethod: 'express', // 目前默认使用快递配送
-                    selectedItems: selectedCartItems, // 添加选中的商品ID列表
-                    shippingFee: shippingFeeInfo.shippingFee, // 添加运费信息
-                    shippingFeeId: shippingFeeInfo.appliedRuleId // 添加运费规则ID
+                    receiverName: receiverName,
+                    shippingFeeId: currentShippingFeeId,
+                    deliveryAreaId: selectedDeliveryAreaId
                 };
-            
-                // 提交订单
-                const response = await api.orders.createFromCart(orderData);
+                
+                // 判断是直接购买还是购物车结算
+                let response;
+                const urlParams = new URLSearchParams(window.location.search);
+                const isDirect = urlParams.get('direct') === 'true';
+                
+                if (isDirect) {
+                    // 直接购买
+                    const buyNowData = JSON.parse(sessionStorage.getItem('buyNowItem') || '{}');
+                    if (!buyNowData.productId || !buyNowData.quantity) {
+                        throw new Error('立即购买信息不完整');
+                    }
+                    
+                    // 添加产品信息到订单数据
+                    orderData.productId = buyNowData.productId;
+                    orderData.quantity = buyNowData.quantity;
+                    orderData.shippingFee = currentShippingFee; // 使用当前计算的运费
+                    orderData.deliveryMethod = 'express'; // 默认快递配送
+                    
+                    response = await api.orders.createDirectOrder(orderData);
+                } else {
+                    // 购物车结算
+                    // 如果有选中的商品，则传递选中项
+                    if (selectedCartItems && selectedCartItems.length > 0) {
+                        orderData.selectedItems = selectedCartItems;
+                    }
+                    
+                    response = await api.orders.createFromCart(orderData);
+                }
                 
                 if (response.code === 200) {
-                    // 清除选中商品的会话存储
-                    sessionStorage.removeItem('selectedCartItems');
+                    showToast('订单提交成功！', 'success');
                     
-                    // 提示成功并跳转
-                    showToast('订单提交成功！正在跳转...', 'success');
+                    // 清除购买信息
+                    if (isDirect) {
+                        sessionStorage.removeItem('buyNowItem');
+                    }
+                    
+                    // 跳转订单成功页面或订单列表
                     setTimeout(() => {
                         window.location.href = '/pages/user/orders.html';
-                    }, 1500);
-                } else {
-                    showToast(`订单提交失败: ${response.message || '未知错误'}`, 'error');
-                    submitBtn.disabled = false;
+                    }, 1000);
+            } else {
+                    throw new Error(response.message || '提交订单失败');
                 }
             } catch (error) {
                 console.error('提交订单错误:', error);
-                showToast(`订单提交出错: ${error.message || '未知错误'}`, 'error');
-                document.getElementById('place-order-btn').disabled = false;
+                showToast('提交订单失败: ' + error.message, 'error');
+                
+                // 恢复按钮状态
+                const orderButton = document.getElementById('place-order-btn');
+                orderButton.disabled = false;
+                orderButton.innerHTML = '提交订单';
             }
         }
         
@@ -1130,13 +1157,13 @@
                                         li.textContent = `${area.province}${area.city}${area.district}`;
                                     }
                                     
-                                    areasList.appendChild(li);
-                                });
-                        } else {
+                                areasList.appendChild(li);
+                            });
+            } else {
                             areasList.innerHTML = '<li>暂无配送区域信息</li>';
-                        }
-                    }
-                } else {
+            }
+        }
+            } else {
                     console.error('加载配送区域数据失败:', response.message);
                 }
             } catch (error) {
@@ -1303,8 +1330,8 @@
                         shippingFeeInfo.innerHTML = `<small class="text-muted">${shippingFeeData.message}</small>`;
                         shippingFeeInfo.classList.remove('d-none');
                     }
-                }
-                
+            }
+            
                 // 计算订单总价（商品总价 + 运费）
                 const total = subtotal + shippingFeeData.shippingFee;
                 document.getElementById('total-amount').textContent = `¥${total.toFixed(2)}`;
@@ -1322,6 +1349,9 @@
             try {
                 // 如果没有选择地址，使用默认运费
                 if (!province || !city || !district) {
+                    currentShippingFee = 15.00;
+                    currentShippingFeeId = null;
+                    selectedDeliveryAreaId = null;
                     return { shippingFee: 15.00, message: "未选择配送地址，使用默认运费" };
                 }
                 
@@ -1330,6 +1360,9 @@
                 const isDeliverable = checkDeliveryAvailability(addressInfo);
                 
                 if (!isDeliverable) {
+                    currentShippingFee = 0;
+                    currentShippingFeeId = null;
+                    selectedDeliveryAreaId = null;
                     return { shippingFee: 0, message: "该地区暂不支持配送" };
                 }
                 
@@ -1375,6 +1408,9 @@
                     }
                 }
                 
+                // 保存找到的配送区域ID到全局变量
+                selectedDeliveryAreaId = deliveryAreaId;
+                
                 // 计算商品重量（假设每个商品1公斤）
                 const cartItems = cartData?.items || [];
                 const totalWeight = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -1389,6 +1425,10 @@
                 const response = await api.shippingFee.calculate(requestData);
                 
                 if (response && response.code === 200 && response.data) {
+                    // 更新全局变量
+                    currentShippingFee = response.data.shippingFee;
+                    currentShippingFeeId = response.data.appliedRuleId;
+                    
                     return {
                         shippingFee: response.data.shippingFee,
                         appliedRuleId: response.data.appliedRuleId,
@@ -1397,10 +1437,15 @@
                     };
                 } else {
                     // API调用失败，使用默认运费
+                    currentShippingFee = 15.00;
+                    currentShippingFeeId = null;
                     return { shippingFee: 15.00, message: "使用默认运费" };
                 }
             } catch (error) {
                 console.error('计算运费出错:', error);
+                // 设置默认值
+                currentShippingFee = 15.00;
+                currentShippingFeeId = null;
                 return { shippingFee: 15.00, message: "计算出错，使用默认运费" };
             }
         }
@@ -1452,50 +1497,40 @@
             }
         }
         
-        // 地址变化时更新运费
-        function updateShippingFeeOnAddressChange() {
+        // 更新配送状态
+        function updateDeliveryStatus() {
             // 获取当前地址信息
             const province = document.getElementById('province').value;
             const city = document.getElementById('city').value;
             const district = document.getElementById('district').value;
             
-            // 更新配送区域可用性提示
-            if (province && city && district) {
-                const addressInfo = { province, city, district };
-                const isDeliverable = checkDeliveryAvailability(addressInfo);
-                
+            // 如果地址信息不完整，不进行检查
+            if (!province || !city || !district) {
                 const statusElement = document.getElementById('delivery-status-message');
                 if (statusElement) {
-                    if (isDeliverable) {
-                        statusElement.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-2"></i>您的地址在配送范围内</span>';
-                        statusElement.className = 'mt-2 p-2 bg-success bg-opacity-10 rounded';
-                    } else {
-                        statusElement.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle me-2"></i>您选择的地区暂不支持配送，请选择其他地址</span>';
-                        statusElement.className = 'mt-2 p-2 bg-danger bg-opacity-10 rounded';
-                    }
-                    statusElement.classList.remove('d-none');
+                    statusElement.classList.add('d-none');
                 }
+                return;
             }
             
-            // 如果购物车数据已加载，则更新订单摘要
-            if (cartData && cartData.items && cartData.items.length > 0) {
-                // 如果有选中的商品，则只使用选中的商品
-                if (selectedCartItems && selectedCartItems.length > 0) {
-                    const filteredItems = cartData.items.filter(item => 
-                        selectedCartItems.includes(item.cartItemId)
-                    );
-                    if (filteredItems.length > 0) {
-                        const filteredCart = {...cartData, items: filteredItems};
-                        updateOrderSummary(filteredCart);
-                        return;
-                    }
+            // 检查配送可用性
+            const addressInfo = { province, city, district };
+            const isDeliverable = checkDeliveryAvailability(addressInfo);
+            
+            // 更新配送区域可用性提示
+            const statusElement = document.getElementById('delivery-status-message');
+            if (statusElement) {
+                if (isDeliverable) {
+                    statusElement.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-2"></i>您的地址在配送范围内</span>';
+                    statusElement.className = 'mt-2 p-2 bg-success bg-opacity-10 rounded';
+                } else {
+                    statusElement.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle me-2"></i>您选择的地区暂不支持配送，请选择其他地址</span>';
+                    statusElement.className = 'mt-2 p-2 bg-danger bg-opacity-10 rounded';
                 }
-                
-                // 否则使用全部商品
-                updateOrderSummary(cartData);
+                statusElement.classList.remove('d-none');
             }
         }
-
+        
         // 添加缺失的loadDistricts函数
         function loadDistricts() {
             const citySelect = document.getElementById('city');

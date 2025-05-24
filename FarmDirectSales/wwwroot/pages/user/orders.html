@@ -29,13 +29,15 @@
             margin-bottom: 20px;
         }
         .product-img {
-            width: 60px;
-            height: 60px;
+            width: 70px; /* 增大图片尺寸 */
+            height: 70px; /* 增大图片尺寸 */
             object-fit: cover;
+            border: none; /* 移除边框 */
+            box-shadow: none; /* 移除阴影 */
         }
         .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
+            padding: 4px 8px;
+            border-radius: 4px;
             font-size: 0.85rem;
             font-weight: 500;
         }
@@ -56,119 +58,320 @@
             color: #721c24;
         }
         
-        /* 时间线样式 */
+        /* 商品数量样式 */
+        .product-quantity {
+            display: inline-block;
+            font-size: 0.9rem;
+            color: #555;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+        
+        /* 收货地址样式 */
+        .shipping-address-label {
+            color: #666;
+            font-size: 0.85rem;
+            margin-right: 5px;
+        }
+        
+        /* 订单金额信息样式 */
+        .order-amount-info {
+            font-size: 0.95rem;
+        }
+        
+        /* 订单详情样式 */
+        .detail-section-title {
+            font-weight: 500;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #444;
+        }
+        
+        .detail-item-row {
+            padding: 6px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .detail-label {
+            color: #666;
+        }
+        
+        .detail-value {
+            font-weight: 400;
+        }
+        
+        /* 时间线样式 - 简化版 */
         .timeline-container {
             position: relative;
-            min-height: 200px; /* 确保最小高度 */
-            padding-bottom: 30px; /* 增加底部填充 */
-            padding-top: 10px; /* 增加顶部填充 */
+            min-height: 120px; /* 减少高度 */
+            padding-bottom: 15px;
+            padding-top: 10px;
+            margin-bottom: 10px; /* 添加底部间距 */
         }
         
         .timeline-line {
             position: absolute;
-            top: 25px; /* 从第一个图标的中心开始 */
-            bottom: 25px; /* 到最后一个图标的中心结束 */
+            top: 20px;
+            bottom: 0;
             left: 24px;
             width: 2px;
-            background: linear-gradient(to bottom, #e9ecef, #007bff, #28a745);
+            background: #dee2e6;
             z-index: 1;
         }
         
         .timeline-item {
             position: relative;
-            padding-left: 60px; /* 增加左侧填充 */
-            margin-bottom: 30px; /* 增加底部间距 */
+            padding-left: 50px;
+            margin-bottom: 20px;
             z-index: 2;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
         
         .timeline-item:last-child {
-            margin-bottom: 0; /* 最后一项不需要底部间距 */
+            margin-bottom: 0;
         }
         
         .timeline-item:hover .timeline-content {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .timeline-badge {
             position: absolute;
             left: 0;
             top: 0;
-            width: 48px; /* 调整图标大小 */
-            height: 48px; /* 调整图标大小 */
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            font-size: 1rem; /* 调小图标尺寸 */
+            font-size: 0.9rem;
             z-index: 2;
-            border: 4px solid white;
+            border: 3px solid white;
             box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
         
         .timeline-badge i {
-            line-height: 1; /* 确保图标垂直居中 */
+            line-height: 1;
         }
         
         .timeline-item:hover .timeline-badge {
-            transform: scale(1.1);
-            box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+            transform: scale(1.05);
         }
         
         .timeline-content {
-            padding: 15px;
+            padding: 12px;
             background-color: #f8f9fa;
             border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
         }
         
-        /* 修复嵌套alert问题 */
-        .timeline-content .alert {
-            margin-top: 15px;
-            margin-bottom: 0;
-        }
-        
-        /* 修复最后一个时间线项目线条可能过长的问题 */
-        .timeline-item:last-child::after {
-            content: "";
-            position: absolute;
-            top: 48px; /* 图标高度 */
-            bottom: 0;
-            left: 24px;
-            width: 2px;
-            background-color: white; /* 与背景色相同，覆盖超出部分的线条 */
-            z-index: 3;
-        }
-        
-        /* 美化卡片样式 */
+        /* 简化卡片样式 */
         .card {
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
         
         .card:hover {
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
         }
         
-        /* 美化农户信息卡片 */
-        .farmer-card-icon {
-            transition: all 0.3s ease;
-        }
-        
-        .card:hover .farmer-card-icon {
-            transform: scale(1.1);
-        }
-        
-        /* 按钮美化 */
+        /* 简化按钮样式 */
         .btn {
             transition: all 0.2s ease;
         }
         
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* 筛选区域样式优化 */
+        .filter-compact {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px; /* 适当间距 */
+            margin-bottom: 10px;
+            align-items: flex-end; /* 底部对齐 */
+        }
+        
+        /* 筛选项样式 */
+        .filter-item {
+            margin-bottom: 0; /* 移除底部边距 */
+        }
+        
+        /* 所有筛选项的子元素对齐 */
+        .filter-item .form-label {
+            margin-bottom: 4px; /* 统一标签底部间距 */
+            font-size: 0.75rem; /* 统一标签字体大小 */
+        }
+        
+        /* 统一表单控件高度 */
+        .filter-item .form-select,
+        .filter-item input.form-control,
+        .search-item .input-group {
+            height: 31px; /* 固定高度 */
+        }
+        
+        /* 搜索区域样式 */
+        .search-item {
+            flex-grow: 1; /* 搜索框占据剩余空间 */
+            margin-bottom: 0; /* 移除底部边距 */
+        }
+        
+        /* 搜索框内部样式 */
+        .search-item .input-group-text,
+        .search-item .form-control,
+        .search-item .btn {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+        
+        /* 卡片内边距调整 */
+        .filter-compact .card-body {
+            padding: 1rem 1rem 0.75rem 1rem; /* 减少底部内边距 */
+        }
+        
+        /* 下拉框基础样式 - 统一为所有筛选项 */
+        .filter-compact .filter-item {
+            flex: 0 0 auto; /* 不伸缩，根据内容自动调整宽度 */
+            width: auto; /* 根据内容自动调整宽度 */
+            min-width: 120px; /* 设置一个最小宽度，确保足够显示内容 */
+        }
+        
+        /* 排序方式下拉框特殊样式 */
+        .filter-compact .sort-filter-item {
+            min-width: 180px; /* 为排序方式设置更宽的最小宽度 */
+        }
+        
+        /* 确保下拉框选项内容不会被截断 */
+        .filter-item .form-select {
+            width: 100%; /* 填满容器宽度 */
+            padding: 0.15rem 1.5rem 0.15rem 0.5rem; /* 调整内部间距，确保右侧有足够空间显示下拉箭头 */
+            overflow: visible; /* 防止内容溢出被截断 */
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .filter-compact {
+                gap: 8px;
+            }
+            
+            .filter-compact .filter-item {
+                flex-basis: calc(50% - 8px); /* 在小屏幕上占一半宽度 */
+                width: calc(50% - 8px);
+            }
+            
+            .filter-compact .search-item {
+                flex-basis: 100%; /* 在小屏幕上占满宽度 */
+                margin-left: 0;
+                margin-top: 5px;
+            }
+        }
+        
+        /* 默认隐藏日期范围选择器 */
+        .date-range-picker {
+            display: none;
+        }
+        
+        .filter-compact .search-item {
+            flex: 1 1 auto; /* 可伸缩，但优先保持宽度 */
+            min-width: 250px; /* 最小宽度保证，避免太窄 */
+            margin-left: 10px; /* 增加左侧间距 */
+        }
+        
+        .filter-compact .filter-actions {
+            display: flex;
+            gap: 6px; /* 减少按钮间隙 */
+            margin-left: auto;
+            align-self: flex-end;
+        }
+        
+        /* 标签样式优化 */
+        .form-label.small.text-muted {
+            margin-bottom: 2px; /* 进一步减少标签底部间距 */
+            font-size: 0.7rem; /* 减小标签字体 */
+        }
+        
+        /* 下拉框样式优化 */
+        .filter-item .form-select {
+            padding: 0.15rem 0.5rem; /* 减小内部间距 */
+            font-size: 0.8rem; /* 减小字体大小 */
+            line-height: 1.2; /* 减小行高 */
+        }
+        
+        /* 日期选择器优化 */
+        .date-range-picker input[type="date"] {
+            padding: 0.15rem 0.5rem; /* 减小内部间距 */
+            font-size: 0.8rem; /* 减小字体大小 */
+        }
+        
+        /* 增强按钮可见度 */
+        .filter-btn {
+            padding: 4px 12px;
+            font-weight: 500;
+            min-width: 70px;
+        }
+        
+        #filterOrdersBtn {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        
+        #filterOrdersBtn:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+        
+        .filter-btn i {
+            font-size: 0.9rem;
+        }
+        
+        /* 按钮悬停效果增强 */
+        .filter-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        
+        /* 订单组和订单之间的分隔 */
+        .order-group-card {
+            margin-bottom: 25px; /* 增加订单组卡片之间的间距 */
+            border: 1px solid #e0e0e0 !important; /* 使用统一的灰色边框代替彩色边框 */
+        }
+        
+        .order-group-card .card-header {
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        /* 收货地址和电话图标样式 */
+        .shipping-info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .shipping-info-icon {
+            color: #777; /* 灰色图标 */
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+        }
+        
+        /* 订单组编号样式 */
+        .order-group-number {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        /* 商品信息相关样式修改 */
+        .product-name {
+            font-size: 1rem; /* 增大商品名称字体 */
+            font-weight: 500; /* 适当加粗 */
+            margin-bottom: 0.5rem; /* 增加底部间距 */
         }
     </style>
 </head>
@@ -234,49 +437,62 @@
 
     <!-- 主要内容 -->
     <div class="container py-5">
-        <h2 class="mb-4">我的订单</h2>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>我的订单</h2>
+        </div>
         
-        <!-- 筛选条件区域 -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label for="statusFilter" class="form-label">订单状态</label>
-                        <select class="form-select" id="statusFilter">
-                            <option value="all" selected>全部状态</option>
+        <!-- 筛选条件区域 - 简化版 -->
+        <div class="card mb-3">
+            <div class="card-body pb-2">
+                <div class="filter-compact">
+                    <div class="filter-item date-filter-item">
+                        <label for="statusFilter" class="form-label small text-muted">订单状态</label>
+                        <select class="form-select form-select-sm" id="statusFilter">
+                            <option value="all" selected>全部</option>
                             <option value="已完成">已完成</option>
                             <option value="已取消">已取消</option>
-                            <option value="货到付款待处理">货到付款待处理</option>
-                            <option value="货到付款配送中">货到付款配送中</option>
-                            <option value="申请退款中">申请退款中</option>
-                            <option value="已退款">已退款</option>
+                            <option value="货到付款待处理">待处理</option>
+                            <option value="货到付款配送中">配送中</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <label for="searchInput" class="form-label">搜索订单</label>
-                        <input type="text" class="form-control" id="searchInput" placeholder="订单号或商品名称">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="dateFilter" class="form-label">日期范围</label>
-                        <select class="form-select" id="dateFilter">
-                            <option value="custom">自定义日期</option>
-                            <option value="all">全部日期</option>
-                            <option value="lastMonth" selected>最近一个月</option>
-                            <option value="lastWeek">最近一周</option>
+                    <div class="filter-item date-filter-item">
+                        <label for="dateFilter" class="form-label small text-muted">日期范围</label>
+                        <select class="form-select form-select-sm" id="dateFilter">
+                            <option value="all" selected>全部</option>
+                            <option value="lastWeek">近7天</option>
+                            <option value="lastMonth">近30天</option>
+                            <option value="custom">自定义</option>
                         </select>
                     </div>
-                    <div class="col-md-2 date-range-picker" style="display: none;">
-                        <label for="startDate" class="form-label">开始日期</label>
-                        <input type="date" class="form-control" id="startDate">
+                    <div class="filter-item date-filter-item date-range-picker">
+                        <label for="startDate" class="form-label small text-muted">开始日期</label>
+                        <input type="date" class="form-control form-control-sm" id="startDate">
                     </div>
-                    <div class="col-md-2 date-range-picker" style="display: none;">
-                        <label for="endDate" class="form-label">结束日期</label>
-                        <input type="date" class="form-control" id="endDate">
+                    <div class="filter-item date-filter-item date-range-picker">
+                        <label for="endDate" class="form-label small text-muted">结束日期</label>
+                        <input type="date" class="form-control form-control-sm" id="endDate">
                     </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button class="btn btn-primary w-100" id="filterOrdersBtn">
-                            <i class="fas fa-filter me-2"></i>筛选订单
-                        </button>
+                    <div class="filter-item sort-filter-item">
+                        <label for="sortOrder" class="form-label small text-muted">排序方式</label>
+                        <select class="form-select form-select-sm" id="sortOrder">
+                            <option value="time-desc" selected>创建时间 (最新订单在前)</option>
+                            <option value="time-asc">创建时间 (最早订单在前)</option>
+                            <option value="amount-desc">订单金额 (从高到低)</option>
+                            <option value="amount-asc">订单金额 (从低到高)</option>
+                        </select>
+                    </div>
+                    <div class="search-item">
+                        <label for="searchInput" class="form-label small text-muted">搜索</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" id="searchInput" placeholder="订单号/商品名称">
+                            <button class="btn btn-primary filter-btn" id="filterOrdersBtn" title="搜索">
+                                搜索
+                            </button>
+                            <button class="btn btn-outline-secondary filter-btn" id="resetFilterBtn" title="重置">
+                                重置
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -481,7 +697,33 @@
             });
             
             // 初始化筛选按钮事件
-            document.getElementById('filterOrdersBtn').addEventListener('click', filterOrders);
+            document.getElementById('filterOrdersBtn').addEventListener('click', function() {
+                console.log("点击了搜索按钮，执行筛选");
+                filterOrders();
+            });
+            
+            document.getElementById('resetFilterBtn').addEventListener('click', function() {
+                console.log("点击了重置按钮，重置所有筛选条件");
+                resetFilters();
+            });
+            
+            // 为搜索框添加按Enter键搜索功能
+            document.getElementById('searchInput').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    console.log("按下Enter键，执行筛选");
+                    filterOrders();
+                }
+            });
+
+            // 添加排序方式变化事件
+            document.getElementById('sortOrder').addEventListener('change', function() {
+                console.log("排序方式变更为:", this.value);
+                // 排序订单
+                sortOrders();
+                // 更新显示
+                renderPaginatedOrders();
+            });
             
             // 记录打开模态框的触发元素
             let lastFocusedElement = null;
@@ -515,13 +757,6 @@
                 if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
                     lastFocusedElement.focus();
                 }
-            });
-
-            // 添加搜索框输入事件（实时搜索）
-            document.getElementById('searchInput').addEventListener('input', function() {
-                // 延迟300毫秒后执行筛选，避免频繁筛选影响性能
-                clearTimeout(this.searchTimeout);
-                this.searchTimeout = setTimeout(filterOrders, 300);
             });
         });
         
@@ -562,23 +797,61 @@
                     throw new Error('用户ID不存在');
                 }
                 
-                // 使用Axios通过http接口获取用户订单
-                const result = await http.get(`/order/user/${userId}`);
+                // 改为先获取订单组列表
+                const orderGroupsResult = await http.get(`/ordergroup/user/${userId}`);
                 
-                if (result.code === 200) {
-                    userOrders = result.data;
-                    
-                    if (userOrders.length === 0) {
-                        // 没有订单
-                        document.getElementById('orders-container').classList.add('d-none');
-                        document.getElementById('no-orders').classList.remove('d-none');
-                        document.getElementById('pagination-container').classList.add('d-none');
-                    } else {
-                        // 初始筛选并渲染订单列表
-                        filterOrders();
+                if (orderGroupsResult.code !== 200) {
+                    throw new Error(orderGroupsResult.message || '获取订单组列表失败');
+                }
+                
+                const orderGroups = orderGroupsResult.data;
+                
+                if (orderGroups.length === 0) {
+                    // 没有订单组
+                    document.getElementById('orders-container').classList.add('d-none');
+                    document.getElementById('no-orders').classList.remove('d-none');
+                    document.getElementById('pagination-container').classList.add('d-none');
+                    return;
+                }
+                
+                // 获取各个订单组中的订单
+                const allOrders = [];
+                const orderGroupMap = {};
+                
+                // 存储所有订单组的信息，以便后续使用
+                orderGroups.forEach(group => {
+                    orderGroupMap[group.orderGroupId] = group;
+                });
+                
+                // 使用Promise.all并行获取所有订单组的订单
+                await Promise.all(orderGroups.map(async (group) => {
+                    try {
+                        const ordersResult = await http.get(`/ordergroup/${group.orderGroupId}/orders`);
+                        if (ordersResult.code === 200) {
+                            // 将订单组ID添加到每个订单对象中
+                            const ordersWithGroup = ordersResult.data.map(order => ({
+                                ...order,
+                                orderGroup: orderGroupMap[group.orderGroupId]
+                            }));
+                            
+                            // 添加到所有订单列表
+                            allOrders.push(...ordersWithGroup);
+                        }
+                    } catch (error) {
+                        console.error(`获取订单组 ${group.orderGroupId} 的订单失败:`, error);
                     }
-                } else {
-                    throw new Error(result.message || '获取订单失败');
+                }));
+                
+                // 如果获取到订单，则更新全局变量并筛选显示
+                if (allOrders.length > 0) {
+                    userOrders = allOrders;
+                    // 初始筛选并渲染订单列表
+                    filterOrders();
+                } else if (allOrders.length === 0) {
+                    // 没有订单
+                    document.getElementById('orders-container').classList.add('d-none');
+                    document.getElementById('no-orders').classList.remove('d-none');
+                    document.getElementById('pagination-container').classList.add('d-none');
                 }
             } catch (error) {
                 console.error('加载订单失败:', error);
@@ -655,17 +928,117 @@
                                             order.product.productName && 
                                             order.product.productName.toLowerCase().includes(searchQuery);
                     
-                    matchesSearch = orderIdMatch || productNameMatch;
+                    // 检查农户名称匹配
+                    const farmerNameMatch = order.product && 
+                                           order.product.farmer && 
+                                           order.product.farmer.username && 
+                                           order.product.farmer.username.toLowerCase().includes(searchQuery);
+                    
+                    matchesSearch = orderIdMatch || productNameMatch || farmerNameMatch;
                 }
                 
                 return matchesStatus && matchesDateRange && matchesSearch;
             });
             
-            // 重置当前页为第一页
+            // 重置当前页为第一页并排序订单
             currentPage = 1;
-        
-        // 渲染订单列表
+            
+            // 排序订单
+            sortOrders();
+            
+            // 渲染订单列表
             renderPaginatedOrders();
+        }
+        
+        // 重置筛选条件
+        function resetFilters() {
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('dateFilter').value = 'all';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('sortOrder').value = 'time-desc';
+            
+            const today = new Date();
+            const oneMonthAgo = new Date();
+            oneMonthAgo.setMonth(today.getMonth() - 1);
+            
+            document.getElementById('endDate').valueAsDate = today;
+            document.getElementById('startDate').valueAsDate = oneMonthAgo;
+            
+            // 隐藏自定义日期范围选择器
+            document.querySelectorAll('.date-range-picker').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // 重新筛选
+            filterOrders();
+        }
+        
+        // 排序订单
+        function sortOrders() {
+            if (!filteredOrders || filteredOrders.length === 0) return;
+            
+            const sortOrder = document.getElementById('sortOrder').value;
+            
+            // 根据选择的排序方式对订单进行排序
+            switch (sortOrder) {
+                case 'time-desc':
+                    // 按下单时间降序排序 (最新的在前面)
+                    filteredOrders.sort((a, b) => {
+                        // 优先按订单组的创建时间排序
+                        if (a.orderGroup && b.orderGroup) {
+                            return new Date(b.orderGroup.createTime) - new Date(a.orderGroup.createTime);
+                        }
+                        // 如果没有订单组信息，则按订单时间排序
+                        return new Date(b.createTime) - new Date(a.createTime);
+                    });
+                    break;
+                case 'time-asc':
+                    // 按下单时间升序排序 (最早的在前面)
+                    filteredOrders.sort((a, b) => {
+                        // 优先按订单组的创建时间排序
+                        if (a.orderGroup && b.orderGroup) {
+                            return new Date(a.orderGroup.createTime) - new Date(b.orderGroup.createTime);
+                        }
+                        // 如果没有订单组信息，则按订单时间排序
+                        return new Date(a.createTime) - new Date(b.createTime);
+                    });
+                    break;
+                case 'amount-desc':
+                    // 按订单金额降序排序 (高到低)
+                    filteredOrders.sort((a, b) => {
+                        // 优先按订单组的总金额排序
+                        if (a.orderGroup && b.orderGroup) {
+                            return b.orderGroup.totalAmount - a.orderGroup.totalAmount;
+                        }
+                        // 如果没有订单组信息，则按订单金额排序
+                        return b.totalPrice - a.totalPrice;
+                    });
+                    break;
+                case 'amount-asc':
+                    // 按订单金额升序排序 (低到高)
+                    filteredOrders.sort((a, b) => {
+                        // 优先按订单组的总金额排序
+                        if (a.orderGroup && b.orderGroup) {
+                            return a.orderGroup.totalAmount - b.orderGroup.totalAmount;
+                        }
+                        // 如果没有订单组信息，则按订单金额排序
+                        return a.totalPrice - b.totalPrice;
+                    });
+                    break;
+                default:
+                    // 默认按下单时间降序排序
+                    filteredOrders.sort((a, b) => {
+                        // 优先按订单组的创建时间排序
+                        if (a.orderGroup && b.orderGroup) {
+                            return new Date(b.orderGroup.createTime) - new Date(a.orderGroup.createTime);
+                        }
+                        // 如果没有订单组信息，则按订单时间排序
+                        return new Date(b.createTime) - new Date(a.createTime);
+                    });
+            }
+            
+            // 确保排序后立即更新渲染
+            console.log("订单已排序，排序方式: " + sortOrder);
         }
         
         // 渲染分页后的订单列表
@@ -674,7 +1047,7 @@
             const paginationContainer = document.getElementById('pagination-container');
             
             if (!filteredOrders || filteredOrders.length === 0) {
-                container.innerHTML = '<div class="alert alert-info mb-4"><i class="fas fa-info-circle me-2"></i>没有找到符合条件的订单</div>';
+                container.innerHTML = '<div class="alert alert-info mb-4 shadow-sm"><i class="fas fa-info-circle me-2"></i>没有找到符合条件的订单</div>';
                 document.getElementById('no-orders').classList.add('d-none');
                 paginationContainer.classList.add('d-none');
                 return;
@@ -696,136 +1069,225 @@
             // 获取当前页的订单
             const currentPageOrders = filteredOrders.slice(startIndex, endIndex);
             
-            // 将订单按批次分组
-            const groupedOrders = groupOrdersByBatch(currentPageOrders);
+            // 将订单按订单组分组
+            const groupedOrders = groupOrdersByOrderGroup(currentPageOrders);
+            
+            // 如果没有分组的订单，提前退出
+            if (Object.keys(groupedOrders).length === 0) {
+                container.innerHTML = '<div class="alert alert-info mb-4 shadow-sm"><i class="fas fa-info-circle me-2"></i>没有找到符合条件的订单组</div>';
+                paginationContainer.classList.add('d-none');
+                return;
+            }
+            
+            // 排序订单组，确保订单组的顺序与排序方式一致
+            const sortedGroupIds = Object.keys(groupedOrders).sort((a, b) => {
+                try {
+                    const groupA = groupedOrders[a][0].orderGroup;
+                    const groupB = groupedOrders[b][0].orderGroup;
+                    const sortOrder = document.getElementById('sortOrder').value;
+                    
+                    if (!groupA || !groupB) return 0;
+                    
+                    if (sortOrder.startsWith('time')) {
+                        // 时间排序 - 确保使用日期对象进行比较
+                        const dateA = new Date(groupA.createTime);
+                        const dateB = new Date(groupB.createTime);
+                        // 使用数值比较而不是日期对象比较，避免潜在的NaN问题
+                        const timeCompare = sortOrder === 'time-desc' ? 
+                            dateB.getTime() - dateA.getTime() : 
+                            dateA.getTime() - dateB.getTime();
+                        console.log(`比较订单组: ${groupA.groupNumber} (${dateA.toISOString()}) vs ${groupB.groupNumber} (${dateB.toISOString()}) = ${timeCompare}`);
+                        return timeCompare;
+                    } else {
+                        // 金额排序 - 确保使用精确值进行比较
+                        const amountA = parseFloat(groupA.totalAmount || 0);
+                        const amountB = parseFloat(groupB.totalAmount || 0);
+                        return sortOrder === 'amount-desc' ? amountB - amountA : amountA - amountB;
+                    }
+                } catch (e) {
+                    console.error("订单组排序出错:", e);
+                    return 0;
+                }
+            });
+            
+            console.log("订单组排序结果:", sortedGroupIds.map(id => {
+                const group = groupedOrders[id][0].orderGroup;
+                return `${group.groupNumber} (${new Date(group.createTime).toISOString()})`;
+            }).join(", "));
             
             let html = '';
             
-            // 渲染每个批次的订单组
-            Object.entries(groupedOrders).forEach(([batchKey, orderGroup]) => {
-                // 计算订单组的总金额
-                const totalAmount = orderGroup.reduce((sum, order) => sum + order.totalPrice, 0);
+            // 按排序后的订单组ID依次渲染
+            sortedGroupIds.forEach(groupId => {
+                const orders = groupedOrders[groupId];
                 
+                // 确保第一个订单有订单组信息
+                if (!orders[0].orderGroup) {
+                    console.error('订单缺少订单组信息:', orders[0]);
+                    return;
+                }
+                
+                const orderGroup = orders[0].orderGroup;
+                
+                // 计算订单组的总状态
+                let groupStatus = '处理中';
+                const allCompleted = orders.every(o => o.status === '已完成');
+                const allCancelled = orders.every(o => o.status === '已取消');
+                const anyShipping = orders.some(o => o.status === '货到付款配送中');
+                
+                if (allCompleted) {
+                    groupStatus = '已完成';
+                } else if (allCancelled) {
+                    groupStatus = '已取消';
+                } else if (anyShipping) {
+                    groupStatus = '配送中';
+                }
+                
+                // 判断是单个商品订单还是多个商品订单组
+                const isSingleOrder = orders.length === 1;
+                const headerTitle = isSingleOrder ? 
+                    `订单 #${orderGroup.groupNumber}` : 
+                    `订单组 #${orderGroup.groupNumber}`;
+                
+                // 订单组卡片头部 - 根据是否为单个订单使用不同标题
                 html += `
-                    <div class="order-batch card mb-4">
+                    <div class="order-group-card card mb-3">
                         <div class="card-header bg-light">
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
                                 <div>
-                                    <span class="text-muted">下单时间: ${new Date(orderGroup[0].createTime).toLocaleString()}</span>
-                                    <span class="badge bg-secondary ms-2">货到付款</span>
+                                    <div class="mb-0">
+                                        <i class="fas fa-${isSingleOrder ? 'receipt' : 'shopping-basket'} me-2 text-primary"></i>
+                                        <span class="order-group-number">${headerTitle}</span>
+                                    </div>
+                                    <div class="text-muted small">${formatFriendlyDateTime(orderGroup.createTime)}</div>
                                 </div>
-                                <div>
-                                    <span class="fw-bold text-danger">订单总金额: ¥${totalAmount.toFixed(2)}</span>
-                                    <span class="ms-2 badge bg-info"><i class="fas fa-box me-1"></i>${orderGroup.length}件商品</span>
+                                <div class="mt-2 mt-md-0">
+                                    <span class="badge ${getGroupStatusClass(groupStatus)} me-2">${groupStatus}</span>
+                                    <span class="badge bg-secondary me-2">${orderGroup.orderCount}件商品</span>
                                 </div>
                             </div>
                         </div>
+                        <div class="card-body p-0">
+                            <div class="list-group list-group-flush">
                 `;
                 
-                // 在订单组中渲染每个订单项
-                orderGroup.forEach(order => {
+                // 渲染订单组中的每个订单
+                orders.forEach(order => {
                     // 获取订单状态样式
                     let statusBadge = OrderManager.renderStatusBadge(order.status);
                     
-                    // 如果订单已取消，显示取消方信息
-                    if (order.status === '已取消' && order.cancelByType) {
-                        const cancelByText = order.cancelByType === 'farmer' ? '（商家）' : '（我）';
-                        statusBadge = `<span class="badge bg-danger text-white"><i class="fas fa-ban me-1"></i>已取消${cancelByText}</span>`;
-                    }
-                    
-                    // 支付方式显示
-                    const paymentMethod = '货到付款';
-                
-                // 添加操作按钮
-                let actionButtons = '';
-                    
-                    // 获取当前用户
-                    const user = JSON.parse(localStorage.getItem('user') || '{}');
-                
-                // 根据订单状态添加不同的操作按钮
-                    if (OrderManager.showConfirmReceiptButton(order, user.role)) {
-                        actionButtons += `
-                            <button class="btn btn-sm btn-success" onclick="confirmReceiptDirect(${order.orderId})">
-                                <i class="fas fa-check me-1"></i> 确认收货
-                            </button>
-                        `;
-                    }
-                    
-                    // 取消订单按钮
-                    if (order.status === '待付款' || 
-                        order.status === '待支付' || 
-                        order.status === '待发货' || 
-                        order.status === '货到付款待处理') {
-                        actionButtons += `
-                            <button class="btn btn-sm btn-danger ms-2" onclick="cancelOrderDirect(${order.orderId})">
-                                <i class="fas fa-times me-1"></i> 取消订单
-                            </button>
-                            `;
-                    }
-                    
-                    // 已取消订单显示删除按钮
-                    if (order.status === '已取消') {
-                        // 检查是否是退款导致的取消
-                        let isRefunded = order.cancelReason && order.cancelReason.includes('已批准');
-                        
-                        actionButtons += `
-                            <button class="btn btn-sm btn-outline-danger ms-2" onclick="showDeleteOrderConfirm(${order.orderId})">
-                                <i class="fas fa-trash-alt me-1"></i> 删除
-                            </button>
-                            `;
-                            
-                        // 如果是退款导致的取消，添加一个标记
-                        if (isRefunded) {
-                            actionButtons += `<span class="badge bg-info ms-2"><i class="fas fa-undo"></i> 已退款</span>`;
-                        }
-                    }
-                    
-
-                
-                html += `
-                        <div class="card-body border-bottom py-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                    <span class="fw-bold">订单号: ${order.orderId}</span>
-                                ${statusBadge}
-                                </div>
+                    html += `
+                        <div class="list-group-item p-3 order-item">
                             <div class="row align-items-center">
-                                <div class="col-md-7">
+                                <div class="col-md-2 mb-2 mb-md-0 text-center">
+                                    <img src="${order.product.imageUrl || '/img/placeholder.jpg'}" alt="${order.product.productName}" 
+                                         class="product-img">
+                                    <div class="product-quantity">x${order.quantity}</div>
+                                </div>
+                                <div class="col-md-4 mb-2 mb-md-0">
+                                    <h6 class="mb-1 product-name">${order.product.productName}</h6>
+                                    <div class="text-muted mb-1">单价: <span class="text-danger">¥${order.product.price.toFixed(2)}</span></div>
                                     <div class="d-flex align-items-center">
-                                        <img src="${order.product.imageUrl || '/img/placeholder.jpg'}" alt="${order.product.productName}" class="product-img me-3">
-                                        <div>
-                                            <h5 class="mb-1">${order.product.productName}</h5>
-                                            <p class="text-muted mb-0">农户: ${order.product.farmer.username} | 数量: ${order.quantity}</p>
-                                            <!-- 显示农户联系方式 -->
-                                            <p class="text-muted small mb-0">联系电话: ${order.product.farmer.phone || '未提供'}</p>
-                                        </div>
+                                        <span class="badge bg-light text-dark border">
+                                            <i class="fas fa-user-circle me-1"></i>${order.product.farmer.username}
+                                        </span>
                                     </div>
                                 </div>
-                                <div class="col-md-2 text-center">
-                                    <div class="fw-bold">¥${order.totalPrice.toFixed(2)}</div>
+                                <div class="col-md-2 mb-2 mb-md-0 text-center">
+                                    <div class="text-primary fw-bold">¥${(order.product.price * order.quantity).toFixed(2)}</div>
                                 </div>
-                                <div class="col-md-3 text-end">
-                                    <button class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#orderDetailModal" data-order-id="${order.orderId}">
-                                        <i class="fas fa-file-alt me-1"></i> 详情
+                                <div class="col-md-2 mb-2 mb-md-0 text-center">
+                                    ${statusBadge}
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#orderDetailModal" data-order-id="${order.orderId}">
+                                        <i class="fas fa-info-circle me-1"></i>详情
                                     </button>
-                                    ${actionButtons}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                // 订单组卡片底部，显示收货信息和运费 - 简化版
+                html += `
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="row align-items-center">
+                                <div class="col-md-6 small">
+                                    <div class="shipping-info-item mb-1">
+                                        <i class="fas fa-map-marker-alt shipping-info-icon"></i>
+                                        <span>${orderGroup.shippingAddress}</span>
+                                    </div>
+                                    <div class="shipping-info-item">
+                                        <i class="fas fa-phone shipping-info-icon"></i>
+                                        <span>${orderGroup.contactPhone}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-end order-amount-info">
+                                    <div class="text-muted">商品金额: <span class="fw-medium">¥${orderGroup.totalProductAmount.toFixed(2)}</span></div>
+                                    <div class="text-muted">运费: <span class="fw-medium">¥${orderGroup.shippingFeeAmount.toFixed(2)}</span></div>
+                                    <div class="fw-bold text-danger">实付款: <span style="font-size: 1.05rem;">¥${orderGroup.totalAmount.toFixed(2)}</span></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 `;
             });
-                
-                html += `</div>`;
-            });
+            
+            // 如果没有找到订单组
+            if (sortedGroupIds.length === 0) {
+                html = '<div class="alert alert-info mb-4 shadow-sm"><i class="fas fa-info-circle me-2"></i>没有找到符合条件的订单</div>';
+            }
+            
+            // 更新页面内容
+            container.innerHTML = html;
             
             // 更新分页控件
-            renderPagination(totalPages);
+            if (totalPages > 1) {
+                updatePagination(totalPages);
+                paginationContainer.classList.remove('d-none');
+            } else {
+                paginationContainer.classList.add('d-none');
+            }
             
-            container.innerHTML = html;
-            paginationContainer.classList.remove('d-none');
+            // 添加订单项的悬停效果 - 简化版
+            document.querySelectorAll('.order-item').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f8f9fa';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
+            });
+            
+            console.log("订单组已渲染，共", sortedGroupIds.length, "个订单组");
+        }
+        
+        // 获取订单组状态样式类
+        function getGroupStatusClass(status) {
+            switch(status) {
+                case '已完成': return 'bg-success';
+                case '已取消': return 'bg-danger';
+                case '配送中': return 'bg-info';
+                default: return 'bg-warning';
+            }
+        }
+        
+        // 获取订单组状态边框样式类
+        function getGroupStatusBorderClass(status) {
+            switch(status) {
+                case '已完成': return 'success';
+                case '已取消': return 'danger';
+                case '配送中': return 'info';
+                default: return 'warning';
+            }
         }
         
         // 渲染分页控件
-        function renderPagination(totalPages) {
+        function updatePagination(totalPages) {
             const pagination = document.querySelector('.pagination');
             const prevPageItem = document.getElementById('prev-page');
             const nextPageItem = document.getElementById('next-page');
@@ -924,41 +1386,59 @@
         }
         
         /**
-         * 将订单按批次分组
-         * 批次识别规则: 创建时间在相近时间范围内(5秒内)的订单视为一批
+         * 将订单按订单组分组
          * @param {Array} orders 订单列表
          * @returns {Object} 按批次分组的订单
          */
-        function groupOrdersByBatch(orders) {
-            // 对订单按创建时间排序
-            const sortedOrders = [...orders].sort((a, b) => 
-                new Date(a.createTime).getTime() - new Date(b.createTime).getTime()
-            );
-            
+        function groupOrdersByOrderGroup(orders) {
             const grouped = {};
-            let currentBatchKey = '';
-            let currentBatchTime = 0;
             
-            // 按时间相近原则分组
-            sortedOrders.forEach(order => {
-                const orderTime = new Date(order.createTime).getTime();
+            // 如果订单列表为空，直接返回空对象
+            if (!orders || orders.length === 0) {
+                console.log("订单列表为空，不进行分组");
+                return grouped;
+            }
+            
+            // 按订单组ID分组
+            orders.forEach(order => {
+                const groupId = order.orderGroupId;
+                if (!groupId) return; // 跳过没有订单组ID的订单
                 
-                // 如果是第一个订单或者订单时间与当前批次时间相差超过5秒(5000毫秒)，则创建新批次
-                if (!currentBatchKey || Math.abs(orderTime - currentBatchTime) > 5000) {
-                    currentBatchKey = `batch_${orderTime}`;
-                    currentBatchTime = orderTime;
-                    grouped[currentBatchKey] = [];
+                if (!grouped[groupId]) {
+                    grouped[groupId] = [];
                 }
                 
-                grouped[currentBatchKey].push(order);
+                grouped[groupId].push(order);
+            });
+            
+            // 确保每个组内的订单也按创建时间排序（组内最新的订单在前）
+            Object.keys(grouped).forEach(groupId => {
+                try {
+                    const sortOrder = document.getElementById('sortOrder').value;
+                    switch (sortOrder) {
+                        case 'time-desc':
+                            grouped[groupId].sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
+                            break;
+                        case 'time-asc':
+                            grouped[groupId].sort((a, b) => new Date(a.createTime) - new Date(b.createTime));
+                            break;
+                        default:
+                            grouped[groupId].sort((a, b) => new Date(b.createTime) - new Date(a.createTime));
+                    }
+                } catch (e) {
+                    console.error("组内订单排序出错:", e);
+                }
             });
             
             return grouped;
         }
         
-        // 将renderOrderList函数改为使用renderPaginatedOrders
+        // 将renderOrderList函数改为使用分组显示
         function renderOrderList(orders) {
             filteredOrders = orders;
+            // 确保先排序
+            sortOrders();
+            // 然后渲染
             renderPaginatedOrders();
         }
         
@@ -1218,7 +1698,7 @@
             // 订单支付方式
             const paymentMethod = '货到付款';
             
-            // 订单状态时间线
+            // 订单状态时间线 - 简化版
             let statusTimeline = `
                 <div class="position-relative timeline-container">
                     <!-- 垂直时间轴线 -->
@@ -1246,29 +1726,18 @@
                     const isRefunded = order.cancelReason && order.cancelReason.includes('已批准');
                     
                     cancelInfo = `
-                        <div class="mt-3">
-                            <div class="alert ${isRefunded ? 'alert-info' : 'alert-danger'}">
+                        <div class="mt-2">
+                            <div class="alert ${isRefunded ? 'alert-info' : 'alert-danger'} py-2">
                                 <div class="d-flex align-items-start">
-                                    <i class="fas fa-${isRefunded ? 'check-circle text-success' : 'times-circle text-danger'} me-3 mt-1 fa-2x"></i>
-                                    <div>
-                                        <h5 class="text-${isRefunded ? 'success' : 'danger'} mb-2">${isRefunded ? '退款申请已批准' : '订单已取消'}</h5>
-                                        <div><i class="fas fa-user text-primary me-2"></i><strong>操作方：</strong>${cancelByText}</div>
-                                        <div><i class="fas fa-comment text-info me-2"></i><strong>原因：</strong>${order.cancelReason || '未提供原因'}</div>
-                                        ${isRefunded ? `<div><i class="fas fa-clock text-warning me-2"></i><strong>申请时间：</strong>${formatFriendlyDateTime(order.shipTime)}</div>` : ''}
-                                        <div><i class="fas fa-calendar-check text-primary me-2"></i><strong>处理时间：</strong>${formatFriendlyDateTime(order.cancelTime)}</div>
-                                        
-                                        ${isRefunded ? `
-                                        <div class="mt-3">
-                                            <div class="progress" style="height: 10px;">
-                                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                            <div class="d-flex justify-content-between mt-1 text-muted small">
-                                                <span>申请提交</span>
-                                                <span>商家审核</span>
-                                                <span>退款完成</span>
-                                            </div>
-                                        </div>
-                                        ` : ''}
+                                    <i class="fas fa-${isRefunded ? 'check-circle text-success' : 'times-circle text-danger'} me-2"></i>
+                                    <div class="flex-grow-1">
+                                        <p class="mb-1"><strong>${isRefunded ? '退款申请已批准' : '订单已取消'}</strong></p>
+                                        <ul class="list-unstyled mb-0 small">
+                                            <li class="mb-1"><strong>操作方：</strong>${cancelByText}</li>
+                                            <li class="mb-1"><strong>原因：</strong>${order.cancelReason || '未提供原因'}</li>
+                                            ${isRefunded ? `<li class="mb-1"><strong>申请时间：</strong>${formatFriendlyDateTime(order.shipTime)}</li>` : ''}
+                                            <li><strong>处理时间：</strong>${formatFriendlyDateTime(order.cancelTime)}</li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
@@ -1289,23 +1758,22 @@
                         </div>
                     </div>
                 `;
-            } else if (order.cancelReason && order.cancelReason.includes('(已拒绝)')) {
-                // 显示退款被拒绝的信息
+            } 
+            // ... 其他订单状态的代码保持不变
+            else if (order.cancelReason && order.cancelReason.includes('(已拒绝)')) {
+                // 显示退款被拒绝的信息 - 简化版
                 const refusalInfo = `
-                    <div class="mt-3">
-                        <div class="alert alert-warning">
+                    <div class="mt-2">
+                        <div class="alert alert-warning py-2">
                             <div class="d-flex align-items-start">
-                                <i class="fas fa-exclamation-triangle text-warning me-3 mt-1 fa-2x"></i>
-                                <div>
-                                    <h5 class="text-warning mb-2">退款申请被拒绝</h5>
-                                    <div><i class="fas fa-comment text-info me-2"></i><strong>拒绝原因：</strong>${order.cancelReason.replace('(已拒绝)', '')}</div>
-                                    <div><i class="fas fa-clock text-primary me-2"></i><strong>申请时间：</strong>${formatFriendlyDateTime(order.shipTime)}</div>
-                                    <div><i class="fas fa-ban text-danger me-2"></i><strong>拒绝时间：</strong>${formatFriendlyDateTime(order.cancelTime)}</div>
-                                    <div class="mt-3">
-                                        <button class="btn btn-sm btn-outline-warning" onclick="requestRefund()">
-                                            <i class="fas fa-redo me-1"></i>再次申请退款
-                                        </button>
-                                    </div>
+                                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1"><strong>退款申请被拒绝</strong></p>
+                                    <ul class="list-unstyled mb-0 small">
+                                        <li class="mb-1"><strong>拒绝原因：</strong>${order.cancelReason.replace('(已拒绝)', '')}</li>
+                                        <li class="mb-1"><strong>申请时间：</strong>${formatFriendlyDateTime(order.shipTime)}</li>
+                                        <li class="mb-1"><strong>拒绝时间：</strong>${formatFriendlyDateTime(order.cancelTime)}</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -1326,30 +1794,19 @@
                     </div>
                 `;
             } else if (order.status === '申请退款中') {
-                // 显示退款申请中的信息
+                // 显示退款申请中的信息 - 简化版
                 const refundRequestInfo = `
-                    <div class="mt-3">
-                        <div class="alert alert-warning">
+                    <div class="mt-2">
+                        <div class="alert alert-warning py-2">
                             <div class="d-flex align-items-start">
-                                <i class="fas fa-hourglass-half text-warning me-3 mt-1 fa-2x"></i>
-                                <div>
-                                    <h5 class="text-warning mb-2">退款申请处理中</h5>
-                                    <div><i class="fas fa-comment text-info me-2"></i><strong>申请原因：</strong>${order.cancelReason || '未提供原因'}</div>
-                                    <div><i class="fas fa-clock text-primary me-2"></i><strong>申请时间：</strong>${formatFriendlyDateTime(order.shipTime)}</div>
-                                    <div class="mt-3 alert alert-info py-2">
-                                        <i class="fas fa-info-circle me-2"></i>商家正在处理您的退款申请，请耐心等待
-                                    </div>
-                                    
-                                    <div class="mt-3">
-                                        <div class="progress" style="height: 10px;">
-                                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                        <div class="d-flex justify-content-between mt-1 text-muted small">
-                                            <span>申请提交</span>
-                                            <span>商家处理中</span>
-                                            <span>处理完成</span>
-                                        </div>
-                                    </div>
+                                <i class="fas fa-hourglass-half text-warning me-2"></i>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1"><strong>退款申请处理中</strong></p>
+                                    <ul class="list-unstyled mb-0 small">
+                                        <li class="mb-1"><strong>申请原因：</strong>${order.cancelReason || '未提供原因'}</li>
+                                        <li class="mb-1"><strong>申请时间：</strong>${formatFriendlyDateTime(order.shipTime)}</li>
+                                        <li><small class="text-info">商家正在处理您的退款申请，请耐心等待</small></li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -1440,135 +1897,203 @@
             // 获取状态样式
             const statusBadge = OrderManager.renderStatusBadge(order.status);
             
-            // 构建HTML内容
+            // 构建HTML内容 - 简化版
             const container = document.getElementById('order-detail-content');
             let html = `
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-light py-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0 text-primary">
-                                <i class="fas fa-info-circle me-2"></i>订单 #${order.orderId} 详情
-                            </h5>
-                            <div>
-                                ${statusBadge}
-                                <span class="badge bg-secondary ms-2">${paymentMethod}</span>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                        <div>
+                            <h5 class="mb-0">订单 #${order.orderId}</h5>
+                            <div class="text-muted small">${formatFriendlyDateTime(order.createTime)}</div>
+                        </div>
+                        <div>
+                            ${statusBadge}
+                            <span class="badge bg-secondary ms-2">${paymentMethod}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="detail-section-title">
+                                <i class="fas fa-clipboard-list me-2 text-secondary"></i>订单信息
+                            </h6>
+                            <div class="detail-item-row">
+                                <div class="row">
+                                    <div class="col-4 detail-label">订单号:</div>
+                                    <div class="col-8 detail-value fw-bold">#${order.orderId}</div>
+                                </div>
+                            </div>
+                            <div class="detail-item-row">
+                                <div class="row">
+                                    <div class="col-4 detail-label">下单时间:</div>
+                                    <div class="col-8 detail-value">${formatFriendlyDateTime(order.createTime)}</div>
+                                </div>
+                            </div>
+                            <div class="detail-item-row">
+                                <div class="row">
+                                    <div class="col-4 detail-label">商品总价:</div>
+                                    <div class="col-8 detail-value fw-bold text-danger">¥${order.totalPrice.toFixed(2)}</div>
+                                </div>
+                            </div>
+                            <div class="detail-item-row">
+                                <div class="row">
+                                    <div class="col-4 detail-label">支付方式:</div>
+                                    <div class="col-8 detail-value">
+                                        <span class="badge bg-secondary">${paymentMethod}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="detail-section-title">
+                                <i class="fas fa-map-marker-alt me-2 text-secondary"></i>
+                            </h6>
+                            <div class="detail-item-row">
+                                <div class="row">
+                                    <div class="col-4 detail-label">
+                                        <i class="fas fa-map-marker-alt me-2 text-secondary"></i>
+                                    </div>
+                                    <div class="col-8 detail-value">${order.shippingAddress}</div>
+                                </div>
+                            </div>
+                            <div class="detail-item-row">
+                                <div class="row">
+                                    <div class="col-4 detail-label">
+                                        <i class="fas fa-phone me-2 text-secondary"></i>
+                                    </div>
+                                    <div class="col-8 detail-value">${order.contactPhone}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card-body p-4">
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <h6 class="border-bottom pb-2 mb-3 text-primary">
-                                    <i class="fas fa-clipboard-list me-2"></i>订单信息
-                                </h6>
-                                <div class="card border h-100">
-                                    <div class="card-body">
-                                        <div class="row mb-2">
-                                            <div class="col-4 text-muted">订单号:</div>
-                                            <div class="col-8 fw-bold">#${order.orderId}</div>
+                    
+                    <h6 class="detail-section-title">
+                        <i class="fas fa-receipt me-2 text-secondary"></i>商品信息
+                    </h6>
+                    <div class="card mb-4">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center">
+                                <img src="${order.product.imageUrl || '/img/placeholder.jpg'}" alt="${order.product.productName}" class="me-3 product-img" style="width:90px;height:90px;">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h5 class="mb-1">${order.product.productName}</h5>
+                                        <span class="badge bg-primary rounded-pill ms-2">×${order.quantity}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <div class="text-muted small">
+                                            <i class="fas fa-tag me-1 text-secondary"></i>单价: 
+                                            <span class="text-dark fw-medium">¥${order.product.price.toFixed(2)}</span>
                                         </div>
-                                        <div class="row mb-2">
-                                            <div class="col-4 text-muted">下单时间:</div>
-                                            <div class="col-8">${formatFriendlyDateTime(order.createTime)}</div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-4 text-muted">商品总价:</div>
-                                            <div class="col-8 fw-bold text-danger">¥${order.totalPrice.toFixed(2)}</div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-4 text-muted">支付方式:</div>
-                                            <div class="col-8">
-                                                <span class="badge bg-secondary">${paymentMethod}</span>
-                                            </div>
+                                        <div class="text-danger fw-bold fs-5">
+                                            ¥${order.totalPrice.toFixed(2)}
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h6 class="border-bottom pb-2 mb-3 text-primary">
-                                    <i class="fas fa-map-marker-alt me-2"></i>收货信息
-                                </h6>
-                                <div class="card border h-100">
-                                    <div class="card-body">
-                                        <div class="row mb-2">
-                                            <div class="col-4 text-muted">收货地址:</div>
-                                            <div class="col-8">${order.shippingAddress}</div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-4 text-muted">联系电话:</div>
-                                            <div class="col-8">${order.contactPhone}</div>
-                                        </div>
+                                    <div class="text-muted d-flex align-items-center mt-2">
+                                        <i class="fas fa-user-circle me-1 text-secondary"></i>农户: ${order.product.farmer.username}
+                                        ${order.product.farmer.phone ? `<span class="ms-3"><i class="fas fa-phone me-1 text-secondary"></i>${order.product.farmer.phone}</span>` : ''}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <h6 class="border-bottom pb-2 mb-3 text-primary">
-                            <i class="fas fa-shopping-basket me-2"></i>商品信息
-                        </h6>
-                        <div class="card mb-4 border">
-                            <div class="card-body p-3">
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h6 class="detail-section-title">
+                                <i class="fas fa-user-tie me-2 text-secondary"></i>农户信息
+                            </h6>
+                            <div class="detail-item-row">
                                 <div class="d-flex align-items-center">
-                                    <img src="${order.product.imageUrl || '/img/placeholder.jpg'}" alt="${order.product.productName}" class="me-3 rounded shadow-sm" style="width:80px;height:80px;object-fit:cover;">
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <h5 class="mb-1">${order.product.productName}</h5>
-                                            <span class="badge bg-primary rounded-pill ms-2">×${order.quantity}</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center mt-2">
-                                            <div class="text-muted small">
-                                                <i class="fas fa-tag me-1 text-secondary"></i>单价: 
-                                                <span class="text-dark fw-medium">¥${order.product.price.toFixed(2)}</span>
-                                            </div>
-                                            <div class="text-danger fw-bold fs-5">
-                                                ¥${order.totalPrice.toFixed(2)}
-                                            </div>
-                                        </div>
-                                        <div class="text-muted d-flex align-items-center mt-2">
-                                            <i class="fas fa-user-circle me-1 text-secondary"></i>农户: ${order.product.farmer.username}
-                                            ${order.product.farmer.phone ? `<span class="ms-3"><i class="fas fa-phone me-1 text-secondary"></i>${order.product.farmer.phone}</span>` : ''}
+                                    <div class="me-3 p-2 bg-light rounded-circle">
+                                        <i class="fas fa-user-circle fa-2x text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 d-flex align-items-center">
+                                            <span>${order.product.farmer.username}</span>
+                                            <span class="badge bg-success ms-2 small">认证农户</span>
+                                        </h6>
+                                        <div class="text-muted small d-flex align-items-center">
+                                            <i class="fas fa-phone me-1 text-secondary"></i>
+                                            <span>联系电话: ${order.product.farmer.phone || '未提供'}</span>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-4">
-                            <div class="col-md-12">
-                                <h6 class="border-bottom pb-2 mb-3 text-primary">
-                                    <i class="fas fa-user-tie me-2"></i>农户信息
-                                </h6>
-                                <div class="card border">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center">
-                                            <div class="me-3 p-3 bg-light rounded-circle farmer-card-icon">
-                                                <i class="fas fa-user-circle fa-2x text-primary"></i>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-1 d-flex align-items-center">
-                                                    <span>${order.product.farmer.username}</span>
-                                                    <span class="badge bg-success ms-2 small">认证农户</span>
-                                                </h6>
-                                                <div class="text-muted small d-flex align-items-center">
-                                                    <i class="fas fa-phone me-1 text-secondary"></i>
-                                                    <span>联系电话: ${order.product.farmer.phone || '未提供'}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <h6 class="border-bottom pb-2 mb-3 text-primary">
-                            <i class="fas fa-history me-2"></i>订单进度
-                        </h6>
-                        <div class="card">
-                            <div class="card-body">
-                                ${statusTimeline}
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- 配送信息部分 -->
+                    ${order.deliveryInfo || order.deliveryContact || order.deliveryPhone || order.estimatedDeliveryTime ? `
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h6 class="detail-section-title">
+                                <i class="fas fa-truck me-2 text-secondary"></i>配送信息
+                            </h6>
+                            ${order.deliveryInfo ? `
+                            <div class="detail-item-row">
+                                <div class="row">
+                                    <div class="col-3 detail-label">配送备注:</div>
+                                    <div class="col-9 detail-value">${order.deliveryInfo}</div>
+                                </div>
+                            </div>
+                            ` : ''}
+                            ${order.deliveryContact ? `
+                            <div class="detail-item-row">
+                                <div class="row">
+                                    <div class="col-3 detail-label">配送联系人:</div>
+                                    <div class="col-9 detail-value">${order.deliveryContact}</div>
+                                </div>
+                            </div>
+                            ` : ''}
+                            ${order.deliveryPhone ? `
+                            <div class="detail-item-row">
+                                <div class="row">
+                                    <div class="col-3 detail-label">配送电话:</div>
+                                    <div class="col-9 detail-value">${order.deliveryPhone}</div>
+                                </div>
+                            </div>
+                            ` : ''}
+                            ${order.estimatedDeliveryTime ? `
+                            <div class="detail-item-row">
+                                <div class="row">
+                                    <div class="col-3 detail-label">预计送达:</div>
+                                    <div class="col-9 detail-value">${order.estimatedDeliveryTime}</div>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h6 class="detail-section-title">
+                                <i class="fas fa-user-tie me-2 text-secondary"></i>农户信息
+                            </h6>
+                            <div class="detail-item-row">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3 p-2 bg-light rounded-circle">
+                                        <i class="fas fa-user-circle fa-2x text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 d-flex align-items-center">
+                                            <span>${order.product.farmer.username}</span>
+                                            <span class="badge bg-success ms-2 small">认证农户</span>
+                                        </h6>
+                                        <div class="text-muted small d-flex align-items-center">
+                                            <i class="fas fa-phone me-1 text-secondary"></i>
+                                            <span>联系电话: ${order.product.farmer.phone || '未提供'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h6 class="detail-section-title">
+                        <i class="fas fa-history me-2 text-secondary"></i>订单进度
+                    </h6>
+                    ${statusTimeline}
                 </div>
             `;
             
@@ -1687,6 +2212,7 @@
                                 <div class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: 33%" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100">退款流程 1/3</div>
                             </div>
                             
+                            
                             <div class="d-flex justify-content-between mb-3 small text-muted">
                                 <div class="text-center">
                                     <i class="fas fa-file-alt d-block mb-1"></i>
@@ -1800,5 +2326,6 @@
     </script>
 </body>
 </html> 
+ 
  
  

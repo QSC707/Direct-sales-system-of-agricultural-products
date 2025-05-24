@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>销售统计 - 农产品直销平台</title>
     <link rel="stylesheet" href="../../css/style.css">
+    <!-- 先加载jQuery和Bootstrap -->
     <script src="../../js/dependencies.js"></script>
+    <!-- 加载axios库 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
+    <!-- 再加载依赖于它们的脚本 -->
     <script src="../../js/auth.js"></script>
     <script src="../../js/axios-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -105,6 +109,9 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="alert alert-info mt-2 mb-0">
+                            <i class="fas fa-info-circle mr-1"></i> 销售统计中的销售额数据仅包含商品销售金额，不包含运费。运费由平台承担，不属于农户收入。
+                        </div>
                     </div>
                 </div>
                 
@@ -131,6 +138,7 @@
                             <div class="card-body">
                                 <h2 class="text-primary" id="totalSales">¥0</h2>
                                 <p class="text-muted mb-0">销售总额</p>
+                                <small class="text-muted">(不含运费)</small>
                             </div>
                         </div>
                     </div>
@@ -227,6 +235,114 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- 添加商品销量详情部分 -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">商品销量详情</h4>
+                        <button class="btn btn-sm btn-light" id="refreshProductsBtn">
+                            <i class="fas fa-sync-alt"></i> 刷新数据
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="productSalesTable">
+                                <thead>
+                                    <tr>
+                                        <th>商品名称</th>
+                                        <th>分类</th>
+                                        <th>销售数量</th>
+                                        <th>销售金额</th>
+                                        <th>平均单价</th>
+                                        <th>当前价格</th>
+                                        <th>订单数</th>
+                                        <th>最后销售日期</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productSalesTableBody">
+                                    <tr>
+                                        <td colspan="9" class="text-center">加载中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 商品价格分析弹窗 -->
+                <div class="modal fade" id="priceAnalysisModal" tabindex="-1" aria-labelledby="priceAnalysisModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="priceAnalysisModalLabel">商品价格分析</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h6 class="card-title">商品信息</h6>
+                                                <dl class="row">
+                                                    <dt class="col-sm-3">商品名称</dt>
+                                                    <dd class="col-sm-9" id="productNameAnalysis"></dd>
+                                                    
+                                                    <dt class="col-sm-3">分类</dt>
+                                                    <dd class="col-sm-9" id="productCategoryAnalysis"></dd>
+                                                    
+                                                    <dt class="col-sm-3">当前价格</dt>
+                                                    <dd class="col-sm-9" id="productCurrentPriceAnalysis"></dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <canvas id="priceAnalysisChart" height="250"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-md-12">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-striped" id="priceAnalysisTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>时间段</th>
+                                                        <th>平均价格</th>
+                                                        <th>销售量</th>
+                                                        <th>销售额</th>
+                                                        <th>订单数</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="priceAnalysisTableBody">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部分析说明 -->
+                <div class="alert alert-info mb-4">
+                    <h5>销售数据分析建议</h5>
+                    <p>通过分析商品销量和价格数据，您可以：</p>
+                    <ul>
+                        <li>识别热销商品，优先补充库存</li>
+                        <li>发现滞销商品，考虑调整价格或促销</li>
+                        <li>分析价格对销量的影响，确定最佳定价策略</li>
+                        <li>观察销售季节性趋势，提前规划生产安排</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -246,116 +362,111 @@
         /**
          * 页面加载完成后执行
          */
+        // 使用依赖加载机制确保jQuery和其他依赖已加载
+        if (typeof window.initDependencies === 'function') {
+            window.initDependencies(function() {
+                // jQuery已加载，可以安全使用
+                $(document).ready(function() {
+                    initStatisticsPage();
+                });
+            });
+        } else {
+            // 备用方案：等待DOM加载完成后尝试初始化
+            document.addEventListener('DOMContentLoaded', function() {
+                // 检查jQuery是否加载
+                if (typeof jQuery !== 'undefined') {
         $(document).ready(function() {
-            // 检查用户是否登录，并且是农户角色
-            checkLogin(function(user) {
-                if (user && user.role === 'farmer') {
-                    // 显示用户信息
-                    $('#userDropdown').show();
-                    $('#currentUsername').text(user.username);
-                    
-                    // 保存用户ID
-                    currentUserId = user.userId;
-                    
-                    // 设置默认日期范围为过去7天
-                    setDateRange('week');
-                    
-                    // 初始化统计数据
-                    refreshStatistics();
+                        initStatisticsPage();
+                    });
                 } else {
-                    // 如果不是农户，跳转到登录页面并显示提示
-                    alert('您需要以农户身份登录才能访问此页面');
-                    window.location.href = '../login.html?role=farmer&redirect=' + encodeURIComponent(window.location.href);
+                    console.error('jQuery未加载，统计功能无法正常工作');
+                    alert('页面加载出错，请刷新页面重试');
                 }
             });
-            
-            // 绑定时间范围按钮点击事件
-            $('.btn-group .btn').on('click', function() {
-                $('.btn-group .btn').removeClass('active');
-                $(this).addClass('active');
-                setDateRange($(this).data('range'));
-                refreshStatistics();
-            });
-            
-            // 绑定自定义日期范围查询按钮点击事件
-            $('#customRangeBtn').on('click', function() {
-                $('.btn-group .btn').removeClass('active');
-                refreshStatistics();
-            });
-            
-            // 绑定退出登录按钮点击事件
-            $('#logoutBtn').on('click', function() {
-                logout();
-                window.location.href = '../login.html';
-            });
-        });
-        
-        /**
-         * 设置日期范围
-         */
-        function setDateRange(range) {
-            const today = new Date();
-            let startDate = new Date();
-            
-            switch (range) {
-                case 'week':
-                    startDate.setDate(today.getDate() - 7);
-                    break;
-                case 'month':
-                    startDate.setMonth(today.getMonth() - 1);
-                    break;
-                case 'quarter':
-                    startDate.setMonth(today.getMonth() - 3);
-                    break;
-                case 'year':
-                    startDate.setFullYear(today.getFullYear() - 1);
-                    break;
-                default:
-                    startDate.setDate(today.getDate() - 7);
-            }
-            
-            // 格式化日期为YYYY-MM-DD
-            const formatDate = function(date) {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            };
-            
-            $('#startDate').val(formatDate(startDate));
-            $('#endDate').val(formatDate(today));
         }
         
         /**
-         * 刷新统计数据
+         * 页面初始化
          */
-        function refreshStatistics() {
-            const startDate = $('#startDate').val();
-            const endDate = $('#endDate').val();
+        async function initStatisticsPage() {
+            try {
+                // 检查用户是否已登录
+                await checkLogin();
             
-            if (!startDate || !endDate) {
-                alert('请选择开始日期和结束日期');
-                return;
+                // 设置默认时间范围（最近30天）
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - 30);
+                
+                // 初始筛选条件
+                const filter = {
+                    startDate: startDate.toISOString(),
+                    endDate: endDate.toISOString()
+                };
+                
+                // 获取销售数据
+                await refreshStatistics(filter);
+            
+                // 初始化时间范围按钮点击事件
+                document.querySelectorAll('[data-range]').forEach(button => {
+                    button.addEventListener('click', function() {
+                        // 移除所有按钮的活动状态
+                        document.querySelectorAll('[data-range]').forEach(btn => {
+                            btn.classList.remove('active');
+        });
+        
+                        // 添加当前按钮的活动状态
+                        this.classList.add('active');
+                        
+                        // 获取时间范围
+                        const range = this.getAttribute('data-range');
+                        const filter = getFilterByRange(range);
+                        
+                        // 刷新统计数据
+                        refreshStatistics(filter);
+                    });
+                });
+                
+                // 添加"刷新数据"按钮事件监听
+                document.getElementById('refreshProductsBtn').addEventListener('click', function() {
+                    const activeButton = document.querySelector('[data-range].active');
+                    const range = activeButton ? activeButton.getAttribute('data-range') : 'month';
+                    const filter = getFilterByRange(range);
+                    refreshStatistics(filter);
+                });
+                
+            } catch (error) {
+                console.error('初始化统计页面出错:', error);
+                alert('加载销售统计数据失败: ' + (error?.message || '请求失败，请稍后重试'));
             }
+        }
+        
+        /**
+         * 刷新所有统计数据
+         */
+        async function refreshStatistics(filter) {
+            try {
+                // 显示加载状态
+                document.getElementById('totalSales').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                document.getElementById('totalOrders').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                document.getElementById('totalQuantity').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                document.getElementById('averageOrderValue').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                document.getElementById('productSalesTableBody').innerHTML = '<tr><td colspan="9" class="text-center"><i class="fas fa-spinner fa-spin"></i> 加载中...</td></tr>';
+                
+                // 获取销售总览
+                await fetchSalesOverview(filter);
+                
+                // 获取销售趋势
+                await fetchSalesTrend(filter);
             
-            if (new Date(startDate) > new Date(endDate)) {
-                alert('开始日期不能大于结束日期');
-                return;
+                // 获取商品销量详情
+                await fetchProductSalesDetails(filter);
+                
+                console.log('所有统计数据已刷新');
+            } catch (error) {
+                console.error('刷新统计数据出错:', error);
+                alert('刷新统计数据失败: ' + (error?.message || '请求失败，请稍后重试'));
             }
-            
-            // 显示加载指示器
-            $('#loadingIndicator').show();
-            $('#overviewContainer, #salesTrendContainer, #productChartsContainer, #productTableContainer, #noDataMessage').hide();
-            
-            // 准备筛选条件
-            const filter = {
-                startDate: startDate,
-                endDate: endDate,
-                farmerId: currentUserId
-            };
-            
-            // 发送请求获取销售总览数据
-            fetchSalesOverview(filter);
         }
         
         /**
@@ -367,16 +478,25 @@
                 
                 if (response && response.code === 200) {
                     const data = response.data;
-                    
-                    // 更新显示
+                
+                // 更新显示
                     $('#totalOrders').text(data.totalOrders);
                     $('#totalSales').text('¥' + data.totalSales.toLocaleString());
                     $('#totalQuantity').text(data.totalQuantity);
                     $('#averageOrderValue').text('¥' + data.averageOrderValue.toLocaleString());
-                    
+                
                     // 如果有销售数据，显示概览容器
                     if (data.totalOrders > 0) {
                         $('#overviewContainer').show();
+                        
+                        // 如果支持显示运费信息（管理员角色才会有）
+                        if (data.showShippingFees && data.shippingFeeAmount > 0) {
+                            // 如果页面上有运费显示元素，更新它
+                            if ($('#shippingFeeAmount').length) {
+                                $('#shippingFeeAmount').text('¥' + data.shippingFeeAmount.toLocaleString());
+                                $('#shippingFeeContainer').show();
+                            }
+                        }
                         
                         // 获取其他统计数据
                         fetchSalesTrend(filter);
@@ -399,28 +519,139 @@
          */
         async function fetchSalesTrend(filter) {
             try {
-                const response = await http.post('statistics/trend/daily', filter);
+                // 计算日期跨度，决定使用每日或每月趋势
+                const startDate = new Date(filter.startDate);
+                const endDate = new Date(filter.endDate);
+                const daysDiff = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
+                
+                // 如果日期跨度超过90天，使用月度趋势，否则使用每日趋势
+                let endpoint = daysDiff > 90 ? 'trend/monthly' : 'trend/daily';
+                const response = await http.post(`statistics/${endpoint}`, filter);
                 
                 if (response && response.code === 200) {
                     const trendData = response.data;
+            
+                    // 绘制趋势图表
+                    drawSalesTrendChart(trendData, daysDiff > 90);
                     
-                    if (trendData && trendData.length > 0) {
-                        // 显示销售趋势容器
-                        $('#salesTrendContainer').show();
-                        
-                        // 处理数据并绘制图表
-                        const labels = trendData.map(item => item.period);
-                        const salesData = trendData.map(item => item.sales);
-                        const ordersData = trendData.map(item => item.orders);
-                        
-                        renderSalesTrendChart(labels, salesData, ordersData);
-                    }
                 } else {
-                    console.error('获取销售趋势失败:', response.message);
+                    console.error('获取销售趋势失败:', response);
+                    alert('获取销售趋势失败: ' + (response?.message || '未知错误'));
                 }
             } catch (error) {
                 console.error('获取销售趋势出错:', error);
+                alert('获取销售趋势出错: ' + (error?.message || '请求失败，请稍后重试'));
             }
+        }
+        
+        /**
+         * 绘制销售趋势图表
+         */
+        function drawSalesTrendChart(data, isMonthly) {
+            const chartId = 'salesTrendChart';
+            
+            // 使用Chart.js提供的方法获取图表实例
+            const existingChart = Chart.getChart(chartId);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+            
+            // 获取Canvas元素
+            const canvas = document.getElementById(chartId);
+            
+            // 检查是否有数据
+            if (!data || data.length === 0) {
+                // 在画布上显示无数据消息
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('暂无销售趋势数据', canvas.width/2, canvas.height/2);
+                return;
+            }
+            
+            // 准备数据
+            const labels = data.map(item => {
+                if (isMonthly) {
+                    return formatYearMonth(item.period);
+                } else {
+                    return item.period;  // 显示MM-DD格式
+                }
+            });
+            
+            const salesData = data.map(item => item.sales);
+            const ordersData = data.map(item => item.orders);
+            
+            // 创建图表
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '销售额 (¥)',
+                            data: salesData,
+                            borderColor: 'rgb(54, 162, 235)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            yAxisID: 'y',
+                            tension: 0.1
+                        },
+                        {
+                            label: '订单数',
+                            data: ordersData,
+                            borderColor: 'rgb(255, 159, 64)',
+                            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                            yAxisID: 'y1',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: isMonthly ? '月度销售趋势' : '每日销售趋势'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: isMonthly ? '月份' : '日期'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: '销售额 (¥)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: '订单数'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         /**
@@ -458,74 +689,6 @@
         }
         
         /**
-         * 渲染销售趋势图表
-         */
-        function renderSalesTrendChart(labels, salesData, ordersData) {
-            // 获取图表实例并销毁
-            const existingChart = Chart.getChart('salesTrendChart');
-            if (existingChart) {
-                existingChart.destroy();
-            }
-            
-            // 创建图表
-            const ctx = document.getElementById('salesTrendChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '销售额(元)',
-                            data: salesData,
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.4
-                        },
-                        {
-                            label: '订单数',
-                            data: ordersData,
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.4,
-                            yAxisID: 'y1'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: '销售额(元)'
-                            }
-                        },
-                        y1: {
-                            position: 'right',
-                            beginAtZero: true,
-                            grid: {
-                                drawOnChartArea: false
-                            },
-                            title: {
-                                display: true,
-                                text: '订单数'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        /**
          * 渲染畅销产品图表
          */
         function renderTopProductsChart(products) {
@@ -544,19 +707,19 @@
             
             // 颜色配置
             const backgroundColors = [
-                'rgba(255, 99, 132, 0.7)',
-                'rgba(54, 162, 235, 0.7)',
-                'rgba(255, 206, 86, 0.7)',
-                'rgba(75, 192, 192, 0.7)',
-                'rgba(153, 102, 255, 0.7)'
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)'
             ];
             
             const borderColors = [
-                'rgba(255, 99, 132, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)'
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
             ];
             
             // 创建图表
@@ -567,7 +730,7 @@
                     labels: labels,
                     datasets: [{
                         label: '销售量',
-                        data: data,
+                data: data,
                         backgroundColor: backgroundColors,
                         borderColor: borderColors,
                         borderWidth: 1
@@ -618,20 +781,20 @@
             
             // 颜色配置
             const backgroundColors = [
-                'rgba(75, 192, 192, 0.7)',
-                'rgba(255, 99, 132, 0.7)',
-                'rgba(255, 206, 86, 0.7)',
-                'rgba(54, 162, 235, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
                 'rgba(153, 102, 255, 0.7)',
                 'rgba(255, 159, 64, 0.7)',
                 'rgba(201, 203, 207, 0.7)'
             ];
             
             const borderColors = [
-                'rgba(75, 192, 192, 1)',
-                'rgba(255, 99, 132, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(54, 162, 235, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(54, 162, 235, 1)',
                 'rgba(153, 102, 255, 1)',
                 'rgba(255, 159, 64, 1)',
                 'rgba(201, 203, 207, 1)'
@@ -714,6 +877,242 @@
             
             // 显示错误消息
             alert(message);
+        }
+
+        /**
+         * 获取农户商品销量详情
+         */
+        async function fetchProductSalesDetails(filter) {
+            try {
+                const response = await http.post('statistics/products/details', filter);
+                
+                if (response && response.code === 200) {
+                    const productDetails = response.data;
+                    
+                    // 清空表格
+                    const tableBody = document.getElementById('productSalesTableBody');
+                    tableBody.innerHTML = '';
+                    
+                    if (productDetails.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="9" class="text-center">无销售数据</td></tr>';
+                        return;
+                    }
+                    
+                    // 填充数据
+                    productDetails.forEach(product => {
+                        const row = document.createElement('tr');
+                        
+                        // 设置一个显示状态的类，以区分活跃和非活跃产品
+                        if (!product.isActive) {
+                            row.classList.add('table-secondary');
+                        }
+                        
+                        row.innerHTML = `
+                            <td>${product.productName}</td>
+                            <td>${product.category}</td>
+                            <td>${product.totalQuantity}</td>
+                            <td>¥${product.totalSales.toFixed(2)}</td>
+                            <td>¥${product.averagePrice.toFixed(2)}</td>
+                            <td>¥${product.currentPrice.toFixed(2)}</td>
+                            <td>${product.orderCount}</td>
+                            <td>${formatFriendlyDate(new Date(product.lastSoldDate))}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info view-price-analysis" data-product-id="${product.productId}">
+                                    <i class="fas fa-chart-line"></i> 价格分析
+                                </button>
+                            </td>
+                        `;
+                        
+                        tableBody.appendChild(row);
+                    });
+                    
+                    // 添加点击事件监听
+                    document.querySelectorAll('.view-price-analysis').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const productId = this.getAttribute('data-product-id');
+                            showPriceAnalysis(productId, filter);
+                        });
+                    });
+                    
+                } else {
+                    console.error('获取商品销量详情失败:', response);
+                    alert('获取商品销量详情失败: ' + (response?.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('获取商品销量详情出错:', error);
+                alert('获取商品销量详情出错: ' + (error?.message || '请求失败，请稍后重试'));
+            }
+        }
+        
+        /**
+         * 显示商品价格分析
+         */
+        async function showPriceAnalysis(productId, filter) {
+            try {
+                const response = await http.post(`statistics/price-analysis/${productId}`, filter);
+                
+                if (response && response.code === 200) {
+                    const data = response.data;
+                    
+                    // 填充商品基础信息
+                    document.getElementById('productNameAnalysis').textContent = data.product.productName;
+                    document.getElementById('productCategoryAnalysis').textContent = data.product.category;
+                    document.getElementById('productCurrentPriceAnalysis').textContent = `¥${data.product.currentPrice.toFixed(2)} ${data.product.isOrganic ? '(有机)' : ''}`;
+                    
+                    // 填充表格数据
+                    const tableBody = document.getElementById('priceAnalysisTableBody');
+                    tableBody.innerHTML = '';
+                    
+                    if (data.analysis.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="5" class="text-center">无价格分析数据</td></tr>';
+                    } else {
+                        data.analysis.forEach(item => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${formatYearMonth(item.period)}</td>
+                                <td>¥${item.averagePrice.toFixed(2)}</td>
+                                <td>${item.totalQuantity}</td>
+                                <td>¥${item.totalSales.toFixed(2)}</td>
+                                <td>${item.orderCount}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                    }
+                    
+                    // 绘制图表
+                    drawPriceAnalysisChart(data.analysis);
+                    
+                    // 显示模态框
+                    const modal = new bootstrap.Modal(document.getElementById('priceAnalysisModal'));
+                    modal.show();
+                    
+                } else {
+                    console.error('获取商品价格分析数据失败:', response);
+                    alert('获取商品价格分析数据失败: ' + (response?.message || '未知错误'));
+                }
+            } catch (error) {
+                console.error('获取商品价格分析数据出错:', error);
+                alert('获取商品价格分析数据出错: ' + (error?.message || '请求失败，请稍后重试'));
+            }
+        }
+        
+        /**
+         * 绘制价格分析图表
+         */
+        function drawPriceAnalysisChart(data) {
+            const ctx = document.getElementById('priceAnalysisChart').getContext('2d');
+            
+            // 如果已存在图表实例，则销毁它
+            if (window.priceAnalysisChart) {
+                window.priceAnalysisChart.destroy();
+            }
+            
+            // 准备数据
+            const labels = data.map(item => formatYearMonth(item.period));
+            const prices = data.map(item => item.averagePrice);
+            const quantities = data.map(item => item.totalQuantity);
+            
+            // 创建图表
+            window.priceAnalysisChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '平均价格 (¥)',
+                            data: prices,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            yAxisID: 'y',
+                            tension: 0.1
+                        },
+                        {
+                            label: '销售数量',
+                            data: quantities,
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            yAxisID: 'y1',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: '价格 (¥)'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: '销售数量'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        /**
+         * 格式化年月显示
+         */
+        function formatYearMonth(yearMonth) {
+            const [year, month] = yearMonth.split('-');
+            const date = new Date(parseInt(year), parseInt(month) - 1);
+            return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
+        }
+        
+        /**
+         * 格式化友好日期
+         */
+        function formatFriendlyDate(date) {
+            return date.toLocaleDateString('zh-CN');
+        }
+
+        /**
+         * 根据时间范围获取筛选条件
+         */
+        function getFilterByRange(range) {
+            const today = new Date();
+            let startDate = new Date();
+            
+            switch (range) {
+                case 'week':
+                    startDate.setDate(today.getDate() - 7);
+                    break;
+                case 'month':
+                    startDate.setMonth(today.getMonth() - 1);
+                    break;
+                case 'quarter':
+                    startDate.setMonth(today.getMonth() - 3);
+                    break;
+                case 'year':
+                    startDate.setFullYear(today.getFullYear() - 1);
+                    break;
+                default:
+                    startDate.setMonth(today.getMonth() - 1); // 默认一个月
+            }
+            
+            return {
+                startDate: startDate.toISOString(),
+                endDate: today.toISOString()
+            };
         }
     </script>
 </body>

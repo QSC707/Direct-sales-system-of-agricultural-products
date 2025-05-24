@@ -3,6 +3,31 @@
  * 统一配置Axios实例，处理请求响应拦截，提供通用的HTTP请求方法
  */
 
+// 检查Axios是否已加载
+if (typeof axios === 'undefined') {
+    console.warn('Axios未加载，正在尝试加载...');
+    // 动态加载Axios
+    (function() {
+        var script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js';
+        script.onload = function() {
+            console.log('Axios加载成功');
+            initAxiosConfig();
+        };
+        script.onerror = function() {
+            console.error('Axios加载失败，请检查网络连接或手动引入axios库');
+        };
+        document.head.appendChild(script);
+    })();
+} else {
+    // Axios已加载，直接初始化
+    initAxiosConfig();
+}
+
+/**
+ * 初始化Axios配置
+ */
+function initAxiosConfig() {
 // 创建Axios实例
 const axiosInstance = axios.create({
     baseURL: window.API_BASE_URL || 'http://localhost:5004', // 使用全局API_BASE_URL或默认值
@@ -153,3 +178,4 @@ const http = {
 // 导出为全局变量，方便在其他页面使用
 window.http = http;
 window.isLoggedIn = isLoggedIn; 
+} 

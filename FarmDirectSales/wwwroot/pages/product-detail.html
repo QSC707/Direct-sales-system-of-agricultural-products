@@ -740,15 +740,15 @@
             buyNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>处理中...';
             
             try {
-                // 显示提示消息
-                const notification = document.getElementById('cart-notification');
-                const notificationText = document.getElementById('cart-notification-text');
+            // 显示提示消息
+            const notification = document.getElementById('cart-notification');
+            const notificationText = document.getElementById('cart-notification-text');
                 notificationText.textContent = '正在准备订单...';
-                notification.classList.remove('d-none');
-                setTimeout(() => {
-                    notification.classList.add('show');
-                }, 10);
-                
+            notification.classList.remove('d-none');
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
                 // 创建直接购买数据
                 const directBuyData = {
                     productId: currentProduct.productId,
@@ -770,23 +770,23 @@
                 // 添加时间戳参数确保页面不会从缓存加载
                 const timestamp = new Date().getTime();
                 
-                // 短暂延迟后跳转，让用户看到提示
-                setTimeout(() => {
+                    // 短暂延迟后跳转，让用户看到提示
+                    setTimeout(() => {
                     // 使用replace而不是href，防止通过后退按钮返回导致状态错误
                     window.location.replace(`/pages/checkout.html?direct=true&t=${timestamp}`);
-                }, 500);
+                    }, 500);
             } catch (error) {
                 console.error('处理立即购买请求失败', error);
                 
                 const notification = document.getElementById('cart-notification');
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    notification.classList.add('d-none');
-                }, 300);
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        notification.classList.add('d-none');
+                    }, 300);
                 
                 alert(`处理请求失败: ${error.message}`);
                     
-                // 恢复按钮状态
+                    // 恢复按钮状态
                 buyNowBtn.disabled = false;
                 buyNowBtn.innerHTML = originalBuyNowText;
             } finally {

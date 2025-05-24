@@ -15,9 +15,19 @@ namespace FarmDirectSales.Models
         public int TotalOrders { get; set; }
         
         /// <summary>
-        /// 总销售额
+        /// 总销售额（不含运费）
         /// </summary>
         public decimal TotalSales { get; set; }
+        
+        /// <summary>
+        /// 总运费金额（仅管理员可见）
+        /// </summary>
+        public decimal ShippingFeeAmount { get; set; }
+        
+        /// <summary>
+        /// 是否显示运费信息（对于农户统计默认为false）
+        /// </summary>
+        public bool ShowShippingFees { get; set; }
         
         /// <summary>
         /// 总销售量

@@ -31,6 +31,11 @@ namespace FarmDirectSales.Data
         public DbSet<Order> Orders { get; set; }
 
         /// <summary>
+        /// 订单组表
+        /// </summary>
+        public DbSet<OrderGroup> OrderGroups { get; set; }
+
+        /// <summary>
         /// 溯源表
         /// </summary>
         public DbSet<Trace> Traces { get; set; }
@@ -73,6 +78,11 @@ namespace FarmDirectSales.Data
         public DbSet<ShippingFee> ShippingFees { get; set; }
 
         /// <summary>
+        /// 配送信息预设表
+        /// </summary>
+        public DbSet<DeliveryPreset> DeliveryPresets { get; set; }
+
+        /// <summary>
         /// 模型创建
         /// </summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -93,6 +103,27 @@ namespace FarmDirectSales.Data
                 .WithMany(p => p.Orders)
                 .HasForeignKey(o => o.ProductId)
                 .OnDelete(DeleteBehavior.NoAction);
+                
+            // 订单组-订单关系
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.OrderGroup)
+                .WithMany(g => g.Orders)
+                .HasForeignKey(o => o.OrderGroupId)
+                .OnDelete(DeleteBehavior.SetNull);
+                
+            // 用户-订单组关系
+            modelBuilder.Entity<OrderGroup>()
+                .HasOne(g => g.User)
+                .WithMany()
+                .HasForeignKey(g => g.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+                
+            // 订单组-运费规则关系
+            modelBuilder.Entity<OrderGroup>()
+                .HasOne(g => g.ShippingFee)
+                .WithMany()
+                .HasForeignKey(g => g.ShippingFeeId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // 农户-产品关系
             modelBuilder.Entity<Product>()
@@ -165,6 +196,13 @@ namespace FarmDirectSales.Data
                 .WithMany()
                 .HasForeignKey(o => o.ShippingFeeId)
                 .OnDelete(DeleteBehavior.SetNull);
+                
+            // 农户-配送预设关系
+            modelBuilder.Entity<DeliveryPreset>()
+                .HasOne(d => d.Farmer)
+                .WithMany()
+                .HasForeignKey(d => d.FarmerId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 } 

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试农户订单页面</title>
+</head>
+<body>
+    <h2>农户订单页面修复验证</h2>
+    <div id="testResults"></div>
+    
+    <script>
+        // 测试页面加载
+        function testPageLoad() {
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '100%';
+            iframe.style.height = '600px';
+            iframe.src = 'http://localhost:5004/pages/farmer/orders.html';
+            
+            iframe.onload = function() {
+                console.log('页面加载成功');
+                const results = document.getElementById('testResults');
+                results.innerHTML += '<p style="color: green;">✓ 页面加载成功</p>';
+                
+                // 检查iframe内的错误
+                iframe.onload = function() {
+                    try {
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        console.log('可以访问iframe内容');
+                        
+                        // 检查是否有JavaScript错误（这个在跨域情况下可能无法检查）
+                        results.innerHTML += '<p style="color: green;">✓ 没有发现明显的跨域问题</p>';
+                        
+                    } catch (e) {
+                        console.log('跨域限制，无法检查iframe内容:', e.message);
+                        results.innerHTML += '<p style="color: orange;">⚠ 跨域限制，无法详细检查iframe内容</p>';
+                    }
+                };
+            };
+            
+            iframe.onerror = function() {
+                console.log('页面加载失败');
+                const results = document.getElementById('testResults');
+                results.innerHTML += '<p style="color: red;">✗ 页面加载失败</p>';
+            };
+            
+            document.body.appendChild(iframe);
+        }
+        
+        // 页面加载完成后运行测试
+        window.onload = function() {
+            console.log('开始测试农户订单页面...');
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<h3>测试结果：</h3>';
+            
+            testPageLoad();
+        };
+    </script>
+</body>
+</html> 

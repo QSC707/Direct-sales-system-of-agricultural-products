@@ -28,6 +28,11 @@ namespace FarmDirectSales.Models
         public int ProductId { get; set; }
 
         /// <summary>
+        /// 订单组ID（外键）
+        /// </summary>
+        public int? OrderGroupId { get; set; }
+
+        /// <summary>
         /// 购买数量
         /// </summary>
         [Required]
@@ -60,6 +65,26 @@ namespace FarmDirectSales.Models
         /// 发货时间
         /// </summary>
         public DateTime? ShipTime { get; set; }
+
+        /// <summary>
+        /// 配送信息备注
+        /// </summary>
+        public string? DeliveryInfo { get; set; }
+
+        /// <summary>
+        /// 配送联系人
+        /// </summary>
+        public string? DeliveryContact { get; set; }
+
+        /// <summary>
+        /// 配送联系电话
+        /// </summary>
+        public string? DeliveryPhone { get; set; }
+
+        /// <summary>
+        /// 预计送达时间
+        /// </summary>
+        public string? EstimatedDeliveryTime { get; set; }
 
         /// <summary>
         /// 完成时间
@@ -104,7 +129,7 @@ namespace FarmDirectSales.Models
         public string ContactPhone { get; set; } = string.Empty;
 
         /// <summary>
-        /// 运费
+        /// 单个订单的运费（通常为0，因为运费在OrderGroup中统一计算）
         /// </summary>
         [Column(TypeName = "decimal(18,2)")]
         public decimal ShippingFeeAmount { get; set; } = 0;
@@ -142,6 +167,12 @@ namespace FarmDirectSales.Models
         /// </summary>
         [ForeignKey("ShippingFeeId")]
         public virtual ShippingFee? ShippingFee { get; set; }
+        
+        /// <summary>
+        /// 所属订单组（导航属性）
+        /// </summary>
+        [ForeignKey("OrderGroupId")]
+        public virtual OrderGroup? OrderGroup { get; set; }
     }
 } 
  

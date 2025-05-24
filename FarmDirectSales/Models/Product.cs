@@ -80,7 +80,7 @@ namespace FarmDirectSales.Models
         /// 产品分类
         /// </summary>
         public string Category { get; set; } = string.Empty;
-        
+
         /// <summary>
         /// 产品规格说明
         /// </summary>

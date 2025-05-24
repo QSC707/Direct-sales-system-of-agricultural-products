@@ -57,7 +57,7 @@ namespace FarmDirectSales.Models
         /// </summary>
         [StringLength(50)]
         public string LicenseNumber { get; set; } = string.Empty;
-        
+
         /// <summary>
         /// 资料创建时间
         /// </summary>

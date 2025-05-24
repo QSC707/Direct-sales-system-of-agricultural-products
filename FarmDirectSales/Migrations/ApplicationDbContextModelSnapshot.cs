@@ -104,6 +104,57 @@ namespace FarmDirectSales.Migrations
                     b.ToTable("DeliveryAreas");
                 });
 
+            modelBuilder.Entity("FarmDirectSales.Models.DeliveryPreset", b =>
+                {
+                    b.Property<int>("PresetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PresetId"));
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeliveryContact")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("DeliveryInfo")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DeliveryPhone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("EstimatedDeliveryTime")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("FarmerId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsSystemDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUserDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PresetName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdateTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PresetId");
+
+                    b.HasIndex("FarmerId");
+
+                    b.ToTable("DeliveryPresets");
+                });
+
             modelBuilder.Entity("FarmDirectSales.Models.FarmerProfile", b =>
                 {
                     b.Property<int>("FarmerProfileId")
@@ -232,8 +283,23 @@ namespace FarmDirectSales.Migrations
                     b.Property<DateTime?>("DeleteTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DeliveryContact")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeliveryInfo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeliveryPhone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EstimatedDeliveryTime")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("OrderGroupId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("PayTime")
                         .HasColumnType("datetime2");
@@ -272,6 +338,8 @@ namespace FarmDirectSales.Migrations
 
                     b.HasKey("OrderId");
 
+                    b.HasIndex("OrderGroupId");
+
                     b.HasIndex("ProductId");
 
                     b.HasIndex("ShippingFeeId");
@@ -279,6 +347,63 @@ namespace FarmDirectSales.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("FarmDirectSales.Models.OrderGroup", b =>
+                {
+                    b.Property<int>("OrderGroupId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderGroupId"));
+
+                    b.Property<string>("ContactPhone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DeliveryAreaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("GroupNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReceiverName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShippingAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("ShippingFeeAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("ShippingFeeId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalProductAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderGroupId");
+
+                    b.HasIndex("ShippingFeeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("OrderGroups");
                 });
 
             modelBuilder.Entity("FarmDirectSales.Models.Product", b =>
@@ -603,6 +728,17 @@ namespace FarmDirectSales.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("FarmDirectSales.Models.DeliveryPreset", b =>
+                {
+                    b.HasOne("FarmDirectSales.Models.User", "Farmer")
+                        .WithMany()
+                        .HasForeignKey("FarmerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Farmer");
+                });
+
             modelBuilder.Entity("FarmDirectSales.Models.FarmerProfile", b =>
                 {
                     b.HasOne("FarmDirectSales.Models.User", "User")
@@ -626,6 +762,11 @@ namespace FarmDirectSales.Migrations
 
             modelBuilder.Entity("FarmDirectSales.Models.Order", b =>
                 {
+                    b.HasOne("FarmDirectSales.Models.OrderGroup", "OrderGroup")
+                        .WithMany("Orders")
+                        .HasForeignKey("OrderGroupId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("FarmDirectSales.Models.Product", "Product")
                         .WithMany("Orders")
                         .HasForeignKey("ProductId")
@@ -643,7 +784,27 @@ namespace FarmDirectSales.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.Navigation("OrderGroup");
+
                     b.Navigation("Product");
+
+                    b.Navigation("ShippingFee");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FarmDirectSales.Models.OrderGroup", b =>
+                {
+                    b.HasOne("FarmDirectSales.Models.ShippingFee", "ShippingFee")
+                        .WithMany()
+                        .HasForeignKey("ShippingFeeId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FarmDirectSales.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("ShippingFee");
 
@@ -701,6 +862,11 @@ namespace FarmDirectSales.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FarmDirectSales.Models.OrderGroup", b =>
+                {
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("FarmDirectSales.Models.Product", b =>
