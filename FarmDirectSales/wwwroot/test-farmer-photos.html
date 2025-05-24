@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>农户照片测试</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .photo-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .photo-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .photo-item .caption {
+            padding: 10px;
+            text-align: center;
+            background: #f8f9fa;
+            font-size: 14px;
+            color: #666;
+        }
+        .error {
+            color: red;
+            padding: 10px;
+            background: #ffebee;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .farmer-info {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .farmer-info h3 {
+            margin: 0 0 10px 0;
+            color: #2d5a3d;
+        }
+        .test-buttons {
+            margin-bottom: 20px;
+        }
+        .test-buttons button {
+            margin-right: 10px;
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .test-buttons button:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌾 农户照片显示测试</h1>
+        
+        <div class="test-buttons">
+            <button onclick="testFarmer(4)">测试农户ID 4</button>
+            <button onclick="testFarmer(5)">测试农户ID 5</button>
+            <button onclick="testFarmer(1)">测试农户ID 1 (无照片)</button>
+        </div>
+        
+        <div id="loading" class="loading" style="display: none;">
+            正在加载农户信息...
+        </div>
+        
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="farmer-info" class="farmer-info" style="display: none;">
+            <h3 id="farmer-name"></h3>
+            <p><strong>地区：</strong><span id="farmer-location"></span></p>
+            <p><strong>类别：</strong><span id="farmer-category"></span></p>
+            <p><strong>描述：</strong><span id="farmer-description"></span></p>
+        </div>
+        
+        <div id="photos-container">
+            <h2>农场照片</h2>
+            <div id="photos-grid" class="photo-grid">
+                <!-- 照片将在这里显示 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5004/api';
+        
+        async function testFarmer(farmerId) {
+            console.log(`开始测试农户 ${farmerId}`);
+            
+            // 显示加载状态
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('farmer-info').style.display = 'none';
+            document.getElementById('photos-grid').innerHTML = '';
+            
+            try {
+                // 获取农户详情
+                const response = await fetch(`${API_BASE_URL}/farmer/${farmerId}`);
+                const result = await response.json();
+                
+                console.log('API响应:', result);
+                
+                if (result.code !== 200) {
+                    throw new Error(result.message || '获取农户信息失败');
+                }
+                
+                const farmer = result.data;
+                
+                // 显示农户信息
+                document.getElementById('farmer-name').textContent = farmer.farmName || farmer.username || '未知农户';
+                document.getElementById('farmer-location').textContent = farmer.location || '未知地区';
+                document.getElementById('farmer-category').textContent = farmer.productCategory || '未分类';
+                document.getElementById('farmer-description').textContent = farmer.description || '暂无描述';
+                document.getElementById('farmer-info').style.display = 'block';
+                
+                // 显示农场照片
+                const photosGrid = document.getElementById('photos-grid');
+                const farmPhotos = farmer.farmPhotos || [];
+                
+                console.log('农场照片数组:', farmPhotos);
+                
+                if (farmPhotos.length === 0) {
+                    photosGrid.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">该农户暂无农场照片</p>';
+                } else {
+                    farmPhotos.forEach((photoUrl, index) => {
+                        const photoItem = document.createElement('div');
+                        photoItem.className = 'photo-item';
+                        photoItem.innerHTML = `
+                            <img src="${photoUrl}" alt="农场照片${index + 1}" loading="lazy" 
+                                 onerror="this.src='/img/placeholder.jpg'; this.alt='图片加载失败';">
+                            <div class="caption">农场照片 ${index + 1}</div>
+                        `;
+                        
+                        // 点击放大
+                        photoItem.addEventListener('click', () => {
+                            window.open(photoUrl, '_blank');
+                        });
+                        
+                        photosGrid.appendChild(photoItem);
+                    });
+                }
+                
+            } catch (error) {
+                console.error('测试失败:', error);
+                document.getElementById('error').textContent = `错误: ${error.message}`;
+                document.getElementById('error').style.display = 'block';
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        // 页面加载后自动测试农户4
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('页面加载完成，开始自动测试...');
+            testFarmer(4);
+        });
+    </script>
+</body>
+</html> 

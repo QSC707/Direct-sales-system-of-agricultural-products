@@ -12,14 +12,174 @@
     <!-- 自定义样式 -->
     <link href="/css/style.css" rel="stylesheet">
     <style>
+        /* ========== 农户卡片样式优化 ========== */
         .farmer-card .card {
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
+            border: 1px solid #e8f5e8;
+            border-radius: 15px;
+            overflow: hidden;
         }
         
         .farmer-card .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(40, 167, 69, 0.15);
+            border-color: #28a745;
+        }
+        
+        .farmer-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .farmer-card .card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+        
+        .farmer-card .card-body {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+        }
+        
+        .farmer-card .card-title {
+            color: #2d5a3d;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+        
+        .farmer-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .farmer-info i {
+            margin-right: 0.5rem;
+            color: #28a745;
+        }
+        
+        .badge-container {
+            margin-bottom: 1rem;
+        }
+        
+        .badge.bg-success {
+            background: linear-gradient(45deg, #28a745, #20c997) !important;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .badge.bg-light {
+            background: #e8f5e8 !important;
+            color: #2d5a3d !important;
+            padding: 0.4rem 0.8rem;
+            border-radius: 15px;
+            border: 1px solid #d4edda;
+        }
+        
+        .farmer-description {
+            color: #6c757d;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .farmer-stats {
+            background: rgba(40, 167, 69, 0.05);
+            padding: 0.8rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+        
+        .stats-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.3rem;
+        }
+        
+        .stats-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .stats-value {
+            color: #28a745;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        /* ========== 搜索区域优化 ========== */
+        .search-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-container .form-control,
+        .search-container .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+        }
+        
+        .search-container .form-control:focus,
+        .search-container .form-select:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+        
+        .search-container .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+        }
+        
+        /* ========== 页面标题优化 ========== */
+        .page-title {
+            color: #2d5a3d;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border-radius: 2px;
+        }
+        
+        /* ========== 响应式优化 ========== */
+        @media (max-width: 768px) {
+            .farmer-card .card-body {
+                padding: 1rem;
+            }
+            
+            .search-container {
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+            }
+            
+            .farmer-card .card-img-top {
+                height: 160px;
+            }
         }
     </style>
 </head>
@@ -79,42 +239,49 @@
 
     <!-- 主要内容 -->
     <div class="container py-5">
-        <h1 class="text-center mb-5">农户展示</h1>
+        <h1 class="text-center page-title">发现优质农户</h1>
         
         <!-- 搜索和筛选 -->
         <div class="row mb-5">
-            <div class="col-lg-8 mx-auto">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <form id="search-form" class="row g-3">
-                            <div class="col-md-6">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="search-keyword" placeholder="搜索农户名称...">
-                                    <button class="btn btn-success" type="submit">
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                </div>
+            <div class="col-lg-10 mx-auto">
+                <div class="search-container">
+                    <form id="search-form" class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">
+                                <i class="fas fa-search me-1"></i>搜索农户
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="search-keyword" placeholder="输入农户名称或关键词...">
+                                <button class="btn btn-success" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
                             </div>
-                            <div class="col-md-3">
-                                <select class="form-select" id="filter-region">
-                                    <option value="">所有地区</option>
-                                    <option value="广东">广东</option>
-                                    <option value="广西">广西</option>
-                                    <option value="福建">福建</option>
-                                    <option value="云南">云南</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <select class="form-select" id="filter-category">
-                                    <option value="">所有类别</option>
-                                    <option value="蔬菜">蔬菜种植</option>
-                                    <option value="水果">水果种植</option>
-                                    <option value="家禽">家禽养殖</option>
-                                    <option value="特产">特产加工</option>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i>地区筛选
+                            </label>
+                            <select class="form-select" id="filter-region">
+                                <option value="">所有地区</option>
+                                <option value="广东">广东</option>
+                                <option value="广西">广西</option>
+                                <option value="福建">福建</option>
+                                <option value="云南">云南</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted">
+                                <i class="fas fa-leaf me-1"></i>产品类别
+                            </label>
+                            <select class="form-select" id="filter-category">
+                                <option value="">所有类别</option>
+                                <option value="蔬菜">蔬菜种植</option>
+                                <option value="水果">水果种植</option>
+                                <option value="家禽">家禽养殖</option>
+                                <option value="特产">特产加工</option>
+                            </select>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -399,7 +566,7 @@
             // 添加农户卡片
             farmers.forEach(farmer => {
                 const farmerCard = document.createElement('div');
-                farmerCard.className = 'col-lg-3 col-md-4 col-sm-6 farmer-card';
+                farmerCard.className = 'col-xl-3 col-lg-4 col-md-6 col-sm-6 farmer-card';
                 
                 // 使用农场照片，如果有的话
                 let farmImageUrl = '/img/placeholder.jpg';
@@ -410,20 +577,40 @@
                 }
                 
                 farmerCard.innerHTML = `
-                    <div class="card h-100 shadow-sm" onclick="window.location.href='/pages/farmer-detail.html?id=${farmer.id}'">
-                        <img src="${farmImageUrl}" class="card-img-top" alt="${farmer.displayName}" style="height: 180px; object-fit: cover;">
-                        <div class="card-body">
+                    <div class="card h-100" onclick="window.location.href='/pages/farmer-detail.html?id=${farmer.id}'">
+                        <img src="${farmImageUrl}" class="card-img-top" alt="${farmer.displayName}" loading="lazy">
+                        <div class="card-body d-flex flex-column">
                             <h5 class="card-title">${farmer.displayName}</h5>
-                            <p class="text-muted small mb-2">经营人：${farmer.owner} | 地区：${farmer.region}</p>
-                            <div class="mb-2">
-                                <span class="badge bg-success">${farmer.category}</span>
-                                <span class="badge bg-light text-dark">${farmer.productCount}种产品</span>
+                            
+                            <div class="farmer-info">
+                                <i class="fas fa-user"></i>
+                                <span>${farmer.owner}</span>
                             </div>
-                            <p class="card-text text-truncate">${farmer.description}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="text-warning">
-                                    ${'★'.repeat(Math.floor(farmer.rating))}${'☆'.repeat(5 - Math.floor(farmer.rating))}
-                                    <small class="text-muted">(${farmer.reviewCount})</small>
+                            
+                            <div class="farmer-info">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${farmer.region}</span>
+                            </div>
+                            
+                            <div class="badge-container">
+                                <span class="badge bg-success me-2">${farmer.category}</span>
+                                <span class="badge bg-light">${farmer.productCount}种产品</span>
+                            </div>
+                            
+                            <p class="farmer-description flex-grow-1">${farmer.description}</p>
+                            
+                            <div class="farmer-stats mt-auto">
+                                <div class="stats-item">
+                                    <span class="stats-label">
+                                        <i class="fas fa-shopping-cart"></i> 在售产品
+                                    </span>
+                                    <span class="stats-value">${farmer.productCount}种</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span class="stats-label">
+                                        <i class="fas fa-seedling"></i> 主营类别
+                                    </span>
+                                    <span class="stats-value">${farmer.category}</span>
                                 </div>
                             </div>
                         </div>

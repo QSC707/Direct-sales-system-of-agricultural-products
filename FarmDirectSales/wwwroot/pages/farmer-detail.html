@@ -11,6 +11,211 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <!-- 自定义样式 -->
     <link href="/css/style.css" rel="stylesheet">
+    <style>
+        /* ========== 农户详情页面样式优化 ========== */
+        .farmer-detail-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .farmer-main-image {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .farmer-main-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .farmer-name {
+            color: #2d5a3d;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        .farmer-info-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+            border: 1px solid #e8f5e8;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.1);
+        }
+        
+        .farmer-info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: #6c757d;
+        }
+        
+        .farmer-info-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .farmer-info-item i {
+            width: 20px;
+            color: #28a745;
+            margin-right: 0.8rem;
+        }
+        
+        .farmer-badge {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            font-weight: 500;
+            margin-right: 0.8rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+        
+        .farmer-badge.secondary {
+            background: #e8f5e8;
+            color: #2d5a3d;
+            border: 1px solid #d4edda;
+        }
+        
+        .product-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e8f5e8;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(40, 167, 69, 0.15);
+            border-color: #28a745;
+        }
+        
+        .product-card .card-img-top {
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+        
+        .section-title {
+            color: #2d5a3d;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border-radius: 2px;
+        }
+        
+        .farm-photos-gallery {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .farm-photo-item {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+        
+        .farm-photo-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .farm-photo-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .contact-info-section {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 2rem;
+        }
+        
+        .contact-info-section h5 {
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+        
+        .contact-info-section p {
+            margin-bottom: 0.8rem;
+            opacity: 0.95;
+        }
+        
+        .contact-info-section i {
+            color: rgba(255, 255, 255, 0.9);
+            margin-right: 0.8rem;
+        }
+        
+        .back-button {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+        
+        /* ========== 响应式优化 ========== */
+        @media (max-width: 768px) {
+            .farmer-detail-container {
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .farmer-main-image {
+                margin-bottom: 2rem;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .product-card .card-body {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- 导航栏 -->
@@ -80,69 +285,100 @@
         <div class="d-none" id="farmer-detail">
             <!-- 返回按钮 -->
             <div class="mb-4">
-                <a href="/pages/farmers.html" class="btn btn-outline-secondary">
+                <a href="/pages/farmers.html" class="back-button">
                     <i class="fas fa-arrow-left me-2"></i>返回农户列表
                 </a>
             </div>
             
             <!-- 农户基本信息 -->
-            <div class="row mb-5">
-                <div class="col-md-5">
-                    <img id="farmer-image" src="" alt="农户图片" class="img-fluid rounded shadow-sm" style="max-height: 300px; object-fit: cover; width: 100%;">
-                    
-                    <!-- 农场照片展示 -->
-                    <div class="farm-photos-gallery mt-3" id="farmPhotosGallery" style="display: none;">
-                        <h6 class="mb-2">农场照片</h6>
-                        <div class="row g-2" id="farmPhotosContainer">
-                            <!-- 农场照片将通过JavaScript动态加载 -->
+            <div class="farmer-detail-container">
+                <div class="row">
+                    <div class="col-md-5">
+                        <img id="farmer-image" src="" alt="农户图片" class="img-fluid farmer-main-image" style="max-height: 350px; object-fit: cover; width: 100%;">
+                        
+                        <!-- 农场照片展示 -->
+                        <div class="farm-photos-gallery" id="farmPhotosGallery" style="display: none;">
+                            <h6 class="mb-3">
+                                <i class="fas fa-images me-2 text-success"></i>农场实景
+                            </h6>
+                            <div class="row g-2" id="farmPhotosContainer">
+                                <!-- 农场照片将通过JavaScript动态加载 -->
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-7">
-                    <h1 id="farmer-name" class="mb-3"></h1>
-                    <div class="mb-3">
-                        <span class="badge bg-success me-2" id="farmer-category"></span>
-                        <span class="badge bg-light text-dark me-2" id="farmer-region"></span>
-                        <span class="badge bg-light text-dark" id="farmer-product-count"></span>
+                    <div class="col-md-7">
+                        <h1 id="farmer-name" class="farmer-name"></h1>
+                        
+                        <div class="mb-3">
+                            <span class="farmer-badge" id="farmer-category"></span>
+                            <span class="farmer-badge secondary" id="farmer-region"></span>
+                            <span class="farmer-badge secondary" id="farmer-product-count"></span>
+                        </div>
+                        
+                        <div class="farmer-info-card">
+                            <div class="farmer-info-item">
+                                <i class="fas fa-user"></i>
+                                <span><strong>经营人：</strong><span id="farmer-owner"></span></span>
+                            </div>
+                            <div class="farmer-info-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span><strong>地区：</strong><span id="farmer-location-display"></span></span>
+                            </div>
+                            <div class="farmer-info-item">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span><strong>在售产品：</strong><span id="farmer-product-count-text"></span></span>
+                            </div>
+                        </div>
+                        
+                        <h5 class="section-title">农户简介</h5>
+                        <p id="farmer-description" class="text-muted mb-0"></p>
                     </div>
-                    <p class="mb-3">
-                        <strong>经营人：</strong><span id="farmer-owner"></span>
-                    </p>
-                    <h5 class="mt-4 mb-3">农户简介</h5>
-                    <p id="farmer-description" class="text-muted"></p>
                 </div>
             </div>
             
             <!-- 农户产品列表 -->
-            <div class="row mb-5">
-                <div class="col-12">
-                    <h3 class="mb-4">农户产品 <span class="badge bg-success" id="farmer-product-count-badge"></span></h3>
-                    <div class="row g-4" id="farmer-products">
-                        <!-- 产品卡片将通过 JavaScript 动态加载 -->
-                    </div>
+            <div class="farmer-detail-container">
+                <h3 class="section-title">
+                    <i class="fas fa-seedling me-2"></i>农户产品 
+                    <span class="farmer-badge" id="farmer-product-count-badge"></span>
+                </h3>
+                <div class="row g-4" id="farmer-products">
+                    <!-- 产品卡片将通过 JavaScript 动态加载 -->
                 </div>
             </div>
             
-            <!-- 农户介绍 -->
-            <div class="row mb-5">
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-body p-4">
-                            <h3 class="card-title mb-4">农户信息</h3>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h5 class="mb-3">联系方式</h5>
-                                    <p><i class="fas fa-phone me-2 text-success"></i>联系电话：<span id="farmer-phone">暂无</span></p>
-                                    <p><i class="fas fa-envelope me-2 text-success"></i>邮箱：<span id="farmer-email">暂无</span></p>
-                                    <p><i class="fas fa-map-marker-alt me-2 text-success"></i>地区：<span id="farmer-location">暂无</span></p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5 class="mb-3">经营信息</h5>
-                                    <p><i class="fas fa-calendar me-2 text-success"></i>注册时间：<span id="farmer-register-time">暂无</span></p>
-                                    <p><i class="fas fa-calendar-plus me-2 text-success"></i>农场成立：<span id="farmer-established-time">暂无</span></p>
-                                    <p><i class="fas fa-shopping-cart me-2 text-success"></i>主营类别：<span id="farmer-product-variety">暂无</span></p>
-                                    <p><i class="fas fa-certificate me-2 text-success"></i>营业执照：<span id="farmer-license-number">暂无</span></p>
-                                </div>
+            <!-- 农户信息 -->
+            <div class="farmer-detail-container">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle me-2"></i>详细信息
+                </h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="contact-info-section">
+                            <h5><i class="fas fa-address-book me-2"></i>联系方式</h5>
+                            <p><i class="fas fa-phone"></i>联系电话：<span id="farmer-phone">暂无</span></p>
+                            <p><i class="fas fa-envelope"></i>邮箱：<span id="farmer-email">暂无</span></p>
+                            <p><i class="fas fa-map-marker-alt"></i>地区：<span id="farmer-location">暂无</span></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="farmer-info-card">
+                            <h5 class="mb-3"><i class="fas fa-chart-line me-2 text-success"></i>经营信息</h5>
+                            <div class="farmer-info-item">
+                                <i class="fas fa-calendar"></i>
+                                <span><strong>注册时间：</strong><span id="farmer-register-time">暂无</span></span>
+                            </div>
+                            <div class="farmer-info-item">
+                                <i class="fas fa-calendar-plus"></i>
+                                <span><strong>农场成立：</strong><span id="farmer-established-time">暂无</span></span>
+                            </div>
+                            <div class="farmer-info-item">
+                                <i class="fas fa-leaf"></i>
+                                <span><strong>主营类别：</strong><span id="farmer-product-variety">暂无</span></span>
+                            </div>
+                            <div class="farmer-info-item">
+                                <i class="fas fa-certificate"></i>
+                                <span><strong>营业执照：</strong><span id="farmer-license-number">暂无</span></span>
                             </div>
                         </div>
                     </div>
@@ -304,7 +540,7 @@
                 const farmerCategory = farmer.productCategory || '未分类';
                 
                 // 使用农场照片，如果有的话
-                let farmImageUrl = 'https://source.unsplash.com/500x300/?farm';
+                let farmImageUrl = '/img/placeholder.jpg';
                 if (farmer.farmPhotos && farmer.farmPhotos.length > 0) {
                     farmImageUrl = farmer.farmPhotos[0]; // 使用第一张农场照片
                 } else if (farmer.imageUrl) {
@@ -322,9 +558,11 @@
                 document.getElementById('farmer-name').textContent = farmerName;
                 document.getElementById('farmer-category').textContent = farmerCategory;
                 document.getElementById('farmer-region').textContent = farmerLocation;
-                document.getElementById('farmer-product-count').textContent = productCount + ' 种产品';
-                document.getElementById('farmer-product-count-badge').textContent = productCount + ' 种产品';
+                document.getElementById('farmer-product-count').textContent = productCount + '种产品';
+                document.getElementById('farmer-product-count-badge').textContent = productCount + '种产品';
+                document.getElementById('farmer-product-count-text').textContent = productCount + '种';
                 document.getElementById('farmer-owner').textContent = farmer.username || '未知';
+                document.getElementById('farmer-location-display').textContent = farmerLocation;
                 document.getElementById('farmer-description').textContent = farmerDescription;
                 
                 // 填充农户详细信息
@@ -346,8 +584,10 @@
                 // 加载农户产品
                 loadFarmerProducts(products);
                 
-                // 显示农场照片
-                displayFarmPhotos(farmer.farmPhotos || []);
+                // 显示农场照片 - 修改为使用FarmPhotos数组
+                const farmPhotos = farmer.farmPhotos || [];
+                console.log('农场照片数据:', farmPhotos); // 添加调试信息
+                displayFarmPhotos(farmPhotos);
                 
                 // 隐藏加载状态，显示详情
                 document.getElementById('loading').classList.add('d-none');
@@ -366,26 +606,35 @@
             container.innerHTML = '';
             
             if (products.length === 0) {
-                container.innerHTML = '<div class="col-12 text-center text-muted">暂无产品信息</div>';
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="empty-state">
+                            <i class="fas fa-seedling"></i>
+                            <p>该农户暂无在售产品</p>
+                        </div>
+                    </div>
+                `;
                 return;
             }
             
             // 添加产品卡片
             products.forEach(product => {
                 const productCard = document.createElement('div');
-                productCard.className = 'col-lg-3 col-md-4 col-sm-6';
+                productCard.className = 'col-xl-3 col-lg-4 col-md-6';
                 productCard.innerHTML = `
-                    <div class="card h-100 shadow-sm">
-                        <img src="${product.imageUrl || '/img/placeholder.jpg'}" class="card-img-top" alt="${product.productName}" style="height: 150px; object-fit: cover;">
-                        <div class="card-body">
+                    <div class="card h-100 product-card">
+                        <img src="${product.imageUrl || '/img/placeholder.jpg'}" class="card-img-top" alt="${product.productName}" style="height: 180px; object-fit: cover;" loading="lazy">
+                        <div class="card-body d-flex flex-column">
                             <h5 class="card-title">${product.productName}</h5>
-                            <p class="card-text text-truncate">${product.description || '暂无描述'}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-danger fw-bold">￥${product.price.toFixed(2)}</span>
-                                <div>
-                                    <small class="text-muted d-block">库存: ${product.stock}</small>
-                                    <a href="/pages/product-detail.html?id=${product.productId}" class="btn btn-sm btn-outline-success">查看详情</a>
+                            <p class="card-text text-muted flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${product.description || '暂无描述'}</p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-success fw-bold fs-5">￥${product.price.toFixed(2)}</span>
+                                    <small class="text-muted">库存: ${product.stock}</small>
                                 </div>
+                                <a href="/pages/product-detail.html?id=${product.productId}" class="btn btn-success w-100">
+                                    <i class="fas fa-eye me-1"></i>查看详情
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -407,16 +656,44 @@
             gallery.style.display = 'block';
             container.innerHTML = '';
             
-            photos.forEach(photo => {
-                const img = document.createElement('img');
-                img.src = photo;
-                img.alt = '农场照片';
-                img.className = 'img-fluid rounded shadow-sm';
-                img.style.width = '100%';
-                img.style.height = 'auto';
-                img.style.objectFit = 'cover';
-                img.style.marginBottom = '0.5rem';
-                container.appendChild(img);
+            photos.forEach((photo, index) => {
+                const photoCol = document.createElement('div');
+                photoCol.className = 'col-6 col-md-4';
+                photoCol.innerHTML = `
+                    <div class="farm-photo-item" onclick="showPhotoModal('${photo}', ${index})">
+                        <img src="${photo}" alt="农场照片${index + 1}" loading="lazy">
+                    </div>
+                `;
+                container.appendChild(photoCol);
+            });
+        }
+        
+        // 显示照片模态框
+        function showPhotoModal(photoUrl, index) {
+            // 创建模态框来显示大图
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">农场照片 ${index + 1}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img src="${photoUrl}" class="img-fluid" alt="农场照片${index + 1}">
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+            
+            // 模态框关闭后删除元素
+            modal.addEventListener('hidden.bs.modal', function() {
+                document.body.removeChild(modal);
             });
         }
     </script>
