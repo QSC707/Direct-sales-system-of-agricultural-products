@@ -13,6 +13,257 @@
     <!-- Axios配置 -->
     <script src="../../js/axios-config.js"></script>
     <script src="../../js/auth.js"></script>
+    
+    <!-- 自定义样式 -->
+    <style>
+        /* 全局布局优化 */
+        body {
+            background: #f8f9fa;
+            font-size: 14px;
+        }
+        
+        .main-container {
+            padding: 15px;
+            max-width: 100%;
+        }
+        
+        /* 导航栏优化 */
+        .navbar {
+            padding: 8px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-nav .nav-link {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+        
+        /* 卡片优化 */
+        .main-card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 0;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-radius: 8px 8px 0 0 !important;
+            padding: 12px 20px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* 搜索区域紧凑化 */
+        .search-toolbar {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .search-toolbar .form-control {
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            height: 36px;
+            font-size: 13px;
+        }
+        
+        .search-toolbar .btn {
+            height: 36px;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+        }
+        
+        /* 统计卡片优化 */
+        .stats-row {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 6px;
+            padding: 12px 20px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        
+        /* 表格优化 */
+        .table-container {
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .table {
+            margin-bottom: 0;
+            font-size: 13px;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            border-top: none;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            color: #495057;
+            padding: 12px 8px;
+            white-space: nowrap;
+        }
+        
+        .table td {
+            padding: 8px;
+            vertical-align: middle;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* 操作按钮紧凑化 */
+        .action-buttons {
+            white-space: nowrap;
+        }
+        
+        .action-buttons .btn {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            margin: 0 1px;
+            border-radius: 4px;
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 角色徽章优化 */
+        .badge {
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+        
+        /* 农场信息优化 */
+        .farm-info {
+            font-size: 11px;
+            line-height: 1.2;
+            color: #666;
+        }
+        
+        /* 分页优化 */
+        .pagination {
+            margin: 0;
+        }
+        
+        .pagination .page-link {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+        
+        .pagination-info {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        /* 模态框优化 */
+        .modal-dialog {
+            margin: 30px auto;
+        }
+        
+        .modal-content {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .modal-header {
+            border-radius: 8px 8px 0 0;
+            padding: 15px 20px;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-control {
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 10px;
+            }
+            
+            .search-toolbar {
+                padding: 10px;
+            }
+            
+            .search-toolbar .row > div {
+                margin-bottom: 8px;
+            }
+            
+            .table {
+                font-size: 11px;
+            }
+            
+            .table th,
+            .table td {
+                padding: 6px 4px;
+            }
+            
+            .action-buttons .btn {
+                width: 24px;
+                height: 24px;
+                font-size: 10px;
+            }
+            
+            /* 隐藏部分列在小屏幕上 */
+            .table th:nth-child(4),
+            .table td:nth-child(4),
+            .table th:nth-child(6),
+            .table td:nth-child(6) {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .table th:nth-child(1),
+            .table td:nth-child(1),
+            .table th:nth-child(5),
+            .table td:nth-child(5) {
+                display: none;
+            }
+        }
+        
+        /* 加载动画优化 */
+        .loading-row {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        /* 快速操作栏 */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .quick-actions .btn {
+            white-space: nowrap;
+        }
+    </style>
 </head>
 <body>
     <!-- 导航栏 -->
@@ -78,81 +329,87 @@
     </nav>
 
     <!-- 主内容 -->
-    <div class="container my-4">
-        <div class="row">
-            <!-- 侧边栏 -->
-            <div class="col-md-3">
-                <div class="list-group">
-                    <a href="dashboard.html" class="list-group-item list-group-item-action">管理中心</a>
-                    <a href="users.html" class="list-group-item list-group-item-action active">用户管理</a>
-                    <a href="products.html" class="list-group-item list-group-item-action">产品管理</a>
-                    <a href="orders.html" class="list-group-item list-group-item-action">订单管理</a>
-                    <a href="statistics.html" class="list-group-item list-group-item-action">统计分析</a>
-                    <a href="delivery-areas.html" class="list-group-item list-group-item-action">配送区域管理</a>
-                    <a href="logs.html" class="list-group-item list-group-item-action">系统日志</a>
-                    <a href="profile.html" class="list-group-item list-group-item-action">个人信息</a>
+    <div class="container-fluid main-container">
+        <!-- 搜索工具栏 -->
+        <div class="search-toolbar">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchKeyword" placeholder="搜索用户名、邮箱或手机号">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" id="searchBtn">
+                                <i class="fa fa-search"></i> 搜索
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- 主要内容 -->
-            <div class="col-md-9">
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0">用户管理</h4>
-                        <button class="btn btn-light" data-toggle="modal" data-target="#addUserModal">
+                <div class="col-md-2">
+                    <select class="form-control" id="roleFilter">
+                        <option value="">所有角色</option>
+                        <option value="admin">管理员</option>
+                        <option value="farmer">农户</option>
+                        <option value="customer">普通用户</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <div class="quick-actions">
+                        <button class="btn btn-success" data-toggle="modal" data-target="#addUserModal">
                             <i class="fa fa-plus"></i> 添加用户
                         </button>
-                    </div>
-                    <div class="card-body">
-                        <!-- 用户搜索和筛选 -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <input type="text" class="form-control" id="searchKeyword" placeholder="搜索用户名、邮箱或手机号">
-                            </div>
-                            <div class="col-md-4">
-                                <select class="form-control" id="roleFilter">
-                                    <option value="">所有角色</option>
-                                    <option value="admin">管理员</option>
-                                    <option value="farmer">农户</option>
-                                    <option value="customer">普通用户</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button class="btn btn-primary btn-block" id="searchBtn">搜索</button>
-                            </div>
-                        </div>
-                        
-                        <!-- 用户列表 -->
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>用户名</th>
-                                        <th>角色</th>
-                                        <th>邮箱</th>
-                                        <th>手机号</th>
-                                        <th>注册时间</th>
-                                        <th>操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="userList">
-                                    <!-- 用户列表将通过JS动态加载 -->
-                                    <tr>
-                                        <td colspan="7" class="text-center">正在加载用户...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- 分页 -->
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center" id="pagination">
-                                <!-- 分页将通过JS动态加载 -->
-                            </ul>
-                        </nav>
+                        <button class="btn btn-outline-secondary" id="refreshBtn">
+                            <i class="fa fa-refresh"></i> 刷新
+                        </button>
+                        <button class="btn btn-outline-info" id="exportBtn">
+                            <i class="fa fa-download"></i> 导出
+                        </button>
                     </div>
                 </div>
+                <div class="col-md-2">
+                    <div class="stats-row" id="userStats" style="display: none;">
+                        <span id="statsText">加载中...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主卡片 -->
+        <div class="main-card card">
+            <div class="card-header">
+                <h4 class="mb-0 text-white">
+                    <i class="fa fa-users"></i> 用户管理
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- 用户列表 -->
+                <div class="table-container">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="80">ID</th>
+                                <th width="140">用户名</th>
+                                <th width="100">角色</th>
+                                <th width="200">邮箱</th>
+                                <th width="130">手机号</th>
+                                <th width="130">注册时间</th>
+                                <th width="100">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userList">
+                            <tr class="loading-row">
+                                <td colspan="7">
+                                    <i class="fa fa-spinner fa-spin mr-2"></i>正在加载用户...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 分页 -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center" id="pagination">
+                        <!-- 分页将通过JS动态加载 -->
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
@@ -388,62 +645,87 @@
 
     <!-- 自定义JS -->
     <script>
-        /**
-         * 页面加载完成后执行
-         */
-        $(document).ready(function() {
-            // 检查用户是否登录，并且是管理员角色
-            checkLogin(function(user) {
-                if (user && user.role === 'admin') {
-                    // 显示用户信息
-                    $('#userDropdown').show();
-                    $('#currentUsername').text(user.username);
-                    
-                    // 加载用户列表
-                    loadUsers(1);
-                    
-                    // 绑定搜索按钮点击事件
-                    $('#searchBtn').on('click', function() {
-                        loadUsers(1);
+        // 等待依赖加载完成后执行
+        if (typeof window.initDependencies === 'function') {
+            window.initDependencies(function() {
+                /**
+                 * 页面加载完成后执行
+                 */
+                $(document).ready(function() {
+                    // 检查用户是否登录，并且是管理员角色
+                    checkLogin(function(user) {
+                        if (user && user.role === 'admin') {
+                            // 显示用户信息
+                            $('#userDropdown').show();
+                            $('#currentUsername').text(user.username);
+                            
+                            // 加载用户列表
+                            loadUsers(1);
+                            
+                            // 绑定搜索按钮点击事件
+                            $('#searchBtn').on('click', function() {
+                                loadUsers(1);
+                            });
+                            
+                            // 绑定刷新按钮点击事件
+                            $('#refreshBtn').on('click', function() {
+                                $('#searchKeyword').val('');
+                                $('#roleFilter').val('');
+                                loadUsers(1);
+                            });
+                            
+                            // 绑定导出按钮点击事件
+                            $('#exportBtn').on('click', function() {
+                                exportUsers();
+                            });
+                            
+                            // 绑定回车键搜索
+                            $('#searchKeyword').on('keypress', function(e) {
+                                if (e.which === 13) {
+                                    loadUsers(1);
+                                }
+                            });
+                            
+                            // 绑定角色筛选改变事件
+                            $('#roleFilter').on('change', function() {
+                                loadUsers(1);
+                            });
+                        } else {
+                            // 如果不是管理员，跳转到登录页面并显示提示
+                            alert('您需要以管理员身份登录才能访问此页面');
+                            window.location.href = '../login.html?role=admin&redirect=' + encodeURIComponent(window.location.href);
+                        }
                     });
                     
-                    // 绑定重置按钮点击事件
-                    $('#resetBtn').on('click', function() {
-                        $('#roleFilter').val('');
-                        $('#statusFilter').val('');
-                        $('#searchInput').val('');
-                        loadUsers(1);
+                    // 重置密码选项改变事件
+                    $('#resetPassword').on('change', function() {
+                        if ($(this).prop('checked')) {
+                            $('#passwordFields').show();
+                        } else {
+                            $('#passwordFields').hide();
+                        }
                     });
-                } else {
-                    // 如果不是管理员，跳转到登录页面并显示提示
-                    alert('您需要以管理员身份登录才能访问此页面');
-                    window.location.href = '../login.html?role=admin&redirect=' + encodeURIComponent(window.location.href);
-                }
+                    
+                    // 保存新用户
+                    $('#saveUserBtn').on('click', function() {
+                        if (validateUserForm('add')) {
+                            addUser();
+                        }
+                    });
+                    
+                    // 更新用户
+                    $('#updateUserBtn').on('click', function() {
+                        if (validateUserForm('edit')) {
+                            updateUser();
+                        }
+                    });
+                });
             });
-            
-            // 重置密码选项改变事件
-            $('#resetPassword').on('change', function() {
-                if ($(this).prop('checked')) {
-                    $('#passwordFields').show();
-                } else {
-                    $('#passwordFields').hide();
-                }
-            });
-            
-            // 保存新用户
-            $('#saveUserBtn').on('click', function() {
-                if (validateUserForm('add')) {
-                    addUser();
-                }
-            });
-            
-            // 更新用户
-            $('#updateUserBtn').on('click', function() {
-                if (validateUserForm('edit')) {
-                    updateUser();
-                }
-            });
-        });
+        } else {
+            // 如果 window.initDependencies 不存在，显示错误信息
+            console.error('依赖管理系统未加载，请检查 dependencies.js 文件');
+            alert('页面依赖未正确加载，请刷新页面重试');
+        }
         
         /**
          * 加载用户列表
@@ -453,21 +735,39 @@
                 const keyword = $('#searchKeyword').val();
                 const role = $('#roleFilter').val();
                 
-                // 使用Axios发送请求
-                const result = await http.get(`/users`, {
+                // 使用Axios发送请求到正确的管理员API端点
+                const result = await http.get(`/admin/users`, {
                     params: {
                         page,
                         keyword,
-                        role
+                        role,
+                        pageSize: 10
                     }
                 });
                 
                 renderUserList(result.data.users);
                 renderPagination(result.data.totalPages, page);
+                showUserStats(result.data);
+                
             } catch (error) {
                 console.error('获取用户列表失败', error);
                 alert('获取用户列表失败: ' + (error.response?.data?.message || error.message));
             }
+        }
+        
+        /**
+         * 显示用户统计信息
+         */
+        function showUserStats(data) {
+            const statsHtml = `
+                <i class="fa fa-users"></i>
+                总用户: <strong>${data.totalUsers}</strong> 
+                | 当前页: <strong>${data.currentPage}/${data.totalPages}</strong> 
+                | 每页显示: <strong>${data.pageSize}</strong> 条
+            `;
+            
+            $('#statsText').html(statsHtml);
+            $('#userStats').show();
         }
         
         /**
@@ -484,24 +784,29 @@
             
             users.forEach(function(user) {
                 const roleBadge = getRoleBadge(user.role);
+                
                 const row = `
                     <tr data-user-id="${user.userId}">
-                        <td>${user.userId}</td>
-                        <td>${user.username}</td>
+                        <td><span class="text-muted">#${user.userId}</span></td>
+                        <td><strong>${user.username}</strong></td>
                         <td>${roleBadge}</td>
-                        <td>${user.email || '未设置'}</td>
-                        <td>${user.phone || '未设置'}</td>
-                        <td>${formatDate(user.createTime)}</td>
+                        <td class="text-truncate" style="max-width: 200px;" title="${user.email || ''}">
+                            ${user.email || '<span class="text-muted">未设置</span>'}
+                        </td>
+                        <td>${user.phone || '<span class="text-muted">未设置</span>'}</td>
+                        <td class="text-muted">${formatDate(user.createTime)}</td>
                         <td>
-                            <button class="btn btn-sm btn-info view-user-btn" data-user-id="${user.userId}">
-                                查看
-                            </button>
-                            <button class="btn btn-sm btn-primary edit-user-btn" data-user-id="${user.userId}">
-                                编辑
-                            </button>
-                            <button class="btn btn-sm btn-danger delete-user-btn" data-user-id="${user.userId}">
-                                删除
-                            </button>
+                            <div class="action-buttons">
+                                <button class="btn btn-info view-user-btn" data-user-id="${user.userId}">
+                                    查看
+                                </button>
+                                <button class="btn btn-primary edit-user-btn" data-user-id="${user.userId}">
+                                    编辑
+                                </button>
+                                <button class="btn btn-danger delete-user-btn" data-user-id="${user.userId}">
+                                    删除
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -584,7 +889,7 @@
         async function openUserDetailModal(userId) {
             try {
                 // 使用Axios获取用户详情
-                const result = await http.get(`/users/${userId}`);
+                const result = await http.get(`/admin/users/${userId}`);
                 const user = result.data;
                 
                 // 填充基本信息
@@ -608,10 +913,10 @@
                     $('#farmerProfileSection').hide();
                 }
                 
-                // 加载用户活动
-                loadUserActivity(userId);
+                // 加载用户活动记录
+                await loadUserActivity(userId);
                 
-                // 打开模态框
+                // 显示模态框
                 $('#userDetailModal').modal('show');
             } catch (error) {
                 console.error('获取用户详情失败', error);
@@ -668,7 +973,7 @@
             
             try {
                 // 使用Axios获取用户信息
-                const result = await http.get(`/users/${userId}`);
+                const result = await http.get(`/admin/users/${userId}`);
                 const user = result.data;
                 
                 // 填充表单
@@ -691,7 +996,8 @@
          */
         function confirmDeleteUser(userId) {
             // 不允许删除自己
-            if (userId == localStorage.getItem('userId')) {
+            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+            if (userId == currentUser.userId) {
                 alert('不能删除自己的账号');
                 return;
             }
@@ -707,7 +1013,7 @@
         async function deleteUser(userId) {
             try {
                 // 使用Axios删除用户
-                await http.delete(`/users/${userId}`);
+                await http.delete(`/admin/users/${userId}`);
                 alert('用户删除成功');
                 loadUsers(1); // 重新加载用户列表
             } catch (error) {
@@ -807,8 +1113,8 @@
             };
             
             try {
-                // 使用Axios发送请求
-                await http.post('/users/register', userData);
+                // 使用Axios发送请求到注册API
+                await http.post('/api/auth/register', userData);
                 
                 alert('用户添加成功');
                 $('#addUserModal').modal('hide');
@@ -828,7 +1134,6 @@
             
             // 收集表单数据
             const userData = {
-                userId: parseInt(userId),
                 email: $('#editEmail').val(),
                 phone: $('#editPhone').val(),
                 role: $('#editRole').val()
@@ -840,8 +1145,8 @@
             }
             
             try {
-                // 使用Axios发送请求
-                await http.put(`/users/${userId}`, userData);
+                // 使用Axios发送请求到管理员API
+                await http.put(`/admin/users/${userId}`, userData);
                 
                 alert('用户更新成功');
                 $('#editUserModal').modal('hide');
@@ -858,13 +1163,13 @@
         function getRoleBadge(role) {
             switch (role) {
                 case 'admin':
-                    return '<span class="badge badge-danger">管理员</span>';
+                    return '<span class="badge badge-danger role-badge">管理员</span>';
                 case 'farmer':
-                    return '<span class="badge badge-success">农户</span>';
+                    return '<span class="badge badge-success role-badge">农户</span>';
                 case 'customer':
-                    return '<span class="badge badge-info">普通用户</span>';
+                    return '<span class="badge badge-info role-badge">普通用户</span>';
                 default:
-                    return '<span class="badge badge-secondary">' + role + '</span>';
+                    return '<span class="badge badge-secondary role-badge">' + role + '</span>';
             }
         }
         
@@ -900,6 +1205,79 @@
         function validatePhone(phone) {
             const re = /^1[3-9]\d{9}$/;
             return re.test(phone);
+        }
+        
+        /**
+         * 导出用户数据
+         */
+        async function exportUsers() {
+            try {
+                const keyword = $('#searchKeyword').val();
+                const role = $('#roleFilter').val();
+                
+                // 获取所有用户数据（不分页）
+                const result = await http.get(`/admin/users`, {
+                    params: {
+                        page: 1,
+                        pageSize: 10000, // 获取所有数据
+                        keyword,
+                        role
+                    }
+                });
+                
+                // 生成CSV数据
+                const csvData = generateCSV(result.data.users);
+                
+                // 下载CSV文件
+                downloadCSV(csvData, `用户数据_${formatDate(new Date())}.csv`);
+                
+            } catch (error) {
+                console.error('导出用户数据失败', error);
+                alert('导出用户数据失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+        
+        /**
+         * 生成CSV数据
+         */
+        function generateCSV(users) {
+            const headers = ['用户ID', '用户名', '角色', '邮箱', '手机号', '农场名称', '农场位置', '产品类别', '注册时间'];
+            let csvContent = headers.join(',') + '\n';
+            
+            users.forEach(user => {
+                const row = [
+                    user.userId,
+                    `"${user.username}"`,
+                    user.role,
+                    `"${user.email || ''}"`,
+                    `"${user.phone || ''}"`,
+                    `"${user.farmName || ''}"`,
+                    `"${user.farmLocation || ''}"`,
+                    `"${user.productCategory || ''}"`,
+                    `"${formatDate(user.createTime)}"`
+                ];
+                csvContent += row.join(',') + '\n';
+            });
+            
+            return csvContent;
+        }
+        
+        /**
+         * 下载CSV文件
+         */
+        function downloadCSV(csvContent, filename) {
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
         }
     </script>
 </body>

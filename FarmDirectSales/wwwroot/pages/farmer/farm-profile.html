@@ -641,7 +641,7 @@
                             <div class="form-group">
                                 <label for="establishedDate">成立日期</label>
                                 <input type="date" class="form-control" id="establishedDate">
-                            </div>
+                                    </div>
                             
                             <!-- 农场照片上传 -->
                             <div class="form-group">
@@ -655,7 +655,7 @@
                                                 <div class="photo-placeholder">
                                                     <i class="fa fa-camera fa-2x"></i>
                                                     <p>点击上传照片1</p>
-                                                </div>
+                                </div>
                                                 <button type="button" class="btn btn-sm btn-danger photo-delete-btn" style="display: none;">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
@@ -723,9 +723,9 @@
                                                     <button type="button" class="btn btn-sm btn-outline-primary retry-btn">重试</button>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                    
+                                </div>
+                            </div>
+                            
                                     <!-- 隐藏的文件输入框 -->
                                     <input type="file" id="farmPhotoInput" accept="image/*" style="display: none;">
                                     
@@ -904,7 +904,7 @@
                 } else {
                     throw new Error('保存失败: ' + (response.message || '未知错误'));
                 }
-            } catch (error) {
+                    } catch (error) {
                 console.error('保存农场资料失败', error);
                 alert('保存农场资料失败: ' + error.message);
             }
@@ -1297,7 +1297,7 @@
                             reject(new Error('权限不足，无法上传照片'));
                         } else if (xhr.status >= 500) {
                             reject(new Error('服务器错误，请稍后重试'));
-                        } else {
+                } else {
                             reject(new Error(`上传失败 (${xhr.status})`));
                         }
                     });

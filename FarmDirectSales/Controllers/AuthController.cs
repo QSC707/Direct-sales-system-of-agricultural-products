@@ -194,7 +194,7 @@ namespace FarmDirectSales.Controllers
         /// </summary>
         [HttpPut("user/{userId}")]
         [Authorize]
-        public async Task<IActionResult> UpdateUserInfo(int userId, [FromBody] UpdateUserRequest request)
+        public async Task<IActionResult> UpdateUserInfo(int userId, [FromBody] UpdateProfileRequest request)
         {
             try
             {
@@ -353,9 +353,9 @@ namespace FarmDirectSales.Controllers
     public class LoginRequest
     {
         /// <summary>
-        /// 用户名
+        /// 用户名或手机号码
         /// </summary>
-        [Required(ErrorMessage = "用户名不能为空")]
+        [Required(ErrorMessage = "用户名或手机号码不能为空")]
         public string Username { get; set; } = string.Empty;
 
         /// <summary>
@@ -366,9 +366,9 @@ namespace FarmDirectSales.Controllers
     }
     
     /// <summary>
-    /// 更新用户信息请求模型
+    /// 更新用户资料请求模型
     /// </summary>
-    public class UpdateUserRequest
+    public class UpdateProfileRequest
     {
         /// <summary>
         /// 用户名

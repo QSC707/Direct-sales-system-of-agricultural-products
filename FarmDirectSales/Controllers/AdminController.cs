@@ -31,7 +31,7 @@ namespace FarmDirectSales.Controllers
         /// 获取所有用户列表（仅管理员）
         /// </summary>
         [HttpGet("users")]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? keyword = null, [FromQuery] string? role = null)
         {
             try
             {
@@ -42,23 +42,59 @@ namespace FarmDirectSales.Controllers
                     return StatusCode(StatusCodes.Status403Forbidden, new { code = 403, message = "无权限访问此接口" });
                 }
 
-                // 获取所有用户
-                var users = await _context.Users.ToListAsync();
+                // 构建查询
+                var query = _context.Users.Include(u => u.FarmerProfile).AsQueryable();
+
+                // 关键词搜索
+                if (!string.IsNullOrEmpty(keyword))
+                {
+                    query = query.Where(u => u.Username.Contains(keyword) || 
+                                           (u.Email != null && u.Email.Contains(keyword)) || 
+                                           (u.Phone != null && u.Phone.Contains(keyword)));
+                }
+
+                // 角色筛选
+                if (!string.IsNullOrEmpty(role))
+                {
+                    query = query.Where(u => u.Role == role);
+                }
+
+                // 获取总数
+                var totalUsers = await query.CountAsync();
+                var totalPages = (int)Math.Ceiling((double)totalUsers / pageSize);
+
+                // 分页查询
+                var users = await query
+                    .OrderByDescending(u => u.CreateTime)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
 
                 return Ok(new
                 {
                     code = 200,
                     message = "获取用户列表成功",
-                    data = users.Select(u => new
+                    data = new
                     {
-                        u.UserId,
-                        u.Username,
-                        u.Email,
-                        u.Phone,
-                        u.Role,
-                        u.CreateTime,
-                        u.LastLoginTime
-                    })
+                        users = users.Select(u => new
+                        {
+                            u.UserId,
+                            u.Username,
+                            u.Email,
+                            u.Phone,
+                            u.Role,
+                            u.CreateTime,
+                            u.LastLoginTime,
+                            // 农户额外信息
+                            FarmName = u.FarmerProfile?.FarmName,
+                            FarmLocation = u.FarmerProfile?.Location,
+                            ProductCategory = u.FarmerProfile?.ProductCategory
+                        }),
+                        totalUsers,
+                        totalPages,
+                        currentPage = page,
+                        pageSize
+                    }
                 });
             }
             catch (Exception ex)
@@ -300,6 +336,128 @@ namespace FarmDirectSales.Controllers
                 return BadRequest(new { code = 400, message = ex.Message });
             }
         }
+
+        /// <summary>
+        /// 获取用户详情（仅管理员）
+        /// </summary>
+        [HttpGet("users/{userId}")]
+        public async Task<IActionResult> GetUserDetail(int userId)
+        {
+            try
+            {
+                // 验证当前用户是否为管理员
+                var currentUser = HttpContext.Items["User"] as User;
+                if (currentUser == null || currentUser.Role != "admin")
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new { code = 403, message = "无权限访问此接口" });
+                }
+
+                // 获取用户详情，包含农户资料
+                var user = await _context.Users
+                    .Include(u => u.FarmerProfile)
+                    .FirstOrDefaultAsync(u => u.UserId == userId);
+
+                if (user == null)
+                {
+                    return NotFound(new { code = 404, message = "用户不存在" });
+                }
+
+                return Ok(new
+                {
+                    code = 200,
+                    message = "获取用户详情成功",
+                    data = new
+                    {
+                        // 基本信息
+                        user.UserId,
+                        user.Username,
+                        user.Email,
+                        user.Phone,
+                        user.Role,
+                        user.CreateTime,
+                        user.LastLoginTime,
+                        
+                        // 农户资料（如果是农户）
+                        FarmerProfile = user.FarmerProfile == null ? null : new
+                        {
+                            user.FarmerProfile.FarmName,
+                            user.FarmerProfile.Location,
+                            user.FarmerProfile.Description,
+                            user.FarmerProfile.ProductCategory,
+                            user.FarmerProfile.LicenseNumber,
+                            user.FarmerProfile.EstablishedDate,
+                            user.FarmerProfile.CreateTime,
+                            user.FarmerProfile.UpdateTime
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { code = 400, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// 更新用户信息（仅管理员）
+        /// </summary>
+        [HttpPut("users/{userId}")]
+        public async Task<IActionResult> UpdateUser(int userId, [FromBody] UpdateUserRequest request)
+        {
+            try
+            {
+                // 验证当前用户是否为管理员
+                var currentUser = HttpContext.Items["User"] as User;
+                if (currentUser == null || currentUser.Role != "admin")
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new { code = 403, message = "无权限访问此接口" });
+                }
+
+                // 获取用户
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return NotFound(new { code = 404, message = "用户不存在" });
+                }
+
+                // 防止管理员修改自己的角色
+                if (userId == currentUser.UserId && request.Role != null && request.Role != user.Role)
+                {
+                    return BadRequest(new { code = 400, message = "不能修改自己的角色" });
+                }
+
+                // 更新用户信息
+                if (request.Email != null) user.Email = request.Email;
+                if (request.Phone != null) user.Phone = request.Phone;
+                if (request.Role != null) user.Role = request.Role;
+
+                // 如果提供了新密码，更新密码
+                if (!string.IsNullOrEmpty(request.Password))
+                {
+                    await _userService.ChangePasswordAsync(userId, request.Password);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    code = 200,
+                    message = "用户更新成功",
+                    data = new
+                    {
+                        user.UserId,
+                        user.Username,
+                        user.Email,
+                        user.Phone,
+                        user.Role
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { code = 400, message = ex.Message });
+            }
+        }
     }
 
     /// <summary>
@@ -312,5 +470,31 @@ namespace FarmDirectSales.Controllers
         /// </summary>
         [Required(ErrorMessage = "角色不能为空")]
         public string Role { get; set; } = string.Empty;
+    }
+
+    /// <summary>
+    /// 更新用户请求模型
+    /// </summary>
+    public class UpdateUserRequest
+    {
+        /// <summary>
+        /// 新邮箱
+        /// </summary>
+        public string? Email { get; set; }
+
+        /// <summary>
+        /// 新电话
+        /// </summary>
+        public string? Phone { get; set; }
+
+        /// <summary>
+        /// 新角色
+        /// </summary>
+        public string? Role { get; set; }
+
+        /// <summary>
+        /// 新密码
+        /// </summary>
+        public string? Password { get; set; }
     }
 } 

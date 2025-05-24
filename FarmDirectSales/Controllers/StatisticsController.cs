@@ -440,8 +440,8 @@ namespace FarmDirectSales.Controllers
                     .OrderByDescending(f => f.Sales)
                     .Take(top)
                     .ToList();
-                
-                // 记录日志
+            
+            // 记录日志
                 await _logService.LogAction(
                     userId: userId,
                     actionType: "获取农户销售排名",

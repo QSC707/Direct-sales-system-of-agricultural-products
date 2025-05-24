@@ -178,15 +178,15 @@ const api = {
     
     // 用户认证相关
     auth: {
-        // 登录
-        login: async (username, password) => {
+        // 登录 - 支持用户名或手机号码
+        login: async (usernameOrPhone, password) => {
             try {
                 const response = await fetch(`${window.API_BASE_URL}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username: usernameOrPhone, password })
                 });
                 
                 if (!response.ok) {
@@ -238,7 +238,7 @@ const api = {
                     // 保存用户信息对象，优先使用JWT令牌中的角色
                     const userData = {
                         userId: data.data.userId,
-                        username: data.data.username || username,
+                        username: data.data.username || usernameOrPhone,
                         role: tokenRole || data.data.role || 'customer', // 优先使用令牌中的角色
                         email: data.data.email,
                         phone: data.data.phone

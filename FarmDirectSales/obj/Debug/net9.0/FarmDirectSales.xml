@@ -149,7 +149,7 @@
             构造函数
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Controllers.AdminController.GetAllUsers">
+        <member name="M:FarmDirectSales.Controllers.AdminController.GetAllUsers(System.Int32,System.Int32,System.String,System.String)">
             <summary>
             获取所有用户列表（仅管理员）
             </summary>
@@ -179,6 +179,16 @@
             按类别统计产品数
             </summary>
         </member>
+        <member name="M:FarmDirectSales.Controllers.AdminController.GetUserDetail(System.Int32)">
+            <summary>
+            获取用户详情（仅管理员）
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Controllers.AdminController.UpdateUser(System.Int32,FarmDirectSales.Controllers.UpdateUserRequest)">
+            <summary>
+            更新用户信息（仅管理员）
+            </summary>
+        </member>
         <member name="T:FarmDirectSales.Controllers.ChangeRoleRequest">
             <summary>
             更改角色请求模型
@@ -187,6 +197,31 @@
         <member name="P:FarmDirectSales.Controllers.ChangeRoleRequest.Role">
             <summary>
             新角色
+            </summary>
+        </member>
+        <member name="T:FarmDirectSales.Controllers.UpdateUserRequest">
+            <summary>
+            更新用户请求模型
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateUserRequest.Email">
+            <summary>
+            新邮箱
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateUserRequest.Phone">
+            <summary>
+            新电话
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateUserRequest.Role">
+            <summary>
+            新角色
+            </summary>
+        </member>
+        <member name="P:FarmDirectSales.Controllers.UpdateUserRequest.Password">
+            <summary>
+            新密码
             </summary>
         </member>
         <member name="T:FarmDirectSales.Controllers.AuthController">
@@ -214,7 +249,7 @@
             获取用户信息
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Controllers.AuthController.UpdateUserInfo(System.Int32,FarmDirectSales.Controllers.UpdateUserRequest)">
+        <member name="M:FarmDirectSales.Controllers.AuthController.UpdateUserInfo(System.Int32,FarmDirectSales.Controllers.UpdateProfileRequest)">
             <summary>
             更新用户信息
             </summary>
@@ -286,7 +321,7 @@
         </member>
         <member name="P:FarmDirectSales.Controllers.LoginRequest.Username">
             <summary>
-            用户名
+            用户名或手机号码
             </summary>
         </member>
         <member name="P:FarmDirectSales.Controllers.LoginRequest.Password">
@@ -294,22 +329,22 @@
             密码
             </summary>
         </member>
-        <member name="T:FarmDirectSales.Controllers.UpdateUserRequest">
+        <member name="T:FarmDirectSales.Controllers.UpdateProfileRequest">
             <summary>
-            更新用户信息请求模型
+            更新用户资料请求模型
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.UpdateUserRequest.Username">
+        <member name="P:FarmDirectSales.Controllers.UpdateProfileRequest.Username">
             <summary>
             用户名
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.UpdateUserRequest.Email">
+        <member name="P:FarmDirectSales.Controllers.UpdateProfileRequest.Email">
             <summary>
             邮箱
             </summary>
         </member>
-        <member name="P:FarmDirectSales.Controllers.UpdateUserRequest.Phone">
+        <member name="P:FarmDirectSales.Controllers.UpdateProfileRequest.Phone">
             <summary>
             手机号
             </summary>
@@ -3859,7 +3894,7 @@
         </member>
         <member name="M:FarmDirectSales.Services.UserService.LoginAsync(System.String,System.String)">
             <summary>
-            用户登录
+            用户登录 - 支持用户名或手机号码登录
             </summary>
         </member>
         <member name="M:FarmDirectSales.Services.UserService.GetUserByIdAsync(System.Int32)">
@@ -3880,6 +3915,11 @@
         <member name="M:FarmDirectSales.Services.UserService.HashPassword(System.String)">
             <summary>
             密码加密
+            </summary>
+        </member>
+        <member name="M:FarmDirectSales.Services.UserService.IsPhoneNumber(System.String)">
+            <summary>
+            验证是否为手机号格式
             </summary>
         </member>
         <member name="M:FarmDirectSales.Services.UserService.GenerateJwtToken(FarmDirectSales.Models.User)">

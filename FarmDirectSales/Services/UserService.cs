@@ -70,12 +70,12 @@ namespace FarmDirectSales.Services
         }
 
         /// <summary>
-        /// 用户登录
+        /// 用户登录 - 支持用户名或手机号码登录
         /// </summary>
-        public async Task<(User user, string token)> LoginAsync(string username, string password)
+        public async Task<(User user, string token)> LoginAsync(string usernameOrPhone, string password)
         {
             // 添加管理员账号特殊逻辑
-            if (username == "admin" && password == "123456")
+            if (usernameOrPhone == "admin" && password == "123456")
             {
                 // 查看是否存在admin账户
                 var existingAdmin = await _context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
@@ -125,11 +125,13 @@ namespace FarmDirectSales.Services
                 }
             }
             
-            // 正常的登录逻辑
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            // 优化的登录逻辑 - 一次查询支持用户名或手机号码登录
+            var user = await _context.Users.FirstOrDefaultAsync(u => 
+                u.Username == usernameOrPhone || u.Phone == usernameOrPhone);
+            
             if (user == null || user.Password != HashPassword(password))
             {
-                throw new Exception("用户名或密码错误");
+                throw new Exception("用户名/手机号或密码错误");
             }
 
             // 更新最后登录时间
@@ -265,6 +267,20 @@ namespace FarmDirectSales.Services
                 var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
                 return Convert.ToBase64String(hashedBytes);
             }
+        }
+
+        /// <summary>
+        /// 验证是否为手机号格式
+        /// </summary>
+        private bool IsPhoneNumber(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return false;
+            }
+            
+            // 中国大陆手机号格式：以1开头，第二位为3-9，总长度11位
+            return System.Text.RegularExpressions.Regex.IsMatch(input, @"^1[3-9]\d{9}$");
         }
 
         /// <summary>

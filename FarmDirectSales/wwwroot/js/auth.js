@@ -119,16 +119,16 @@ function updateNavbar(user) {
 }
 
 /**
- * 用户登录
- * @param {string} username 用户名
+ * 用户登录 - 支持用户名或手机号码登录
+ * @param {string} usernameOrPhone 用户名或手机号码
  * @param {string} password 密码
  * @param {Function} callback 回调函数，参数为成功与否
  */
-function login(username, password, callback) {
+function login(usernameOrPhone, password, callback) {
     // 检查API对象是否可用
     if (typeof api !== 'undefined' && api.auth && api.auth.login) {
         // 使用API模块进行登录
-        api.auth.login(username, password)
+        api.auth.login(usernameOrPhone, password)
             .then(function(response) {
                 if (response.code === 200) {
                     // 读取存储的用户信息
@@ -166,16 +166,16 @@ function login(username, password, callback) {
         
         // 判断用户名的前缀来模拟不同角色
         let role = 'customer';
-        if (username === 'admin') {
+        if (usernameOrPhone === 'admin') {
             role = 'admin';
-        } else if (username.startsWith('farmer')) {
+        } else if (usernameOrPhone.startsWith('farmer')) {
             role = 'farmer';
         }
         
         // 模拟成功登录
         const userData = {
             userId: Math.floor(Math.random() * 1000) + 1,
-            username: username,
+            username: usernameOrPhone,
             role: role
         };
         
