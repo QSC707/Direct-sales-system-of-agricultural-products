@@ -1177,6 +1177,40 @@ const api = {
 // 导出API对象
 window.api = api; 
 
+/**
+ * checkLogin函数 - 检查登录状态并执行回调
+ * @param {Function} callback - 登录成功后的回调函数，传入用户信息
+ */
+window.checkLogin = function(callback) {
+    if (typeof callback !== 'function') {
+        console.error('checkLogin: callback必须是一个函数');
+        return;
+    }
+    
+    try {
+        const isLoggedIn = api.checkLoginStatus();
+        
+        if (isLoggedIn) {
+            // 获取用户信息
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                const user = JSON.parse(userStr);
+                console.log('checkLogin: 用户已登录', user);
+                callback(user);
+            } else {
+                console.warn('checkLogin: 登录状态有效但无法获取用户信息');
+                callback(null);
+            }
+        } else {
+            console.log('checkLogin: 用户未登录');
+            callback(null);
+        }
+    } catch (error) {
+        console.error('checkLogin: 检查登录状态时出错', error);
+        callback(null);
+    }
+};
+
 const API_ENDPOINTS = {
     // 用户相关
     LOGIN: '/api/auth/login',

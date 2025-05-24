@@ -30,7 +30,7 @@ if (typeof axios === 'undefined') {
 function initAxiosConfig() {
 // 创建Axios实例
 const axiosInstance = axios.create({
-    baseURL: window.API_BASE_URL || 'http://localhost:5004', // 使用全局API_BASE_URL或默认值
+    baseURL: 'http://localhost:5004', // 只使用主机地址，避免与API路径重复
     timeout: 10000, // 请求超时时间10秒
     headers: {
         'Content-Type': 'application/json'
@@ -130,12 +130,16 @@ const http = {
     /**
      * GET请求
      * @param {string} url 请求URL
-     * @param {Object} params 查询参数
-     * @param {Object} config 其他配置选项
+     * @param {Object} options 选项，包含params查询参数和其他config配置
      * @returns {Promise} 响应数据
      */
-    get: (url, params = {}, config = {}) => {
-        return axiosInstance.get(url, { params, ...config });
+    get: (url, options = {}) => {
+        // 如果options中有params属性，直接传递给axios
+        if (options.params) {
+            return axiosInstance.get(url, options);
+        }
+        // 否则将整个options作为params传递（向后兼容）
+        return axiosInstance.get(url, { params: options });
     },
     
     /**

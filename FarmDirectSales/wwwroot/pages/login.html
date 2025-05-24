@@ -191,7 +191,7 @@
                         <div class="row mb-4 text-center">
                             <h5 class="mb-3">请选择您的身份</h5>
                             <div class="col-md-4">
-                                <div class="card role-card selected" data-role="customer" onclick="selectRole('customer')">
+                                <div class="card role-card selected" data-role="user" onclick="selectRole('user')">
                                     <div class="card-body">
                                         <i class="fas fa-user login-icon customer-icon"></i>
                                         <h5 class="card-title">消费者</h5>
@@ -271,7 +271,7 @@
     <!-- 登录页逻辑 -->
     <script>
         // 当前选择的角色
-        let currentRole = 'customer';
+        let currentRole = 'user';
         
         // 等待依赖加载完成
         window.initDependencies(function() {
@@ -443,7 +443,7 @@
                             let roleNames = {
                                 'farmer': '农户',
                                 'admin': '管理员',
-                                'customer': '消费者'
+                                'user': '消费者'
                             };
                             
                             showError(`您的账号是${roleNames[userData.role] || userData.role}身份，但选择了${roleNames[selectedRole] || selectedRole}角色登录。请选择正确的角色后重新登录。`);
@@ -549,7 +549,7 @@
                 case 'farmer':
                     window.location.href = '/pages/farmer/dashboard.html';
                     break;
-                case 'customer':
+                case 'user':
                 default:
                     window.location.href = '/index.html';
                     break;

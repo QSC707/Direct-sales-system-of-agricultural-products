@@ -354,7 +354,7 @@
                         <input type="text" class="form-control" id="searchKeyword" placeholder="搜索用户名、邮箱或手机号">
                         <div class="input-group-append">
                             <button class="btn btn-primary" id="searchBtn">
-                                <i class="fa fa-search"></i> 搜索</button><button class="btn btn-outline-warning" id="resetBtn" title="清空搜索条件和筛选"><i class="fa fa-times"></i> 重置
+                                <i class="fa fa-search"></i> 搜索
                             </button>
                         </div>
                     </div>
@@ -364,7 +364,7 @@
                         <option value="">所有角色</option>
                         <option value="admin">管理员</option>
                         <option value="farmer">农户</option>
-                        <option value="user">普通用户</option>
+                        <option value="customer">普通用户</option>
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -473,7 +473,7 @@
                                 <option value="">请选择角色</option>
                                 <option value="admin">管理员</option>
                                 <option value="farmer">农户</option>
-                                <option value="user">普通用户</option>
+                                <option value="customer">普通用户</option>
                             </select>
                         </div>
                     </form>
@@ -522,7 +522,7 @@
                                 <option value="">请选择角色</option>
                                 <option value="admin">管理员</option>
                                 <option value="farmer">农户</option>
-                                <option value="user">普通用户</option>
+                                <option value="customer">普通用户</option>
                             </select>
                         </div>
                         
@@ -690,13 +690,6 @@
                                 loadUsers(1);
                             });
                             
-                            // 绑定重置按钮点击事件
-                            $('#resetBtn').on('click', function() {
-                                $('#searchKeyword').val('');
-                                $('#roleFilter').val('');
-                                loadUsers(1);
-                            });
-                            
                             // 绑定导出按钮点击事件
                             $('#exportBtn').on('click', function() {
                                 exportUsers();
@@ -759,7 +752,7 @@
                 const role = $('#roleFilter').val();
                 
                 // 使用Axios发送请求到正确的管理员API端点
-                const result = await http.get(`/api/admin/users`, {
+                const result = await http.get(`/admin/users`, {
                     params: {
                         page,
                         keyword,
@@ -912,7 +905,7 @@
         async function openUserDetailModal(userId) {
             try {
                 // 使用Axios获取用户详情
-                const result = await http.get(`/api/admin/users/${userId}`);
+                const result = await http.get(`/admin/users/${userId}`);
                 const user = result.data;
                 
                 // 填充基本信息
@@ -996,7 +989,7 @@
             
             try {
                 // 使用Axios获取用户信息
-                const result = await http.get(`/api/admin/users/${userId}`);
+                const result = await http.get(`/admin/users/${userId}`);
                 const user = result.data;
                 
                 // 填充表单
@@ -1036,7 +1029,7 @@
         async function deleteUser(userId) {
             try {
                 // 使用Axios删除用户
-                await http.delete(`/api/admin/users/${userId}`);
+                await http.delete(`/admin/users/${userId}`);
                 alert('用户删除成功');
                 loadUsers(1); // 重新加载用户列表
             } catch (error) {
@@ -1169,7 +1162,7 @@
             
             try {
                 // 使用Axios发送请求到管理员API
-                await http.put(`/api/admin/users/${userId}`, userData);
+                await http.put(`/admin/users/${userId}`, userData);
                 
                 alert('用户更新成功');
                 $('#editUserModal').modal('hide');
@@ -1189,7 +1182,7 @@
                     return '<span class="badge badge-danger role-badge">管理员</span>';
                 case 'farmer':
                     return '<span class="badge badge-success role-badge">农户</span>';
-                case 'user':
+                case 'customer':
                     return '<span class="badge badge-info role-badge">普通用户</span>';
                 default:
                     return '<span class="badge badge-secondary role-badge">' + role + '</span>';
@@ -1239,7 +1232,7 @@
                 const role = $('#roleFilter').val();
                 
                 // 获取所有用户数据（不分页）
-                const result = await http.get(`/api/admin/users`, {
+                const result = await http.get(`/admin/users`, {
                     params: {
                         page: 1,
                         pageSize: 10000, // 获取所有数据
