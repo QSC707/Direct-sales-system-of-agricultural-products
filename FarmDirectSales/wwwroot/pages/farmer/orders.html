@@ -209,9 +209,69 @@
                                     <option value="已取消并退款">已取消并退款</option>
                                 </select>
                             </div>
-                            <div class="col-md-2">
-                                <label for="orderSearch" class="small mb-1">搜索订单号/客户</label>
-                                <input type="text" class="form-control form-control-sm" id="orderSearch" placeholder="输入订单号或客户名">
+                            <div class="col-md-3">
+                                <label for="orderSearch" class="small mb-1">关键词搜索</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" id="orderSearch" placeholder="输入搜索关键词">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="searchOptionsBtn">
+                                            <i class="fa fa-cog"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="searchOptionsBtn" style="width: 280px; padding: 15px;">
+                                            <h6 class="dropdown-header">搜索设置</h6>
+                                            
+                                            <!-- 搜索类型选择 -->
+                                            <div class="form-group mb-3">
+                                                <label class="small font-weight-bold">搜索范围</label>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="searchType" id="searchAll" value="all" checked>
+                                                    <label class="form-check-label small" for="searchAll">
+                                                        <i class="fa fa-search text-primary"></i> 全部搜索
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="searchType" id="searchOrder" value="order">
+                                                    <label class="form-check-label small" for="searchOrder">
+                                                        <i class="fa fa-receipt text-info"></i> 仅订单号
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="searchType" id="searchUser" value="user">
+                                                    <label class="form-check-label small" for="searchUser">
+                                                        <i class="fa fa-user text-success"></i> 仅客户名称
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="searchType" id="searchProduct" value="product">
+                                                    <label class="form-check-label small" for="searchProduct">
+                                                        <i class="fa fa-leaf text-warning"></i> 仅商品名称
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- 模糊搜索开关 -->
+                                            <div class="form-group mb-2">
+                                                <label class="small font-weight-bold">搜索模式</label>
+                                                <div class="custom-control custom-switch">
+                                                    <input type="checkbox" class="custom-control-input" id="fuzzySearchSwitch">
+                                                    <label class="custom-control-label small" for="fuzzySearchSwitch">
+                                                        模糊搜索
+                                                    </label>
+                                                </div>
+                                                <small class="form-text text-muted">
+                                                    开启：支持部分匹配<br>
+                                                    关闭：仅精确匹配
+                                                </small>
+                                            </div>
+                                            
+                                            <div class="dropdown-divider"></div>
+                                            <button type="button" class="btn btn-sm btn-outline-primary btn-block" onclick="updateSearchPlaceholder()">
+                                                <i class="fa fa-check"></i> 应用设置
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted" id="searchHelpText">精确搜索所有字段</small>
                             </div>
                             <div class="col-md-2">
                                 <label for="startDateFilter" class="small mb-1">开始日期</label>
@@ -221,7 +281,7 @@
                                 <label for="endDateFilter" class="small mb-1">结束日期</label>
                                 <input type="date" class="form-control form-control-sm" id="endDateFilter">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="small mb-1">操作</label>
                                 <div class="d-flex">
                                     <button class="btn btn-primary btn-sm mr-1" id="searchBtn">
@@ -230,9 +290,20 @@
                                     <button class="btn btn-outline-secondary btn-sm mr-1" id="resetBtn">
                                         <i class="fa fa-undo"></i> 重置
                                     </button>
-                                    <button class="btn btn-success btn-sm" id="batchShipBtn" disabled>
-                                        <i class="fa fa-shipping-fast"></i> 批量发货
-                                    </button>
+                                    <!-- 批量操作按钮组 -->
+                                    <div id="batchModeButtons">
+                                        <button class="btn btn-success btn-sm" id="enterBatchModeBtn">
+                                            <i class="fa fa-shipping-fast"></i> 批量发货
+                                        </button>
+                                    </div>
+                                    <div id="batchActionButtons" style="display: none;">
+                                        <button class="btn btn-success btn-sm mr-1" id="batchShipBtn" disabled>
+                                            <i class="fa fa-shipping-fast"></i> 确认批量发货
+                                        </button>
+                                        <button class="btn btn-secondary btn-sm" id="exitBatchModeBtn">
+                                            <i class="fa fa-times"></i> 取消批量
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -247,12 +318,18 @@
                             <button class="btn btn-sm btn-outline-secondary ml-2" id="clearSelectionBtn">清除选择</button>
                         </div>
                         
+                        <!-- 批量模式提示 -->
+                        <div class="alert alert-info mb-3" id="batchModeInfo" style="display: none;">
+                            <i class="fa fa-info-circle"></i> 
+                            批量发货模式已启用，请选择需要发货的订单。只有"货到付款待处理"状态的订单可以批量发货。
+                        </div>
+                        
                         <!-- 订单列表 -->
                         <div class="table-responsive">
                             <table class="table table-hover table-sm">
                                 <thead class="thead-light">
                                     <tr>
-                                        <th width="40">
+                                        <th width="40" id="selectAllColumn" style="display: none;">
                                             <input type="checkbox" id="selectAllCheckbox" title="全选/取消全选">
                                         </th>
                                         <th width="100">订单号</th>
@@ -705,6 +782,9 @@
                 // 初始化退款功能
                 initRefundFeatures();
                 
+                // 初始化搜索选项
+                initSearchOptions();
+                
                 // 检查用户是否登录，并且是农户角色
                 checkLogin(function(user) {
                     if (user && user.role === 'farmer') {
@@ -761,6 +841,8 @@
                     $('#orderSearch').val('');
                     $('#startDateFilter').val('');
                     $('#endDateFilter').val('');
+                    // 重置搜索选项
+                    resetSearchOptions();
                     loadOrders(1);
                 });
                 
@@ -779,6 +861,16 @@
                     $('.order-checkbox').prop('checked', false);
                     $('#selectAllCheckbox').prop('checked', false).prop('indeterminate', false);
                     updateBatchButtons();
+                });
+                
+                // 进入批量模式按钮点击事件
+                $('#enterBatchModeBtn').on('click', function() {
+                    enterBatchMode();
+                });
+                
+                // 退出批量模式按钮点击事件
+                $('#exitBatchModeBtn').on('click', function() {
+                    exitBatchMode();
                 });
                 
                 // 确认发货按钮点击事件
@@ -823,6 +915,10 @@
             const startDateFilter = $('#startDateFilter').val();
             const endDateFilter = $('#endDateFilter').val();
             
+            // 获取新的搜索选项
+            const searchType = $('input[name="searchType"]:checked').val() || 'all';
+            const isFuzzySearch = $('#fuzzySearchSwitch').is(':checked');
+            
             // 显示或隐藏筛选信息
             if (status || keyword || startDateFilter || endDateFilter) {
                 let filterMessage = '当前筛选: ';
@@ -830,7 +926,9 @@
                     filterMessage += `状态 [${status}] `;
                 }
                 if (keyword) {
-                    filterMessage += `关键词 [${keyword}] `;
+                    const searchTypeText = getSearchTypeText(searchType);
+                    const searchModeText = isFuzzySearch ? '模糊搜索' : '精确搜索';
+                    filterMessage += `${searchTypeText} [${keyword}] (${searchModeText}) `;
                 }
                 if (startDateFilter || endDateFilter) {
                     filterMessage += `日期 [${startDateFilter} - ${endDateFilter}] `;
@@ -860,7 +958,7 @@
                     throw new Error('未找到用户ID');
                 }
                 
-                console.log(`正在加载订单数据，用户ID: ${userId}，状态: ${status || '全部'}，关键词: ${keyword || '无'}，日期: ${startDateFilter || '无'} - ${endDateFilter || '无'}`);
+                console.log(`正在加载订单数据，用户ID: ${userId}，状态: ${status || '全部'}，关键词: ${keyword || '无'}，搜索类型: ${searchType}，模糊搜索: ${isFuzzySearch}，日期: ${startDateFilter || '无'} - ${endDateFilter || '无'}`);
                 
                 // 构建查询参数
                 let apiUrl = `/api/order/farmer/${userId}`;
@@ -880,6 +978,8 @@
                 }
                 if (keyword) {
                     params.append('keyword', keyword);
+                    params.append('searchType', searchType);
+                    params.append('fuzzySearch', isFuzzySearch.toString());
                 }
                 if (startDateFilter || endDateFilter) {
                     // 如果有日期筛选，使用startDate和endDate参数
@@ -929,6 +1029,21 @@
             } finally {
                 // 恢复筛选和搜索元素
                 $('#statusFilter, #orderSearch, #startDateFilter, #endDateFilter, #searchBtn, #resetBtn').prop('disabled', false);
+                
+                // 如果之前处于批量模式，则恢复批量模式UI状态
+                if (isBatchModeActive) {
+                    $('#selectAllColumn').show();
+                    $('.order-checkbox-cell').show();
+                    $('#batchModeButtons').hide();
+                    $('#batchActionButtons').show();
+                    $('#batchModeInfo').show();
+                    
+                    // 重新绑定复选框事件
+                    bindCheckboxEvents();
+                    
+                    // 更新按钮状态
+                    updateBatchButtons();
+                }
             }
         }
         
@@ -955,143 +1070,109 @@
                 return;
             }
             
+            // 使用新的renderOrderRow函数渲染每个订单
             orders.forEach(function(order) {
-                // 获取详细的状态信息
-                const detailedStatus = getDetailedStatus(order);
-                const statusBadge = getStatusBadge(detailedStatus);
-                
-                // 支付方式显示
-                const paymentMethod = '货到付款';
-                const paymentBadge = `<span class="badge badge-secondary badge-sm">${paymentMethod}</span>`;
-                
-                // 从User对象中获取客户名，如果不存在则显示'未知客户'
-                const customerName = order.user && order.user.username ? order.user.username : '未知客户';
-                
-                // 使用totalPrice替代totalAmount，并添加null检查
-                const totalPrice = order.totalPrice ? order.totalPrice.toFixed(2) : '0.00';
-                
-                // 获取商品信息
-                let productInfo = '未知商品';
-                if (order.product && order.product.productName) {
-                    const productName = order.product.productName;
-                    const quantity = order.quantity || 1;
-                    const unit = order.product.specification || 'kg';
-                    productInfo = `
-                        <div class="product-info">
-                            <div class="font-weight-bold text-truncate" style="max-width: 100px;" title="${productName}">
-                                ${productName}
-                            </div>
-                            <small class="text-muted">数量: ${quantity} ${unit}</small>
-                        </div>
-                    `;
-                } else {
-                    // 兼容旧数据结构
-                    const quantity = order.quantity || 1;
-                    productInfo = `
-                        <div class="product-info">
-                            <div class="font-weight-bold">商品信息待更新</div>
-                            <small class="text-muted">数量: ${quantity}</small>
-                        </div>
-                    `;
-                }
-                
-                // 判断是否可以批量发货（货到付款待处理状态）
-                const canBatchShip = order.status === '货到付款待处理';
-                const checkboxDisabled = !canBatchShip ? 'disabled' : '';
-                
-                // 复选框
-                const checkbox = `<input type="checkbox" class="order-checkbox" data-order-id="${order.orderId}" ${checkboxDisabled}>`;
-                
-                // 添加操作按钮
-                let actionButtons = `
-                            <button class="btn btn-sm btn-info view-order-btn" data-order-id="${order.orderId}" title="查看详情">
-                                <i class="fa fa-eye"></i>
-                            </button>
-                `;
-                
-                // 获取当前用户
-                const user = JSON.parse(localStorage.getItem('user') || '{}');
-                
-                // 根据订单状态添加不同的操作按钮
-                if (OrderManager.showStartDeliveryButton(order, user.role)) {
-                    // 开始配送按钮
-                    const nextStatus = order.status === '已发货' ? '配送中' : '货到付款配送中';
-                    actionButtons += `
-                        <button class="btn btn-sm btn-success start-delivery-btn" data-order-id="${order.orderId}" title="开始配送">
-                            <i class="fa fa-truck"></i>
-                        </button>
-                    `;
-                }
-                
-                // 发货按钮 - 对于货到付款待处理的订单
-                if (order.status === '货到付款待处理') {
-                    actionButtons += `
-                        <button class="btn btn-sm btn-primary ship-order-btn" data-order-id="${order.orderId}" title="标记发货">
-                            <i class="fa fa-shipping-fast"></i>
-                        </button>
-                    `;
-                }
-                
-                // 修改配送信息按钮 - 对于已开始配送的订单
-                if (order.status === '货到付款配送中') {
-                    actionButtons += `
-                        <button class="btn btn-sm btn-warning edit-delivery-btn" data-order-id="${order.orderId}" title="修改配送信息">
-                            <i class="fa fa-edit"></i>
-                        </button>
-                    `;
-                }
-                
-                // 取消按钮 - 对于待处理或待支付的订单
-                if (order.status === '货到付款待处理' || order.status === '待付款' || order.status === '待支付') {
-                    actionButtons += `
-                        <button class="btn btn-sm btn-danger cancel-order-btn" data-order-id="${order.orderId}" title="取消订单">
-                            <i class="fa fa-times"></i>
-                        </button>
-                    `;
-                }
-                
-                // 退款处理按钮 - 对于申请退款中的订单
-                if (order.status === '申请退款中') {
-                    actionButtons += `
-                        <button class="btn btn-sm btn-warning process-refund-btn" data-order-id="${order.orderId}" title="处理退款">
-                            <i class="fa fa-undo"></i>
-                        </button>
-                    `;
-                }
-                
-                // 表格行HTML
-                const row = `
-                    <tr class="order-row" data-order-id="${order.orderId}" data-status="${order.status}">
-                        <td class="text-center">${checkbox}</td>
-                        <td><span class="badge badge-light">#${order.orderId}</span></td>
-                        <td>${productInfo}</td>
-                        <td>
-                            <div>${customerName}</div>
-                            <div>${paymentBadge}</div>
-                        </td>
-                        <td class="font-weight-bold">¥${totalPrice}</td>
-                        <td>
-                            <small title="${order.createTime}">
-                                ${formatFriendlyDateTime(order.createTime)}
-                            </small>
-                        </td>
-                        <td>${statusBadge}</td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                ${actionButtons}
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                
-                $orderList.append(row);
+                // 更新订单状态为详细状态
+                order.status = getDetailedStatus(order);
+                $orderList.append(renderOrderRow(order));
             });
             
-            // 绑定订单操作按钮事件
-            bindOrderEvents();
-            
-            // 绑定复选框事件
+            // 重新绑定复选框事件
             bindCheckboxEvents();
+            
+            console.log('订单列表渲染完成，共渲染了', orders.length, '个订单');
+        }
+        
+        /**
+         * 渲染订单行
+         */
+        function renderOrderRow(order) {
+            const createTime = new Date(order.createTime).toLocaleString('zh-CN');
+            
+            // 构建操作按钮
+            let actionButtons = '';
+            
+            if (order.status === '货到付款待处理') {
+                actionButtons = `
+                    <button class="btn btn-primary btn-sm mr-1" onclick="openShipModal(${order.orderId})">
+                        <i class="fa fa-shipping-fast"></i> 开始配送
+                    </button>
+                `;
+            } else if (order.status === '货到付款配送中') {
+                actionButtons = `
+                    <button class="btn btn-warning btn-sm mr-1" onclick="openEditDeliveryModal(${order.orderId})">
+                        <i class="fa fa-edit"></i> 修改配送信息
+                    </button>
+                `;
+            }
+            
+            actionButtons += `
+                <button class="btn btn-info btn-sm" onclick="viewOrderDetails(${order.orderId})">
+                    <i class="fa fa-eye"></i> 详情
+                </button>
+            `;
+            
+            // 状态样式
+            let statusClass = '';
+            switch(order.status) {
+                case '货到付款待处理':
+                    statusClass = 'badge-warning';
+                    break;
+                case '货到付款配送中':
+                    statusClass = 'badge-info';
+                    break;
+                case '已完成':
+                    statusClass = 'badge-success';
+                    break;
+                case '申请退款中':
+                    statusClass = 'badge-danger';
+                    break;
+                default:
+                    statusClass = 'badge-secondary';
+            }
+            
+            // 判断是否可以批量发货（只有货到付款待处理状态可以）
+            const canBatchShip = order.status === '货到付款待处理';
+            const checkboxDisabled = !canBatchShip ? 'disabled' : '';
+            const checkboxTitle = !canBatchShip ? '只有"货到付款待处理"状态的订单可以批量发货' : '选择此订单进行批量发货';
+            
+            // 添加调试日志
+            console.log(`订单 ${order.orderId}: 状态=${order.status}, 可批量发货=${canBatchShip}`);
+            
+            return `
+                <tr data-order-id="${order.orderId}" data-status="${order.status}">
+                    <td class="order-checkbox-cell" style="display: none;">
+                        <input type="checkbox" class="order-checkbox" 
+                               data-order-id="${order.orderId}" 
+                               ${checkboxDisabled} 
+                               title="${checkboxTitle}">
+                    </td>
+                    <td>${order.orderId}</td>
+                    <td>
+                        <div class="small">
+                            <strong>${order.product?.productName || '未知商品'}</strong><br>
+                            规格：${order.product?.specification || '未知'}<br>
+                            数量：${order.quantity}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="small">
+                            ${order.user?.username || '未知用户'}<br>
+                            ${order.contactPhone || ''}
+                        </div>
+                    </td>
+                    <td>
+                        <strong class="text-success">¥${(order.totalPrice || 0).toFixed(2)}</strong>
+                    </td>
+                    <td class="small text-muted">${createTime}</td>
+                    <td>
+                        <span class="badge ${statusClass} status-cell">${order.status}</span>
+                    </td>
+                    <td>
+                        ${actionButtons}
+                    </td>
+                </tr>
+            `;
         }
         
         /**
@@ -2008,17 +2089,27 @@
          * 绑定复选框事件
          */
         function bindCheckboxEvents() {
-            // 全选/取消全选
+            console.log('重新绑定复选框事件');
+            
+            // 先移除之前的事件绑定，避免重复绑定
+            $('#selectAllCheckbox').off('change');
+            $('.order-checkbox').off('change');
+            
+            // 全选/取消全选 - 只影响未禁用的复选框
             $('#selectAllCheckbox').on('change', function() {
                 const isChecked = $(this).is(':checked');
                 $('.order-checkbox:not(:disabled)').prop('checked', isChecked);
                 updateBatchButtons();
+                console.log('全选复选框状态变更:', isChecked);
             });
             
-            // 单个复选框变化
-            $('.order-checkbox').on('change', function() {
+            // 单个复选框变化 - 使用事件委托确保动态添加的复选框也能响应
+            $(document).off('change', '.order-checkbox').on('change', '.order-checkbox', function() {
                 updateBatchButtons();
                 updateSelectAllState();
+                const orderId = $(this).data('order-id');
+                const isChecked = $(this).is(':checked');
+                console.log('订单', orderId, '复选框状态变更:', isChecked);
             });
         }
         
@@ -2027,7 +2118,9 @@
          */
         function updateSelectAllState() {
             const totalCheckboxes = $('.order-checkbox:not(:disabled)').length;
-            const checkedCheckboxes = $('.order-checkbox:checked').length;
+            const checkedCheckboxes = $('.order-checkbox:checked:not(:disabled)').length;
+            
+            console.log('更新全选状态 - 总可用复选框:', totalCheckboxes, '已选中:', checkedCheckboxes);
             
             if (checkedCheckboxes === 0) {
                 $('#selectAllCheckbox').prop('indeterminate', false).prop('checked', false);
@@ -2039,20 +2132,111 @@
         }
         
         /**
+         * 进入批量模式
+         */
+        function enterBatchMode() {
+            console.log('进入批量模式');
+            
+            // 设置批量模式状态
+            isBatchModeActive = true;
+            
+            // 显示复选框列和批量操作界面
+            $('#selectAllColumn').show();
+            $('.order-checkbox-cell').show();
+            $('#batchModeButtons').hide();
+            $('#batchActionButtons').show();
+            $('#batchModeInfo').show();
+            
+            // 清除已有选择
+            $('.order-checkbox').prop('checked', false);
+            $('#selectAllCheckbox').prop('checked', false).prop('indeterminate', false);
+            
+            // 重新绑定复选框事件，确保在批量模式下正常工作
+            bindCheckboxEvents();
+            
+            // 更新按钮状态
+            updateBatchButtons();
+            
+            // 检查有多少个可选的复选框
+            const totalCheckboxes = $('.order-checkbox').length;
+            const enabledCheckboxes = $('.order-checkbox:not(:disabled)').length;
+            console.log('总复选框数量:', totalCheckboxes, '可用复选框数量:', enabledCheckboxes);
+        }
+        
+        /**
+         * 退出批量模式
+         */
+        function exitBatchMode() {
+            // 设置批量模式状态
+            isBatchModeActive = false;
+            
+            // 隐藏复选框列和批量操作界面
+            $('#selectAllColumn').hide();
+            $('.order-checkbox-cell').hide();
+            $('#batchModeButtons').show();
+            $('#batchActionButtons').hide();
+            $('#batchModeInfo').hide();
+            $('#batchInfo').hide();
+            
+            // 清除所有选择
+            $('.order-checkbox').prop('checked', false);
+            $('#selectAllCheckbox').prop('checked', false).prop('indeterminate', false);
+        }
+        
+        /**
          * 更新批量操作按钮状态
          */
         function updateBatchButtons() {
-            const checkedCount = $('.order-checkbox:checked').length;
+            const selectedOrders = $('.order-checkbox:checked');
+            const selectedCount = selectedOrders.length;
             
-            // 更新选择计数
-            $('#selectedCount').text(checkedCount);
+            // 更新选中订单计数
+            $('#selectedCount').text(selectedCount);
             
-            if (checkedCount > 0) {
+            if (selectedCount > 0) {
                 $('#batchInfo').show();
                 $('#batchShipBtn').prop('disabled', false);
+                
+                // 检查是否所有选中的订单都是待处理状态
+                let allPending = true;
+                selectedOrders.each(function() {
+                    const row = $(this).closest('tr');
+                    const status = row.find('.status-cell').text().trim();
+                    if (status !== '货到付款待处理') {
+                        allPending = false;
+                        return false; // 跳出循环
+                    }
+                });
+                
+                if (!allPending) {
+                    $('#batchShipBtn').prop('disabled', true);
+                    $('#batchInfo').removeClass('alert-warning').addClass('alert-danger');
+                    $('#batchInfo').html('<i class="fa fa-exclamation-triangle"></i> 已选择 ' + selectedCount + ' 个订单，但其中包含非"货到付款待处理"状态的订单，无法批量发货');
+                } else {
+                    $('#batchShipBtn').prop('disabled', false);
+                    $('#batchInfo').removeClass('alert-danger').addClass('alert-warning');
+                    $('#batchInfo').html('<i class="fa fa-check-square"></i> 已选择 <span id="selectedCount">' + selectedCount + '</span> 个订单 <button class="btn btn-sm btn-outline-secondary ml-2" id="clearSelectionBtn">清除选择</button>');
+                    
+                    // 重新绑定清除选择按钮事件
+                    $('#clearSelectionBtn').off('click').on('click', function() {
+                        $('.order-checkbox').prop('checked', false);
+                        $('#selectAllCheckbox').prop('checked', false).prop('indeterminate', false);
+                        updateBatchButtons();
+                    });
+                }
             } else {
                 $('#batchInfo').hide();
                 $('#batchShipBtn').prop('disabled', true);
+            }
+            
+            // 更新全选复选框状态
+            const totalCheckboxes = $('.order-checkbox').length;
+            if (selectedCount === 0) {
+                $('#selectAllCheckbox').prop('checked', false).prop('indeterminate', false);
+            } else if (selectedCount === totalCheckboxes) {
+                $('#selectAllCheckbox').prop('checked', true).prop('indeterminate', false);
+            } else {
+                $('#selectAllCheckbox').prop('checked', false).prop('indeterminate', true);
             }
         }
         
@@ -2292,6 +2476,9 @@
             // 关闭模态框
             $('#batchShipModal').modal('hide');
             
+            // 退出批量模式
+            exitBatchMode();
+            
             // 刷新订单列表
             if (successCount > 0) {
                 loadOrders(1);
@@ -2351,6 +2538,11 @@
          * 全局变量存储配送预设
          */
         let deliveryPresets = [];
+        
+        /**
+         * 批量模式状态跟踪
+         */
+        let isBatchModeActive = false;
         
         /**
          * 加载配送预设列表
@@ -2580,6 +2772,105 @@
                 $('#editEstimatedDeliveryTime').val(preset.estimatedDeliveryTime || '');
             }
         }
+
+        /**
+         * 查看订单详情
+         */
+        function viewOrderDetails(orderId) {
+            openOrderDetail(orderId);
+        }
+
+        // ==================== 搜索辅助函数 ====================
+        
+        /**
+         * 获取搜索类型的文本描述
+         * @param {string} searchType - 搜索类型
+         * @returns {string} 搜索类型的文本描述
+         */
+        function getSearchTypeText(searchType) {
+            switch (searchType) {
+                case 'all': return '全部搜索';
+                case 'order': return '订单号搜索';
+                case 'user': return '客户搜索';
+                case 'product': return '商品搜索';
+                default: return '全部搜索';
+            }
+        }
+        
+        /**
+         * 更新搜索框占位符和提示文本
+         */
+        function updateSearchPlaceholder() {
+            const searchType = $('input[name="searchType"]:checked').val() || 'all';
+            const isFuzzySearch = $('#fuzzySearchSwitch').is(':checked');
+            
+            let placeholder = '';
+            let helpText = '';
+            
+            // 根据搜索类型设置占位符
+            switch (searchType) {
+                case 'all':
+                    placeholder = '输入订单号、客户名或商品名';
+                    helpText = isFuzzySearch ? '模糊搜索所有字段' : '精确搜索所有字段';
+                    break;
+                case 'order':
+                    placeholder = '输入订单号';
+                    helpText = isFuzzySearch ? '模糊搜索订单号' : '精确匹配订单号';
+                    break;
+                case 'user':
+                    placeholder = '输入客户名称';
+                    helpText = isFuzzySearch ? '模糊搜索客户名称' : '精确匹配客户名称';
+                    break;
+                case 'product':
+                    placeholder = '输入商品名称';
+                    helpText = isFuzzySearch ? '模糊搜索商品名称' : '精确匹配商品名称';
+                    break;
+            }
+            
+            $('#orderSearch').attr('placeholder', placeholder);
+            $('#searchHelpText').text(helpText);
+            
+            // 关闭下拉菜单
+            $('.dropdown-menu').removeClass('show');
+        }
+        
+        /**
+         * 重置搜索选项
+         */
+        function resetSearchOptions() {
+            // 重置搜索类型为全部
+            $('#searchAll').prop('checked', true);
+            // 关闭模糊搜索
+            $('#fuzzySearchSwitch').prop('checked', false);
+            // 更新界面
+            updateSearchPlaceholder();
+        }
+        
+        // ==================== 全局变量 ====================
+        
+        /**
+         * 初始化搜索选项
+         */
+        function initSearchOptions() {
+            // 设置默认搜索选项
+            $('#searchAll').prop('checked', true);
+            $('#fuzzySearchSwitch').prop('checked', false);
+            
+            // 初始化搜索提示文本
+            updateSearchPlaceholder();
+            
+            // 绑定搜索选项变更事件
+            $('input[name="searchType"]').on('change', function() {
+                updateSearchPlaceholder();
+            });
+            
+            $('#fuzzySearchSwitch').on('change', function() {
+                updateSearchPlaceholder();
+            });
+        }
+    </script>
+
+    <!-- 批量发货配送信息模态框 -->
     </script>
 
     <!-- 批量发货配送信息模态框 -->

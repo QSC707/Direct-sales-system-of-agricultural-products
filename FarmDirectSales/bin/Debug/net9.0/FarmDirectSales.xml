@@ -771,7 +771,7 @@
             获取用户订单列表
             </summary>
         </member>
-        <member name="M:FarmDirectSales.Controllers.OrderController.GetFarmerOrders(System.Int32,System.String,System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+        <member name="M:FarmDirectSales.Controllers.OrderController.GetFarmerOrders(System.Int32,System.String,System.String,System.String,System.Boolean,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.Int32)">
             <summary>
             获取农户订单列表
             </summary>

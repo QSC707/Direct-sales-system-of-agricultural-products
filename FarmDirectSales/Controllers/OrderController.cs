@@ -190,12 +190,26 @@ namespace FarmDirectSales.Controllers
         public async Task<IActionResult> GetFarmerOrders(int farmerId, 
             [FromQuery] string status = "", 
             [FromQuery] string keyword = "",
+            [FromQuery] string searchType = "all",
+            [FromQuery] bool fuzzySearch = false,
             [FromQuery] DateTime? startDate = null,
-            [FromQuery] DateTime? endDate = null)
+            [FromQuery] DateTime? endDate = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50)
         {
             try
             {
-                Console.WriteLine($"GetFarmerOrders接口被调用：farmerId={farmerId}, status={status}, keyword={keyword}, startDate={startDate}, endDate={endDate}");
+                // 参数验证
+                if (pageSize <= 0 || pageSize > 100)
+                {
+                    pageSize = 50; // 限制每页最大100条记录以提升性能
+                }
+                if (page <= 0)
+                {
+                    page = 1;
+                }
+                
+                Console.WriteLine($"GetFarmerOrders接口被调用：farmerId={farmerId}, status={status}, keyword={keyword}, searchType={searchType}, fuzzySearch={fuzzySearch}, startDate={startDate}, endDate={endDate}");
                 
                 // 检查农户是否存在
                 var farmer = await _context.Users.FirstOrDefaultAsync(u => u.UserId == farmerId && u.Role == "farmer");
@@ -207,7 +221,7 @@ namespace FarmDirectSales.Controllers
 
                 Console.WriteLine($"找到农户：{farmer.Username}");
 
-                // 构建查询
+                // 构建基础查询
                 var query = _context.Orders
                     .Include(o => o.Product)
                     .Include(o => o.User)
@@ -219,17 +233,97 @@ namespace FarmDirectSales.Controllers
                 if (!string.IsNullOrEmpty(status))
                 {
                     Console.WriteLine($"应用状态筛选: status='{status}'");
-                    // 使用常规的 == 比较而不是 string.Equals
                     query = query.Where(o => o.Status == status);
                     Console.WriteLine($"状态筛选应用完成");
                 }
 
-                // 按关键词搜索（订单ID或客户用户名）
+                // 按关键词搜索 - 优化后的搜索逻辑
                 if (!string.IsNullOrEmpty(keyword))
                 {
-                    Console.WriteLine($"应用关键词筛选: keyword='{keyword}'");
-                    query = query.Where(o => o.OrderId.ToString().Contains(keyword) || 
-                                          o.User.Username.Contains(keyword));
+                    Console.WriteLine($"应用关键词筛选: keyword='{keyword}', searchType='{searchType}', fuzzySearch={fuzzySearch}");
+                    
+                    // 确保关键词安全（防止SQL注入）
+                    keyword = keyword.Trim();
+                    if (keyword.Length > 100)
+                    {
+                        keyword = keyword.Substring(0, 100); // 限制关键词长度
+                    }
+                    
+                    switch (searchType.ToLower())
+                    {
+                        case "order":
+                            // 只搜索订单号
+                            if (fuzzySearch)
+                            {
+                                query = query.Where(o => o.OrderId.ToString().Contains(keyword));
+                            }
+                            else
+                            {
+                                // 精确匹配订单号
+                                if (int.TryParse(keyword, out int orderId))
+                                {
+                                    query = query.Where(o => o.OrderId == orderId);
+                                }
+                                else
+                                {
+                                    // 如果关键词不是数字，返回空结果
+                                    query = query.Where(o => false);
+                                }
+                            }
+                            break;
+                            
+                        case "user":
+                            // 只搜索客户名称
+                            if (fuzzySearch)
+                            {
+                                query = query.Where(o => o.User.Username.Contains(keyword));
+                            }
+                            else
+                            {
+                                query = query.Where(o => o.User.Username == keyword);
+                            }
+                            break;
+                            
+                        case "product":
+                            // 只搜索商品名称
+                            if (fuzzySearch)
+                            {
+                                query = query.Where(o => o.Product.ProductName.Contains(keyword));
+                            }
+                            else
+                            {
+                                query = query.Where(o => o.Product.ProductName == keyword);
+                            }
+                            break;
+                            
+                        default: // "all"
+                            // 搜索所有字段
+                            if (fuzzySearch)
+                            {
+                                query = query.Where(o => 
+                                    o.OrderId.ToString().Contains(keyword) || 
+                                    o.User.Username.Contains(keyword) ||
+                                    o.Product.ProductName.Contains(keyword));
+                            }
+                            else
+                            {
+                                // 精确匹配
+                                if (int.TryParse(keyword, out int orderIdExact))
+                                {
+                                    query = query.Where(o => 
+                                        o.OrderId == orderIdExact ||
+                                        o.User.Username == keyword ||
+                                        o.Product.ProductName == keyword);
+                                }
+                                else
+                                {
+                                    query = query.Where(o => 
+                                        o.User.Username == keyword ||
+                                        o.Product.ProductName == keyword);
+                                }
+                            }
+                            break;
+                    }
                     Console.WriteLine($"关键词筛选应用完成");
                 }
 
@@ -250,13 +344,18 @@ namespace FarmDirectSales.Controllers
                     Console.WriteLine($"结束日期筛选应用完成");
                 }
 
-                Console.WriteLine($"执行查询前的最终查询语句: {query.ToQueryString()}");
-                
+                // 获取总数量（用于分页）
+                var totalCount = await query.CountAsync();
+                Console.WriteLine($"查询总数量: {totalCount}");
+
+                // 应用分页并执行查询
                 var orders = await query
                     .OrderByDescending(o => o.CreateTime)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
                     .ToListAsync();
                     
-                Console.WriteLine($"查询结果：找到 {orders.Count} 个订单");
+                Console.WriteLine($"查询结果：找到 {orders.Count} 个订单（第{page}页，每页{pageSize}条）");
 
                 return Ok(new
                 {
@@ -294,7 +393,16 @@ namespace FarmDirectSales.Controllers
                         o.DeliveryContact,
                         o.DeliveryPhone,
                         o.EstimatedDeliveryTime
-                    })
+                    }),
+                    pagination = new
+                    {
+                        currentPage = page,
+                        pageSize = pageSize,
+                        totalCount = totalCount,
+                        totalPages = (int)Math.Ceiling((double)totalCount / pageSize),
+                        hasNext = page * pageSize < totalCount,
+                        hasPrevious = page > 1
+                    }
                 });
             }
             catch (Exception ex)
