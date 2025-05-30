@@ -553,7 +553,7 @@
             $('#logoutBtn').on('click', function(e) {
                 e.preventDefault();
                 logout();
-        });
+            });
         }
         
         /**
@@ -601,8 +601,8 @@
                     // 渲染分页控件
                     if (pagination) {
                         renderPagination(pagination.currentPage, pagination.totalPages, function(newPage) {
-                        loadProducts(newPage, pageSize);
-                    });
+                            loadProducts(newPage, pageSize);
+                        });
                     }
                 } else {
                     throw new Error('获取产品列表失败');

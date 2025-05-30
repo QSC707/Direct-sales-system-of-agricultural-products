@@ -133,6 +133,12 @@
             display: inline-block;
         }
         
+        /* 导航栏样式统一 */
+        .navbar-nav .nav-link {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+        
         @media (max-width: 768px) {
             .welcome-text {
                 flex-direction: column;
@@ -216,8 +222,8 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <li class="nav-item dropdown" id="userDropdown" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                             <span id="currentUsername">管理员</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end">

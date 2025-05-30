@@ -15,6 +15,14 @@
     <!-- Axios配置 -->
     <script src="../../js/axios-config.js"></script>
     <script src="../../js/auth.js"></script>
+    
+    <style>
+        /* 导航栏样式统一 */
+        .navbar-nav .nav-link {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
     <!-- 导航栏 -->
@@ -447,14 +455,14 @@
                     logout();
                 });
                 
-                // 修复模态框aria-hidden警告问题
-                $('.modal').on('show.bs.modal', function() {
-                    // 移除aria-hidden属性当模态框显示时
-                    $(this).removeAttr('aria-hidden');
-                });
-                
+                // 修复模态框关闭问题
                 $('.modal').on('hidden.bs.modal', function() {
-                    // 模态框完全隐藏后设置aria-hidden
+                    // 移除模态框背景
+                    $('.modal-backdrop').remove();
+                    // 移除body上的样式
+                    $('body').removeClass('modal-open');
+                    $('body').css('padding-right', '');
+                    // 确保aria-hidden属性设置正确
                     $(this).attr('aria-hidden', 'true');
                 });
             });
@@ -812,6 +820,13 @@
                     const addModal = bootstrap.Modal.getInstance(document.getElementById('addAreaModal'));
                     addModal.hide();
                     
+                    // 确保模态框背景也被移除
+                    setTimeout(() => {
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open');
+                        $('body').css('padding-right', '');
+                    }, 100);
+                    
                     // 重置表单
                     $('#addAreaForm')[0].reset();
                     
@@ -1097,6 +1112,13 @@
                     const editModalInstance = bootstrap.Modal.getInstance(document.getElementById('editAreaModal'));
                     if (editModalInstance) {
                         editModalInstance.hide();
+                        
+                        // 确保模态框背景也被移除
+                        setTimeout(() => {
+                            $('.modal-backdrop').remove();
+                            $('body').removeClass('modal-open');
+                            $('body').css('padding-right', '');
+                        }, 100);
                     }
                     
                     // 重新加载数据
@@ -1199,7 +1221,17 @@
                     }
                     
                     // 关闭模态框
-                    const deleteConfirmModal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')); if (deleteConfirmModal) deleteConfirmModal.hide();
+                    const deleteConfirmModal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')); 
+                    if (deleteConfirmModal) {
+                        deleteConfirmModal.hide();
+                        
+                        // 确保模态框背景也被移除
+                        setTimeout(() => {
+                            $('.modal-backdrop').remove();
+                            $('body').removeClass('modal-open');
+                            $('body').css('padding-right', '');
+                        }, 100);
+                    }
                     
                     // 重新加载数据
                     await loadDeliveryAreas();
