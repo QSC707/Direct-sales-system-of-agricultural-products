@@ -1,0 +1,337 @@
+/**
+ * 农产品直销平台自定义样式
+ */
+
+/* 全局样式 */
+body {
+    font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* 重写Bootstrap样式 */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1030;
+}
+
+.navbar .dropdown-menu {
+    z-index: 1031 !important;
+    border: 1px solid rgba(0,0,0,.15);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+}
+
+.navbar .dropdown-toggle {
+    z-index: 1032;
+}
+
+#userDropdown {
+    z-index: 1033;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0,0,0,.075);
+}
+
+.btn-primary {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-primary:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+.btn-outline-primary {
+    color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-outline-primary:hover {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+/* 产品卡片 */
+.product-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.product-img {
+    height: 180px;
+    object-fit: cover;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+/* 评价样式 */
+.review-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.star-rating .fa-star {
+    color: #ccc;
+}
+
+.star-rating .fa-star.checked {
+    color: #ffcc00;
+}
+
+/* 数据统计卡片 */
+.stats-card {
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    margin-bottom: 20px;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.stats-card .card-body {
+    padding: 25px;
+}
+
+.stats-card .icon {
+    font-size: 2.5rem;
+    color: #28a745;
+    opacity: 0.8;
+}
+
+.stats-card .stats-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #212529;
+}
+
+.stats-card .text-muted {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* 图表容器 */
+.chart-container {
+    height: 400px;
+    margin-bottom: 20px;
+}
+
+/* 页脚 */
+footer {
+    margin-top: 2rem;
+    padding: 20px 0;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .stats-card .stats-value {
+        font-size: 1.5rem;
+    }
+    .chart-container {
+        height: 300px;
+    }
+}
+
+/* 通用样式 */
+.text-success {
+    color: #28a745 !important;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* 现代页脚样式 */
+.footer-section {
+    background: linear-gradient(to bottom, #f8f9fa, #eaedf0);
+    border-top: 1px solid rgba(0,0,0,0.05);
+    font-size: 0.95rem;
+}
+
+.footer-brand .social-links {
+    display: flex;
+    gap: 12px;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #f0f2f5;
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.social-link:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-3px);
+}
+
+.footer-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.footer-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 40px;
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.75rem;
+}
+
+.footer-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+    padding-left: 0;
+}
+
+.footer-links a:hover {
+    color: var(--primary-color);
+    padding-left: 5px;
+}
+
+.contact-info {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.contact-info li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: var(--text-muted);
+}
+
+.contact-info li i {
+    width: 20px;
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+.footer-bottom {
+    background-color: rgba(0,0,0,0.02);
+    border-top: 1px solid rgba(0,0,0,0.05);
+    font-size: 0.85rem;
+}
+
+.copyright {
+    color: var(--text-muted);
+}
+
+.footer-links-secondary {
+    display: flex;
+    gap: 20px;
+}
+
+.footer-links-secondary a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-links-secondary a:hover {
+    color: var(--primary-color);
+}
+
+.newsletter .form-control {
+    background-color: rgba(255,255,255,0.8);
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.newsletter .btn {
+    padding: 0.375rem 1rem;
+}
+
+@media (max-width: 767.98px) {
+    .footer-title {
+        margin-bottom: 1rem;
+    }
+    
+    .footer-section {
+        text-align: center;
+    }
+    
+    .footer-title::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .footer-brand .social-links {
+        justify-content: center;
+    }
+    
+    .contact-info li {
+        justify-content: center;
+    }
+    
+    .contact-info li i {
+        margin-right: 8px;
+    }
+    
+    .footer-bottom .d-flex {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .footer-links-secondary {
+        justify-content: center;
+    }
+} 
+ 
+ 

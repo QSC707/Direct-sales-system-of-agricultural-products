@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - 农产品直销平台</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <script src="../../js/dependencies.js"></script>
+    <!-- 引入Axios库 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- 应用配置 -->
+    <script src="../../js/config.js"></script>
+    <!-- API调用相关 -->
+    <script src="../../js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="../../js/axios-config.js"></script>
+    <script src="../../js/auth.js"></script>
+    
+    <!-- 自定义样式 -->
+    <style>
+        /* 全局布局优化 */
+        body {
+            background: #f8f9fa;
+            font-size: 14px;
+        }
+        
+        .main-container {
+            padding: 15px;
+            max-width: 100%;
+        }
+        
+        /* 导航栏优化 */
+        .navbar {
+            padding: 8px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-nav .nav-link {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+        
+        /* 卡片优化 */
+        .main-card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 0;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-radius: 8px 8px 0 0 !important;
+            padding: 12px 20px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* 搜索区域紧凑化 */
+        .search-toolbar {
+            background: white;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .search-toolbar .form-control {
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            height: 36px;
+            font-size: 13px;
+        }
+        
+        .search-toolbar .btn {
+            height: 36px;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+        }
+        
+        /* 统计卡片优化 */
+        .stats-row {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 6px;
+            padding: 12px 20px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        
+        /* 表格优化 */
+        .table-container {
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .table {
+            margin-bottom: 0;
+            font-size: 13px;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            border-top: none;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            color: #495057;
+            padding: 12px 8px;
+            white-space: nowrap;
+        }
+        
+        .table td {
+            padding: 8px;
+            vertical-align: middle;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* 操作按钮紧凑化 */
+        .action-buttons {
+            white-space: nowrap;
+        }
+        
+        .action-buttons .btn {
+            padding: 4px 8px;
+            margin: 0 1px;
+            border-radius: 4px;
+            font-size: 11px;
+            border: none;
+        }
+        
+        .action-buttons .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+        
+        .action-buttons .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .action-buttons .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        /* 角色徽章优化 */
+        .badge {
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+        
+        /* 农场信息优化 */
+        .farm-info {
+            font-size: 11px;
+            line-height: 1.2;
+            color: #666;
+        }
+        
+        /* 分页优化 */
+        .pagination {
+            margin: 0;
+        }
+        
+        .pagination .page-link {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+        
+        .pagination-info {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        /* 模态框优化 */
+        .modal-dialog {
+            margin: 30px auto;
+        }
+        
+        .modal-content {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .modal-header {
+            border-radius: 8px 8px 0 0;
+            padding: 15px 20px;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-control {
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        /* 响应式优化 */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 10px;
+            }
+            
+            .search-toolbar {
+                padding: 10px;
+            }
+            
+            .search-toolbar .row > div {
+                margin-bottom: 8px;
+            }
+            
+            .table {
+                font-size: 11px;
+            }
+            
+            .table th,
+            .table td {
+                padding: 6px 4px;
+            }
+            
+            .action-buttons .btn {
+                padding: 2px 6px;
+                font-size: 10px;
+                margin: 0 1px;
+            }
+            
+            /* 隐藏部分列在小屏幕上 */
+            .table th:nth-child(4),
+            .table td:nth-child(4),
+            .table th:nth-child(6),
+            .table td:nth-child(6) {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .table th:nth-child(1),
+            .table td:nth-child(1),
+            .table th:nth-child(5),
+            .table td:nth-child(5) {
+                display: none;
+            }
+            
+            .action-buttons .btn {
+                padding: 2px 4px;
+                font-size: 9px;
+            }
+        }
+        
+        /* 加载动画优化 */
+        .loading-row {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        /* 快速操作栏 */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .quick-actions .btn {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">
+                农产品直销管理中心
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">
+                            管理首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="users.html">
+                            用户管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="products.html">
+                            产品管理
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="delivery-areas.html">
+                            配送区域
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="shipping-fees.html">
+                            配送费用
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="logs.html">
+                            系统日志
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown" id="userDropdown" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <span id="currentUsername">管理员</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="profile.html">
+                                个人信息
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" id="logoutBtn">
+                                退出登录
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <div class="container-fluid main-container">
+        <!-- 搜索工具栏 -->
+        <div class="search-toolbar">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="searchKeyword" placeholder="搜索用户名、邮箱或手机号">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" id="searchBtn">
+                                <i class="fa fa-search"></i> 搜索
+                            </button>
+                            <button class="btn btn-outline-warning" id="resetBtn" title="清空搜索条件和筛选">
+                                <i class="fa fa-times"></i> 重置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-control" id="roleFilter">
+                        <option value="">所有角色</option>
+                        <option value="admin">管理员</option>
+                        <option value="user">普通用户</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <div class="quick-actions">
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                            <i class="fa fa-plus"></i> 添加用户
+                        </button>
+                        <button class="btn btn-outline-secondary" id="refreshBtn">
+                            <i class="fa fa-refresh"></i> 刷新
+                        </button>
+                        <button class="btn btn-outline-info" id="exportBtn">
+                            <i class="fa fa-download"></i> 导出
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-row" id="userStats" style="display: none;">
+                        <span id="statsText">加载中...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主卡片 -->
+        <div class="main-card card">
+            <div class="card-header">
+                <h4 class="mb-0 text-white">
+                    <i class="fa fa-users"></i> 用户管理
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- 用户列表 -->
+                <div class="table-container">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="80">ID</th>
+                                <th width="140">用户名</th>
+                                <th width="100">角色</th>
+                                <th width="200">邮箱</th>
+                                <th width="130">手机号</th>
+                                <th width="130">注册时间</th>
+                                <th width="100">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userList">
+                            <tr class="loading-row">
+                                <td colspan="7">
+                                    <i class="fa fa-spinner fa-spin me-2"></i>正在加载用户...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 分页 -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center" id="pagination">
+                        <!-- 分页将通过JS动态加载 -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加用户模态框 -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addUserModalLabel">添加用户</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserForm">
+                        <div class="form-group">
+                            <label for="username">用户名 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">密码 <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">确认密码 <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">邮箱 <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">手机号 <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="phone" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="role">角色 <span class="text-danger">*</span></label>
+                            <select class="form-control" id="role" required>
+                                <option value="">请选择角色</option>
+                                <option value="admin">管理员</option>
+                                <option value="user">普通用户</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveUserBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 编辑用户模态框 -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editUserModalLabel">编辑用户</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" id="editUserId">
+                        
+                        <div class="form-group">
+                            <label for="editUsername">用户名</label>
+                            <input type="text" class="form-control" id="editUsername" readonly>
+                            <small class="form-text text-muted">用户名不可修改</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editEmail">邮箱</label>
+                            <input type="email" class="form-control" id="editEmail">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editPhone">手机号 <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="editPhone" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editRole">角色 <span class="text-danger">*</span></label>
+                            <select class="form-control" id="editRole" required>
+                                <option value="">请选择角色</option>
+                                <option value="admin">管理员</option>
+                                <option value="user">普通用户</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="resetPassword">
+                                <label class="form-check-label" for="resetPassword">重置密码</label>
+                            </div>
+                        </div>
+                        
+                        <div id="passwordFields" style="display: none;">
+                            <div class="form-group">
+                                <label for="newPassword">新密码 <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="newPassword">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="confirmNewPassword">确认新密码 <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="confirmNewPassword">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="updateUserBtn">更新</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户详情模态框 -->
+    <div class="modal fade" id="userDetailModal" tabindex="-1" role="dialog" aria-labelledby="userDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="userDetailModalLabel">用户详情</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>基本信息</h6>
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <th width="100">用户ID:</th>
+                                    <td id="detailUserId"></td>
+                                </tr>
+                                <tr>
+                                    <th>用户名:</th>
+                                    <td id="detailUsername"></td>
+                                </tr>
+                                <tr>
+                                    <th>角色:</th>
+                                    <td id="detailRole"></td>
+                                </tr>
+                                <tr>
+                                    <th>邮箱:</th>
+                                    <td id="detailEmail"></td>
+                                </tr>
+                                <tr>
+                                    <th>手机号:</th>
+                                    <td id="detailPhone"></td>
+                                </tr>
+                                <tr>
+                                    <th>注册时间:</th>
+                                    <td id="detailCreateTime"></td>
+                                </tr>
+                                <tr>
+                                    <th>最近登录:</th>
+                                    <td id="detailLastLoginTime"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white mt-5 py-3">
+        <div class="container text-center">
+            <p>© 2023 农产品直销平台 版权所有</p>
+        </div>
+    </footer>
+
+    <!-- 自定义JS -->
+    <script>
+        // 等待依赖加载完成后执行
+        if (typeof window.initDependencies === 'function') {
+            window.initDependencies(function() {
+                /**
+                 * 页面加载完成后执行
+                 */
+                $(document).ready(function() {
+                    // 检查用户是否登录，并且是管理员角色
+                    checkLogin(function(user) {
+                        if (user && user.role === 'admin') {
+                            // 显示用户信息
+                            $('#userDropdown').show();
+                            $('#currentUsername').text(user.username);
+                            
+                            // 加载用户列表
+                            loadUsers(1);
+                            
+                            // 绑定搜索按钮点击事件
+                            $('#searchBtn').on('click', function() {
+                                loadUsers(1);
+                            });
+                            
+                            // 绑定刷新按钮点击事件
+                            $('#refreshBtn').on('click', function() {
+                                $('#searchKeyword').val('');
+                                $('#roleFilter').val('');
+                                loadUsers(1);
+                            });
+                            
+                            // 绑定重置按钮点击事件
+                            $('#resetBtn').on('click', function() {
+                                $('#searchKeyword').val('');
+                                $('#roleFilter').val('');
+                                loadUsers(1);
+                            });
+                            
+                            // 绑定导出按钮点击事件
+                            $('#exportBtn').on('click', function() {
+                                exportUsers();
+                            });
+                            
+                            // 绑定回车键搜索
+                            $('#searchKeyword').on('keypress', function(e) {
+                                if (e.which === 13) {
+                                    loadUsers(1);
+                                }
+                            });
+                            
+                            // 绑定角色筛选改变事件
+                            $('#roleFilter').on('change', function() {
+                                loadUsers(1);
+                            });
+                        } else {
+                            // 如果不是管理员，跳转到登录页面并显示提示
+                            alert('您需要以管理员身份登录才能访问此页面');
+                            window.location.href = '../login.html?role=admin&redirect=' + encodeURIComponent(window.location.href);
+                        }
+                    });
+                    
+                    // 重置密码选项改变事件
+                    $('#resetPassword').on('change', function() {
+                        if ($(this).prop('checked')) {
+                            $('#passwordFields').show();
+                        } else {
+                            $('#passwordFields').hide();
+                        }
+                    });
+                    
+                    // 保存新用户
+                    $('#saveUserBtn').on('click', function() {
+                        if (validateUserForm('add')) {
+                            addUser();
+                        }
+                    });
+                    
+                    // 更新用户
+                    $('#updateUserBtn').on('click', function() {
+                        if (validateUserForm('edit')) {
+                            updateUser();
+                        }
+                    });
+
+                    // 模态框事件绑定 - 解决无障碍访问问题
+                    $('#addUserModal').on('hide.bs.modal', function () {
+                        // 模态框开始关闭时立即移除焦点，避免aria-hidden警告
+                        $(document.activeElement).blur();
+                    }).on('hidden.bs.modal', function () {
+                        // 模态框完全关闭后重置表单
+                        $('#addUserForm')[0].reset();
+                        $('#farmerFields').hide();
+                    });
+
+                    $('#editUserModal').on('hide.bs.modal', function () {
+                        // 模态框开始关闭时立即移除焦点
+                        $(document.activeElement).blur();
+                    }).on('hidden.bs.modal', function () {
+                        // 模态框完全关闭后重置状态
+                        $('#passwordFields').hide();
+                        $('#resetPassword').prop('checked', false);
+                    });
+
+                    $('#userDetailModal').on('hide.bs.modal', function () {
+                        // 模态框开始关闭时立即移除焦点
+                        $(document.activeElement).blur();
+                    });
+                });
+            });
+        } else {
+            // 如果 window.initDependencies 不存在，显示错误信息
+            console.error('依赖管理系统未加载，请检查 dependencies.js 文件');
+            alert('页面依赖未正确加载，请刷新页面重试');
+        }
+        
+        /**
+         * 加载用户列表
+         */
+        async function loadUsers(page) {
+            try {
+                const keyword = $('#searchKeyword').val();
+                const role = $('#roleFilter').val();
+                
+                // 使用正确的管理员API端点
+                const result = await http.get(`/api/Admin/users`, {
+                    params: {
+                        page,
+                        keyword,
+                        role,
+                        pageSize: 10
+                    }
+                });
+                
+                renderUserList(result.data.users);
+                renderPagination(result.data.totalPages, page);
+                showUserStats(result.data);
+                
+            } catch (error) {
+                console.error('获取用户列表失败', error);
+                alert('获取用户列表失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+        
+        /**
+         * 显示用户统计信息
+         */
+        function showUserStats(data) {
+            const statsHtml = `
+                <i class="fa fa-users"></i>
+                总用户: <strong>${data.totalUsers}</strong> 
+                | 当前页: <strong>${data.currentPage}/${data.totalPages}</strong> 
+                | 每页显示: <strong>${data.pageSize}</strong> 条
+            `;
+            
+            $('#statsText').html(statsHtml);
+            $('#userStats').show();
+        }
+        
+        /**
+         * 渲染用户列表
+         */
+        function renderUserList(users) {
+            const $userList = $('#userList');
+            $userList.empty();
+            
+            if (!users || users.length === 0) {
+                $userList.append('<tr><td colspan="7" class="text-center">暂无用户数据</td></tr>');
+                return;
+            }
+            
+            users.forEach(function(user) {
+                const roleBadge = getRoleBadge(user.role);
+                
+                const row = `
+                    <tr data-user-id="${user.userId}">
+                        <td><span class="text-muted">#${user.userId}</span></td>
+                        <td><strong>${user.username}</strong></td>
+                        <td>${roleBadge}</td>
+                        <td class="text-truncate" style="max-width: 200px;" title="${user.email || ''}">
+                            ${user.email || '<span class="text-muted">未设置</span>'}
+                        </td>
+                        <td>${user.phone || '<span class="text-muted">未设置</span>'}</td>
+                        <td class="text-muted">${formatDate(user.createTime)}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-info view-user-btn" data-user-id="${user.userId}">
+                                    查看
+                                </button>
+                                <button class="btn btn-primary edit-user-btn" data-user-id="${user.userId}">
+                                    编辑
+                                </button>
+                                <button class="btn btn-danger delete-user-btn" data-user-id="${user.userId}">
+                                    删除
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                
+                $userList.append(row);
+            });
+            
+            // 绑定查看、编辑和删除事件
+            $('.view-user-btn').on('click', function() {
+                const userId = $(this).data('user-id');
+                openUserDetailModal(userId);
+            });
+            
+            $('.edit-user-btn').on('click', function() {
+                const userId = $(this).data('user-id');
+                openEditUserModal(userId);
+            });
+            
+            $('.delete-user-btn').on('click', function() {
+                const userId = $(this).data('user-id');
+                confirmDeleteUser(userId);
+            });
+        }
+        
+        /**
+         * 渲染分页
+         */
+        function renderPagination(totalPages, currentPage) {
+            const $pagination = $('#pagination');
+            $pagination.empty();
+            
+            if (totalPages <= 1) {
+                return;
+            }
+            
+            // 上一页
+            $pagination.append(`
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">上一页</a>
+                </li>
+            `);
+            
+            // 页码
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage || (i <= 3 || i >= totalPages - 2) || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    $pagination.append(`
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>
+                    `);
+                } else if ($pagination.children().last().text() !== '...') {
+                    $pagination.append(`
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    `);
+                }
+            }
+            
+            // 下一页
+            $pagination.append(`
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage + 1}">下一页</a>
+                </li>
+            `);
+            
+            // 绑定页码点击事件
+            $('.page-link').on('click', function(e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                if (page && page !== currentPage) {
+                    loadUsers(page);
+                }
+            });
+        }
+        
+        /**
+         * 打开用户详情模态框
+         */
+        async function openUserDetailModal(userId) {
+            try {
+                // 使用正确的管理员API端点获取用户详情
+                const result = await http.get(`/api/Admin/users/${userId}`);
+                const user = result.data;
+                
+                // 填充基本信息
+                $('#detailUserId').text(user.userId);
+                $('#detailUsername').text(user.username);
+                $('#detailRole').html(getRoleBadge(user.role));
+                $('#detailEmail').text(user.email || '未设置');
+                $('#detailPhone').text(user.phone || '未设置');
+                $('#detailCreateTime').text(formatDate(user.createTime));
+                $('#detailLastLoginTime').text(user.lastLoginTime ? formatDate(user.lastLoginTime) : '未登录');
+                
+                // 显示模态框
+                const userDetailModal = new bootstrap.Modal(document.getElementById('userDetailModal')); userDetailModal.show();
+            } catch (error) {
+                console.error('获取用户详情失败', error);
+                alert('获取用户详情失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+        
+
+        
+        /**
+         * 打开编辑用户模态框
+         */
+        async function openEditUserModal(userId) {
+            // 重置表单
+            $('#editUserForm')[0].reset();
+            $('#passwordFields').hide();
+            $('#resetPassword').prop('checked', false);
+            
+            try {
+                // 使用Axios获取用户信息
+                const result = await http.get(`/api/Admin/users/${userId}`);
+                const user = result.data;
+                
+                // 填充表单
+                $('#editUserId').val(user.userId);
+                $('#editUsername').val(user.username);
+                $('#editEmail').val(user.email);
+                $('#editPhone').val(user.phone);
+                $('#editRole').val(user.role);
+                
+                // 打开模态框
+                const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal')); editUserModal.show();
+            } catch (error) {
+                console.error('获取用户信息失败', error);
+                alert('获取用户信息失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+        
+        /**
+         * 确认删除用户
+         */
+        function confirmDeleteUser(userId) {
+            // 不允许删除自己
+            const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+            if (userId == currentUser.userId) {
+                alert('不能删除自己的账号');
+                return;
+            }
+            
+            if (confirm('确定要删除这个用户吗？此操作无法撤销。')) {
+                deleteUser(userId);
+            }
+        }
+        
+        /**
+         * 删除用户
+         */
+        async function deleteUser(userId) {
+            try {
+                // 使用Axios删除用户
+                await http.delete(`/api/Admin/users/${userId}`);
+                alert('用户删除成功');
+                loadUsers(1); // 重新加载用户列表
+            } catch (error) {
+                console.error('删除用户失败', error);
+                alert('删除用户失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+        
+        /**
+         * 验证用户表单
+         */
+        function validateUserForm(formType) {
+            if (formType === 'add') {
+                // 验证添加用户表单
+                const username = $('#username').val();
+                const password = $('#password').val();
+                const confirmPassword = $('#confirmPassword').val();
+                const email = $('#email').val();
+                const phone = $('#phone').val();
+                const role = $('#role').val();
+                
+                if (!username || !password || !confirmPassword || !email || !phone || !role) {
+                    alert('请填写所有必填字段');
+                    return false;
+                }
+                
+                if (password !== confirmPassword) {
+                    alert('两次输入的密码不一致');
+                    return false;
+                }
+                
+                // 简单的邮箱验证（仅在有输入时验证）
+                if (email && !validateEmail(email)) {
+                    alert('请输入有效的邮箱地址');
+                    return false;
+                }
+                
+                // 简单的手机号验证
+                if (!validatePhone(phone)) {
+                    alert('请输入有效的手机号码');
+                    return false;
+                }
+            } else {
+                // 验证编辑用户表单
+                const email = $('#editEmail').val();
+                const phone = $('#editPhone').val();
+                const role = $('#editRole').val();
+                
+                if (!phone || !role) {
+                    alert('请填写所有必填字段');
+                    return false;
+                }
+                
+                // 简单的邮箱验证（仅在有输入时验证）
+                if (email && !validateEmail(email)) {
+                    alert('请输入有效的邮箱地址');
+                    return false;
+                }
+                
+                // 简单的手机号验证
+                if (!validatePhone(phone)) {
+                    alert('请输入有效的手机号码');
+                    return false;
+                }
+                
+                // 如果选择了重置密码，验证密码字段
+                if ($('#resetPassword').prop('checked')) {
+                    const newPassword = $('#newPassword').val();
+                    const confirmNewPassword = $('#confirmNewPassword').val();
+                    
+                    if (!newPassword || !confirmNewPassword) {
+                        alert('请填写新密码和确认密码');
+                        return false;
+                    }
+                    
+                    if (newPassword !== confirmNewPassword) {
+                        alert('两次输入的密码不一致');
+                        return false;
+                    }
+                }
+            }
+            
+            return true;
+        }
+        
+        /**
+         * 添加用户
+         */
+        async function addUser() {
+            // 收集表单数据
+            const userData = {
+                username: $('#username').val(),
+                password: $('#password').val(),
+                email: $('#email').val(),
+                phone: $('#phone').val(),
+                role: $('#role').val()
+            };
+            
+            try {
+                // 使用Axios发送请求到注册API
+                await http.post('/api/auth/register', userData);
+                
+                alert('用户添加成功');
+                const addUserModal = bootstrap.Modal.getInstance(document.getElementById('addUserModal')); if (addUserModal) addUserModal.hide();
+                $('#addUserForm')[0].reset(); // 重置表单
+                loadUsers(1); // 重新加载用户列表
+            } catch (error) {
+                console.error('添加用户失败', error);
+                alert('添加用户失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+        
+        /**
+         * 更新用户
+         */
+        async function updateUser() {
+            const userId = $('#editUserId').val();
+            
+            // 收集表单数据
+            const userData = {
+                email: $('#editEmail').val(),
+                phone: $('#editPhone').val(),
+                role: $('#editRole').val()
+            };
+            
+            // 如果选择了重置密码，添加密码字段
+            if ($('#resetPassword').prop('checked')) {
+                userData.password = $('#newPassword').val();
+            }
+            
+            try {
+                // 使用Axios发送请求到管理员API
+                await http.put(`/api/Admin/users/${userId}`, userData);
+                
+                alert('用户更新成功');
+                const editUserModal = bootstrap.Modal.getInstance(document.getElementById('editUserModal')); if (editUserModal) editUserModal.hide();
+                loadUsers(1); // 重新加载用户列表
+            } catch (error) {
+                console.error('更新用户失败', error);
+                alert('更新用户失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+        
+        /**
+         * 获取角色徽章HTML
+         */
+        function getRoleBadge(role) {
+            if (role === 'admin') {
+                return '<span class="badge bg-danger role-badge">管理员</span>';
+            } else if (role === 'farmer') {
+                return '<span class="badge bg-success role-badge">农户</span>';
+            } else {
+                return '<span class="badge bg-info role-badge">普通用户</span>';
+            }
+        }
+        
+        /**
+         * 格式化日期
+         */
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('zh-CN');
+        }
+        
+        /**
+         * 格式化日期时间
+         */
+        function formatDateTime(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN');
+        }
+        
+        /**
+         * 验证邮箱
+         */
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        /**
+         * 验证手机号
+         */
+        function validatePhone(phone) {
+            const re = /^1[3-9]\d{9}$/;
+            return re.test(phone);
+        }
+        
+        /**
+         * 导出用户数据
+         */
+        async function exportUsers() {
+            try {
+                const keyword = $('#searchKeyword').val();
+                const role = $('#roleFilter').val();
+                
+                // 获取所有用户数据（不分页）
+                const result = await http.get(`/api/Admin/users`, {
+                    params: {
+                        page: 1,
+                        pageSize: 10000, // 获取所有数据
+                        keyword,
+                        role
+                    }
+                });
+                
+                // 生成CSV数据
+                const csvData = generateCSV(result.data.users);
+                
+                // 下载CSV文件
+                downloadCSV(csvData, `用户数据_${formatDate(new Date())}.csv`);
+                
+            } catch (error) {
+                console.error('导出用户数据失败', error);
+                alert('导出用户数据失败: ' + (error.response?.data?.message || error.message));
+            }
+        }
+        
+        /**
+         * 生成CSV数据
+         */
+        function generateCSV(users) {
+            const headers = ['用户ID', '用户名', '角色', '邮箱', '手机号', '农场名称', '农场位置', '产品类别', '注册时间'];
+            let csvContent = headers.join(',') + '\n';
+            
+            users.forEach(user => {
+                const row = [
+                    user.userId,
+                    `"${user.username}"`,
+                    user.role,
+                    `"${user.email || ''}"`,
+                    `"${user.phone || ''}"`,
+                    `"${user.farmName || ''}"`,
+                    `"${user.farmLocation || ''}"`,
+                    `"${user.productCategory || ''}"`,
+                    `"${formatDate(user.createTime)}"`
+                ];
+                csvContent += row.join(',') + '\n';
+            });
+            
+            return csvContent;
+        }
+        
+        /**
+         * 下载CSV文件
+         */
+        function downloadCSV(csvContent, filename) {
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    </script>
+</body>
+</html>

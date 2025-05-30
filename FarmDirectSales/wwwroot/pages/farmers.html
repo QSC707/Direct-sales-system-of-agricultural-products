@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>农户展示 - 本地特色农产品直销系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- 自定义样式 -->
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        /* ========== 农户卡片样式优化 ========== */
+        .farmer-card .card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #e8f5e8;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .farmer-card .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(40, 167, 69, 0.15);
+            border-color: #28a745;
+        }
+        
+        .farmer-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .farmer-card .card:hover .card-img-top {
+            transform: scale(1.05);
+        }
+        
+        .farmer-card .card-body {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+        }
+        
+        .farmer-card .card-title {
+            color: #2d5a3d;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+        
+        .farmer-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .farmer-info i {
+            margin-right: 0.5rem;
+            color: #28a745;
+        }
+        
+        .badge-container {
+            margin-bottom: 1rem;
+        }
+        
+        .badge.bg-success {
+            background: linear-gradient(45deg, #28a745, #20c997) !important;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .badge.bg-light {
+            background: #e8f5e8 !important;
+            color: #2d5a3d !important;
+            padding: 0.4rem 0.8rem;
+            border-radius: 15px;
+            border: 1px solid #d4edda;
+        }
+        
+        .farmer-description {
+            color: #6c757d;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .farmer-stats {
+            background: rgba(40, 167, 69, 0.05);
+            padding: 0.8rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+        
+        .stats-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.3rem;
+        }
+        
+        .stats-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .stats-value {
+            color: #28a745;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        /* ========== 搜索区域优化 ========== */
+        .search-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-container .form-control,
+        .search-container .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+        }
+        
+        .search-container .form-control:focus,
+        .search-container .form-select:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+        
+        .search-container .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 1.5rem;
+        }
+        
+        /* ========== 页面标题优化 ========== */
+        .page-title {
+            color: #2d5a3d;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border-radius: 2px;
+        }
+        
+        /* ========== 响应式优化 ========== */
+        @media (max-width: 768px) {
+            .farmer-card .card-body {
+                padding: 1rem;
+            }
+            
+            .search-container {
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+            }
+            
+            .farmer-card .card-img-top {
+                height: 160px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-leaf me-2"></i>农产品直销系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/products.html">产品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/pages/farmers.html">农户展示</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/about.html">关于我们</a>
+                    </li>
+                </ul>
+                
+                <!-- 未登录状态 -->
+                <div class="d-flex gap-2" id="unauthenticated-menu">
+                    <a href="/pages/login.html" class="btn btn-outline-primary">登录</a>
+                    <a href="/pages/register.html" class="btn btn-primary">注册</a>
+                </div>
+                
+                <!-- 已登录状态 -->
+                <div class="d-none" id="authenticated-menu">
+                    <a href="/pages/cart.html" class="btn btn-outline-primary me-2" title="购物车">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <div class="dropdown d-inline-block">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="username">用户名</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" aria-labelledby="userMenuButton">
+                            <li><a class="dropdown-item" href="/pages/user/profile.html"><i class="fas fa-user me-2"></i>个人中心</a></li>
+                            <li><a class="dropdown-item" href="/pages/user/orders.html"><i class="fas fa-shopping-cart me-2"></i>我的订单</a></li>
+                            <li id="farmer-menu-item" class="d-none"><a class="dropdown-item" href="/pages/farmer/dashboard.html"><i class="fas fa-tractor me-2"></i>农户中心</a></li>
+                            <li id="admin-menu-item" class="d-none"><a class="dropdown-item" href="/pages/admin/dashboard.html"><i class="fas fa-cogs me-2"></i>管理后台</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container py-5">
+        <h1 class="text-center page-title">发现优质农户</h1>
+        
+        <!-- 搜索和筛选 -->
+        <div class="row mb-5">
+            <div class="col-lg-10 mx-auto">
+                <div class="search-container">
+                    <form id="search-form" class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">
+                                <i class="fas fa-search me-1"></i>搜索农户
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="search-keyword" placeholder="输入农户名称或地区关键词...">
+                                <button class="btn btn-success" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted mt-1">可搜索农户名称、农场名称或地区</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">
+                                <i class="fas fa-leaf me-1"></i>产品类别
+                            </label>
+                            <select class="form-select" id="filter-category">
+                                <option value="">所有类别</option>
+                                <option value="蔬菜">蔬菜</option>
+                                <option value="水果">水果</option>
+                                <option value="谷物">谷物</option>
+                                <option value="肉类">肉类</option>
+                                <option value="奶制品">奶制品</option>
+                                <option value="蛋类">蛋类</option>
+                                <option value="水产品">水产品</option>
+                                <option value="干货">干货</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 农户展示 -->
+        <div class="row g-4" id="farmers-container">
+            <!-- 加载状态 -->
+            <div class="col-12 text-center" id="loading">
+                <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">加载中...</span>
+                </div>
+                <p class="mt-2">正在加载农户数据...</p>
+            </div>
+            
+            <!-- 空状态 -->
+            <div class="col-12 text-center d-none" id="no-farmers">
+                <img src="/img/empty.svg" alt="暂无数据" style="max-width: 200px;">
+                <p class="mt-3 text-muted">暂无符合条件的农户</p>
+            </div>
+            
+            <!-- 农户卡片将通过 JavaScript 动态加载 -->
+        </div>
+        
+        <!-- 分页 -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <nav aria-label="分页导航">
+                    <ul class="pagination justify-content-center" id="pagination">
+                        <!-- 分页将通过 JavaScript 动态生成 -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer-section">
+        <div class="footer-top py-5">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6 fade-in">
+                        <div class="footer-brand">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-leaf text-success me-2 fs-3"></i>
+                                <h4 class="mb-0 fw-bold">农产品直销系统</h4>
+                            </div>
+                            <p class="text-muted mb-4">致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收，实现优质农产品直达餐桌。</p>
+                            <div class="social-links mb-4">
+                                <a href="#" class="social-link" aria-label="微信"><i class="fab fa-weixin"></i></a>
+                                <a href="#" class="social-link" aria-label="微博"><i class="fab fa-weibo"></i></a>
+                                <a href="#" class="social-link" aria-label="QQ"><i class="fab fa-qq"></i></a>
+                                <a href="#" class="social-link" aria-label="抖音"><i class="fab fa-tiktok"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-6 fade-in">
+                        <h5 class="footer-title">快速链接</h5>
+                        <ul class="footer-links">
+                            <li><a href="/index.html">首页</a></li>
+                            <li><a href="/pages/products.html">产品列表</a></li>
+                            <li><a href="/pages/farmers.html" class="fw-bold">农户展示</a></li>
+                            <li><a href="/pages/about.html">关于我们</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-6 fade-in">
+                        <h5 class="footer-title">帮助支持</h5>
+                        <ul class="footer-links">
+                            <li><a href="/pages/faq.html">常见问题</a></li>
+                            <li><a href="/pages/shipping.html">配送政策</a></li>
+                            <li><a href="/pages/return.html">退换政策</a></li>
+                            <li><a href="/pages/contact.html">联系客服</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-4 col-md-6 fade-in">
+                        <h5 class="footer-title">联系我们</h5>
+                        <ul class="contact-info">
+                            <li>
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>广东省广州市白云区</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-phone"></i>
+                                <span>123-456-7890</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-envelope"></i>
+                                <span>info@farmshop.com</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-clock"></i>
+                                <span>周一至周日 9:00-18:00</span>
+                            </li>
+                        </ul>
+                        <div class="newsletter mt-4">
+                            <h6 class="mb-2">订阅我们的新闻</h6>
+                            <div class="d-flex">
+                                <input type="email" class="form-control form-control-sm" placeholder="您的电子邮箱">
+                                <button class="btn btn-success btn-sm ms-2">订阅</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom py-3">
+            <div class="container">
+                <div class="d-flex flex-wrap justify-content-between align-items-center">
+                    <p class="copyright mb-0">&copy; 2025 农产品直销系统 · 保留所有权利</p>
+                    <div class="footer-links-secondary">
+                        <a href="/pages/privacy.html">隐私政策</a>
+                        <a href="/pages/terms.html">服务条款</a>
+                        <a href="/pages/sitemap.html">网站地图</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Axios库 -->
+    <script src="/js/lib/axios.min.js"></script>
+    <!-- 应用配置 -->
+    <script src="/js/config.js"></script>
+    <!-- API配置 -->
+    <script src="/js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="/js/axios-config.js"></script>
+    
+    <!-- 页面逻辑 -->
+    <script>
+        // 全局变量
+        let currentPage = 1;
+        let totalPages = 1;
+        const pageSize = 12; // 每页显示的农户数量
+        let totalItems = 0;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查用户登录状态
+            checkAuthStatus();
+            
+            // 设置登出按钮事件
+            document.getElementById('logout-button').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+            
+            // 加载农户数据
+            loadFarmers();
+            
+            // 搜索和筛选事件
+            document.getElementById('search-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                currentPage = 1;
+                loadFarmers();
+            });
+            
+            document.getElementById('filter-category').addEventListener('change', function() {
+                currentPage = 1;
+                loadFarmers();
+            });
+        });
+        
+        // 检查用户登录状态
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            let user = null;
+            try {
+                user = JSON.parse(localStorage.getItem('user') || '{}');
+            } catch (e) {
+                console.error('解析user数据失败', e);
+                localStorage.removeItem('user'); // 清除错误的数据
+                user = {};
+            }
+            
+            if (token && user && user.userId) {
+                // 调试信息
+                if (window.location.hostname === 'localhost') {
+                    console.log('登录状态', {token: token.substring(0, 10) + '...', user});
+                }
+                
+                // 已登录
+                document.getElementById('unauthenticated-menu').classList.add('d-none');
+                document.getElementById('authenticated-menu').classList.remove('d-none');
+                
+                // 设置用户名
+                document.getElementById('username').textContent = user.username || '用户';
+                
+                // 根据角色显示不同的菜单项
+                if (user.role === 'farmer') {
+                    document.getElementById('farmer-menu-item').classList.remove('d-none');
+                } else if (user.role === 'admin') {
+                    document.getElementById('admin-menu-item').classList.remove('d-none');
+                }
+            } else {
+                // 调试信息
+                if (window.location.hostname === 'localhost') {
+                    console.log('未登录', {token, user});
+                }
+                
+                // 未登录
+                document.getElementById('unauthenticated-menu').classList.remove('d-none');
+                document.getElementById('authenticated-menu').classList.add('d-none');
+            }
+        }
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/index.html';
+        }
+        
+        // 加载农户数据
+        async function loadFarmers() {
+            try {
+                // 显示加载状态
+                document.getElementById('loading').classList.remove('d-none');
+                document.getElementById('no-farmers').classList.add('d-none');
+                
+                // 获取筛选参数
+                const keyword = document.getElementById('search-keyword')?.value || '';
+                const category = document.getElementById('filter-category')?.value || '';
+                
+                // 构建API请求参数
+                const params = {
+                    page: currentPage,
+                    pageSize: pageSize
+                };
+                
+                if (keyword) params.keyword = keyword; // 关键词将同时搜索农户名称和地区
+                if (category) params.category = category;
+                
+                // 调用后端分页API
+                const response = await fetch(`/api/Farmer?` + new URLSearchParams(params));
+                const result = await response.json();
+                
+                console.log('API 响应:', result);
+                
+                if (result.code === 200 && result.data) {
+                    const items = result.data; // 农户数据数组
+                    const pagination = result.pagination; // 分页信息
+                    
+                    totalItems = pagination.totalCount; // 注意：后端返回的是totalCount，不是totalItems
+                    totalPages = pagination.totalPages;
+                    currentPage = pagination.currentPage;
+                    
+                    // 为每个农户获取产品数量（可选优化：可以在后端一次性返回）
+                    const farmers = items || [];
+                    for (let farmer of farmers) {
+                        try {
+                            // 获取农户的产品数量
+                            const productsResponse = await api.farmers.getProducts(farmer.userId);
+                            farmer.productCount = productsResponse.data ? productsResponse.data.length : 0;
+                        } catch (error) {
+                            console.error(`获取农户 ${farmer.userId} 的产品数据失败:`, error);
+                            farmer.productCount = 0;
+                        }
+                        
+                        // 设置显示信息
+                        farmer.displayName = farmer.farmName || farmer.username || '未知农户';
+                        farmer.id = farmer.userId;
+                        farmer.owner = farmer.username;
+                        farmer.region = farmer.location || '未知地区';
+                        farmer.category = farmer.productCategory || '未分类';
+                        farmer.description = farmer.description || '专业农户，提供优质农产品';
+                        farmer.imageUrl = farmer.imageUrl || '/img/placeholder.jpg';
+                        farmer.rating = farmer.rating || 4.5;
+                        farmer.reviewCount = farmer.reviewCount || 0;
+                    }
+                    
+                    // 隐藏加载状态
+                    document.getElementById('loading').classList.add('d-none');
+                    
+                    // 显示农户数据或空状态
+                    if (farmers.length === 0) {
+                        document.getElementById('no-farmers').classList.remove('d-none');
+                    } else {
+                        renderFarmers(farmers);
+                    }
+                    
+                    // 渲染分页
+                    renderPagination();
+                    
+                    // 更新结果统计
+                    updateResultStats();
+                    
+                } else {
+                    throw new Error(result.message || '获取农户列表失败');
+                }
+                
+            } catch (error) {
+                console.error('加载农户数据失败:', error);
+                
+                // 隐藏加载状态
+                document.getElementById('loading').classList.add('d-none');
+                
+                // 显示错误状态
+                const container = document.getElementById('farmers-container');
+                container.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="alert alert-danger">
+                            <h5>加载失败</h5>
+                            <p>无法获取农户数据: ${error.message}</p>
+                            <button class="btn btn-outline-danger" onclick="loadFarmers()">重试</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // 应用筛选条件（重置到第一页）
+        function filterFarmers() {
+            currentPage = 1;
+            loadFarmers();
+        }
+        
+        // 渲染分页
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            // 如果只有一页，不显示分页
+            if (totalPages <= 1) return;
+            
+            // 上一页按钮
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" aria-label="上一页" ${currentPage === 1 ? 'tabindex="-1" aria-disabled="true"' : ''}><span aria-hidden="true">&laquo;</span></a>`;
+            prevLi.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentPage > 1) {
+                    currentPage--;
+                    loadFarmers();
+                }
+            });
+            pagination.appendChild(prevLi);
+            
+            // 页码按钮 - 智能显示页码
+            const showPages = [];
+            
+            // 始终显示第一页
+            if (totalPages > 0) showPages.push(1);
+            
+            // 当前页附近的页码
+            const start = Math.max(2, currentPage - 1);
+            const end = Math.min(totalPages - 1, currentPage + 1);
+            
+            // 如果有间隔，显示省略号
+            if (start > 2) {
+                const ellipsisLi = document.createElement('li');
+                ellipsisLi.className = 'page-item disabled';
+                ellipsisLi.innerHTML = '<span class="page-link">...</span>';
+                pagination.appendChild(ellipsisLi);
+            }
+            
+            // 显示中间页码
+            for (let i = start; i <= end; i++) {
+                if (!showPages.includes(i)) {
+                    showPages.push(i);
+                }
+            }
+            
+            // 显示页码
+            showPages.forEach(i => {
+                if (i === 1 && showPages.length > 1 && showPages[1] > 2) {
+                    // 第一页已经添加，跳过
+                    const pageLi = document.createElement('li');
+                    pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                    pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                    pageLi.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        currentPage = i;
+                        loadFarmers();
+                    });
+                    pagination.appendChild(pageLi);
+                } else if (i > 1 && i < totalPages) {
+                    const pageLi = document.createElement('li');
+                    pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                    pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                    pageLi.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        currentPage = i;
+                        loadFarmers();
+                    });
+                    pagination.appendChild(pageLi);
+                }
+            });
+            
+            // 如果有间隔，显示省略号
+            if (end < totalPages - 1) {
+                const ellipsisLi = document.createElement('li');
+                ellipsisLi.className = 'page-item disabled';
+                ellipsisLi.innerHTML = '<span class="page-link">...</span>';
+                pagination.appendChild(ellipsisLi);
+            }
+            
+            // 始终显示最后一页（如果不止一页）
+            if (totalPages > 1) {
+                const pageLi = document.createElement('li');
+                pageLi.className = `page-item ${totalPages === currentPage ? 'active' : ''}`;
+                pageLi.innerHTML = `<a class="page-link" href="#">${totalPages}</a>`;
+                pageLi.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    currentPage = totalPages;
+                    loadFarmers();
+                });
+                pagination.appendChild(pageLi);
+            }
+            
+            // 下一页按钮
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" aria-label="下一页" ${currentPage === totalPages ? 'tabindex="-1" aria-disabled="true"' : ''}><span aria-hidden="true">&raquo;</span></a>`;
+            nextLi.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    loadFarmers();
+                }
+            });
+            pagination.appendChild(nextLi);
+        }
+        
+        // 更新结果统计
+        function updateResultStats() {
+            const startItem = (currentPage - 1) * pageSize + 1;
+            const endItem = Math.min(currentPage * pageSize, totalItems);
+            
+            // 更新页面统计信息（如果存在相应元素）
+            const statsElement = document.getElementById('result-stats');
+            if (statsElement) {
+                statsElement.textContent = `显示第 ${startItem}-${endItem} 项，共 ${totalItems} 项农户`;
+            }
+        }
+        
+        // 渲染农户数据
+        function renderFarmers(farmers) {
+            const container = document.getElementById('farmers-container');
+            
+            // 清空现有内容（保留加载和空状态元素）
+            Array.from(container.querySelectorAll('.farmer-card')).forEach(el => el.remove());
+            
+            // 添加农户卡片
+            farmers.forEach(farmer => {
+                const farmerCard = document.createElement('div');
+                farmerCard.className = 'col-xl-3 col-lg-4 col-md-6 col-sm-6 farmer-card';
+                
+                // 使用农场照片，如果有的话
+                let farmImageUrl = '/img/placeholder.jpg';
+                if (farmer.farmPhotos && farmer.farmPhotos.length > 0) {
+                    farmImageUrl = farmer.farmPhotos[0]; // 使用第一张农场照片
+                } else if (farmer.imageUrl) {
+                    farmImageUrl = farmer.imageUrl; // 备用图片
+                }
+                
+                farmerCard.innerHTML = `
+                    <div class="card h-100" onclick="window.location.href='/pages/farmer-detail.html?id=${farmer.id}'">
+                        <img src="${farmImageUrl}" class="card-img-top" alt="${farmer.displayName}" loading="lazy">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">${farmer.displayName}</h5>
+                            
+                            <div class="farmer-info">
+                                <i class="fas fa-user"></i>
+                                <span>${farmer.owner}</span>
+                            </div>
+                            
+                            <div class="farmer-info">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${farmer.region}</span>
+                            </div>
+                            
+                            <div class="badge-container">
+                                <span class="badge bg-success me-2">${farmer.category}</span>
+                                <span class="badge bg-light">${farmer.productCount}种产品</span>
+                            </div>
+                            
+                            <p class="farmer-description flex-grow-1">${farmer.description}</p>
+                            
+                            <div class="farmer-stats mt-auto">
+                                <div class="stats-item">
+                                    <span class="stats-label">
+                                        <i class="fas fa-shopping-cart"></i> 在售产品
+                                    </span>
+                                    <span class="stats-value">${farmer.productCount}种</span>
+                                </div>
+                                <div class="stats-item">
+                                    <span class="stats-label">
+                                        <i class="fas fa-seedling"></i> 主营类别
+                                    </span>
+                                    <span class="stats-value">${farmer.category}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(farmerCard);
+            });
+        }
+    </script>
+</body>
+</html> 
+ 
+ 

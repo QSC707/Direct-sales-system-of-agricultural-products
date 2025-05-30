@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 本地特色农产品直销系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- 自定义样式 -->
+    <link href="/css/style.css" rel="stylesheet">
+    <!-- jQuery库 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- 引入Axios库 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- 应用配置 -->
+    <script src="/js/config.js"></script>
+    <!-- API调用相关 -->
+    <script src="/js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="/js/axios-config.js"></script>
+    <!-- 认证相关 -->
+    <script src="/js/auth.js"></script>
+    <!-- 区域数据 -->
+    <script src="/js/region-data.js"></script>
+    <style>
+        .user-info-card {
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .user-info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .profile-header {
+            background-color: #f8f9fa;
+            border-radius: 15px 15px 0 0;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .profile-icon {
+            font-size: 5rem;
+            color: #198754;
+            background-color: rgba(25, 135, 84, 0.1);
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        
+        .edit-form label {
+            font-weight: 500;
+        }
+        
+        .form-control:focus {
+            border-color: #198754;
+            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+        }
+        
+        .btn-success {
+            padding: 10px 20px;
+        }
+        
+        .alert-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 250px;
+        }
+        
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .fade-in-right {
+            animation: fadeInRight 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-leaf text-success me-2"></i>农产品直销系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/products.html">产品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/farmers.html">农户展示</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/about.html">关于我们</a>
+                    </li>
+                </ul>
+                
+                <!-- 未登录状态 -->
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item" id="loginItem">
+                        <a href="/pages/login.html" class="nav-link">登录</a>
+                    </li>
+                    <li class="nav-item" id="registerItem">
+                        <a href="/pages/register.html" class="nav-link">注册</a>
+                    </li>
+                </ul>
+                
+                <!-- 已登录状态 -->
+                <div class="dropdown" id="userDropdown" style="display: none;">
+                    <a href="/pages/cart.html" class="btn btn-outline-success me-2" title="购物车">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="true">
+                            <i class="fas fa-user-circle me-1"></i>
+                        <span id="currentUsername">用户名</span>
+                        </button>
+                    <ul class="dropdown-menu dropdown-menu-end" style="z-index: 1031;">
+                            <li><a class="dropdown-item active" href="/pages/user/profile.html"><i class="fas fa-user me-2"></i>个人中心</a></li>
+                            <li><a class="dropdown-item" href="/pages/user/orders.html"><i class="fas fa-shopping-cart me-2"></i>我的订单</a></li>
+                            
+                            <li id="farmer-menu-item" class="d-none"><a class="dropdown-item" href="/pages/farmer/dashboard.html"><i class="fas fa-tractor me-2"></i>农户中心</a></li>
+                            <li id="admin-menu-item" class="d-none"><a class="dropdown-item" href="/pages/admin/dashboard.html"><i class="fas fa-cogs me-2"></i>管理后台</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
+                        </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-3 mb-4">
+                <!-- 用户菜单 -->
+                <div class="list-group">
+                    <a href="/pages/user/profile.html" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-user me-2"></i> 个人资料
+                    </a>
+                    <a href="/pages/user/orders.html" class="list-group-item list-group-item-action">
+                        <i class="fas fa-shopping-cart me-2"></i> 我的订单
+                    </a>
+                    <a href="#" id="address-tab" class="list-group-item list-group-item-action">
+                        <i class="fas fa-map-marker-alt me-2"></i> 我的地址
+                    </a>
+                    <a href="#" id="sidebar-logout-button" class="list-group-item list-group-item-action text-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i> 退出登录
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-9">
+                <!-- 用户信息卡片 -->
+                <div class="card user-info-card mb-4">
+                    <div class="profile-header">
+                        <div class="profile-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h3 id="profile-username" class="mb-1">加载中...</h3>
+                        <p class="text-muted" id="profile-role">普通用户</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- 加载中提示 -->
+                        <div id="loading-spinner" class="text-center py-4">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">加载中...</span>
+                            </div>
+                            <p class="mt-2">正在加载个人资料...</p>
+                        </div>
+                        
+                        <!-- 用户信息展示 -->
+                        <div id="profile-info" class="d-none">
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <h5><i class="fas fa-user-tag text-success me-2"></i>基本信息</h5>
+                                    <hr>
+                                    <p><strong>用户ID：</strong> <span id="profile-userid"></span></p>
+                                    <p><strong>注册时间：</strong> <span id="profile-createtime"></span></p>
+                                    <p><strong>最近登录：</strong> <span id="profile-lastlogin"></span></p>
+                                </div>
+                                <div class="col-md-8">
+                                    <h5><i class="fas fa-address-card text-success me-2"></i>联系方式</h5>
+                                    <hr>
+                                    <p><strong>用户名：</strong> <span id="profile-username-info"></span></p>
+                                    <p>
+                                        <strong>电子邮箱：</strong> 
+                                        <span id="profile-email" class="me-1"></span>
+                                    </p>
+                                    <p>
+                                        <strong>手机号码：</strong> 
+                                        <span id="profile-phone" class="me-1"></span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <button class="btn btn-outline-success me-2" id="change-password-btn">
+                                    <i class="fas fa-key me-2"></i>修改密码
+                                </button>
+                                <button class="btn btn-success" id="edit-profile-btn">
+                                    <i class="fas fa-edit me-2"></i>修改资料
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 编辑表单 -->
+                        <div id="edit-form" class="d-none">
+                            <h5 class="mb-3"><i class="fas fa-edit text-success me-2"></i>修改个人资料</h5>
+                            <form id="profile-edit-form" class="edit-form">
+                                <div class="mb-3">
+                                    <label for="edit-username" class="form-label">用户名</label>
+                                    <input type="text" class="form-control" id="edit-username" placeholder="请输入用户名" required>
+                                    <div class="form-text">用户名是您的身份标识，其他用户将通过此名称认识您</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-email" class="form-label">电子邮箱</label>
+                                    <input type="email" class="form-control" id="edit-email" placeholder="请输入电子邮箱">
+                                    <div class="form-text">电子邮箱用于接收订单通知和重要消息</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-phone" class="form-label">手机号码</label>
+                                    <input type="tel" class="form-control" id="edit-phone" placeholder="请输入手机号码">
+                                    <div class="form-text">手机号码用于接收订单状态变更和发货通知</div>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <button type="button" class="btn btn-outline-secondary" id="cancel-edit-btn">
+                                        <i class="fas fa-times me-2"></i>取消
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save me-2"></i>保存修改
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- 修改密码表单 -->
+                        <div id="password-form" class="d-none">
+                            <h5 class="mb-3"><i class="fas fa-key text-success me-2"></i>修改密码</h5>
+                            <form id="password-edit-form" class="edit-form">
+                                <div class="mb-3">
+                                    <label for="current-password" class="form-label">当前密码</label>
+                                    <input type="password" class="form-control" id="current-password" placeholder="请输入当前密码" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="new-password" class="form-label">新密码</label>
+                                    <input type="password" class="form-control" id="new-password" placeholder="请输入新密码" required>
+                                    <div class="form-text">密码长度至少6位，包含字母和数字</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirm-password" class="form-label">确认新密码</label>
+                                    <input type="password" class="form-control" id="confirm-password" placeholder="请再次输入新密码" required>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <button type="button" class="btn btn-outline-secondary" id="cancel-password-btn">
+                                        <i class="fas fa-times me-2"></i>取消
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save me-2"></i>保存修改
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- 验证邮箱表单 -->
+                        <div id="verify-email-form" class="d-none">
+                            <h5 class="mb-3"><i class="fas fa-envelope text-success me-2"></i>验证邮箱</h5>
+                            <form id="email-verify-form" class="edit-form">
+                                <div class="mb-3">
+                                    <label for="verify-email-code" class="form-label">验证码</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="verify-email-code" placeholder="请输入验证码" required>
+                                        <button class="btn btn-outline-success" type="button" id="send-email-code-btn">
+                                            发送验证码
+                                        </button>
+                                    </div>
+                                    <div class="form-text">验证码将发送到您的邮箱</div>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <button type="button" class="btn btn-outline-secondary" id="cancel-email-verify-btn">
+                                        <i class="fas fa-times me-2"></i>取消
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check me-2"></i>验证
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- 验证手机表单 -->
+                        <div id="verify-phone-form" class="d-none">
+                            <h5 class="mb-3"><i class="fas fa-mobile-alt text-success me-2"></i>验证手机</h5>
+                            <form id="phone-verify-form" class="edit-form">
+                                <div class="mb-3">
+                                    <label for="verify-phone-code" class="form-label">验证码</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="verify-phone-code" placeholder="请输入验证码" required>
+                                        <button class="btn btn-outline-success" type="button" id="send-phone-code-btn">
+                                            发送验证码
+                                        </button>
+                                    </div>
+                                    <div class="form-text">验证码将发送到您的手机</div>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <button type="button" class="btn btn-outline-secondary" id="cancel-phone-verify-btn">
+                                        <i class="fas fa-times me-2"></i>取消
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check me-2"></i>验证
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- 地址管理 -->
+                        <div id="address-management" class="d-none">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="mb-0"><i class="fas fa-map-marker-alt text-success me-2"></i>我的收货地址</h5>
+                                <button class="btn btn-sm btn-success" id="add-address-btn" type="button">
+                                    <i class="fas fa-plus-circle me-1"></i>新增地址
+                                </button>
+                    </div>
+                            
+                            <!-- 地址列表 -->
+                            <div id="address-list-container">
+                                <div class="alert alert-info" id="loading-addresses">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>正在加载地址列表...
+                </div>
+                                <div class="alert alert-secondary d-none" id="no-addresses">
+                                    <i class="fas fa-info-circle me-2"></i>您还没有添加收货地址
+                                </div>
+                                <div id="address-list" class="d-none">
+                                    <!-- 地址列表将动态填充 -->
+                                </div>
+                            </div>
+                            
+                            <!-- 地址限制提示 -->
+                            <div id="address-limit-warning" class="alert alert-warning d-none">
+                                <i class="fas fa-exclamation-triangle me-2"></i>您最多可以保存7个地址，已达到上限
+                            </div>
+                        </div>
+                        
+                        <!-- 地址表单 -->
+                        <div id="address-form" class="d-none">
+                            <h5 class="mb-3">
+                                <i class="fas fa-map-marker-alt text-success me-2"></i>
+                                <span id="address-form-title">添加新地址</span>
+                            </h5>
+                            <form id="address-edit-form" class="edit-form">
+                                <input type="hidden" id="address-id">
+                                <div class="row g-3">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="address-receiver-name" class="form-label">收货人姓名</label>
+                                        <input type="text" class="form-control" id="address-receiver-name" placeholder="请输入收货人姓名" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="address-contact-phone" class="form-label">联系电话</label>
+                                        <input type="tel" class="form-control" id="address-contact-phone" placeholder="请输入手机号码" required>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="address-province" class="form-label">省份</label>
+                                        <select class="form-select" id="address-province" required>
+                                            <option value="">请选择省份</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="address-city" class="form-label">城市</label>
+                                        <select class="form-select" id="address-city" required>
+                                            <option value="">请选择城市</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="address-district" class="form-label">区/县</label>
+                                        <input type="text" class="form-control" id="address-district" placeholder="请输入区/县" required>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label for="address-detail" class="form-label">详细地址</label>
+                                        <textarea class="form-control" id="address-detail" rows="2" placeholder="请输入详细地址，如街道、门牌号等" required></textarea>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="address-is-default">
+                                            <label class="form-check-label" for="address-is-default">
+                                                设为默认收货地址
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <button type="button" class="btn btn-outline-secondary" id="cancel-address-btn">
+                                        <i class="fas fa-times me-2"></i>取消
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save me-2"></i>保存地址
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </footer>
+
+    <!-- Toast提示 -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;">
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0 fade-in-right" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span id="toast-message">操作成功</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        
+        <!-- 错误提示 -->
+        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0 fade-in-right" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span id="error-message">操作失败</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 个人中心页面逻辑 -->
+    <script>
+        // 全局变量
+        let currentUser = null;
+        let successToast = null;
+        let errorToast = null;
+        let userAddresses = [];
+        let isAddressEdit = false;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化Toast
+            successToast = new bootstrap.Toast(document.getElementById('successToast'));
+            errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
+            
+            // 确保jQuery已加载
+            if (typeof $ === 'undefined') {
+                console.error('jQuery未加载，等待加载...');
+                // 显示一个简单的加载提示
+                document.getElementById('loading-spinner').classList.remove('d-none');
+                
+                // 定期检查jQuery是否已加载
+                const jqueryCheckInterval = setInterval(function() {
+                    if (typeof $ !== 'undefined') {
+                        clearInterval(jqueryCheckInterval);
+                        console.log('jQuery已加载，继续初始化页面');
+                        initializePageAfterJQuery();
+                    }
+                }, 100);
+            } else {
+                // jQuery已经加载，直接初始化
+                initializePageAfterJQuery();
+            }
+        });
+        
+        // 在jQuery加载完成后初始化页面
+        function initializePageAfterJQuery() {
+            // 检查用户登录状态
+            checkLogin(function(user) {
+                if (!user) {
+                // 未登录跳转到登录页
+                window.location.href = '/pages/login.html?redirect=user/profile';
+                return;
+            }
+            
+                // 保存用户信息到全局变量并加载个人资料
+                currentUser = user;
+                
+                // 手动更新导航栏，避免可能的延迟加载问题
+                if (typeof updateNavbar === 'function' && typeof $ !== 'undefined') {
+                    updateNavbar(user);
+                }
+                
+            loadUserProfile();
+            });
+            
+            // 设置登出按钮事件
+            document.getElementById('logout-button').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.logout();
+            });
+            
+            document.getElementById('sidebar-logout-button').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.logout();
+            });
+            
+            // 设置编辑按钮事件
+            document.getElementById('edit-profile-btn').addEventListener('click', function() {
+                showEditForm();
+            });
+            
+            // 设置取消编辑按钮事件
+            document.getElementById('cancel-edit-btn').addEventListener('click', function() {
+                hideEditForm();
+            });
+            
+            // 设置修改密码按钮事件
+            document.getElementById('change-password-btn').addEventListener('click', function() {
+                showPasswordForm();
+            });
+            
+            // 设置取消修改密码按钮事件
+            document.getElementById('cancel-password-btn').addEventListener('click', function() {
+                hidePasswordForm();
+            });
+            
+            // 设置表单提交事件
+            document.getElementById('profile-edit-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateUserProfile();
+            });
+            
+            document.getElementById('password-edit-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                updatePassword();
+            });
+            
+            // 地址管理相关事件绑定
+            document.getElementById('address-tab').addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 更新侧边栏选中状态
+                document.querySelectorAll('.list-group-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // 隐藏其他表单
+                hideAllForms();
+                
+                // 显示地址管理
+                document.getElementById('address-management').classList.remove('d-none');
+                
+                // 加载地址列表
+                loadUserAddresses();
+            });
+            
+            // 添加地址按钮
+            document.getElementById('add-address-btn').addEventListener('click', function() {
+                // 检查是否已达到7个地址的上限
+                if (userAddresses.length >= 7) {
+                    document.getElementById('address-limit-warning').classList.remove('d-none');
+                    showToast('您最多可以保存7个地址，请先删除不需要的地址', 'error');
+                    return;
+                }
+                
+                // 隐藏地址管理界面
+                document.getElementById('address-management').classList.add('d-none');
+                
+                // 重置表单
+                resetAddressForm();
+                
+                // 设置表单标题
+                document.getElementById('address-form-title').textContent = '添加新地址';
+                
+                // 显示地址表单
+                document.getElementById('address-form').classList.remove('d-none');
+                
+                // 初始化省市区选择器
+                initAddressRegionSelector();
+                
+                // 设置表单模式
+                isAddressEdit = false;
+            });
+            
+            // 取消地址编辑
+            document.getElementById('cancel-address-btn').addEventListener('click', function() {
+                // 隐藏地址表单
+                document.getElementById('address-form').classList.add('d-none');
+                
+                // 显示地址管理界面
+                document.getElementById('address-management').classList.remove('d-none');
+            });
+            
+            // 地址表单提交
+            document.getElementById('address-edit-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (isAddressEdit) {
+                    updateAddress();
+                } else {
+                    addNewAddress();
+                }
+            });
+        }
+        
+        // 加载用户个人资料
+        async function loadUserProfile() {
+            try {
+                // 显示加载中
+                document.getElementById('loading-spinner').classList.remove('d-none');
+                document.getElementById('profile-info').classList.add('d-none');
+                
+                // 使用API获取最新的用户详细信息
+                let userData = currentUser;
+                
+                if (api && api.user && api.user.getUserInfo) {
+                    const response = await api.user.getUserInfo(currentUser.userId);
+                    if (response && response.code === 200 && response.data) {
+                        userData = response.data;
+                        // 更新全局变量
+                        currentUser = userData;
+                    }
+                }
+                
+                // 填充用户信息
+                document.getElementById('profile-username').textContent = userData.username;
+                document.getElementById('currentUsername').textContent = userData.username;
+                document.getElementById('profile-role').textContent = userData.role === 'admin' ? '系统管理员' : (userData.role === 'farmer' ? '农户' : '普通用户');
+                document.getElementById('profile-userid').textContent = userData.userId || '';
+                document.getElementById('profile-username-info').textContent = userData.username || '';
+                document.getElementById('profile-email').textContent = userData.email || '未设置';
+                document.getElementById('profile-phone').textContent = userData.phone || '未设置';
+                
+                // 格式化日期
+                const createTime = userData.createTime ? new Date(userData.createTime) : null;
+                const lastLoginTime = userData.lastLoginTime ? new Date(userData.lastLoginTime) : null;
+                
+                document.getElementById('profile-createtime').textContent = createTime ? createTime.toLocaleString('zh-CN') : '未知';
+                document.getElementById('profile-lastlogin').textContent = lastLoginTime ? lastLoginTime.toLocaleString('zh-CN') : '未知';
+                
+                // 根据角色显示不同的菜单
+                if (userData.role === 'admin') {
+                    document.getElementById('admin-menu-item').classList.remove('d-none');
+                } else if (userData.role === 'farmer') {
+                    document.getElementById('farmer-menu-item').classList.remove('d-none');
+                }
+                
+                // 隐藏加载中，显示个人信息
+                document.getElementById('loading-spinner').classList.add('d-none');
+                document.getElementById('profile-info').classList.remove('d-none');
+            } catch (error) {
+                console.error('加载用户资料失败:', error);
+                document.getElementById('loading-spinner').classList.add('d-none');
+                showToast('加载用户资料失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 显示编辑表单
+        function showEditForm() {
+            document.getElementById('profile-info').classList.add('d-none');
+            document.getElementById('edit-form').classList.remove('d-none');
+            
+            // 填充表单
+            document.getElementById('edit-username').value = currentUser.username || '';
+            document.getElementById('edit-email').value = currentUser.email || '';
+            document.getElementById('edit-phone').value = currentUser.phone || '';
+        }
+        
+        // 隐藏编辑表单
+        function hideEditForm() {
+            document.getElementById('edit-form').classList.add('d-none');
+            document.getElementById('profile-info').classList.remove('d-none');
+        }
+        
+        // 显示修改密码表单
+        function showPasswordForm() {
+            document.getElementById('profile-info').classList.add('d-none');
+            document.getElementById('password-form').classList.remove('d-none');
+        }
+        
+        // 隐藏修改密码表单
+        function hidePasswordForm() {
+            document.getElementById('password-form').classList.add('d-none');
+            document.getElementById('profile-info').classList.remove('d-none');
+        }
+        
+        // 隐藏所有表单
+        function hideAllForms() {
+            document.getElementById('profile-info').classList.add('d-none');
+            document.getElementById('edit-form').classList.add('d-none');
+            document.getElementById('password-form').classList.add('d-none');
+            document.getElementById('verify-email-form').classList.add('d-none');
+            document.getElementById('verify-phone-form').classList.add('d-none');
+            document.getElementById('address-management').classList.add('d-none');
+            document.getElementById('address-form').classList.add('d-none');
+        }
+        
+        // 更新用户资料
+        async function updateUserProfile() {
+            try {
+                // 获取表单数据
+                const username = document.getElementById('edit-username').value.trim();
+                const email = document.getElementById('edit-email').value.trim();
+                const phone = document.getElementById('edit-phone').value.trim();
+                
+                // 验证数据
+                if (!username) {
+                    showToast('用户名不能为空', 'error');
+                    return;
+                }
+                
+                // 构建更新数据
+                const userData = {
+                    username: username,
+                    email: email || null,
+                    phone: phone || null
+                };
+                
+                // 添加调试信息
+                console.log('准备更新用户资料:', userData);
+                
+                // 调用API更新用户资料
+                const response = await api.user.updateUserInfo(userData);
+                
+                console.log('API响应:', response);
+                
+                if (response && response.code === 200) {
+                    // 更新成功
+                    showToast('个人资料更新成功', 'success');
+                    
+                    // 更新当前用户信息
+                    if (response.data) {
+                        currentUser = {...currentUser, ...response.data};
+                    } else {
+                        currentUser = {...currentUser, ...userData};
+                    }
+                    
+                    // 重新加载用户资料
+                    loadUserProfile();
+                    
+                    // 隐藏编辑表单
+                    hideEditForm();
+                } else {
+                    showToast('更新失败: ' + (response?.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('更新用户资料错误:', error);
+                showToast('更新失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 更新密码
+        async function updatePassword() {
+            try {
+                // 获取表单数据
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                
+                // 验证数据
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    showToast('请填写所有密码字段', 'error');
+                    return;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    showToast('两次输入的新密码不一致', 'error');
+                    return;
+                }
+                
+                if (newPassword.length < 6) {
+                    showToast('新密码长度至少6位', 'error');
+                    return;
+                }
+                
+                // 调用API更新密码
+                const response = await api.user.changePassword({
+                    currentPassword,
+                    newPassword
+                });
+                
+                if (response && response.code === 200) {
+                    // 更新成功
+                    showToast('密码修改成功', 'success');
+                    
+                    // 清空表单
+                    document.getElementById('current-password').value = '';
+                    document.getElementById('new-password').value = '';
+                    document.getElementById('confirm-password').value = '';
+                    
+                    // 隐藏密码表单
+                    hidePasswordForm();
+                } else {
+                    showToast('密码修改失败: ' + (response?.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('修改密码错误:', error);
+                showToast('密码修改失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 加载用户地址
+        async function loadUserAddresses() {
+            try {
+                // 显示加载中
+                document.getElementById('loading-addresses').classList.remove('d-none');
+                document.getElementById('no-addresses').classList.add('d-none');
+                document.getElementById('address-list').classList.add('d-none');
+                document.getElementById('address-limit-warning').classList.add('d-none');
+                
+                // 清空地址列表
+                const addressListContainer = document.getElementById('address-list');
+                addressListContainer.innerHTML = '';
+                
+                // 获取用户地址
+                const response = await api.address.getSavedAddresses();
+                
+                // 隐藏加载中
+                document.getElementById('loading-addresses').classList.add('d-none');
+                
+                if (response && response.code === 200 && response.data) {
+                    userAddresses = response.data;
+                
+                    if (userAddresses.length === 0) {
+                        // 没有地址
+                        document.getElementById('no-addresses').classList.remove('d-none');
+                    } else {
+                        // 渲染地址列表
+                        renderAddressList(userAddresses);
+                        document.getElementById('address-list').classList.remove('d-none');
+                        
+                        // 如果地址数量达到7个，显示警告
+                        if (userAddresses.length >= 7) {
+                            document.getElementById('address-limit-warning').classList.remove('d-none');
+                        }
+                    }
+                } else {
+                    console.error('获取地址失败:', response);
+                    document.getElementById('no-addresses').classList.remove('d-none');
+                    showToast('获取地址列表失败', 'error');
+                }
+            } catch (error) {
+                console.error('加载地址错误:', error);
+                document.getElementById('loading-addresses').classList.add('d-none');
+                document.getElementById('no-addresses').classList.remove('d-none');
+                showToast('加载地址列表失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 渲染地址列表
+        function renderAddressList(addresses) {
+            const addressListContainer = document.getElementById('address-list');
+            addressListContainer.innerHTML = '';
+            
+            addresses.forEach(address => {
+                const addressCard = document.createElement('div');
+                addressCard.className = 'card mb-3 shadow-sm';
+                
+                // 默认地址卡片样式
+                if (address.isDefault) {
+                    addressCard.classList.add('border-success');
+                }
+                
+                // 卡片内容
+                addressCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1">${address.receiverName} ${address.contactPhone}</h6>
+                                <p class="mb-1 text-muted small">
+                                    ${address.province} ${address.city} ${address.district} ${address.detailAddress}
+                                </p>
+                                ${address.isDefault ? '<span class="badge bg-success">默认地址</span>' : ''}
+                            </div>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-primary edit-address" data-address-id="${address.addressId}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger delete-address" data-address-id="${address.addressId}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                ${!address.isDefault ? `
+                                <button type="button" class="btn btn-sm btn-outline-success set-default-address" data-address-id="${address.addressId}">
+                                    <i class="fas fa-check"></i>
+                                </button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                addressListContainer.appendChild(addressCard);
+            });
+            
+            // 绑定编辑按钮事件
+            document.querySelectorAll('.edit-address').forEach(button => {
+                button.addEventListener('click', function() {
+                    const addressId = this.getAttribute('data-address-id');
+                    editAddress(addressId);
+                });
+            });
+            
+            // 绑定删除按钮事件
+            document.querySelectorAll('.delete-address').forEach(button => {
+                button.addEventListener('click', function() {
+                    const addressId = this.getAttribute('data-address-id');
+                    deleteAddress(addressId);
+                });
+            });
+            
+            // 绑定设为默认地址按钮事件
+            document.querySelectorAll('.set-default-address').forEach(button => {
+                button.addEventListener('click', function() {
+                    const addressId = this.getAttribute('data-address-id');
+                    setDefaultAddress(addressId);
+                });
+            });
+        }
+        
+        // 编辑地址
+        async function editAddress(addressId) {
+            try {
+                // 根据ID找到地址
+                const address = userAddresses.find(a => a.addressId == addressId);
+                if (!address) {
+                    showToast('未找到要编辑的地址', 'error');
+                    return;
+                }
+                
+                // 隐藏地址管理界面
+                document.getElementById('address-management').classList.add('d-none');
+                
+                // 设置表单标题
+                document.getElementById('address-form-title').textContent = '编辑收货地址';
+                
+                // 初始化省市区选择器
+                initAddressRegionSelector();
+                
+                // 填充表单数据
+                document.getElementById('address-id').value = address.addressId;
+                document.getElementById('address-receiver-name').value = address.receiverName || '';
+                document.getElementById('address-contact-phone').value = address.contactPhone || '';
+                document.getElementById('address-province').value = address.province || '';
+                
+                // 触发省份变更事件加载城市
+                if (address.province) {
+                    document.getElementById('address-province').dispatchEvent(new Event('change'));
+                    
+                    // 延时设置城市和区县
+                    setTimeout(() => {
+                        document.getElementById('address-city').value = address.city || '';
+                
+                        if (address.city) {
+                            document.getElementById('address-city').dispatchEvent(new Event('change'));
+                            
+                            setTimeout(() => {
+                                document.getElementById('address-district').value = address.district || '';
+                            }, 100);
+                        }
+                    }, 100);
+                }
+                
+                document.getElementById('address-detail').value = address.detailAddress || '';
+                document.getElementById('address-is-default').checked = address.isDefault;
+                
+                // 显示地址表单
+                document.getElementById('address-form').classList.remove('d-none');
+                
+                // 设置表单模式为编辑
+                isAddressEdit = true;
+            } catch (error) {
+                console.error('编辑地址错误:', error);
+                showToast('编辑地址失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 删除地址
+        async function deleteAddress(addressId) {
+            try {
+                // 确认删除
+                if (!confirm('确定要删除这个地址吗？')) {
+                    return;
+                }
+                
+                // 调用API删除地址
+                const response = await api.address.deleteAddress(addressId);
+                
+                if (response && response.code === 200) {
+                    showToast('地址删除成功', 'success');
+                        
+                    // 重新加载地址列表
+                    loadUserAddresses();
+                } else {
+                    showToast('删除地址失败: ' + (response?.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('删除地址错误:', error);
+                showToast('删除地址失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 设为默认地址
+        async function setDefaultAddress(addressId) {
+            try {
+                // 调用API设置默认地址
+                const response = await api.address.setDefaultAddress(addressId);
+                
+                if (response && response.code === 200) {
+                    showToast('已设为默认地址', 'success');
+            
+                    // 重新加载地址列表
+                    loadUserAddresses();
+                } else {
+                    showToast('设置默认地址失败: ' + (response?.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('设置默认地址错误:', error);
+                showToast('设置默认地址失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 添加新地址
+        async function addNewAddress() {
+            try {
+                // 获取表单数据
+                const receiverName = document.getElementById('address-receiver-name').value.trim();
+                const contactPhone = document.getElementById('address-contact-phone').value.trim();
+                const province = document.getElementById('address-province').value;
+                const city = document.getElementById('address-city').value;
+                const district = document.getElementById('address-district').value;
+                const detailAddress = document.getElementById('address-detail').value.trim();
+                const isDefault = document.getElementById('address-is-default').checked;
+                
+                // 验证表单
+                if (!receiverName || !contactPhone || !province || !city || !district || !detailAddress) {
+                    showToast('请填写完整的地址信息', 'error');
+                    return;
+                }
+                
+                // 验证手机号
+                if (!/^1[3-9]\d{9}$/.test(contactPhone)) {
+                    showToast('请输入正确的手机号码', 'error');
+                    return;
+                }
+
+                // 检查地址数量限制
+                if (userAddresses.length >= 7) {
+                    showToast('最多只能添加7个收货地址', 'error');
+                    return;
+                }
+                
+                // 构建地址数据
+                const addressData = {
+                    receiverName,
+                    contactPhone,
+                    province,
+                    city,
+                    district,
+                    detailAddress,
+                    isDefault
+                };
+                
+                // 调用API添加地址
+                const response = await api.address.addAddress(addressData);
+                
+                if (response && response.code === 200) {
+                    showToast('添加地址成功', 'success');
+                        
+                    // 隐藏地址表单
+                    document.getElementById('address-form').classList.add('d-none');
+                    
+                    // 显示地址管理界面
+                    document.getElementById('address-management').classList.remove('d-none');
+                        
+                    // 重新加载地址列表
+                    loadUserAddresses();
+                } else {
+                    showToast('添加地址失败: ' + (response?.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('添加地址错误:', error);
+                showToast('添加地址失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 更新地址
+        async function updateAddress() {
+            try {
+                // 获取表单数据
+                const addressId = document.getElementById('address-id').value;
+                const receiverName = document.getElementById('address-receiver-name').value.trim();
+                const contactPhone = document.getElementById('address-contact-phone').value.trim();
+                const province = document.getElementById('address-province').value;
+                const city = document.getElementById('address-city').value;
+                const district = document.getElementById('address-district').value;
+                const detailAddress = document.getElementById('address-detail').value.trim();
+                const isDefault = document.getElementById('address-is-default').checked;
+                
+                // 验证表单
+                if (!receiverName || !contactPhone || !province || !city || !district || !detailAddress) {
+                    showToast('请填写完整的地址信息', 'error');
+                    return;
+                }
+                
+                // 验证手机号
+                if (!/^1[3-9]\d{9}$/.test(contactPhone)) {
+                    showToast('请输入正确的手机号码', 'error');
+                    return;
+                }
+                
+                // 构建地址数据
+                const addressData = {
+                    receiverName,
+                    contactPhone,
+                    province,
+                    city,
+                    district,
+                    detailAddress,
+                    isDefault
+                };
+                
+                // 调用API更新地址
+                const response = await api.address.updateAddress(addressId, addressData);
+                
+                if (response && response.code === 200) {
+                    showToast('更新地址成功', 'success');
+                    
+                    // 隐藏地址表单
+                    document.getElementById('address-form').classList.add('d-none');
+                    
+                    // 显示地址管理界面
+                    document.getElementById('address-management').classList.remove('d-none');
+                    
+                    // 重新加载地址列表
+                    loadUserAddresses();
+                } else {
+                    showToast('更新地址失败: ' + (response?.message || '未知错误'), 'error');
+                }
+            } catch (error) {
+                console.error('更新地址错误:', error);
+                showToast('更新地址失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 重置地址表单
+        function resetAddressForm() {
+            document.getElementById('address-id').value = '';
+            document.getElementById('address-receiver-name').value = '';
+            document.getElementById('address-contact-phone').value = '';
+            document.getElementById('address-province').value = '';
+            document.getElementById('address-city').innerHTML = '<option value="">请先选择省份</option>';
+            document.getElementById('address-district').value = '';
+            document.getElementById('address-detail').value = '';
+            document.getElementById('address-is-default').checked = false;
+        }
+        
+        // 初始化地址表单的省市区选择器
+        function initAddressRegionSelector() {
+            const provinceSelect = document.getElementById('address-province');
+            const citySelect = document.getElementById('address-city');
+            
+            // 初始化省份数据
+            if (provinceSelect.options.length <= 1) {
+                const provinces = regionData.getProvinces();
+                provinceSelect.innerHTML = '<option value="">请选择省份</option>';
+                provinces.forEach(province => {
+                    provinceSelect.innerHTML += `<option value="${province.name}">${province.name}</option>`;
+                });
+            }
+            
+            // 省份选择事件
+            provinceSelect.addEventListener('change', function() {
+                const provinceName = this.value;
+                citySelect.innerHTML = '<option value="">请选择城市</option>';
+                
+                if (provinceName) {
+                    const provinceCode = regionData.getProvinceCode(provinceName);
+                    if (provinceCode) {
+                        const cities = regionData.getCities(provinceCode);
+                        cities.forEach(city => {
+                            citySelect.innerHTML += `<option value="${city.name}">${city.name}</option>`;
+                        });
+                    }
+                }
+            });
+        }
+        
+        // 显示提示信息
+        function showToast(message, type = 'success') {
+            if (type === 'success') {
+            document.getElementById('toast-message').textContent = message;
+            successToast.show();
+            } else if (type === 'error') {
+                document.getElementById('error-message').textContent = message;
+                errorToast.show();
+            }
+        }
+    </script>
+</body>
+</html> 

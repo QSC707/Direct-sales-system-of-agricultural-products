@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配送政策 - 本地特色农产品直销系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- 自定义样式 -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-leaf me-2"></i>农产品直销系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/products.html">产品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/farmers.html">农户展示</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/about.html">关于我们</a>
+                    </li>
+                </ul>
+                
+                <!-- 未登录状态 -->
+                <div class="d-flex gap-2" id="unauthenticated-menu">
+                    <a href="/pages/login.html" class="btn btn-outline-primary">登录</a>
+                    <a href="/pages/register.html" class="btn btn-primary">注册</a>
+                </div>
+                
+                <!-- 已登录状态 -->
+                <div class="d-none" id="authenticated-menu">
+                    <a href="/pages/cart.html" class="btn btn-outline-primary me-2" title="购物车">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <div class="dropdown d-inline-block">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="username">用户名</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" aria-labelledby="userMenuButton">
+                            <li><a class="dropdown-item" href="/pages/user/profile.html"><i class="fas fa-user me-2"></i>个人中心</a></li>
+                            <li><a class="dropdown-item" href="/pages/user/orders.html"><i class="fas fa-shopping-cart me-2"></i>我的订单</a></li>
+                            <li id="farmer-menu-item" class="d-none"><a class="dropdown-item" href="/pages/farmer/dashboard.html"><i class="fas fa-tractor me-2"></i>农户中心</a></li>
+                            <li id="admin-menu-item" class="d-none"><a class="dropdown-item" href="/pages/admin/dashboard.html"><i class="fas fa-cogs me-2"></i>管理后台</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面内容 -->
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="fas fa-truck me-2"></i>配送政策</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- 配送服务概述 -->
+                        <section class="mb-5">
+                            <h5 class="border-bottom pb-2 text-success">配送服务概述</h5>
+                            <p>本地特色农产品直销系统提供专业的新鲜农产品配送服务，采用<strong>货到付款</strong>的方式，确保您收到最新鲜的农产品。我们所有商品均由合作农户直接配送，从田间到餐桌，减少中间环节，保证新鲜度。</p>
+                            
+                            <div class="alert alert-info">
+                                <div class="d-flex">
+                                    <div class="me-3">
+                                        <i class="fas fa-info-circle fa-2x text-info"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="alert-heading">支付方式</h6>
+                                        <p class="mb-0">我们采用<strong>货到付款</strong>方式，您可以在收到商品并确认无误后通过现金、微信或支付宝向配送人员付款。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- 配送范围 -->
+                        <section class="mb-5">
+                            <h5 class="border-bottom pb-2 text-success">配送范围</h5>
+                            <p>我们的配送范围主要覆盖广州市及周边区域，具体如下：</p>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>城市</th>
+                                            <th>覆盖区域</th>
+                                            <th>备注</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td rowspan="2">广州市</td>
+                                            <td>天河区、越秀区、海珠区、荔湾区、白云区、黄埔区、番禺区</td>
+                                            <td>全覆盖</td>
+                                        </tr>
+                                        <tr>
+                                            <td>花都区、南沙区、从化区、增城区</td>
+                                            <td>部分区域</td>
+                                        </tr>
+                                        <tr>
+                                            <td>佛山市</td>
+                                            <td>禅城区、南海区</td>
+                                            <td>主要城区</td>
+                                        </tr>
+                                        <tr>
+                                            <td>东莞市</td>
+                                            <td>部分镇区</td>
+                                            <td>靠近广州区域</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="alert alert-warning mt-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                具体配送区域会根据农户分布情况有所调整，下单时系统会自动检查您的收货地址是否在配送范围内。
+                            </div>
+                        </section>
+                        
+                        <!-- 配送时间 -->
+                        <section class="mb-5">
+                            <h5 class="border-bottom pb-2 text-success">配送时间</h5>
+                            <p>为保证农产品的新鲜度，我们采用以下配送时间安排：</p>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 border-success">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0">上午下单</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>下单时间：</strong>00:00 - 12:00</p>
+                                            <p><strong>配送时间：</strong>当天下午13:00 - 18:00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 border-success">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0">下午下单</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>下单时间：</strong>12:01 - 20:00</p>
+                                            <p><strong>配送时间：</strong>次日上午09:00 - 12:00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 border-success">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0">晚间下单</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>下单时间：</strong>20:01 - 23:59</p>
+                                            <p><strong>配送时间：</strong>次日下午13:00 - 18:00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info mt-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                请在订单确认页面查看具体的预计送达时间，实际配送时间可能因天气、交通等因素有所调整。
+                            </div>
+                        </section>
+                        
+                        <!-- 配送费用 -->
+                        <section class="mb-5">
+                            <h5 class="border-bottom pb-2 text-success">配送费用</h5>
+                            <p>我们的配送费用按照距离和商品重量计算，具体如下：</p>
+                            
+                            <ul class="list-group mb-3">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">基础配送费</h6>
+                                        <small class="text-muted">3公里内</small>
+                                    </div>
+                                    <span class="badge bg-success rounded-pill">¥8.00</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">额外距离费</h6>
+                                        <small class="text-muted">每增加1公里</small>
+                                    </div>
+                                    <span class="badge bg-success rounded-pill">+¥2.00</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">重量附加费</h6>
+                                        <small class="text-muted">每0.5公斤（订单总重量超过5公斤时计算）</small>
+                                    </div>
+                                    <span class="badge bg-success rounded-pill">+¥1.00</span>
+                                </li>
+                            </ul>
+                            
+                            <div class="alert alert-success">
+                                <i class="fas fa-gift me-2"></i>
+                                <strong>满额优惠：</strong>单笔订单满¥100免基础配送费，满¥200免所有配送费！
+                            </div>
+                        </section>
+                        
+                        <!-- 其他说明 -->
+                        <section>
+                            <h5 class="border-bottom pb-2 text-success">其他说明</h5>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6><i class="fas fa-calendar-check me-2 text-success"></i>预约配送</h6>
+                                    <p>如需指定配送日期和时间段，请在下单时选择"预约配送"选项，并选择您方便收货的时间段。</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6><i class="fas fa-phone-alt me-2 text-success"></i>配送通知</h6>
+                                    <p>配送员出发前会通过短信或电话方式与您确认，请保持手机畅通。如需临时修改配送时间，请提前与我们联系。</p>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6><i class="fas fa-snowflake me-2 text-success"></i>特殊天气</h6>
+                                    <p>在台风、暴雨等恶劣天气情况下，配送时间可能会相应延长，请您理解。</p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer-section">
+        <div class="footer-top py-5">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6 fade-in">
+                        <div class="footer-brand">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-leaf text-success me-2 fs-3"></i>
+                                <h4 class="mb-0 fw-bold">农产品直销系统</h4>
+                            </div>
+                            <p class="text-muted mb-4">致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收，实现优质农产品直达餐桌。</p>
+                            <div class="social-links mb-4">
+                                <a href="#" class="social-link" aria-label="微信"><i class="fab fa-weixin"></i></a>
+                                <a href="#" class="social-link" aria-label="微博"><i class="fab fa-weibo"></i></a>
+                                <a href="#" class="social-link" aria-label="QQ"><i class="fab fa-qq"></i></a>
+                                <a href="#" class="social-link" aria-label="抖音"><i class="fab fa-tiktok"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-6 fade-in">
+                        <h5 class="footer-title">快速链接</h5>
+                        <ul class="footer-links">
+                            <li><a href="/index.html">首页</a></li>
+                            <li><a href="/pages/products.html">产品列表</a></li>
+                            <li><a href="/pages/farmers.html">农户展示</a></li>
+                            <li><a href="/pages/about.html">关于我们</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-6 fade-in">
+                        <h5 class="footer-title">帮助支持</h5>
+                        <ul class="footer-links">
+                            <li><a href="/pages/faq.html">常见问题</a></li>
+                            <li><a href="/pages/shipping.html" class="fw-bold">配送政策</a></li>
+                            <li><a href="/pages/return.html">退换政策</a></li>
+                            <li><a href="/pages/contact.html">联系客服</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-4 col-md-6 fade-in">
+                        <h5 class="footer-title">联系我们</h5>
+                        <ul class="contact-info">
+                            <li>
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>广东省广州市白云区</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-phone"></i>
+                                <span>123-456-7890</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-envelope"></i>
+                                <span>info@farmshop.com</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-clock"></i>
+                                <span>周一至周日 9:00-18:00</span>
+                            </li>
+                        </ul>
+                        <div class="newsletter mt-4">
+                            <h6 class="mb-2">订阅我们的新闻</h6>
+                            <div class="d-flex">
+                                <input type="email" class="form-control form-control-sm" placeholder="您的电子邮箱">
+                                <button class="btn btn-success btn-sm ms-2">订阅</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom py-3">
+            <div class="container">
+                <div class="d-flex flex-wrap justify-content-between align-items-center">
+                    <p class="copyright mb-0">&copy; 2025 农产品直销系统 · 保留所有权利</p>
+                    <div class="footer-links-secondary">
+                        <a href="/pages/privacy.html">隐私政策</a>
+                        <a href="/pages/terms.html">服务条款</a>
+                        <a href="/pages/sitemap.html">网站地图</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Axios库 -->
+    <script src="/js/lib/axios.min.js"></script>
+    <!-- 应用配置 -->
+    <script src="/js/config.js"></script>
+    <!-- API配置 -->
+    <script src="/js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="/js/axios-config.js"></script>
+    <!-- 登录验证 -->
+    <script src="/js/auth.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查用户登录状态
+            if (typeof checkLogin === 'function') {
+                checkLogin(function(user) {
+                    // 更新导航栏状态
+                    updateNavbar(user);
+                });
+            }
+            
+            // 退出登录
+            const logoutBtn = document.getElementById('logout-button');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (typeof logout === 'function') {
+                        logout();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>确认订单 - 本地特色农产品直销系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- 自定义样式 -->
+    <link href="/css/style.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- 应用配置 -->
+    <script src="/js/config.js"></script>
+    <!-- Axios配置 -->
+    <script src="/js/axios-config.js"></script>
+    <!-- 认证相关 -->
+    <script src="/js/auth.js"></script>
+    <!-- 行政区划数据 -->
+    <script src="/js/region-data.js"></script>
+    <style>
+        .product-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+        }
+        .checkout-section {
+            margin-bottom: 30px;
+        }
+        .order-summary {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .payment-methods .form-check {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        .payment-methods .form-check-input:checked + .form-check-label {
+            font-weight: bold;
+        }
+        /* 地址选择框样式优化 */
+        .region-search {
+            position: relative;
+            margin-bottom: 8px;
+        }
+        .region-search input {
+            padding-left: 30px;
+        }
+        .region-search i {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+            color: #aaa;
+        }
+        .select-wrapper {
+            position: relative;
+        }
+        .select-wrapper select {
+            padding-right: 30px;
+            appearance: none;
+        }
+        .select-wrapper::after {
+            content: "▼";
+            font-size: 12px;
+            color: #666;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        /* 滚动条样式优化 */
+        select::-webkit-scrollbar {
+            width: 8px;
+        }
+        select::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        select::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        select::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+        /* 搜索框样式 */
+        .search-box {
+            margin-bottom: 10px;
+        }
+        .search-box input {
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            padding: 8px 12px;
+            width: 100%;
+        }
+        /* 快速搜索项 */
+        .quick-regions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        .quick-region-tag {
+            background-color: #e9ecef;
+            border-radius: 15px;
+            padding: 2px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .quick-region-tag:hover {
+            background-color: #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-leaf text-success me-2"></i>农产品直销系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/products.html">产品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/farmers.html">农户展示</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/about.html">关于我们</a>
+                    </li>
+                </ul>
+                
+                <!-- 未登录状态 -->
+                <div class="d-flex" id="unauthenticated-menu">
+                    <a href="/pages/login.html" class="btn btn-outline-success me-2">登录</a>
+                    <a href="/pages/register.html" class="btn btn-success">注册</a>
+                </div>
+                
+                <!-- 已登录状态 -->
+                <div class="d-none" id="authenticated-menu">
+                    <a href="/pages/cart.html" class="btn btn-outline-success me-2" title="购物车">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <div class="dropdown d-inline-block">
+                        <button class="btn btn-outline-success dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="username">用户名</span>
+                            <span class="badge bg-success ms-1">已登录</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenuButton">
+                            <li><a class="dropdown-item" href="/pages/user/profile.html"><i class="fas fa-user me-2"></i>个人中心</a></li>
+                            <li><a class="dropdown-item" href="/pages/user/orders.html"><i class="fas fa-shopping-cart me-2"></i>我的订单</a></li>
+                            
+                            <li id="farmer-menu-item" class="d-none"><a class="dropdown-item" href="/pages/farmer/dashboard.html"><i class="fas fa-tractor me-2"></i>农户中心</a></li>
+                            <li id="admin-menu-item" class="d-none"><a class="dropdown-item" href="/pages/admin/dashboard.html"><i class="fas fa-cogs me-2"></i>管理后台</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container py-5">
+        <h2 class="mb-4">确认订单</h2>
+        
+        <div class="row">
+            <!-- 订单信息部分 -->
+            <div class="col-lg-8">
+                <!-- 购物清单 -->
+                <div class="checkout-section">
+                    <h4 class="mb-3">购物清单</h4>
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-borderless mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>商品</th>
+                                            <th>规格</th>
+                                            <th>单价</th>
+                                            <th>数量</th>
+                                            <th class="text-end">小计</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="checkout-items">
+                                        <!-- 商品信息将通过JS加载 -->
+                                        <tr>
+                                            <td colspan="4" class="text-center py-4">
+                                                <div class="spinner-border text-success" role="status">
+                                                    <span class="visually-hidden">加载中...</span>
+                                                </div>
+                                                <p class="mt-2">正在加载商品信息...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 收货信息 -->
+                <div class="checkout-section">
+                    <h4 class="mb-3">收货信息</h4>
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- 已保存地址选择 -->
+                            <div class="mb-3" id="saved-addresses-container">
+                                <label class="form-label fw-bold">选择已保存的地址</label>
+                                <select class="form-select" id="saved-addresses">
+                                    <option value="">-- 请选择收货地址 --</option>
+                                </select>
+                            </div>
+                            
+                            <form id="shipping-form">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="receiverName" class="form-label">收货人姓名</label>
+                                        <input type="text" class="form-control" id="receiverName" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="contactPhone" class="form-label">联系电话</label>
+                                        <input type="tel" class="form-control" id="contactPhone" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="province" class="form-label">省份</label>
+                                        <div class="select-wrapper">
+                                            <select class="form-select" id="province" required>
+                                                <option value="">请选择省份</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="city" class="form-label">城市</label>
+                                        <div class="select-wrapper">
+                                            <select class="form-select" id="city" required>
+                                                <option value="">请先选择省份</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="district" class="form-label">详细地址</label>
+                                        <input type="text" class="form-control" id="district" required placeholder="区县、街道等">
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="detailAddress" class="form-label">详细地址</label>
+                                        <textarea class="form-control" id="detailAddress" rows="2" required placeholder="小区、门牌号等"></textarea>
+                                    </div>
+                                    <!-- 地址保存按钮 -->
+                                    <div class="col-12 mt-3">
+                                        <button type="button" class="btn btn-outline-success" id="save-address-btn">
+                                            <i class="fas fa-plus-circle me-2"></i>将此地址添加到我的地址簿
+                                        </button>
+                                        <div class="mt-2 text-muted small">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            您最多可以保存7个收货地址，如果已达上限，请前往<a href="/pages/user/profile.html" class="text-decoration-none">个人中心</a>管理地址。
+                                        </div>
+                                        <div id="address-save-result" class="mt-2 d-none"></div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 支付方式 -->
+                <div class="checkout-section">
+                    <h4 class="mb-3">配送与付款方式</h4>
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- 统一货到付款配送方式 -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">配送方式</label>
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="me-3">
+                                        <i class="fas fa-truck fa-2x text-success"></i>
+                                            </div>
+                                            <div>
+                                        <strong>货到付款配送</strong>
+                                        <p class="text-muted mb-0">下单后由附近农户直接配送，下单后会尽快安排送货</p>
+                                            </div>
+                                        </div>
+                                <input type="hidden" name="deliveryMethod" id="deliveryMethod" value="sameDay">
+                                
+                                <!-- 配送地区信息 -->
+                                <div id="deliveryAreaInfo" class="alert alert-info mt-2">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <span><strong>重要提示：</strong>我们只能在以下配送区域内提供服务，超出配送范围将无法下单</span>
+                                    <div id="delivery-status-message" class="mt-2 p-2 rounded d-none"></div>
+                                    <div class="mt-2 small">
+                                        <p class="mb-1"><strong>当前支持配送的区域：</strong></p>
+                                        <ul id="sameday-areas-list" class="mb-0">
+                                            <!-- 将通过JS加载区域列表 -->
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr class="my-3">
+                            
+                            <!-- 货到付款方式 -->
+                            <div>
+                                <label class="form-label fw-bold">付款方式</label>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <i class="fas fa-money-bill-wave fa-2x text-success"></i>
+                                    </div>
+                                    <div>
+                                        <strong>货到付款</strong>
+                                        <p class="text-muted mb-0">收到商品后支付，可使用现金或扫码支付</p>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="paymentMethod" id="paymentMethod" value="cod">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 订单摘要侧边栏 -->
+            <div class="col-lg-4">
+                <div class="order-summary sticky-top" style="top: 80px;">
+                    <h4 class="mb-3">订单摘要</h4>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>商品金额</span>
+                        <span id="items-total">¥0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>运费</span>
+                        <span id="shipping-fee">¥0.00</span>
+                    </div>
+                    <div id="shipping-fee-info" class="small text-muted mb-2 d-none"></div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>应付总额</strong>
+                        <strong class="text-danger" id="total-amount">¥0.00</strong>
+                    </div>
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle me-2"></i> 货到付款，收到商品后再付款
+                    </div>
+                    <button id="place-order-btn" class="btn btn-success btn-lg w-100">
+                        <i class="fas fa-check me-2"></i>提交订单
+                    </button>
+                    <div class="text-center mt-3">
+                        <a href="/pages/cart.html" class="text-decoration-none">
+                            <i class="fas fa-arrow-left me-1"></i>返回购物车
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h5>关于我们</h5>
+                    <p class="text-muted">本地特色农产品直销系统，致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收。</p>
+                </div>
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <h5>快速链接</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/index.html" class="text-decoration-none text-muted">首页</a></li>
+                        <li><a href="/pages/products.html" class="text-decoration-none text-muted">产品列表</a></li>
+                        <li><a href="/pages/farmers.html" class="text-decoration-none text-muted">农户展示</a></li>
+
+                        <li><a href="/pages/about.html" class="text-decoration-none text-muted">关于我们</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-3 mb-md-0">
+                    <h5>帮助</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/pages/faq.html" class="text-decoration-none text-muted">常见问题</a></li>
+                        <li><a href="/pages/shipping.html" class="text-decoration-none text-muted">配送政策</a></li>
+                        <li><a href="/pages/return.html" class="text-decoration-none text-muted">退换政策</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>联系我们</h5>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="fas fa-map-marker-alt me-2"></i> 地址：广东省广州市白云区</li>
+                        <li><i class="fas fa-phone me-2"></i> 电话：123-456-7890</li>
+                        <li><i class="fas fa-envelope me-2"></i> 邮箱：info@farmshop.com</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center text-muted">
+                <small>&copy; 2023 农产品直销系统. 保留所有权利.</small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 页脚结束 -->
+
+    <!-- Toast 提示 -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span id="success-message">操作成功</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        
+        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-times-circle me-2"></i>
+                    <span id="error-message">操作失败</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- API 调用 -->
+    <script src="/js/api.js"></script>
+    
+    <!-- 主要脚本 -->
+    <script>
+        // 全局变量
+        let cartData = null; // 购物车数据
+        let deliveryAreas = []; // 配送区域
+        // 添加缺失的变量
+        let currentShippingFee = 0; // 当前的运费
+        let currentShippingFeeId = null; // 当前的运费ID
+        let selectedDeliveryAreaId = null; // 选择的配送区域ID
+        const currentAddressInfo = {
+            province: '',
+            city: '',
+            district: ''
+        };
+        let successToast = null;
+        let errorToast = null;
+        let selectedCartItems = []; // 添加selectedCartItems变量存储选中的商品ID
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化Toast
+            successToast = new bootstrap.Toast(document.getElementById('successToast'));
+            errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
+            
+            // 设置登出按钮事件
+            document.getElementById('logout-button').addEventListener('click', function(e) {
+                e.preventDefault();
+                logout();
+            });
+            
+            // 检查用户登录状态
+            checkLogin(function(user) {
+                if (!user) {
+                // 未登录跳转到登录页
+                window.location.href = '/pages/login.html?redirect=checkout';
+                return;
+            }
+            
+            // 更新导航栏状态
+            checkAuthStatus();
+            
+            // 检查是否是直接购买模式
+            const urlParams = new URLSearchParams(window.location.search);
+            const isDirect = urlParams.get('direct') === 'true';
+            const buyNowItemStr = sessionStorage.getItem('buyNowItem');
+            
+            if (isDirect && buyNowItemStr) {
+                // 直接购买模式
+                try {
+                    const buyNowItem = JSON.parse(buyNowItemStr);
+                    console.log('直接购买模式，商品:', buyNowItem);
+                    // 直接加载单个商品
+                    loadDirectBuyItem(buyNowItem);
+                } catch (e) {
+                    console.error('解析立即购买商品数据失败:', e);
+                    // 降级到普通购物车模式
+                    loadCartData();
+                }
+            } else {
+            // 从sessionStorage获取选中的商品ID
+            const selectedItemsStr = sessionStorage.getItem('selectedCartItems');
+            if (selectedItemsStr) {
+                try {
+                    selectedCartItems = JSON.parse(selectedItemsStr);
+                    console.log('从购物车获取选中商品ID:', selectedCartItems);
+                } catch (e) {
+                    console.error('解析选中商品ID失败:', e);
+                    selectedCartItems = [];
+                }
+            }
+            
+            // 加载购物车数据
+            loadCartData();
+            }
+            
+                // 加载配送区域数据
+                loadDeliveryAreas();
+                
+                // 加载用户已保存地址
+                loadUserAddresses();
+                
+                // 初始化省份选择器
+                initProvinceSelector();
+                
+                // 绑定事件
+            document.getElementById('place-order-btn').addEventListener('click', submitOrder);
+            document.getElementById('saved-addresses').addEventListener('change', function() {
+                fillAddressFromSelection();
+                // 不需要在这里显式调用updateShippingFeeOnAddressChange，
+                // 因为fillAddressFromData函数中已经有调用
+            });
+            document.getElementById('province').addEventListener('change', function() {
+                loadCities();
+                updateShippingFeeOnAddressChange();
+            });
+            document.getElementById('city').addEventListener('change', function() {
+                loadDistricts();
+                updateShippingFeeOnAddressChange();
+            });
+            document.getElementById('district').addEventListener('change', updateShippingFeeOnAddressChange);
+            document.getElementById('detailAddress').addEventListener('change', updateShippingFeeOnAddressChange);
+            
+                // 绑定保存地址按钮事件
+                document.getElementById('save-address-btn').addEventListener('click', saveAddress);
+            });
+        });
+        
+        // 检查用户登录状态并更新导航栏
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (token && user && user.userId) {
+                // 已登录
+                document.getElementById('unauthenticated-menu').classList.add('d-none');
+                document.getElementById('authenticated-menu').classList.remove('d-none');
+                
+                // 设置用户名
+                document.getElementById('username').textContent = user.username || '用户';
+                
+                // 根据角色显示不同的菜单项
+                if (user.role === 'farmer') {
+                    document.getElementById('farmer-menu-item').classList.remove('d-none');
+                } else if (user.role === 'admin') {
+                    document.getElementById('admin-menu-item').classList.remove('d-none');
+                }
+                
+                return true; // 已登录
+            } else {
+                // 未登录
+                document.getElementById('unauthenticated-menu').classList.remove('d-none');
+                document.getElementById('authenticated-menu').classList.add('d-none');
+                return false; // 未登录
+            }
+        }
+        
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('username');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('role');
+            window.location.href = '/index.html';
+        }
+        
+        // 从选择的地址填充表单
+        function fillAddressFromSelection() {
+            const selectElement = document.getElementById('saved-addresses');
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            
+            if (selectedOption && selectedOption.dataset.address) {
+                try {
+                    const addressData = JSON.parse(selectedOption.dataset.address);
+                    fillAddressFromData(addressData);
+                } catch (e) {
+                    console.error('解析地址数据错误:', e);
+                }
+            }
+        }
+        
+        // 根据地址数据填充表单
+        function fillAddressFromData(address) {
+            document.getElementById('receiverName').value = address.receiverName || '';
+            document.getElementById('contactPhone').value = address.contactPhone || '';
+                
+            // 选择省份
+            const provinceSelect = document.getElementById('province');
+            provinceSelect.value = address.province || '';
+            provinceSelect.dispatchEvent(new Event('change'));
+            
+            // 需要延迟选择城市，因为城市是基于省份动态加载的
+            setTimeout(() => {
+                const citySelect = document.getElementById('city');
+                citySelect.value = address.city || '';
+                citySelect.dispatchEvent(new Event('change'));
+                
+                document.getElementById('district').value = address.district || '';
+                document.getElementById('detailAddress').value = address.detailAddress || '';
+                
+                // 填充地址后触发运费计算
+                setTimeout(() => {
+                    updateShippingFeeOnAddressChange();
+                }, 300);
+            }, 300);
+        }
+        
+        // 初始化省份选择器
+        function initProvinceSelector() {
+            if (!window.regionData || !window.regionData.provinces) {
+                console.error('地区数据未加载!');
+                return;
+            }
+            
+            const provinceSelect = document.getElementById('province');
+            provinceSelect.innerHTML = '<option value="">请选择省份</option>';
+            
+            window.regionData.provinces.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province.name;
+                option.textContent = province.name;
+                provinceSelect.appendChild(option);
+            });
+        }
+        
+        // 加载城市选择器
+        function loadCities() {
+            const provinceSelect = document.getElementById('province');
+            const citySelect = document.getElementById('city');
+            const selectedProvince = provinceSelect.value;
+            
+            // 更新当前地址信息
+            currentAddressInfo.province = selectedProvince;
+            currentAddressInfo.city = '';
+            currentAddressInfo.district = '';
+            
+            // 重置城市选择器
+            citySelect.innerHTML = '<option value="">请选择城市</option>';
+            
+            if (!selectedProvince) {
+                    return;
+                }
+                
+            if (!window.regionData || !window.regionData.provinces || !window.regionData.cities) {
+                console.error('地区数据未加载!');
+                return;
+            }
+            
+            // 根据省份名称查找省份代码
+            const provinceCode = window.regionData.getProvinceCode(selectedProvince);
+            
+            if (!provinceCode) {
+                console.error('未找到省份代码:', selectedProvince);
+                    return;
+                }
+                
+            // 获取该省份的城市列表
+            const cities = window.regionData.getCities(provinceCode);
+            
+            if (!cities || cities.length === 0) {
+                console.error('未找到城市数据:', provinceCode);
+                return;
+            }
+            
+            // 填充城市选择器
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.name;
+                option.textContent = city.name;
+                citySelect.appendChild(option);
+            });
+        }
+        
+        // 地址变化时更新运费
+        function updateShippingFeeOnAddressChange() {
+            // 获取当前地址信息
+            const province = document.getElementById('province').value;
+            const city = document.getElementById('city').value;
+            const district = document.getElementById('district').value;
+            
+            // 当地址手动修改时，重置下拉框选择，避免使用旧的选择地址信息
+            if (document.getElementById('saved-addresses').selectedIndex > 0) {
+                // 如果当前地址与选中的保存地址不一致，则清除下拉框选择
+                const selectElement = document.getElementById('saved-addresses');
+                const selectedOption = selectElement.options[selectElement.selectedIndex];
+                
+                if (selectedOption && selectedOption.dataset.address) {
+                    try {
+                        const addressData = JSON.parse(selectedOption.dataset.address);
+                        if (addressData.province !== province || 
+                            addressData.city !== city || 
+                            addressData.district !== district) {
+                            // 地址被手动修改，清除选中状态
+                            document.getElementById('saved-addresses').selectedIndex = 0;
+                        }
+                    } catch (e) {
+                        console.error('解析地址数据错误:', e);
+                    }
+                }
+            }
+            
+            // 更新配送区域可用性提示
+            if (province && city && district) {
+                const addressInfo = { province, city, district };
+                const isDeliverable = checkDeliveryAvailability(addressInfo);
+                
+                const statusElement = document.getElementById('delivery-status-message');
+                if (statusElement) {
+                    if (isDeliverable) {
+                        statusElement.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-2"></i>您的地址在配送范围内</span>';
+                        statusElement.className = 'mt-2 p-2 bg-success bg-opacity-10 rounded';
+                    } else {
+                        statusElement.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle me-2"></i>您选择的地区暂不支持配送，请选择其他地址</span>';
+                        statusElement.className = 'mt-2 p-2 bg-danger bg-opacity-10 rounded';
+                    }
+                    statusElement.classList.remove('d-none');
+                }
+            }
+            
+            // 如果购物车数据已加载，则更新订单摘要
+            if (cartData && cartData.items && cartData.items.length > 0) {
+                // 如果有选中的商品，则只使用选中的商品
+                if (selectedCartItems && selectedCartItems.length > 0) {
+                    const filteredItems = cartData.items.filter(item => 
+                        selectedCartItems.includes(item.cartItemId)
+                    );
+                    if (filteredItems.length > 0) {
+                        const filteredCart = {...cartData, items: filteredItems};
+                        updateOrderSummary(filteredCart);
+                        return;
+                    }
+                }
+                
+                // 否则使用全部商品
+                updateOrderSummary(cartData);
+            }
+        }
+        
+        // 检查配送可用性
+        function checkDeliveryAvailability(addressInfo) {
+            // 首先检查是否有全国配送选项
+            const hasNationwideArea = deliveryAreas.some(area => area.isNationwide && area.supportSameDayDelivery);
+            if (hasNationwideArea) {
+                // 有全国配送选项，直接返回可配送
+                return true;
+            }
+            
+            // 检查省级配送
+            const hasProvinceDelivery = deliveryAreas.some(area => 
+                area.province === addressInfo.province && 
+                !area.city && 
+                area.supportSameDayDelivery
+            );
+            if (hasProvinceDelivery) {
+                    return true;
+                }
+                
+            // 检查市级配送
+            const hasCityDelivery = deliveryAreas.some(area => 
+                area.province === addressInfo.province && 
+                    area.city === addressInfo.city && 
+                !area.district && 
+                area.supportSameDayDelivery
+            );
+            if (hasCityDelivery) {
+                    return true;
+                }
+                
+            // 检查区/县级配送
+            const hasDistrictDelivery = deliveryAreas.some(area => 
+                area.province === addressInfo.province && 
+                area.city === addressInfo.city && 
+                area.district === addressInfo.district && 
+                area.supportSameDayDelivery
+            );
+            
+            return hasDistrictDelivery;
+        }
+        
+        // 显示警告提示
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alert-container') || document.createElement('div');
+            
+            if (!document.getElementById('alert-container')) {
+                alertContainer.id = 'alert-container';
+                alertContainer.style.position = 'fixed';
+                alertContainer.style.top = '20px';
+                alertContainer.style.right = '20px';
+                alertContainer.style.zIndex = '9999';
+                document.body.appendChild(alertContainer);
+                    }
+            
+            const alertElement = document.createElement('div');
+            alertElement.className = `alert alert-${type} alert-dismissible fade show`;
+            alertElement.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            alertContainer.appendChild(alertElement);
+            
+            // 添加动画效果
+            alertElement.style.transition = 'all 0.3s ease-in-out';
+            alertElement.style.opacity = '0';
+            alertElement.style.transform = 'translateX(100%)';
+            
+                setTimeout(() => {
+                alertElement.style.opacity = '1';
+                alertElement.style.transform = 'translateX(0)';
+            }, 10);
+                        
+            // 设置自动消失
+                        setTimeout(() => {
+                alertElement.classList.remove('show');
+                setTimeout(() => {
+                    // 添加检查确保元素仍然是容器的子节点
+                    if (alertElement.parentNode === alertContainer) {
+                        alertContainer.removeChild(alertElement);
+                    }
+                }, 300);
+            }, 5000);
+        }
+        
+        // 保存地址
+        async function saveAddress() {
+            try {
+                // 获取收货地址信息
+                const receiverName = document.getElementById('receiverName').value.trim();
+                const contactPhone = document.getElementById('contactPhone').value.trim();
+                const province = document.getElementById('province').value;
+                const city = document.getElementById('city').value;
+                const district = document.getElementById('district').value;
+                const detailAddress = document.getElementById('detailAddress').value.trim();
+                
+                // 验证表单
+                if (!receiverName || !contactPhone || !province || !city || !district || !detailAddress) {
+                    showToast('请填写完整的收货地址信息', 'error');
+                    return;
+                }
+        
+                // 验证手机号
+                if (!/^1[3-9]\d{9}$/.test(contactPhone)) {
+                    showToast('请输入正确的手机号码', 'error');
+                    return;
+                }
+                
+                // 获取用户当前地址数量
+                const addressesResponse = await api.address.getSavedAddresses();
+                if (addressesResponse && addressesResponse.code === 200) {
+                    const existingAddresses = addressesResponse.data || [];
+                    
+                    // 如果地址数量已达到7个，不允许再添加
+                    if (existingAddresses.length >= 7) {
+                        showToast('您最多只能保存7个收货地址，请先删除不需要的地址', 'error');
+                        const resultElement = document.getElementById('address-save-result');
+                        resultElement.className = 'mt-2 alert alert-warning';
+                        resultElement.innerHTML = `
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            您最多只能保存7个收货地址，请前往<a href="/pages/user/profile.html" class="alert-link">个人中心</a>管理地址。
+                        `;
+                        resultElement.classList.remove('d-none');
+                        return;
+                    }
+                    
+                    // 检查是否有相同的地址
+                    let exactSameAddress = false;
+                    
+                    for (const addr of existingAddresses) {
+                        // 统一格式化地址进行比较（去除空格和标点符号）
+                        const normalizeString = (str) => str.replace(/[\s,，。.、；:!"！?？\-]/g, '').toLowerCase();
+                        
+                        // 比较关键部分是否相同
+                        const isSameProvince = addr.province === province;
+                        const isSameCity = addr.city === city;
+                        const isSameDistrict = addr.district === district;
+                        
+                        // 对详细地址进行归一化处理再比较
+                        const normalizedExistingAddress = normalizeString(addr.detailAddress || '');
+                        const normalizedNewAddress = normalizeString(detailAddress);
+                        const isSameDetail = normalizedExistingAddress === normalizedNewAddress;
+                        
+                        // 比较收货人和联系电话是否相同
+                        const isSameReceiver = addr.receiverName === receiverName;
+                        const isSamePhone = addr.contactPhone === contactPhone;
+                        
+                        // 仅当省市区、详细地址、收货人姓名和联系电话都相同时，才视为完全相同的地址
+                        if (isSameProvince && isSameCity && isSameDistrict && isSameDetail && isSameReceiver && isSamePhone) {
+                            exactSameAddress = true;
+                                    break;
+                                }
+                            }
+                            
+                    if (exactSameAddress) {
+                        showToast('已存在完全相同的地址信息，无需重复添加', 'info');
+                        const resultElement = document.getElementById('address-save-result');
+                        resultElement.className = 'mt-2 alert alert-info';
+                        resultElement.innerHTML = `
+                            <i class="fas fa-info-circle me-2"></i>
+                            您已经添加过完全相同的地址信息（包括收货人和联系电话），无需重复添加。
+                        `;
+                        resultElement.classList.remove('d-none');
+                        return;
+                    }
+                }
+                
+                // 构建地址数据
+                const addressData = {
+                    receiverName,
+                    contactPhone,
+                    province,
+                    city,
+                    district,
+                    detailAddress,
+                    isDefault: false // 默认不设为默认地址
+                };
+                    
+                // 调用API保存地址
+                const response = await api.address.addAddress(addressData);
+                
+                if (response && response.code === 200) {
+                    // 显示成功消息
+                    showToast('地址保存成功', 'success');
+                    const resultElement = document.getElementById('address-save-result');
+                    resultElement.className = 'mt-2 alert alert-success';
+                    resultElement.innerHTML = `
+                        <i class="fas fa-check-circle me-2"></i>
+                        地址已成功保存到您的地址簿！
+                    `;
+                    resultElement.classList.remove('d-none');
+                    
+                    // 延迟一段时间后隐藏成功消息
+                    setTimeout(() => {
+                        resultElement.classList.add('d-none');
+                    }, 5000);
+                    
+                    // 重新加载用户地址
+                    loadUserAddresses();
+                } else {
+                    showToast('保存地址失败: ' + (response?.message || '未知错误'), 'error');
+                    const resultElement = document.getElementById('address-save-result');
+                    resultElement.className = 'mt-2 alert alert-danger';
+                    resultElement.innerHTML = `
+                        <i class="fas fa-times-circle me-2"></i>
+                        保存地址失败: ${response?.message || '未知错误'}
+                    `;
+                    resultElement.classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('保存地址错误:', error);
+                showToast('保存地址错误: ' + error.message, 'error');
+                const resultElement = document.getElementById('address-save-result');
+                resultElement.className = 'mt-2 alert alert-danger';
+                resultElement.innerHTML = `
+                    <i class="fas fa-times-circle me-2"></i>
+                    保存地址失败: ${error.message || '未知错误'}
+                `;
+                resultElement.classList.remove('d-none');
+            }
+        }
+        
+        // 显示Toast消息
+        function showToast(message, type = 'success') {
+            // 设置消息文本
+            const messageElement = document.getElementById(type === 'success' ? 'success-message' : 'error-message');
+            if (messageElement) {
+                messageElement.textContent = message;
+            }
+            
+            // 显示对应的Toast
+            if (type === 'success' && successToast) {
+                successToast.show();
+            } else if (type === 'error' && errorToast) {
+                errorToast.show();
+            }
+        }
+        
+        // 提交订单
+        async function submitOrder() {
+            try {
+                // 获取用户信息
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                if (!user || !user.userId) {
+                    throw new Error('用户未登录或会话已过期');
+                }
+                
+                // 获取所有的表单数据
+                const receiverName = document.getElementById('receiverName').value.trim();
+                const contactPhone = document.getElementById('contactPhone').value.trim();
+                const province = document.getElementById('province').value.trim();
+                const city = document.getElementById('city').value.trim();
+                const district = document.getElementById('district').value.trim();
+                const detailAddress = document.getElementById('detailAddress').value.trim();
+            
+                // 表单验证
+                if (!receiverName) {
+                    throw new Error('请填写收货人姓名');
+                }
+                if (!contactPhone) {
+                    throw new Error('请填写联系电话');
+                }
+                if (!province || !city || !district) {
+                    throw new Error('请选择完整的收货地区');
+                }
+                if (!detailAddress) {
+                    throw new Error('请填写详细地址');
+                }
+                
+                // 在提交订单前重新计算运费，确保使用最新的地址信息
+                const currentCart = cartData;
+                let subtotal = 0;
+                if (currentCart && currentCart.items) {
+                    subtotal = currentCart.items.reduce((sum, item) => 
+                        sum + (item.product.price * item.quantity), 0);
+                }
+            
+                const shippingFeeResult = await calculateShippingFee(province, city, district, subtotal);
+                console.log('订单提交前重新计算运费:', shippingFeeResult);
+                
+                // 检查配送区域可用性
+                const addressInfo = { province, city, district };
+                if (!checkDeliveryAvailability(addressInfo)) {
+                    showToast('您选择的地区暂不支持配送，请选择其他地址', 'error');
+                    return;
+                }
+                
+                // 构建地址字符串
+                const fullAddress = `${province} ${city} ${district} ${detailAddress}`;
+                        
+                // 禁用提交按钮，显示加载状态
+                const orderButton = document.getElementById('place-order-btn');
+                orderButton.disabled = true;
+                orderButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 提交中...';
+                
+                // 准备参数
+                const orderData = {
+                    userId: user.userId,
+                    shippingAddress: fullAddress,
+                    contactPhone: contactPhone,
+                    receiverName: receiverName,
+                    shippingFeeId: currentShippingFeeId,
+                    deliveryAreaId: selectedDeliveryAreaId
+                };
+                
+                // 判断是直接购买还是购物车结算
+                let response;
+                const urlParams = new URLSearchParams(window.location.search);
+                const isDirect = urlParams.get('direct') === 'true';
+                
+                if (isDirect) {
+                    // 直接购买
+                    const buyNowData = JSON.parse(sessionStorage.getItem('buyNowItem') || '{}');
+                    if (!buyNowData.productId || !buyNowData.quantity) {
+                        throw new Error('立即购买信息不完整');
+                    }
+                    
+                    // 添加产品信息到订单数据
+                    orderData.productId = buyNowData.productId;
+                    orderData.quantity = buyNowData.quantity;
+                    orderData.shippingFee = currentShippingFee; // 使用当前计算的运费
+                    orderData.deliveryMethod = 'express'; // 默认快递配送
+                    
+                    response = await api.orders.createDirectOrder(orderData);
+                } else {
+                    // 购物车结算
+                    // 如果有选中的商品，则传递选中项
+                    if (selectedCartItems && selectedCartItems.length > 0) {
+                        orderData.selectedItems = selectedCartItems;
+                    }
+                    
+                    response = await api.orders.createFromCart(orderData);
+                }
+                
+                if (response.code === 200) {
+                    showToast('订单提交成功！', 'success');
+                    
+                    // 清除购买信息
+                    if (isDirect) {
+                        sessionStorage.removeItem('buyNowItem');
+                    }
+                    
+                    // 跳转订单成功页面或订单列表
+                    setTimeout(() => {
+                        window.location.href = '/pages/user/orders.html';
+                    }, 1000);
+            } else {
+                    throw new Error(response.message || '提交订单失败');
+                }
+            } catch (error) {
+                console.error('提交订单错误:', error);
+                showToast('提交订单失败: ' + error.message, 'error');
+                
+                // 恢复按钮状态
+                const orderButton = document.getElementById('place-order-btn');
+                orderButton.disabled = false;
+                orderButton.innerHTML = '提交订单';
+            }
+        }
+        
+        // 加载配送区域数据
+        async function loadDeliveryAreas() {
+            try {
+                // 使用deliveryArea API端点替代delivery API端点
+                const response = await api.deliveryArea.getSameDayAreas();
+                if (response.code === 200) {
+                    deliveryAreas = response.data || [];
+                    
+                    // 更新配送区域列表显示
+                    const areasList = document.getElementById('sameday-areas-list');
+                    if (areasList) {
+                        if (deliveryAreas.length > 0) {
+                            areasList.innerHTML = '';
+                            
+                            // 检查是否有全国配送选项
+                            const hasNationwideArea = deliveryAreas.some(area => area.isNationwide);
+                            if (hasNationwideArea) {
+                                const li = document.createElement('li');
+                                li.className = 'text-success fw-bold';
+                                li.innerHTML = `<strong>全国配送</strong> (不限制区域)`;
+                                areasList.appendChild(li);
+                            }
+                            
+                            // 显示具体的配送区域
+                            deliveryAreas
+                                .filter(area => !area.isNationwide) // 过滤掉全国配送，已单独显示
+                                .forEach(area => {
+                                    const li = document.createElement('li');
+                                    
+                                    // 根据不同的配送级别显示
+                                    if (area.province && !area.city) {
+                                        li.textContent = `${area.province} (全省范围)`;
+                                    } else if (area.province && area.city && !area.district) {
+                                        li.textContent = `${area.province}${area.city} (全市范围)`;
+                                    } else {
+                                        li.textContent = `${area.province}${area.city}${area.district}`;
+                                    }
+                                    
+                                areasList.appendChild(li);
+                            });
+            } else {
+                            areasList.innerHTML = '<li>暂无配送区域信息</li>';
+            }
+        }
+            } else {
+                    console.error('加载配送区域数据失败:', response.message);
+                }
+            } catch (error) {
+                console.error('加载配送区域数据出错:', error);
+            }
+        }
+        
+        // 加载购物车数据
+        async function loadCartData() {
+            try {
+                // 调用API获取购物车数据
+                const response = await api.cart.getCart();
+            
+                if (response.code === 200) {
+                    cartData = response.data;
+                    
+                    if (!cartData || !cartData.items || cartData.items.length === 0) {
+                        // 购物车为空
+                        renderEmptyCart();
+                return;
+            }
+            
+                    // 如果有选中的商品，则只显示选中的商品
+                    if (selectedCartItems && selectedCartItems.length > 0) {
+                        const filteredItems = cartData.items.filter(item => 
+                            selectedCartItems.includes(item.cartItemId)
+                        );
+                        if (filteredItems.length > 0) {
+                            // 渲染选中的购物车商品
+                            renderCartItems(filteredItems);
+                            
+                            // 更新订单摘要 - 使用选中的商品
+                            const filteredCart = {...cartData, items: filteredItems};
+                            updateOrderSummary(filteredCart);
+                        return;
+                    }
+                }
+                
+                    // 如果没有选中的商品或选中的商品不存在，则显示全部商品
+                    renderCartItems(cartData.items);
+                        
+                    // 更新订单摘要
+                    updateOrderSummary(cartData);
+                    } else {
+                    // API返回错误
+                    renderCartError(response.message || '获取购物车数据失败');
+                }
+            } catch (error) {
+                console.error('加载购物车数据失败:', error);
+                renderCartError(error.message || '网络错误');
+            }
+        }
+        
+        // 渲染空购物车提示
+        function renderEmptyCart() {
+            document.getElementById('checkout-items').innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center py-4">
+                        <div class="alert alert-info">
+                            <i class="fas fa-shopping-cart me-2"></i> 您的购物车是空的，请先添加商品。
+                        </div>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('place-order-btn').disabled = true;
+        }
+        
+        // 渲染购物车错误提示
+        function renderCartError(errorMessage) {
+            document.getElementById('checkout-items').innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center py-4">
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i> 加载购物车数据失败: ${errorMessage}
+                        </div>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('place-order-btn').disabled = true;
+        }
+        
+        // 渲染购物车商品
+        function renderCartItems(items) {
+            let hasOutOfStockItems = false;
+            let html = '';
+            
+            items.forEach((item) => {
+                // 检查库存
+                const isOutOfStock = item.quantity > item.product.stock;
+                if (isOutOfStock) {
+                    hasOutOfStockItems = true;
+                }
+                
+                html += `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="${item.product.imageUrl || '/img/placeholder.jpg'}" alt="${item.product.productName}" 
+                                    class="img-fluid rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                <div>
+                                    <h6 class="mb-0">${item.product.productName}</h6>
+                                    <small class="text-muted">农户: ${item.product.farmer?.username || '未知'}</small>
+                                    ${isOutOfStock ? `<div class="text-danger small">库存不足 (库存:${item.product.stock})</div>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center align-middle">${item.product.specification || '未设置'}</td>
+                        <td class="text-center align-middle">¥${item.product.price.toFixed(2)}</td>
+                        <td class="text-center align-middle">${item.quantity}</td>
+                        <td class="text-end align-middle fw-bold">¥${(item.product.price * item.quantity).toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            
+            document.getElementById('checkout-items').innerHTML = html;
+            
+            // 如果有库存不足的商品，禁用提交按钮并显示提示
+            if (hasOutOfStockItems) {
+                document.getElementById('place-order-btn').disabled = true;
+                document.getElementById('place-order-btn').innerHTML = '库存不足，请调整购物车';
+                
+                // 显示库存不足提示
+                const alertRow = document.createElement('tr');
+                alertRow.innerHTML = `
+                    <td colspan="4" class="text-center py-3">
+                        <div class="alert alert-danger mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>注意：</strong> 部分商品库存不足，请返回购物车调整数量。
+                        </div>
+                    </td>
+                `;
+                const checkoutItems = document.getElementById('checkout-items');
+                checkoutItems.insertBefore(alertRow, checkoutItems.firstChild);
+                } else {
+                // 启用提交按钮
+                document.getElementById('place-order-btn').disabled = false;
+                document.getElementById('place-order-btn').innerHTML = '<i class="fas fa-check me-2"></i>提交订单';
+            }
+        }
+        
+        // 更新订单摘要
+        function updateOrderSummary(cartData) {
+            if (!cartData || !cartData.items || cartData.items.length === 0) {
+                return;
+            }
+            
+            // 计算商品总价
+            const subtotal = cartData.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+            document.getElementById('items-total').textContent = `¥${subtotal.toFixed(2)}`;
+            
+            // 获取当前选择的地址信息
+            const province = document.getElementById('province').value;
+            const city = document.getElementById('city').value;
+            const district = document.getElementById('district').value;
+            
+            // 根据地址信息计算运费
+            calculateShippingFee(province, city, district, subtotal).then(shippingFeeData => {
+                // 显示运费
+                document.getElementById('shipping-fee').textContent = `¥${shippingFeeData.shippingFee.toFixed(2)}`;
+                
+                // 如果有运费计算规则信息，显示详情
+                if (shippingFeeData.message) {
+                    const shippingFeeInfo = document.getElementById('shipping-fee-info');
+                    if (shippingFeeInfo) {
+                        shippingFeeInfo.innerHTML = `<small class="text-muted">${shippingFeeData.message}</small>`;
+                        shippingFeeInfo.classList.remove('d-none');
+                    }
+            }
+            
+                // 计算订单总价（商品总价 + 运费）
+                const total = subtotal + shippingFeeData.shippingFee;
+                document.getElementById('total-amount').textContent = `¥${total.toFixed(2)}`;
+            }).catch(error => {
+                console.error('计算运费失败:', error);
+                // 使用默认运费
+                document.getElementById('shipping-fee').textContent = '¥15.00';
+                const total = subtotal + 15;
+                document.getElementById('total-amount').textContent = `¥${total.toFixed(2)}`;
+            });
+        }
+        
+        /**
+         * 从产品规格中解析重量
+         * @param {string} specification - 产品规格说明
+         * @returns {number|null} - 解析出的重量（公斤），如果解析失败返回null
+         */
+        function parseWeightFromSpecification(specification) {
+            if (!specification || typeof specification !== 'string') {
+                console.log('重量解析失败: 规格为空或非字符串', specification);
+                return null;
+            }
+            
+            // 清理规格字符串，转为小写
+            const spec = specification.toLowerCase().trim();
+            console.log('正在解析重量规格:', specification, '=> 清理后:', spec);
+            
+            // 匹配重量模式：数字 + 单位（公斤、kg、克、g、斤等）
+            const patterns = [
+                /(\d+(?:\.\d+)?)\s*(?:公斤|kg)/i,     // 公斤、kg
+                /(\d+(?:\.\d+)?)\s*(?:克|g)/i,        // 克、g  
+                /(\d+(?:\.\d+)?)\s*(?:斤)/i,          // 斤
+                /(\d+(?:\.\d+)?)\s*(?:千克)/i,        // 千克
+                /(\d+(?:\.\d+)?)\s*(?:磅|lb)/i        // 磅
+            ];
+            
+            for (const pattern of patterns) {
+                const match = spec.match(pattern);
+                if (match) {
+                    const value = parseFloat(match[1]);
+                    if (!isNaN(value) && value > 0) {
+                        // 根据单位转换为公斤
+                        let finalWeight;
+                        if (pattern.source.includes('克|g')) {
+                            finalWeight = value / 1000; // 克转公斤
+                            console.log(`解析成功: ${value}克 => ${finalWeight}公斤`);
+                        } else if (pattern.source.includes('斤')) {
+                            finalWeight = value * 0.5; // 斤转公斤（1斤=0.5公斤）
+                            console.log(`解析成功: ${value}斤 => ${finalWeight}公斤`);
+                        } else if (pattern.source.includes('磅|lb')) {
+                            finalWeight = value * 0.453592; // 磅转公斤
+                            console.log(`解析成功: ${value}磅 => ${finalWeight}公斤`);
+                        } else {
+                            finalWeight = value; // 公斤、kg、千克直接返回
+                            console.log(`解析成功: ${value}公斤`);
+                        }
+                        return finalWeight;
+                    }
+                }
+            }
+            
+            // 如果没有匹配到重量单位，尝试匹配纯数字（假设为公斤）
+            const numberMatch = spec.match(/(\d+(?:\.\d+)?)/);
+            if (numberMatch) {
+                const value = parseFloat(numberMatch[1]);
+                if (!isNaN(value) && value > 0 && value <= 50) { // 限制在合理范围内
+                    console.log(`解析纯数字成功: ${value} => 假设为${value}公斤`);
+                    return value;
+                }
+            }
+            
+            console.log('重量解析失败: 无法从规格中提取重量信息');
+            return null;
+        }
+        
+        // 计算运费
+        async function calculateShippingFee(province, city, district, orderAmount) {
+            try {
+                // 如果没有选择地址，使用默认运费
+                if (!province || !city || !district) {
+                    currentShippingFee = 15.00;
+                    currentShippingFeeId = null;
+                    selectedDeliveryAreaId = null;
+                    return { shippingFee: 15.00, message: "未选择配送地址，使用默认运费" };
+                }
+                
+                // 检查配送区域可用性
+                const addressInfo = { province, city, district };
+                const isDeliverable = checkDeliveryAvailability(addressInfo);
+                
+                if (!isDeliverable) {
+                    currentShippingFee = 0;
+                    currentShippingFeeId = null;
+                    selectedDeliveryAreaId = null;
+                    return { shippingFee: 0, message: "该地区暂不支持配送" };
+                }
+                
+                // 查找匹配的配送区域ID
+                let deliveryAreaId = null;
+                
+                // 首先检查是否有全国配送
+                const nationwideArea = deliveryAreas.find(area => area.isNationwide && area.supportSameDayDelivery);
+                if (nationwideArea) {
+                    deliveryAreaId = nationwideArea.deliveryAreaId;
+                } else {
+                    // 按照区县、城市、省份的顺序查找最精确的配送区域
+                    const districtArea = deliveryAreas.find(area => 
+                        area.province === province && 
+                        area.city === city && 
+                        area.district === district && 
+                        area.supportSameDayDelivery
+                    );
+                    
+                    if (districtArea) {
+                        deliveryAreaId = districtArea.deliveryAreaId;
+                    } else {
+                        const cityArea = deliveryAreas.find(area => 
+                            area.province === province && 
+                            area.city === city && 
+                            !area.district && 
+                            area.supportSameDayDelivery
+                        );
+                        
+                        if (cityArea) {
+                            deliveryAreaId = cityArea.deliveryAreaId;
+                        } else {
+                            const provinceArea = deliveryAreas.find(area => 
+                                area.province === province && 
+                                !area.city && 
+                                area.supportSameDayDelivery
+                            );
+                            
+                            if (provinceArea) {
+                                deliveryAreaId = provinceArea.deliveryAreaId;
+                            }
+                        }
+                    }
+                }
+                
+                // 保存找到的配送区域ID到全局变量
+                selectedDeliveryAreaId = deliveryAreaId;
+                
+                // 计算商品重量（从规格中解析重量）
+                const cartItems = cartData?.items || [];
+                const totalWeight = cartItems.reduce((sum, item) => {
+                    // 从产品规格中解析重量，如果无法解析则默认为1公斤/件
+                    const weight = parseWeightFromSpecification(item.product.specification) || 1;
+                    console.log(`商品 ${item.product.productName}: 规格=${item.product.specification}, 解析重量=${weight}公斤, 数量=${item.quantity}`);
+                    return sum + (weight * item.quantity);
+                }, 0);
+                
+                console.log(`总重量: ${totalWeight}公斤, 订单金额: ${orderAmount}元`);
+                
+                // 调用运费计算API
+                const requestData = {
+                    orderAmount: orderAmount,
+                    deliveryAreaId: deliveryAreaId,
+                    weight: totalWeight
+                };
+                
+                const response = await api.shippingFee.calculate(requestData);
+                
+                if (response && response.code === 200 && response.data) {
+                    // 更新全局变量
+                    currentShippingFee = response.data.shippingFee;
+                    currentShippingFeeId = response.data.appliedRuleId;
+                    
+                    return {
+                        shippingFee: response.data.shippingFee,
+                        appliedRuleId: response.data.appliedRuleId,
+                        appliedRuleName: response.data.appliedRuleName,
+                        message: response.data.message
+                    };
+                } else {
+                    // API调用失败，使用默认运费
+                    currentShippingFee = 15.00;
+                    currentShippingFeeId = null;
+                    return { shippingFee: 15.00, message: "使用默认运费" };
+                }
+            } catch (error) {
+                console.error('计算运费出错:', error);
+                // 设置默认值
+                currentShippingFee = 15.00;
+                currentShippingFeeId = null;
+                return { shippingFee: 15.00, message: "计算出错，使用默认运费" };
+            }
+        }
+        
+        // 加载用户已保存地址
+        async function loadUserAddresses() {
+            try {
+                const response = await api.address.getSavedAddresses();
+                
+                if (response && response.code === 200) {
+                    const addresses = response.data || [];
+                    const selectElement = document.getElementById('saved-addresses');
+                    selectElement.innerHTML = '<option value="">-- 请选择收货地址 --</option>';
+                
+                    if (addresses.length === 0) {
+                        // 如果没有保存的地址，显示提示
+                        const emptyOption = document.createElement('option');
+                        emptyOption.disabled = true;
+                        emptyOption.textContent = '没有保存的地址';
+                        selectElement.appendChild(emptyOption);
+                    } else {
+                        // 添加地址选项
+                        let hasDefaultAddress = false;
+                        addresses.forEach(address => {
+                            const option = document.createElement('option');
+                            option.value = address.addressId;
+                            option.textContent = `${address.receiverName} ${address.contactPhone} (${address.province} ${address.city} ${address.district})`;
+                            option.dataset.address = JSON.stringify(address);
+                            if (address.isDefault) {
+                                option.selected = true;
+                                hasDefaultAddress = true;
+                                // 自动填充默认地址
+                                fillAddressFromData(address);
+                            }
+                            selectElement.appendChild(option);
+                        });
+                        
+                        // 如果没有默认地址但有地址，自动选择第一个地址
+                        if (!hasDefaultAddress && addresses.length > 0) {
+                            selectElement.options[1].selected = true; // 第一个真实地址选项的索引是1
+                            fillAddressFromData(addresses[0]);
+                        }
+                    }
+                } else {
+                    console.error('加载用户地址失败:', response?.message || '未知错误');
+                }
+            } catch (error) {
+                console.error('加载用户地址错误:', error);
+            }
+        }
+        
+        // 更新配送状态
+        function updateDeliveryStatus() {
+            // 获取当前地址信息
+            const province = document.getElementById('province').value;
+            const city = document.getElementById('city').value;
+            const district = document.getElementById('district').value;
+            
+            // 如果地址信息不完整，不进行检查
+            if (!province || !city || !district) {
+                const statusElement = document.getElementById('delivery-status-message');
+                if (statusElement) {
+                    statusElement.classList.add('d-none');
+                }
+                // 保持提交按钮启用状态
+                document.getElementById('place-order-btn').disabled = false;
+                return;
+            }
+            
+            // 检查配送可用性
+            const addressInfo = { province, city, district };
+            const isDeliverable = checkDeliveryAvailability(addressInfo);
+            
+            // 更新配送区域可用性提示
+            const statusElement = document.getElementById('delivery-status-message');
+            if (statusElement) {
+                if (isDeliverable) {
+                    statusElement.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-2"></i>您的地址在配送范围内</span>';
+                    statusElement.className = 'mt-2 p-2 bg-success bg-opacity-10 rounded';
+                    // 启用提交按钮
+                    document.getElementById('place-order-btn').disabled = false;
+                } else {
+                    statusElement.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle me-2"></i>您选择的地区暂不支持配送，请选择其他地址</span>';
+                    statusElement.className = 'mt-2 p-2 bg-danger bg-opacity-10 rounded';
+                    // 禁用提交按钮
+                    document.getElementById('place-order-btn').disabled = true;
+                }
+                statusElement.classList.remove('d-none');
+            }
+        }
+        
+        // 添加缺失的loadDistricts函数
+        function loadDistricts() {
+            const citySelect = document.getElementById('city');
+            const districtInput = document.getElementById('district');
+            const selectedCity = citySelect.value;
+            
+            // 更新当前地址信息
+            currentAddressInfo.city = selectedCity;
+            currentAddressInfo.district = '';
+            
+            // 由于使用文本输入框而不是选择框，只需要清空区/县输入框
+            districtInput.value = '';
+            
+            // 更新配送状态和运费
+            updateDeliveryStatus();
+            updateShippingFeeOnAddressChange();
+        }
+
+        // 加载直接购买商品
+        async function loadDirectBuyItem(buyNowItem) {
+            try {
+                if (!buyNowItem || !buyNowItem.productId) {
+                    throw new Error('无效的商品数据');
+                }
+                
+                // 检查是否已包含完整的商品信息
+                if (buyNowItem.productInfo) {
+                    console.log('使用直接提供的商品信息:', buyNowItem.productInfo);
+                    
+                    // 构造商品对象
+                    const product = {
+                        productId: buyNowItem.productId,
+                        productName: buyNowItem.productInfo.name,
+                        price: buyNowItem.productInfo.price,
+                        imageUrl: buyNowItem.productInfo.imageUrl,
+                        stock: buyNowItem.productInfo.stock,
+                        specification: buyNowItem.productInfo.specification || '1公斤', // 添加规格信息
+                        // 添加默认农户信息，因为产品信息中可能没有farmer字段
+                        farmer: buyNowItem.productInfo.farmer || { 
+                            username: '未知农户',
+                            userId: null
+                        }
+                    };
+                    
+                    // 调试信息
+                    console.log('构造的完整商品对象:', product);
+                    
+                    // 构造购物车数据结构
+                    const directBuyCart = {
+                        items: [{
+                            product: product,
+                            quantity: buyNowItem.quantity,
+                            productId: product.productId,
+                            price: product.price
+                        }]
+                    };
+                    
+                    // 保存到全局变量
+                    cartData = directBuyCart;
+                    
+                    // 渲染页面
+                    renderCartItems(directBuyCart.items);
+                    updateOrderSummary(directBuyCart);
+                    
+                    // 更新返回链接
+                    updatePageForDirectBuy(product.productId);
+                    
+                    return;
+                }
+                
+                // 如果没有完整的商品信息，则通过API获取
+                console.log('通过API获取商品信息:', buyNowItem.productId);
+                const response = await api.product.getProduct(buyNowItem.productId);
+                
+                if (response.code !== 200 || !response.data) {
+                    throw new Error('获取商品数据失败');
+                }
+                
+                const product = response.data;
+                
+                // 构造购物车数据结构
+                const directBuyCart = {
+                    items: [{
+                        product: product,
+                        quantity: buyNowItem.quantity,
+                        productId: product.productId,
+                        price: product.price
+                    }]
+                };
+                
+                // 保存到全局变量
+                cartData = directBuyCart;
+                
+                // 渲染页面
+                renderCartItems(directBuyCart.items);
+                updateOrderSummary(directBuyCart);
+                
+                // 更新返回链接和页面标题
+                updatePageForDirectBuy(product.productId);
+                
+            } catch (error) {
+                console.error('加载直接购买商品数据失败:', error);
+                showToast('加载商品数据失败，请返回重试', 'error');
+                
+                // 显示错误提示
+                document.getElementById('checkout-items').innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-4">
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i> 加载商品数据失败: ${error.message}
+                            </div>
+                            <a href="javascript:history.back()" class="btn btn-outline-secondary mt-2">
+                                <i class="fas fa-arrow-left me-1"></i>返回上一页
+                            </a>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('place-order-btn').disabled = true;
+            }
+        }
+
+        // 更新页面UI，适配直接购买模式
+        function updatePageForDirectBuy(productId) {
+            // 更新返回链接
+            const backToCartLink = document.querySelector('a[href="/pages/cart.html"]');
+            if (backToCartLink) {
+                backToCartLink.href = '/pages/product-detail.html?id=' + productId;
+                backToCartLink.innerHTML = '<i class="fas fa-arrow-left me-1"></i>返回商品详情';
+            }
+            
+            // 更新页面标题
+            const pageTitle = document.querySelector('h2.mb-4');
+            if (pageTitle) {
+                pageTitle.textContent = '确认订单 - 立即购买';
+            }
+        }
+    </script>
+</body>
+</html> 
+ 
+ 
+ 

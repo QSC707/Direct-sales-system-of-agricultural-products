@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联系客服 - 本地特色农产品直销系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- 自定义样式 -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/index.html">
+                <i class="fas fa-leaf me-2"></i>农产品直销系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/products.html">产品列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/farmers.html">农户展示</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pages/about.html">关于我们</a>
+                    </li>
+                </ul>
+                
+                <!-- 未登录状态 -->
+                <div class="d-flex gap-2" id="unauthenticated-menu">
+                    <a href="/pages/login.html" class="btn btn-outline-primary">登录</a>
+                    <a href="/pages/register.html" class="btn btn-primary">注册</a>
+                </div>
+                
+                <!-- 已登录状态 -->
+                <div class="d-none" id="authenticated-menu">
+                    <a href="/pages/cart.html" class="btn btn-outline-primary me-2" title="购物车">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <div class="dropdown d-inline-block">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="username">用户名</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" aria-labelledby="userMenuButton">
+                            <li><a class="dropdown-item" href="/pages/user/profile.html"><i class="fas fa-user me-2"></i>个人中心</a></li>
+                            <li><a class="dropdown-item" href="/pages/user/orders.html"><i class="fas fa-shopping-cart me-2"></i>我的订单</a></li>
+                            <li id="farmer-menu-item" class="d-none"><a class="dropdown-item" href="/pages/farmer/dashboard.html"><i class="fas fa-tractor me-2"></i>农户中心</a></li>
+                            <li id="admin-menu-item" class="d-none"><a class="dropdown-item" href="/pages/admin/dashboard.html"><i class="fas fa-cogs me-2"></i>管理后台</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logout-button"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 页面内容 -->
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="fas fa-headset me-2"></i>联系客服</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- 联系方式 -->
+                            <div class="col-lg-5 mb-4 mb-lg-0">
+                                <h5 class="border-bottom pb-2 text-success">联系方式</h5>
+                                
+                                <!-- 忘记密码提示 -->
+                                <div class="alert alert-info mb-4">
+                                    <div class="d-flex">
+                                        <div class="me-3">
+                                            <i class="fas fa-key fa-2x"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="alert-heading">忘记密码？</h6>
+                                            <p class="mb-0">如果您忘记了密码，请联系管理员协助重置。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mb-3 border-success">
+                                    <div class="card-body">
+                                        <div class="d-flex">
+                                            <div class="me-3">
+                                                <div class="bg-success rounded-circle text-white d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
+                                                    <i class="fas fa-phone-alt fa-lg"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h6 class="card-title">客服电话</h6>
+                                                <p class="card-text mb-0">123-456-7890</p>
+                                                <p class="card-text text-muted small">工作时间：周一至周五 9:00-18:00</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mb-3 border-success">
+                                    <div class="card-body">
+                                        <div class="d-flex">
+                                            <div class="me-3">
+                                                <div class="bg-success rounded-circle text-white d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
+                                                    <i class="fas fa-envelope fa-lg"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h6 class="card-title">电子邮箱</h6>
+                                                <p class="card-text mb-0">service@farmshop.com</p>
+                                                <p class="card-text text-muted small">我们会在24小时内回复您的邮件</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mb-3 border-success">
+                                    <div class="card-body">
+                                        <div class="d-flex">
+                                            <div class="me-3">
+                                                <div class="bg-success rounded-circle text-white d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
+                                                    <i class="fas fa-map-marker-alt fa-lg"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h6 class="card-title">公司地址</h6>
+                                                <p class="card-text mb-0">广东省广州市白云区某某路123号</p>
+                                                <p class="card-text text-muted small">办公时间：周一至周五 9:00-18:00</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card border-success">
+                                    <div class="card-body">
+                                        <div class="d-flex">
+                                            <div class="me-3">
+                                                <div class="bg-success rounded-circle text-white d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
+                                                    <i class="fas fa-comments fa-lg"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h6 class="card-title">社交媒体</h6>
+                                                <div class="d-flex gap-3 mt-2">
+                                                    <a href="#" class="text-success fs-4"><i class="fab fa-weixin"></i></a>
+                                                    <a href="#" class="text-success fs-4"><i class="fab fa-qq"></i></a>
+                                                    <a href="#" class="text-success fs-4"><i class="fab fa-weibo"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 联系表单 -->
+                            <div class="col-lg-7">
+                                <h5 class="border-bottom pb-2 text-success">发送消息</h5>
+                                <p class="text-muted mb-4">如有任何问题或建议，请填写以下表单，我们将尽快回复您。</p>
+                                
+                                <form id="contactForm">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="name" class="form-label">姓名 <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="name" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="phone" class="form-label">手机号码 <span class="text-danger">*</span></label>
+                                            <input type="tel" class="form-control" id="phone" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="email" class="form-label">电子邮箱</label>
+                                            <input type="email" class="form-control" id="email">
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="subject" class="form-label">主题 <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="subject" required>
+                                                <option value="">请选择主题</option>
+                                                <option value="order">订单问题</option>
+                                                <option value="product">商品咨询</option>
+                                                <option value="account">账户相关</option>
+                                                <option value="password">密码重置</option>
+                                                <option value="suggestion">建议反馈</option>
+                                                <option value="other">其他问题</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label for="message" class="form-label">消息内容 <span class="text-danger">*</span></label>
+                                            <textarea class="form-control" id="message" rows="6" required></textarea>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                                <label class="form-check-label" for="agreeTerms">
+                                                    我同意根据<a href="#" class="text-decoration-none">隐私政策</a>处理我的个人信息
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 mt-4">
+                                            <button type="submit" class="btn btn-success px-4 py-2">
+                                                <i class="fas fa-paper-plane me-2"></i>发送消息
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                                
+                                <!-- 成功提示，默认隐藏 -->
+                                <div class="alert alert-success mt-4 d-none" id="successMessage">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    您的消息已成功发送！我们会尽快回复您。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer-section">
+        <div class="footer-top py-5">
+            <div class="container">
+                <div class="row g-4">
+                    <div class="col-lg-4 col-md-6 fade-in">
+                        <div class="footer-brand">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-leaf text-success me-2 fs-3"></i>
+                                <h4 class="mb-0 fw-bold">农产品直销系统</h4>
+                            </div>
+                            <p class="text-muted mb-4">致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收，实现优质农产品直达餐桌。</p>
+                            <div class="social-links mb-4">
+                                <a href="#" class="social-link" aria-label="微信"><i class="fab fa-weixin"></i></a>
+                                <a href="#" class="social-link" aria-label="微博"><i class="fab fa-weibo"></i></a>
+                                <a href="#" class="social-link" aria-label="QQ"><i class="fab fa-qq"></i></a>
+                                <a href="#" class="social-link" aria-label="抖音"><i class="fab fa-tiktok"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-6 fade-in">
+                        <h5 class="footer-title">快速链接</h5>
+                        <ul class="footer-links">
+                            <li><a href="/index.html">首页</a></li>
+                            <li><a href="/pages/products.html">产品列表</a></li>
+                            <li><a href="/pages/farmers.html">农户展示</a></li>
+                            <li><a href="/pages/about.html">关于我们</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-2 col-md-6 col-6 fade-in">
+                        <h5 class="footer-title">帮助支持</h5>
+                        <ul class="footer-links">
+                            <li><a href="/pages/faq.html">常见问题</a></li>
+                            <li><a href="/pages/shipping.html">配送政策</a></li>
+                            <li><a href="/pages/return.html">退换政策</a></li>
+                            <li><a href="/pages/contact.html" class="fw-bold">联系客服</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-4 col-md-6 fade-in">
+                        <h5 class="footer-title">联系我们</h5>
+                        <ul class="contact-info">
+                            <li>
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>广东省广州市白云区</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-phone"></i>
+                                <span>123-456-7890</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-envelope"></i>
+                                <span>info@farmshop.com</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-clock"></i>
+                                <span>周一至周日 9:00-18:00</span>
+                            </li>
+                        </ul>
+                        <div class="newsletter mt-4">
+                            <h6 class="mb-2">订阅我们的新闻</h6>
+                            <div class="d-flex">
+                                <input type="email" class="form-control form-control-sm" placeholder="您的电子邮箱">
+                                <button class="btn btn-success btn-sm ms-2">订阅</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom py-3">
+            <div class="container">
+                <div class="d-flex flex-wrap justify-content-between align-items-center">
+                    <p class="copyright mb-0">&copy; 2025 农产品直销系统 · 保留所有权利</p>
+                    <div class="footer-links-secondary">
+                        <a href="/pages/privacy.html">隐私政策</a>
+                        <a href="/pages/terms.html">服务条款</a>
+                        <a href="/pages/sitemap.html">网站地图</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Axios库 -->
+    <script src="/js/lib/axios.min.js"></script>
+    <!-- 应用配置 -->
+    <script src="/js/config.js"></script>
+    <!-- API配置 -->
+    <script src="/js/api.js"></script>
+    <!-- Axios配置 -->
+    <script src="/js/axios-config.js"></script>
+    <!-- 登录验证 -->
+    <script src="/js/auth.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查用户登录状态
+            if (typeof checkLogin === 'function') {
+                checkLogin(function(user) {
+                    // 更新导航栏状态
+                    updateNavbar(user);
+                    
+                    // 如果用户已登录，自动填充表单
+                    if (user) {
+                        document.getElementById('name').value = user.username || '';
+                        document.getElementById('phone').value = user.phone || '';
+                        document.getElementById('email').value = user.email || '';
+                    }
+                });
+            }
+            
+            // 退出登录
+            const logoutBtn = document.getElementById('logout-button');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (typeof logout === 'function') {
+                        logout();
+                    }
+                });
+            }
+            
+            // 处理表单提交
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // 在实际项目中，这里应该有AJAX请求发送表单数据
+                    // 这里仅做模拟
+                    setTimeout(function() {
+                        // 显示成功消息
+                        document.getElementById('successMessage').classList.remove('d-none');
+                        
+                        // 重置表单
+                        contactForm.reset();
+                        
+                        // 5秒后隐藏成功消息
+                        setTimeout(function() {
+                            document.getElementById('successMessage').classList.add('d-none');
+                        }, 5000);
+                    }, 1000);
+                });
+            }
+        });
+    </script>
+</body>
+</html> 
