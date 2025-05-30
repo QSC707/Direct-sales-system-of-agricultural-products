@@ -258,7 +258,7 @@
                 </div>
                 <div class="welcome-right">
                     <div class="text-white">
-                        <span id="currentDate"></span>
+                            <span id="currentDate"></span>
                     </div>
                     <span class="welcome-badge">管理员</span>
                 </div>
@@ -458,10 +458,10 @@
             const logoutBtn = document.getElementById('logoutBtn');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
+                e.preventDefault();
                     console.log('退出登录按钮被点击');
-                    logout();
-                });
+                logout();
+            });
             } else {
                 console.warn('未找到退出登录按钮');
             }

@@ -1,0 +1,62 @@
+From 8dced121c43785f9f128b048f3be0a3a9e02f796 Mon Sep 17 00:00:00 2001
+From: Your Name <your-email@example.com>
+Date: Fri, 30 May 2025 20:01:08 +0800
+Subject: [PATCH 2/4] =?UTF-8?q?=E6=A0=B7=E5=BC=8F=E4=BF=AE=E5=A4=8D?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ FarmDirectSales/wwwroot/css/style.css | 36 +++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
+
+diff --git a/FarmDirectSales/wwwroot/css/style.css b/FarmDirectSales/wwwroot/css/style.css
+index e7caaa1..243c852 100644
+--- a/FarmDirectSales/wwwroot/css/style.css
++++ b/FarmDirectSales/wwwroot/css/style.css
+@@ -933,5 +933,41 @@ input#quantity {
+         padding: 0.75rem 1rem;
+     }
+ }
++
++/* 修复按钮中图标颜色 */
++.btn-success i,
++.btn-primary i,
++.bg-success i {
++    color: #ffffff !important;
++}
++
++.btn-outline-success:hover i,
++.btn-outline-primary:hover i {
++    color: #ffffff !important;
++}
++
++/* 确保农户主页链接按钮中的图标颜色正确 */
++#viewFarmerPageLink i {
++    color: #ffffff !important;
++}
++
++/* 修复导航栏切换按钮颜色 */
++.navbar-toggler {
++    border-color: var(--primary-color) !important;
++    color: var(--primary-color) !important;
++}
++
++.navbar-toggler-icon {
++    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(34, 197, 94, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
++}
++
++/* 深色导航栏中的切换按钮 */
++.navbar-dark .navbar-toggler {
++    border-color: rgba(255, 255, 255, 0.8) !important;
++}
++
++.navbar-dark .navbar-toggler-icon {
++    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
++}
+  
+  
+\ No newline at end of file
+-- 
+2.39.5 (Apple Git-154)
+

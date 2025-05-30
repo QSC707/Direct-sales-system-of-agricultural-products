@@ -1,0 +1,190 @@
+From 90fe50ed2f4f114af4f1814e7694f5d4b85138d7 Mon Sep 17 00:00:00 2001
+From: Your Name <your-email@example.com>
+Date: Fri, 30 May 2025 18:38:56 +0800
+Subject: [PATCH 1/4] =?UTF-8?q?=E5=B0=8F=E4=BF=AE=E5=A4=8D?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ FarmDirectSales/wwwroot/css/style.css | 146 +++++++++++++++++++++++++-
+ 1 file changed, 143 insertions(+), 3 deletions(-)
+
+diff --git a/FarmDirectSales/wwwroot/css/style.css b/FarmDirectSales/wwwroot/css/style.css
+index f4fdec0..e7caaa1 100644
+--- a/FarmDirectSales/wwwroot/css/style.css
++++ b/FarmDirectSales/wwwroot/css/style.css
+@@ -101,7 +101,7 @@ body {
+ 
+ .btn-primary, .btn-success {
+     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+-    border: none;
++    border: none !important;
+     box-shadow: var(--shadow-sm);
+ }
+ 
+@@ -263,11 +263,14 @@ body {
+ 
+ .btn-success {
+     background-color: #28a745;
+-    border-color: #28a745;
++    border: none !important;
++    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+ }
+ 
+ .btn-success:hover {
+     background-color: #218838;
++    border: none !important;
++    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+ }
+ 
+ /* 现代页脚样式 */
+@@ -792,6 +795,143 @@ input#quantity {
+ 
+ .card-header.bg-success {
+     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
+-} 
++}
++
++/* 后台管理和农户中心特定样式 */
++.navbar-dark .navbar-nav .nav-link {
++    color: rgba(255, 255, 255, 0.85) !important;
++}
++
++.navbar-dark .navbar-nav .nav-link:hover,
++.navbar-dark .navbar-nav .nav-link.active {
++    color: #ffffff !important;
++}
++
++/* 农户中心和管理中心的表格和详情页文本颜色修复 */
++.page-title, 
++.page-subtitle,
++.modal-body label,
++.form-control,
++.table,
++.clean-table,
++.filter-section label,
++.pagination-info {
++    color: var(--text-color) !important;
++}
++
++/* 农户中心产品详情表单标签修复 */
++.form-group label {
++    color: var(--text-color) !important;
++    font-weight: 500;
++}
++
++/* 修复徽章(badge)文字颜色问题 */
++.badge {
++    font-weight: 500;
++    font-size: 0.85rem;
++    padding: 0.35em 0.65em;
++}
++
++.badge-secondary {
++    background-color: #6c757d !important;
++    color: #ffffff !important;
++}
++
++.badge-success {
++    background-color: var(--primary-color) !important;
++    color: #ffffff !important;
++}
++
++.badge-info {
++    background-color: #17a2b8 !important;
++    color: #ffffff !important;
++}
++
++.badge-warning {
++    background-color: #ffc107 !important;
++    color: #212529 !important;
++}
++
++.badge-danger {
++    background-color: #dc3545 !important;
++    color: #ffffff !important;
++}
++
++.badge-light {
++    background-color: #f8f9fa !important;
++    color: #212529 !important;
++}
++
++.badge-dark {
++    background-color: #343a40 !important;
++    color: #ffffff !important;
++}
++
++/* 产品详情页中农户信息和溯源信息模块优化 */
++#farmer-content h6,
++#trace-content h6 {
++    font-size: 0.9rem;
++    margin-bottom: 0.3rem;
++    color: var(--text-color);
++    font-weight: 600;
++}
++
++#farmer-content p,
++#trace-content p {
++    margin-bottom: 0.5rem;
++    color: var(--text-muted);
++    font-size: 0.95rem;
++}
++
++#farmer-content .row > div,
++#trace-content .row > div {
++    padding-bottom: 0.5rem;
++}
++
++#farmer-content .col-md-6,
++#trace-content .col-md-6 {
++    padding-right: 1rem;
++}
++
++#productInfoTabsContent .tab-pane {
++    padding: 1rem 1.25rem;
++}
++
++/* 信息图标样式统一 */
++#farmer-content .fas,
++#trace-content .fas,
++#farmer-content .far,
++#trace-content .far {
++    width: 18px;
++    text-align: center;
++    color: var(--primary-color);
++}
++
++/* 农户主页链接按钮位置调整 */
++#farmer-content .text-end {
++    margin-top: 0.5rem;
++}
++
++/* 当屏幕较小时调整布局 */
++@media (max-width: 767.98px) {
++    #farmer-content .row > div,
++    #trace-content .row > div {
++        padding-bottom: 0.75rem;
++    }
++    
++    #farmer-content h6,
++    #trace-content h6 {
++        font-size: 0.85rem;
++    }
++    
++    #farmer-content p,
++    #trace-content p {
++        font-size: 0.9rem;
++    }
++    
++    #productInfoTabsContent .tab-pane {
++        padding: 0.75rem 1rem;
++    }
++}
+  
+  
+\ No newline at end of file
+-- 
+2.39.5 (Apple Git-154)
+

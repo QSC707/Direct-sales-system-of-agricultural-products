@@ -1,0 +1,866 @@
+From 6aff1839bb0f0eb1ca49422450da46b74fdaa93a Mon Sep 17 00:00:00 2001
+From: Your Name <your-email@example.com>
+Date: Fri, 30 May 2025 20:13:57 +0800
+Subject: [PATCH 3/4] =?UTF-8?q?=E5=B0=8F=E6=B8=85=E7=90=86=E9=A1=B9?=
+ =?UTF-8?q?=E7=9B=AE=E6=96=87=E4=BB=B6?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ FarmDirectSales/wwwroot/footer-template.html |  76 --------
+ backup_files/footer-demo.html                | 174 -------------------
+ backup_files/template.html                   |   1 -
+ backup_files/update-footer.sh                |  69 --------
+ cleanup_summary.md                           |   7 +
+ migration_fix.sql                            | 162 -----------------
+ optimize-footer.sh                           |  50 ------
+ remove-newsletter.sh                         |  54 ------
+ update-footer-style.sh                       |  67 -------
+ update-login-state.sh                        |  51 ------
+ update-navbar.sh                             |  43 -----
+ 11 files changed, 7 insertions(+), 747 deletions(-)
+ delete mode 100644 FarmDirectSales/wwwroot/footer-template.html
+ delete mode 100644 backup_files/footer-demo.html
+ delete mode 100644 backup_files/template.html
+ delete mode 100644 backup_files/update-footer.sh
+ create mode 100644 cleanup_summary.md
+ delete mode 100644 migration_fix.sql
+ delete mode 100755 optimize-footer.sh
+ delete mode 100755 remove-newsletter.sh
+ delete mode 100755 update-footer-style.sh
+ delete mode 100755 update-login-state.sh
+ delete mode 100755 update-navbar.sh
+
+diff --git a/FarmDirectSales/wwwroot/footer-template.html b/FarmDirectSales/wwwroot/footer-template.html
+deleted file mode 100644
+index 73899ea..0000000
+--- a/FarmDirectSales/wwwroot/footer-template.html
++++ /dev/null
+@@ -1,76 +0,0 @@
+-<!-- 现代简洁页脚 - 模板 -->
+-<!-- 在使用此模板前，确保已引入style.css，其中包含了footer-section相关样式 -->
+-<footer class="footer-section">
+-    <div class="container">
+-        <div class="footer-top">
+-            <div class="row g-3">
+-                <div class="col-lg-4 col-md-6">
+-                    <div class="footer-brand">
+-                        <h4><i class="fas fa-leaf text-success me-2"></i>农产品直销系统</h4>
+-                        <p>致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收，实现优质农产品直达餐桌。</p>
+-                        <div class="social-links">
+-                            <a href="#" class="social-link" aria-label="微信"><i class="fab fa-weixin"></i></a>
+-                            <a href="#" class="social-link" aria-label="微博"><i class="fab fa-weibo"></i></a>
+-                            <a href="#" class="social-link" aria-label="QQ"><i class="fab fa-qq"></i></a>
+-                            <a href="#" class="social-link" aria-label="抖音"><i class="fab fa-tiktok"></i></a>
+-                        </div>
+-                    </div>
+-                </div>
+-                <div class="col-lg-2 col-md-6 col-6">
+-                    <h5 class="footer-title">快速链接</h5>
+-                    <ul class="footer-links">
+-                        <li><a href="/index.html"><i class="fas fa-angle-right me-1"></i>首页</a></li>
+-                        <li><a href="/pages/products.html"><i class="fas fa-angle-right me-1"></i>产品列表</a></li>
+-                        <li><a href="/pages/farmers.html"><i class="fas fa-angle-right me-1"></i>农户展示</a></li>
+-                        <li><a href="/pages/about.html"><i class="fas fa-angle-right me-1"></i>关于我们</a></li>
+-                    </ul>
+-                </div>
+-                <div class="col-lg-2 col-md-6 col-6">
+-                    <h5 class="footer-title">帮助支持</h5>
+-                    <ul class="footer-links">
+-                        <li><a href="/pages/faq.html"><i class="fas fa-angle-right me-1"></i>常见问题</a></li>
+-                        <li><a href="/pages/shipping.html"><i class="fas fa-angle-right me-1"></i>配送政策</a></li>
+-                        <li><a href="/pages/return.html"><i class="fas fa-angle-right me-1"></i>退换政策</a></li>
+-                        <li><a href="/pages/contact.html"><i class="fas fa-angle-right me-1"></i>联系客服</a></li>
+-                    </ul>
+-                </div>
+-                <div class="col-lg-4 col-md-6">
+-                    <h5 class="footer-title">联系我们</h5>
+-                    <ul class="contact-info">
+-                        <li>
+-                            <i class="fas fa-map-marker-alt"></i>
+-                            <span>广东省广州市白云区</span>
+-                        </li>
+-                        <li>
+-                            <i class="fas fa-phone"></i>
+-                            <span>123-456-7890</span>
+-                        </li>
+-                        <li>
+-                            <i class="fas fa-envelope"></i>
+-                            <span>info@farmshop.com</span>
+-                        </li>
+-                        <li>
+-                            <i class="fas fa-clock"></i>
+-                            <span>周一至周日 9:00-18:00</span>
+-                        </li>
+-                    </ul>
+-                    </div>
+-                </div>
+-            </div>
+-        </div>
+-        <div class="footer-bottom">
+-            <div class="row">
+-                <div class="col-md-6">
+-                    <p class="copyright">&copy; 2025 农产品直销系统 · 保留所有权利</p>
+-                </div>
+-                <div class="col-md-6">
+-                    <div class="footer-links-secondary">
+-                        <a href="/pages/privacy.html">隐私政策</a>
+-                        <a href="/pages/terms.html">服务条款</a>
+-                        <a href="/pages/sitemap.html">网站地图</a>
+-                    </div>
+-                </div>
+-            </div>
+-        </div>
+-    </div>
+-</footer>
+diff --git a/backup_files/footer-demo.html b/backup_files/footer-demo.html
+deleted file mode 100644
+index dc60231..0000000
+--- a/backup_files/footer-demo.html
++++ /dev/null
+@@ -1,174 +0,0 @@
+-<!DOCTYPE html>
+-<html lang="zh-CN">
+-<head>
+-    <meta charset="UTF-8">
+-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-    <title>页脚设计示例 - 本地特色农产品直销系统</title>
+-    
+-    <!-- Bootstrap CSS -->
+-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+-    <!-- Font Awesome -->
+-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+-    <!-- 自定义样式 -->
+-    <link href="/css/style.css" rel="stylesheet">
+-</head>
+-<body>
+-    <!-- 导航栏 -->
+-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+-        <div class="container">
+-            <a class="navbar-brand" href="/index.html">
+-                <i class="fas fa-leaf text-success me-2"></i>农产品直销系统
+-            </a>
+-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+-                <span class="navbar-toggler-icon"></span>
+-            </button>
+-            <div class="collapse navbar-collapse" id="navbarNav">
+-                <ul class="navbar-nav me-auto">
+-                    <li class="nav-item">
+-                        <a class="nav-link" href="/index.html">首页</a>
+-                    </li>
+-                    <li class="nav-item">
+-                        <a class="nav-link" href="/pages/products.html">产品列表</a>
+-                    </li>
+-                    <li class="nav-item">
+-                        <a class="nav-link" href="/pages/farmers.html">农户展示</a>
+-                    </li>
+-                    <li class="nav-item">
+-                        <a class="nav-link" href="/pages/about.html">关于我们</a>
+-                    </li>
+-                </ul>
+-                <div class="d-flex gap-2">
+-                    <a href="/pages/login.html" class="btn btn-outline-success">登录</a>
+-                    <a href="/pages/register.html" class="btn btn-success">注册</a>
+-                </div>
+-            </div>
+-        </div>
+-    </nav>
+-
+-    <!-- 主要内容 -->
+-    <div class="container py-5">
+-        <div class="row">
+-            <div class="col-12 text-center mb-5">
+-                <h1 class="display-4">新的现代简洁页脚设计</h1>
+-                <p class="lead">这是我们设计的新页脚，具有更好的兼容性、性能和美观度</p>
+-            </div>
+-        </div>
+-        
+-        <div class="row mb-5">
+-            <div class="col-md-6">
+-                <div class="card h-100">
+-                    <div class="card-body">
+-                        <h5 class="card-title">设计特点</h5>
+-                        <ul class="list-group list-group-flush">
+-                            <li class="list-group-item">简洁现代的布局</li>
+-                            <li class="list-group-item">优化的响应式设计</li>
+-                            <li class="list-group-item">更好的颜色对比度</li>
+-                            <li class="list-group-item">改进的社交媒体图标</li>
+-                            <li class="list-group-item">微妙的动画效果</li>
+-                        </ul>
+-                    </div>
+-                </div>
+-            </div>
+-            <div class="col-md-6">
+-                <div class="card h-100">
+-                    <div class="card-body">
+-                        <h5 class="card-title">技术优化</h5>
+-                        <ul class="list-group list-group-flush">
+-                            <li class="list-group-item">减少DOM元素数量</li>
+-                            <li class="list-group-item">优化CSS选择器</li>
+-                            <li class="list-group-item">使用CSS变量实现一致性</li>
+-                            <li class="list-group-item">提高移动设备兼容性</li>
+-                            <li class="list-group-item">减少重绘和回流</li>
+-                        </ul>
+-                    </div>
+-                </div>
+-            </div>
+-        </div>
+-    </div>
+-
+-    <!-- 页脚 -->
+-    <footer class="footer-section">
+-        <div class="container">
+-            <div class="footer-top">
+-                <div class="row g-4">
+-                    <div class="col-lg-4 col-md-6">
+-                        <div class="footer-brand">
+-                            <h4><i class="fas fa-leaf text-success me-2"></i>农产品直销系统</h4>
+-                            <p>致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收，实现优质农产品直达餐桌。</p>
+-                            <div class="social-links">
+-                                <a href="#" class="social-link" aria-label="微信"><i class="fab fa-weixin"></i></a>
+-                                <a href="#" class="social-link" aria-label="微博"><i class="fab fa-weibo"></i></a>
+-                                <a href="#" class="social-link" aria-label="QQ"><i class="fab fa-qq"></i></a>
+-                                <a href="#" class="social-link" aria-label="抖音"><i class="fab fa-tiktok"></i></a>
+-                            </div>
+-                        </div>
+-                    </div>
+-                    <div class="col-lg-2 col-md-6 col-6">
+-                        <h5 class="footer-title">快速链接</h5>
+-                        <ul class="footer-links">
+-                            <li><a href="/index.html"><i class="fas fa-angle-right me-1"></i>首页</a></li>
+-                            <li><a href="/pages/products.html"><i class="fas fa-angle-right me-1"></i>产品列表</a></li>
+-                            <li><a href="/pages/farmers.html"><i class="fas fa-angle-right me-1"></i>农户展示</a></li>
+-                            <li><a href="/pages/about.html"><i class="fas fa-angle-right me-1"></i>关于我们</a></li>
+-                        </ul>
+-                    </div>
+-                    <div class="col-lg-2 col-md-6 col-6">
+-                        <h5 class="footer-title">帮助支持</h5>
+-                        <ul class="footer-links">
+-                            <li><a href="/pages/faq.html"><i class="fas fa-angle-right me-1"></i>常见问题</a></li>
+-                            <li><a href="/pages/shipping.html"><i class="fas fa-angle-right me-1"></i>配送政策</a></li>
+-                            <li><a href="/pages/return.html"><i class="fas fa-angle-right me-1"></i>退换政策</a></li>
+-                            <li><a href="/pages/contact.html"><i class="fas fa-angle-right me-1"></i>联系客服</a></li>
+-                        </ul>
+-                    </div>
+-                    <div class="col-lg-4 col-md-6">
+-                        <h5 class="footer-title">联系我们</h5>
+-                        <ul class="contact-info">
+-                            <li>
+-                                <i class="fas fa-map-marker-alt"></i>
+-                                <span>广东省广州市白云区</span>
+-                            </li>
+-                            <li>
+-                                <i class="fas fa-phone"></i>
+-                                <span>123-456-7890</span>
+-                            </li>
+-                            <li>
+-                                <i class="fas fa-envelope"></i>
+-                                <span>info@farmshop.com</span>
+-                            </li>
+-                            <li>
+-                                <i class="fas fa-clock"></i>
+-                                <span>周一至周日 9:00-18:00</span>
+-                            </li>
+-                        </ul>
+-                        <div class="newsletter mt-4">
+-                            <h6 class="mb-2">订阅我们的新闻</h6>
+-                            <div class="d-flex">
+-                                <input type="email" class="form-control" placeholder="您的电子邮箱">
+-                                <button class="btn btn-success ms-0">订阅</button>
+-                            </div>
+-                        </div>
+-                    </div>
+-                </div>
+-            </div>
+-            <div class="footer-bottom">
+-                <div class="row">
+-                    <div class="col-md-6">
+-                        <p class="copyright">&copy; 2025 农产品直销系统 · 保留所有权利</p>
+-                    </div>
+-                    <div class="col-md-6">
+-                        <div class="footer-links-secondary">
+-                            <a href="/pages/privacy.html">隐私政策</a>
+-                            <a href="/pages/terms.html">服务条款</a>
+-                            <a href="/pages/sitemap.html">网站地图</a>
+-                        </div>
+-                    </div>
+-                </div>
+-            </div>
+-        </div>
+-    </footer>
+-
+-    <!-- Bootstrap JS -->
+-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+-</body>
+-</html> 
+\ No newline at end of file
+diff --git a/backup_files/template.html b/backup_files/template.html
+deleted file mode 100644
+index 0519ecb..0000000
+--- a/backup_files/template.html
++++ /dev/null
+@@ -1 +0,0 @@
+- 
+\ No newline at end of file
+diff --git a/backup_files/update-footer.sh b/backup_files/update-footer.sh
+deleted file mode 100644
+index 11f1d64..0000000
+--- a/backup_files/update-footer.sh
++++ /dev/null
+@@ -1,69 +0,0 @@
+-#!/bin/bash
+-
+-# 更新页脚的脚本
+-# 新页脚模板已保存在 FarmDirectSales/wwwroot/footer-template.html
+-
+-# 定义新页脚开始和结束标记
+-FOOTER_START="    <!-- 页脚 -->\n    <!-- 使用新设计的现代简洁页脚 -->"
+-FOOTER_END="    </footer>"
+-
+-# 读取新页脚内容
+-NEW_FOOTER=$(cat FarmDirectSales/wwwroot/footer-template.html)
+-
+-# 要更新的页面列表
+-PAGES=(
+-  "FarmDirectSales/wwwroot/pages/register.html"
+-  "FarmDirectSales/wwwroot/pages/login.html"
+-  "FarmDirectSales/wwwroot/pages/contact.html"
+-  "FarmDirectSales/wwwroot/pages/about.html"
+-  "FarmDirectSales/wwwroot/pages/faq.html"
+-  "FarmDirectSales/wwwroot/pages/shipping.html"
+-  "FarmDirectSales/wwwroot/pages/return.html"
+-  "FarmDirectSales/wwwroot/pages/cart.html"
+-  "FarmDirectSales/wwwroot/pages/products.html"
+-  "FarmDirectSales/wwwroot/pages/farmers.html"
+-  "FarmDirectSales/wwwroot/pages/product-detail.html"
+-  "FarmDirectSales/wwwroot/pages/checkout.html"
+-  "FarmDirectSales/wwwroot/index.html"
+-)
+-
+-# 对每个页面进行处理
+-for page in "${PAGES[@]}"; do
+-  # 检查文件是否存在
+-  if [ -f "$page" ]; then
+-    echo "正在更新页脚: $page"
+-    
+-    # 创建备份
+-    cp "$page" "${page}.bak"
+-    
+-    # 使用awk提取页脚之前和之后的内容
+-    awk 'BEGIN {printing=1} 
+-      /<!-- 页脚 -->/ {printing=0} 
+-      {if(printing) print} 
+-      /<\/footer>/ {printing=1; next}' "$page" > "${page}.temp1"
+-    
+-    # 使用awk提取页脚之后的内容
+-    awk 'BEGIN {printing=0} 
+-      /<\/footer>/ {printing=1; next} 
+-      {if(printing) print}' "$page" > "${page}.temp2"
+-    
+-    # 合并文件：页脚前 + 新页脚 + 页脚后
+-    cat "${page}.temp1" > "${page}.new"
+-    echo -e "$FOOTER_START" >> "${page}.new"
+-    echo "$NEW_FOOTER" | sed '1d;$d' >> "${page}.new"  # 删除第一行和最后一行（HTML注释和footer标签）
+-    echo -e "$FOOTER_END" >> "${page}.new"
+-    cat "${page}.temp2" >> "${page}.new"
+-    
+-    # 替换原文件
+-    mv "${page}.new" "$page"
+-    
+-    # 清理临时文件
+-    rm "${page}.temp1" "${page}.temp2"
+-    
+-    echo "✅ 成功更新页脚: $page"
+-  else
+-    echo "❌ 文件不存在: $page"
+-  fi
+-done
+-
+-echo "所有页脚更新完成！" 
+\ No newline at end of file
+diff --git a/cleanup_summary.md b/cleanup_summary.md
+new file mode 100644
+index 0000000..33a3a53
+--- /dev/null
++++ b/cleanup_summary.md
+@@ -0,0 +1,7 @@
++项目清理完成，以下文件已删除：
++1. 脚本文件：optimize-footer.sh, update-footer-style.sh, remove-newsletter.sh, update-login-state.sh, update-navbar.sh
++2. 备份文件夹：backup_files/
++3. 临时模板文件：FarmDirectSales/wwwroot/footer-template.html
++4. 数据库修复脚本：migration_fix.sql
++
++清理时间：2025年 5月30日 星期五 20时07分10秒 CST
+diff --git a/migration_fix.sql b/migration_fix.sql
+deleted file mode 100644
+index fe0bd51..0000000
+--- a/migration_fix.sql
++++ /dev/null
+@@ -1,162 +0,0 @@
+--- ===================================
+--- 农产品直销系统数据库迁移修复脚本
+--- 用于解决外键关系冲突问题
+--- ===================================
+-
+-USE FarmDirectSales;
+-GO
+-
+--- 检查并修复OrderGroupId类型问题
+-IF EXISTS (
+-    SELECT * 
+-    FROM INFORMATION_SCHEMA.COLUMNS 
+-    WHERE TABLE_NAME = 'Orders' 
+-    AND COLUMN_NAME = 'OrderGroupId' 
+-    AND DATA_TYPE = 'nvarchar'
+-)
+-BEGIN
+-    PRINT '正在修复Orders表中OrderGroupId字段类型...';
+-    
+-    -- 1. 删除相关约束
+-    DECLARE @constraintName NVARCHAR(128);
+-    SELECT @constraintName = name 
+-    FROM sys.foreign_keys 
+-    WHERE parent_object_id = OBJECT_ID('Orders') 
+-    AND referenced_object_id = OBJECT_ID('OrderGroups');
+-    
+-    IF @constraintName IS NOT NULL
+-    BEGIN
+-        DECLARE @sql NVARCHAR(500) = 'ALTER TABLE Orders DROP CONSTRAINT ' + @constraintName;
+-        EXEC sp_executesql @sql;
+-        PRINT '已删除外键约束: ' + @constraintName;
+-    END
+-    
+-    -- 2. 更改列类型
+-    ALTER TABLE Orders ALTER COLUMN OrderGroupId INT NULL;
+-    PRINT '已将OrderGroupId列类型更改为INT';
+-    
+-    -- 3. 重新添加外键约束
+-    ALTER TABLE Orders ADD CONSTRAINT FK_Orders_OrderGroups 
+-    FOREIGN KEY (OrderGroupId) REFERENCES OrderGroups(OrderGroupId) ON DELETE SET NULL;
+-    PRINT '已重新添加外键约束: FK_Orders_OrderGroups';
+-END
+-ELSE
+-BEGIN
+-    PRINT 'OrderGroupId字段类型正常，无需修复';
+-END
+-
+--- 检查并修复ShippingFee与DeliveryArea的关系
+-IF EXISTS (
+-    SELECT * 
+-    FROM sys.foreign_keys 
+-    WHERE name = 'FK_ShippingFees_DeliveryAreas' 
+-    AND delete_referential_action = 1 -- CASCADE
+-)
+-BEGIN
+-    PRINT '正在修复ShippingFees与DeliveryAreas的关系...';
+-    
+-    -- 删除旧约束
+-    ALTER TABLE ShippingFees DROP CONSTRAINT FK_ShippingFees_DeliveryAreas;
+-    
+-    -- 添加新约束
+-    ALTER TABLE ShippingFees ADD CONSTRAINT FK_ShippingFees_DeliveryAreas 
+-    FOREIGN KEY (DeliveryAreaId) REFERENCES DeliveryAreas(DeliveryAreaId) ON DELETE SET NULL;
+-    
+-    PRINT '已修复ShippingFees与DeliveryAreas的关系';
+-END
+-ELSE
+-BEGIN
+-    PRINT 'ShippingFees与DeliveryAreas的关系正常，无需修复';
+-END
+-
+--- 检查并修复Orders表的外键关系
+-IF NOT EXISTS (
+-    SELECT * 
+-    FROM sys.foreign_keys 
+-    WHERE name = 'FK_Orders_ShippingFees'
+-)
+-BEGIN
+-    PRINT '正在添加Orders表到ShippingFee的外键关系...';
+-    
+-    -- 添加约束
+-    ALTER TABLE Orders ADD CONSTRAINT FK_Orders_ShippingFees 
+-    FOREIGN KEY (ShippingFeeId) REFERENCES ShippingFees(ShippingFeeId) ON DELETE SET NULL;
+-    
+-    PRINT '已添加Orders表到ShippingFee的外键关系';
+-END
+-ELSE
+-BEGIN
+-    PRINT 'Orders表到ShippingFee的外键关系已存在，无需添加';
+-END
+-
+--- 检查并修复Orders表与Users和Products的外键关系
+-IF EXISTS (
+-    SELECT * 
+-    FROM sys.foreign_keys 
+-    WHERE name = 'FK_Orders_Users' 
+-    AND delete_referential_action = 0 -- NO ACTION
+-)
+-BEGIN
+-    PRINT 'Orders表与Users的外键关系正常，无需修复';
+-END
+-ELSE
+-BEGIN
+-    PRINT '正在修复Orders表与Users的外键关系...';
+-    
+-    -- 获取当前约束名称
+-    DECLARE @usersConstraint NVARCHAR(128);
+-    SELECT @usersConstraint = name 
+-    FROM sys.foreign_keys 
+-    WHERE parent_object_id = OBJECT_ID('Orders') 
+-    AND referenced_object_id = OBJECT_ID('Users');
+-    
+-    -- 删除旧约束
+-    IF @usersConstraint IS NOT NULL
+-    BEGIN
+-        DECLARE @dropUsersSql NVARCHAR(500) = 'ALTER TABLE Orders DROP CONSTRAINT ' + @usersConstraint;
+-        EXEC sp_executesql @dropUsersSql;
+-    END
+-    
+-    -- 添加新约束
+-    ALTER TABLE Orders ADD CONSTRAINT FK_Orders_Users 
+-    FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE NO ACTION;
+-    
+-    PRINT '已修复Orders表与Users的外键关系';
+-END
+-
+-IF EXISTS (
+-    SELECT * 
+-    FROM sys.foreign_keys 
+-    WHERE name = 'FK_Orders_Products' 
+-    AND delete_referential_action = 0 -- NO ACTION
+-)
+-BEGIN
+-    PRINT 'Orders表与Products的外键关系正常，无需修复';
+-END
+-ELSE
+-BEGIN
+-    PRINT '正在修复Orders表与Products的外键关系...';
+-    
+-    -- 获取当前约束名称
+-    DECLARE @productsConstraint NVARCHAR(128);
+-    SELECT @productsConstraint = name 
+-    FROM sys.foreign_keys 
+-    WHERE parent_object_id = OBJECT_ID('Orders') 
+-    AND referenced_object_id = OBJECT_ID('Products');
+-    
+-    -- 删除旧约束
+-    IF @productsConstraint IS NOT NULL
+-    BEGIN
+-        DECLARE @dropProductsSql NVARCHAR(500) = 'ALTER TABLE Orders DROP CONSTRAINT ' + @productsConstraint;
+-        EXEC sp_executesql @dropProductsSql;
+-    END
+-    
+-    -- 添加新约束
+-    ALTER TABLE Orders ADD CONSTRAINT FK_Orders_Products 
+-    FOREIGN KEY (ProductId) REFERENCES Products(ProductId) ON DELETE NO ACTION;
+-    
+-    PRINT '已修复Orders表与Products的外键关系';
+-END
+-
+-PRINT '数据库迁移修复完成！';
+-GO 
+\ No newline at end of file
+diff --git a/optimize-footer.sh b/optimize-footer.sh
+deleted file mode 100755
+index f78a20a..0000000
+--- a/optimize-footer.sh
++++ /dev/null
+@@ -1,50 +0,0 @@
+-#!/bin/bash
+-
+-# 脚本：优化页脚HTML结构
+-# 作用：移除页脚中的冗余元素，进一步减少高度
+-
+-# 颜色定义
+-GREEN="\033[0;32m"
+-RED="\033[0;31m"
+-YELLOW="\033[0;33m"
+-RESET="\033[0m"
+-
+-echo -e "${GREEN}开始优化页脚HTML结构...${RESET}"
+-
+-# 查找所有HTML文件
+-HTML_FILES=$(find FarmDirectSales/wwwroot -type f -name "*.html")
+-
+-# 计数器
+-TOTAL=0
+-UPDATED=0
+-
+-# 处理每个HTML文件
+-for FILE in $HTML_FILES; do
+-    TOTAL=$((TOTAL + 1))
+-    
+-    # 检查文件中是否包含页脚
+-    if grep -q '<footer class="footer-section">' "$FILE"; then
+-        echo -e "${YELLOW}处理文件: ${FILE}${RESET}"
+-        
+-        # 1. 移除社交链接中的不必要的mb-4类
+-        sed -i '' 's/<div class="social-links mb-4">/<div class="social-links">/' "$FILE"
+-        
+-        # 2. 移除页脚品牌描述中的多余mb-4
+-        sed -i '' 's/<p class="text-muted mb-4">/<p class="text-muted">/' "$FILE"
+-        
+-        # 3. 移除淡入动画类(fade-in)，因为它会占用额外的渲染时间
+-        perl -i -pe 's/class="col-lg-(\d+) col-md-(\d+) fade-in"/class="col-lg-$1 col-md-$2"/g' "$FILE"
+-        perl -i -pe 's/class="col-lg-(\d+) col-md-(\d+) col-(\d+) fade-in"/class="col-lg-$1 col-md-$2 col-$3"/g' "$FILE"
+-        
+-        # 4. 移除列间距的g-4，改为更小的g-3
+-        sed -i '' 's/class="row g-4"/class="row g-3"/' "$FILE"
+-        
+-        echo -e "${GREEN}成功优化页脚 - ${FILE}${RESET}"
+-        UPDATED=$((UPDATED + 1))
+-    else
+-        echo -e "${RED}跳过文件: ${FILE} (未找到页脚)${RESET}"
+-    fi
+-done
+-
+-echo -e "${GREEN}完成！${RESET}"
+-echo -e "总共处理 ${TOTAL} 个文件，更新了 ${UPDATED} 个文件。" 
+\ No newline at end of file
+diff --git a/remove-newsletter.sh b/remove-newsletter.sh
+deleted file mode 100755
+index c908a6e..0000000
+--- a/remove-newsletter.sh
++++ /dev/null
+@@ -1,54 +0,0 @@
+-#!/bin/bash
+-
+-# 脚本：移除所有页面中的订阅新闻模块
+-# 作用：遍历所有HTML文件，移除"订阅我们的新闻"模块
+-
+-# 颜色定义
+-GREEN="\033[0;32m"
+-RED="\033[0;31m"
+-YELLOW="\033[0;33m"
+-RESET="\033[0m"
+-
+-echo -e "${GREEN}开始移除订阅新闻模块...${RESET}"
+-
+-# 查找HTML文件
+-HTML_FILES=$(find FarmDirectSales/wwwroot -type f -name "*.html")
+-
+-# 计数器
+-TOTAL=0
+-UPDATED=0
+-
+-# 处理每个HTML文件
+-for FILE in $HTML_FILES; do
+-    TOTAL=$((TOTAL + 1))
+-    
+-    # 检查文件中是否包含newsletter模块
+-    if grep -q "订阅我们的新闻" "$FILE"; then
+-        echo -e "${YELLOW}处理文件: ${FILE}${RESET}"
+-        
+-        # 使用sed删除newsletter div模块
+-        # 使用多行删除模式匹配从<div class="newsletter开始到</div>结束的整个模块
+-        sed -i '' '/<div class="newsletter/,/<\/div>/{
+-            /<div class="newsletter/!{
+-                /<\/div>/!d
+-            }
+-            /<div class="newsletter/{
+-                d
+-            }
+-            /<\/div>/{
+-                d
+-            }
+-        }' "$FILE"
+-        
+-        # 验证修改
+-        if ! grep -q "订阅我们的新闻" "$FILE"; then
+-            echo -e "${GREEN}成功移除新闻订阅模块 - ${FILE}${RESET}"
+-            UPDATED=$((UPDATED + 1))
+-        else
+-            echo -e "${RED}移除失败 - ${FILE}${RESET}"
+-        fi
+-    fi
+-done
+-
+-echo -e "${GREEN}完成！${RESET}"
+-echo -e "总共处理 ${TOTAL} 个文件，更新了 ${UPDATED} 个文件。" 
+\ No newline at end of file
+diff --git a/update-footer-style.sh b/update-footer-style.sh
+deleted file mode 100755
+index 0d9d1c8..0000000
+--- a/update-footer-style.sh
++++ /dev/null
+@@ -1,67 +0,0 @@
+-#!/bin/bash
+-
+-# 脚本：更新页脚样式
+-# 作用：为所有HTML页面添加紧凑型页脚样式
+-
+-# 颜色定义
+-GREEN="\033[0;32m"
+-RED="\033[0;31m"
+-YELLOW="\033[0;33m"
+-RESET="\033[0m"
+-
+-echo -e "${GREEN}开始更新页脚样式...${RESET}"
+-
+-# 确保CSS文件目录存在
+-STYLE_DIR="FarmDirectSales/wwwroot/css"
+-if [ ! -d "$STYLE_DIR" ]; then
+-    echo -e "${RED}错误: CSS目录不存在!${RESET}"
+-    exit 1
+-fi
+-
+-# 确保紧凑型页脚样式文件存在
+-FOOTER_CSS="$STYLE_DIR/footer-compact.css"
+-if [ ! -f "$FOOTER_CSS" ]; then
+-    echo -e "${RED}错误: 紧凑型页脚样式文件不存在!${RESET}"
+-    exit 1
+-fi
+-
+-# 查找所有HTML文件
+-HTML_FILES=$(find FarmDirectSales/wwwroot -type f -name "*.html")
+-
+-# 计数器
+-TOTAL=0
+-UPDATED=0
+-
+-# 处理每个HTML文件
+-for FILE in $HTML_FILES; do
+-    TOTAL=$((TOTAL + 1))
+-    
+-    # 检查文件中是否已包含紧凑型页脚样式引用
+-    if grep -q "footer-compact.css" "$FILE"; then
+-        echo -e "${YELLOW}跳过文件: ${FILE} (已包含紧凑型页脚样式)${RESET}"
+-        continue
+-    fi
+-    
+-    # 检查文件是否包含样式表引用区域
+-    if grep -q "<link.*style.css" "$FILE"; then
+-        echo -e "${YELLOW}处理文件: ${FILE}${RESET}"
+-        
+-        # 在样式表后添加紧凑型页脚样式引用
+-        sed -i '' '/<link.*style.css/a \
+-    <link href="/css/footer-compact.css" rel="stylesheet">
+-' "$FILE"
+-        
+-        # 验证更新
+-        if grep -q "footer-compact.css" "$FILE"; then
+-            echo -e "${GREEN}成功添加紧凑型页脚样式 - ${FILE}${RESET}"
+-            UPDATED=$((UPDATED + 1))
+-        else
+-            echo -e "${RED}更新失败 - ${FILE}${RESET}"
+-        fi
+-    else
+-        echo -e "${RED}跳过文件: ${FILE} (未找到样式表引用区域)${RESET}"
+-    fi
+-done
+-
+-echo -e "${GREEN}完成！${RESET}"
+-echo -e "总共处理 ${TOTAL} 个文件，更新了 ${UPDATED} 个文件。" 
+\ No newline at end of file
+diff --git a/update-login-state.sh b/update-login-state.sh
+deleted file mode 100755
+index bcc6363..0000000
+--- a/update-login-state.sh
++++ /dev/null
+@@ -1,51 +0,0 @@
+-#!/bin/bash
+-
+-# 登录状态修复脚本添加工具
+-
+-# 需要修复的HTML文件列表
+-HTML_FILES=(
+-    "FarmDirectSales/wwwroot/pages/faq.html"
+-    "FarmDirectSales/wwwroot/pages/shipping.html"
+-    "FarmDirectSales/wwwroot/pages/return.html"
+-    "FarmDirectSales/wwwroot/pages/contact.html"
+-)
+-
+-# 计数器
+-UPDATED=0
+-
+-echo "开始更新登录状态修复脚本..."
+-
+-# 遍历每个文件并添加修复脚本
+-for FILE in "${HTML_FILES[@]}"; do
+-    # 检查文件是否存在
+-    if [ ! -f "$FILE" ]; then
+-        echo "错误: 文件 $FILE 不存在!"
+-        continue
+-    fi
+-    
+-    # 检查文件是否已包含修复脚本
+-    if grep -q "fix-login-state.js" "$FILE"; then
+-        echo "跳过 $FILE (已包含修复脚本)"
+-        continue
+-    fi
+-    
+-    # 检查文件是否包含update-navbar.js引用，在其前面添加修复脚本
+-    if grep -q "update-navbar.js" "$FILE"; then
+-        sed -i '' 's|<script src="/pages/update-navbar.js"></script>|<script src="/js/fix-login-state.js"></script>\n    <script src="/pages/update-navbar.js"></script>|' "$FILE"
+-        echo "已更新 $FILE"
+-        UPDATED=$((UPDATED + 1))
+-    else
+-        # 如果没有找到update-navbar.js，则在body结束标签前添加
+-        sed -i '' 's|</body>|    <script src="/js/fix-login-state.js"></script>\n</body>|' "$FILE"
+-        echo "已更新 $FILE"
+-        UPDATED=$((UPDATED + 1))
+-    fi
+-done
+-
+-echo "完成! 已更新 $UPDATED 个文件。"
+-
+-# 将登录状态修复脚本复制到正确位置
+-mkdir -p FarmDirectSales/wwwroot/js
+-cp -f FarmDirectSales/wwwroot/js/fix-login-state.js FarmDirectSales/wwwroot/js/
+-
+-echo "登录状态修复脚本已部署，重新加载页面后生效。" 
+\ No newline at end of file
+diff --git a/update-navbar.sh b/update-navbar.sh
+deleted file mode 100755
+index c8a44de..0000000
+--- a/update-navbar.sh
++++ /dev/null
+@@ -1,43 +0,0 @@
+-#!/bin/bash
+-
+-# 导航栏样式统一脚本
+-
+-# 定义要处理的HTML文件目录
+-HTML_DIR="FarmDirectSales/wwwroot"
+-
+-# 检查脚本文件是否存在
+-if [ ! -f "${HTML_DIR}/pages/update-navbar.js" ]; then
+-    echo "错误: 导航栏统一脚本文件不存在!"
+-    exit 1
+-fi
+-
+-# 查找所有HTML文件
+-echo "正在查找HTML文件..."
+-HTML_FILES=$(find "${HTML_DIR}" -name "*.html")
+-TOTAL_FILES=$(echo "${HTML_FILES}" | wc -l)
+-echo "找到 ${TOTAL_FILES} 个HTML文件。"
+-
+-# 计数器
+-UPDATED=0
+-
+-# 为每个HTML文件添加导航栏统一脚本
+-for FILE in ${HTML_FILES}; do
+-    # 检查文件是否已包含统一脚本
+-    if grep -q "update-navbar.js" "${FILE}"; then
+-        echo "跳过 ${FILE} (已包含脚本)"
+-        continue
+-    fi
+-    
+-    # 检查文件是否包含导航栏
+-    if grep -q "<nav class=\"navbar" "${FILE}"; then
+-        # 在</body>标签前添加脚本引用
+-        sed -i '' 's|</body>|    <script src="/pages/update-navbar.js"></script>\n</body>|' "${FILE}"
+-        echo "已更新 ${FILE}"
+-        UPDATED=$((UPDATED + 1))
+-    else
+-        echo "跳过 ${FILE} (未发现导航栏)"
+-    fi
+-done
+-
+-echo "完成! 已更新 ${UPDATED} 个文件。"
+-echo "导航栏样式已统一。" 
+\ No newline at end of file
+-- 
+2.39.5 (Apple Git-154)
+
