@@ -22,6 +22,8 @@ PAGES=(
   "FarmDirectSales/wwwroot/pages/cart.html"
   "FarmDirectSales/wwwroot/pages/products.html"
   "FarmDirectSales/wwwroot/pages/farmers.html"
+  "FarmDirectSales/wwwroot/pages/product-detail.html"
+  "FarmDirectSales/wwwroot/pages/checkout.html"
   "FarmDirectSales/wwwroot/index.html"
 )
 
