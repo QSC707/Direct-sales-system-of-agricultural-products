@@ -11,6 +11,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <!-- 自定义样式 -->
     <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/footer-compact.css" rel="stylesheet">
 </head>
 <body>
     <!-- 导航栏 -->
@@ -100,7 +101,7 @@
                             <h5 class="border-bottom pb-2 text-success">退换条件</h5>
                             <p>符合以下条件的商品，可以申请退换：</p>
                             
-                            <div class="row g-4">
+                            <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="card h-100 border-success">
                                         <div class="card-header bg-success text-white">
@@ -283,15 +284,15 @@
     <footer class="footer-section">
         <div class="footer-top py-5">
             <div class="container">
-                <div class="row g-4">
-                    <div class="col-lg-4 col-md-6 fade-in">
+                <div class="row g-3">
+                    <div class="col-lg-4 col-md-6">
                         <div class="footer-brand">
                             <div class="d-flex align-items-center mb-3">
                                 <i class="fas fa-leaf text-success me-2 fs-3"></i>
                                 <h4 class="mb-0 fw-bold">农产品直销系统</h4>
                             </div>
-                            <p class="text-muted mb-4">致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收，实现优质农产品直达餐桌。</p>
-                            <div class="social-links mb-4">
+                            <p class="text-muted">致力于搭建农户与消费者的桥梁，推动农产品流通、促进农民增收，实现优质农产品直达餐桌。</p>
+                            <div class="social-links">
                                 <a href="#" class="social-link" aria-label="微信"><i class="fab fa-weixin"></i></a>
                                 <a href="#" class="social-link" aria-label="微博"><i class="fab fa-weibo"></i></a>
                                 <a href="#" class="social-link" aria-label="QQ"><i class="fab fa-qq"></i></a>
@@ -299,7 +300,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-2 col-md-6 col-6 fade-in">
+                    <div class="col-lg-2 col-md-6 col-6">
                         <h5 class="footer-title">快速链接</h5>
                         <ul class="footer-links">
                             <li><a href="/index.html">首页</a></li>
@@ -308,7 +309,7 @@
                             <li><a href="/pages/about.html">关于我们</a></li>
                         </ul>
                     </div>
-                    <div class="col-lg-2 col-md-6 col-6 fade-in">
+                    <div class="col-lg-2 col-md-6 col-6">
                         <h5 class="footer-title">帮助支持</h5>
                         <ul class="footer-links">
                             <li><a href="/pages/faq.html">常见问题</a></li>
@@ -317,7 +318,7 @@
                             <li><a href="/pages/contact.html">联系客服</a></li>
                         </ul>
                     </div>
-                    <div class="col-lg-4 col-md-6 fade-in">
+                    <div class="col-lg-4 col-md-6">
                         <h5 class="footer-title">联系我们</h5>
                         <ul class="contact-info">
                             <li>
@@ -337,12 +338,6 @@
                                 <span>周一至周日 9:00-18:00</span>
                             </li>
                         </ul>
-                        <div class="newsletter mt-4">
-                            <h6 class="mb-2">订阅我们的新闻</h6>
-                            <div class="d-flex">
-                                <input type="email" class="form-control form-control-sm" placeholder="您的电子邮箱">
-                                <button class="btn btn-success btn-sm ms-2">订阅</button>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -397,5 +392,7 @@
             }
         });
     </script>
+    <script src="/js/fix-login-state.js"></script>
+    <script src="/pages/update-navbar.js"></script>
 </body>
 </html> 

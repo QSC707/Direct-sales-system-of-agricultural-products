@@ -2,33 +2,158 @@
  * 农产品直销平台自定义样式
  */
 
+/* 全局样式变量 */
+:root {
+    --primary-color: #22c55e;
+    --primary-dark: #16a34a;
+    --secondary-color: #f8fafc;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
 /* 全局样式 */
 body {
-    font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #333;
+    font-family: 'Inter', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text-color);
     line-height: 1.6;
 }
 
-/* 重写Bootstrap样式 */
+/* 统一导航栏样式 */
 .navbar {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: none !important;
+    padding: 0.5rem 0;
     z-index: 1030;
 }
 
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--primary-color) !important;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--text-color) !important;
+    transition: none !important;
+    position: relative;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+.nav-link.active {
+    color: var(--primary-color) !important;
+}
+
+/* 下拉菜单样式统一 */
 .navbar .dropdown-menu {
     z-index: 1031 !important;
-    border: 1px solid rgba(0,0,0,.15);
-    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    padding: 0.5rem 0;
+    transition: none !important;
+    margin-top: 0 !important;
+    transform: none !important;
+    animation: none !important;
+    opacity: 1 !important;
 }
 
-.navbar .dropdown-toggle {
-    z-index: 1032;
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
-#userDropdown {
-    z-index: 1033;
+.dropdown-item:hover {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: var(--primary-color);
 }
 
+.dropdown-item i {
+    color: var(--primary-color);
+    width: 20px;
+    text-align: center;
+}
+
+/* 统一按钮样式 */
+.btn {
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 8px 16px;
+    transition: all 0.3s ease;
+    border: none;
+    overflow: hidden;
+}
+
+.btn-primary, .btn-success {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    border: none;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover, .btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background: linear-gradient(135deg, var(--primary-dark), #15803d);
+}
+
+.btn-outline-primary, .btn-outline-success {
+    border: 1.5px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+}
+
+.btn-outline-primary:hover, .btn-outline-success:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* 响应式导航 */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--shadow-lg);
+        padding: 1rem;
+        margin-top: 0.5rem;
+        transition: none !important;
+    }
+    
+    .navbar-nav {
+        margin-bottom: 1rem;
+    }
+    
+    .nav-link {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+    }
+    
+    .nav-link:hover {
+        background-color: rgba(34, 197, 94, 0.1);
+    }
+    
+    .navbar-toggler {
+        transition: none !important;
+    }
+}
+
+/* 保留原来的其他样式 */
 .card {
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     border-radius: 8px;
@@ -38,26 +163,6 @@ body {
 .card-header {
     background-color: #f8f9fa;
     border-bottom: 1px solid rgba(0,0,0,.075);
-}
-
-.btn-primary {
-    background-color: #28a745;
-    border-color: #28a745;
-}
-
-.btn-primary:hover {
-    background-color: #218838;
-    border-color: #1e7e34;
-}
-
-.btn-outline-primary {
-    color: #28a745;
-    border-color: #28a745;
-}
-
-.btn-outline-primary:hover {
-    background-color: #28a745;
-    border-color: #28a745;
 }
 
 /* 产品卡片 */
@@ -137,14 +242,6 @@ body {
     margin-bottom: 20px;
 }
 
-/* 页脚 */
-footer {
-    margin-top: 2rem;
-    padding: 20px 0;
-    background-color: #f8f9fa;
-    border-top: 1px solid #dee2e6;
-}
-
 /* 响应式调整 */
 @media (max-width: 768px) {
     .stats-card .stats-value {
@@ -157,11 +254,11 @@ footer {
 
 /* 通用样式 */
 .text-success {
-    color: #28a745 !important;
+    color: var(--primary-color) !important;
 }
 
 .bg-success {
-    background-color: #28a745 !important;
+    background-color: var(--primary-color) !important;
 }
 
 .btn-success {
@@ -545,6 +642,156 @@ footer {
         flex-wrap: wrap;
         margin-top: 1rem;
     }
+}
+
+/* 禁用导航栏和下拉菜单动画效果 */
+.navbar *,
+.dropdown *,
+.dropdown-menu,
+.dropdown-item,
+.nav-link,
+.navbar-collapse,
+.collapse,
+.collapsing {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+}
+
+/* 修复Bootstrap默认动画 */
+.dropdown-menu.show {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: none !important;
+    transition: none !important;
+}
+
+/* 禁用折叠导航栏的动画 */
+.collapsing {
+    transition: none !important;
+    height: auto !important;
+}
+
+/* 确保导航栏移动设备上的过渡效果也被禁用 */
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        transition: none !important;
+    }
+    
+    .navbar-toggler {
+        transition: none !important;
+    }
+}
+
+/* 数量增减按钮样式优化 */
+.quantity-control .btn, 
+button[onclick*="decreaseQuantity"],
+button[onclick*="increaseQuantity"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: 1rem;
+    font-weight: bold;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    color: var(--text-color);
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    box-shadow: none;
+}
+
+.quantity-control .btn:hover, 
+button[onclick*="decreaseQuantity"]:hover,
+button[onclick*="increaseQuantity"]:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    transform: none;
+    box-shadow: none;
+}
+
+.quantity-control .btn:focus, 
+button[onclick*="decreaseQuantity"]:focus,
+button[onclick*="increaseQuantity"]:focus {
+    box-shadow: 0 0 0 0.2rem rgba(34, 197, 94, 0.25);
+}
+
+.quantity-control .btn:disabled, 
+button[onclick*="decreaseQuantity"]:disabled,
+button[onclick*="increaseQuantity"]:disabled {
+    background-color: #f1f1f1;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+.quantity-control input,
+input#quantity {
+    width: 50px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    padding: 0.375rem 0.25rem;
+    height: 32px;
+}
+
+/* 产品详情页和购物车的数量控制包装容器 */
+.d-flex > input#quantity,
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* 产品详情页信息标签按钮样式修复 */
+#productInfoTabs .nav-link.text-white {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.2s ease;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+}
+
+#productInfoTabs .nav-link.text-white:hover,
+#productInfoTabs .nav-link.text-white.active {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.15);
+    border: none;
+}
+
+#productInfoTabs .nav-link.text-white.active {
+    font-weight: 600;
+    position: relative;
+}
+
+#productInfoTabs .nav-link.text-white.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    width: 80%;
+    height: 3px;
+    background-color: white;
+    border-radius: 3px 3px 0 0;
+}
+
+/* 产品详情页标签页内容区域优化 */
+#productInfoTabsContent .tab-pane {
+    padding: 1.5rem;
+}
+
+#productInfoTabs {
+    border-bottom: none;
+}
+
+.card-header.bg-success {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)) !important;
 } 
  
  

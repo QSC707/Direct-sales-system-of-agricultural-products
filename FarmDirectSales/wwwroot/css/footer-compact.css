@@ -1,0 +1,122 @@
+/**
+ * 紧凑型页脚样式
+ * 用于减小页脚高度，使页面更加紧凑
+ */
+
+/* 调整页脚整体高度和内边距 */
+.footer-section {
+    padding: 1.5rem 0 0.75rem !important;
+}
+
+.footer-top {
+    padding-bottom: 1rem !important;
+}
+
+/* 覆盖页脚顶部的大内边距 */
+.footer-section .footer-top.py-5 {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1rem !important;
+}
+
+/* 列间距调整 */
+.footer-section .row > div {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* 减小标题和文本间距 */
+.footer-title {
+    margin-bottom: 0.75rem !important;
+    font-size: 0.95rem !important;
+}
+
+.footer-title::after {
+    bottom: -3px !important;
+    height: 1px !important;
+}
+
+.footer-brand p {
+    margin-bottom: 0.5rem !important;
+    font-size: 0.85rem !important;
+    line-height: 1.4 !important;
+}
+
+/* 缩小社交链接尺寸 */
+.social-links {
+    margin-top: 0.75rem !important;
+    gap: 10px !important;
+}
+
+.social-link {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+/* 减小底部链接列表间距 */
+.footer-links li {
+    margin-bottom: 0.35rem !important;
+}
+
+.footer-links a {
+    font-size: 0.85rem !important;
+}
+
+/* 缩小联系信息间距 */
+.contact-info li {
+    margin-bottom: 0.4rem !important;
+    font-size: 0.85rem !important;
+}
+
+.contact-info li i {
+    margin-right: 8px !important;
+    margin-top: 2px !important;
+}
+
+/* 减小底部版权区间距 */
+.footer-bottom {
+    padding-top: 0.75rem !important;
+    margin-top: 0.5rem !important;
+}
+
+.footer-bottom.py-3 {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+.copyright {
+    font-size: 0.8rem !important;
+    margin-bottom: 0 !important;
+}
+
+.footer-links-secondary {
+    gap: 15px !important;
+}
+
+.footer-links-secondary a {
+    font-size: 0.8rem !important;
+}
+
+/* 适配移动设备的紧凑样式 */
+@media (max-width: 767.98px) {
+    .footer-section {
+        padding: 1.25rem 0 0.5rem !important;
+    }
+    
+    .footer-section .footer-top.py-5 {
+        padding-top: 1.25rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    
+    .footer-title {
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .footer-bottom {
+        padding-top: 0.5rem !important;
+    }
+    
+    .footer-section .col-lg-2,
+    .footer-section .col-lg-4 {
+        margin-bottom: 0.75rem !important;
+    }
+} 
