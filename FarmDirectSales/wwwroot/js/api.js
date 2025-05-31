@@ -3,6 +3,30 @@
  * 提供统一的API调用接口
  */
 
+// JWT令牌解码函数 - 支持中文字符
+function base64UrlDecode(str) {
+    // 替换URL安全字符
+    str = str.replace(/-/g, '+').replace(/_/g, '/');
+    // 补齐Base64填充
+    while (str.length % 4) {
+        str += '=';
+    }
+    return str;
+}
+
+function utf8Decode(str) {
+    try {
+        // 先尝试使用atob解码
+        const decoded = atob(str);
+        // 然后使用decodeURIComponent和escape处理UTF-8
+        return decodeURIComponent(escape(decoded));
+    } catch (e) {
+        // 如果失败，回退到直接使用atob
+        console.warn('UTF-8解码失败，使用标准Base64解码:', e);
+        return atob(str);
+    }
+}
+
 // 使用config.js中的动态API基础URL配置
 if (typeof window.AppConfig === 'undefined') {
     console.error('AppConfig未加载，请确保config.js已正确引入');
@@ -95,7 +119,8 @@ const handleResponse = async (response) => {
 // 辅助函数：检查登录状态
 const checkLoginStatus = () => {
     const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
     
     if (token && user && user.userId) {
         // 解析JWT令牌获取角色信息
@@ -103,8 +128,8 @@ const checkLoginStatus = () => {
             // JWT令牌格式是以.分隔的三部分
             const parts = token.split('.');
             if (parts.length === 3) {
-                // 解码JWT的payload部分（第二部分）
-                const payload = JSON.parse(atob(parts[1]));
+                // 解码JWT的payload部分（第二部分）- 修复中文字符问题
+                const payload = JSON.parse(utf8Decode(base64UrlDecode(parts[1])));
                 // 从payload中获取角色信息
                 const tokenRole = payload.role;
                 const tokenUserId = payload.nameid;
@@ -231,7 +256,7 @@ const api = {
                     try {
                         const parts = token.split('.');
                         if (parts.length === 3) {
-                            const payload = JSON.parse(atob(parts[1]));
+                            const payload = JSON.parse(utf8Decode(base64UrlDecode(parts[1])));
                             // 从payload中获取角色信息
                             tokenRole = payload.role;
                             if (!tokenRole && payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]) {

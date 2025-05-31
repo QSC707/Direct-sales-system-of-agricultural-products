@@ -731,7 +731,7 @@
             }
             
             const isPhone = /^1[3-9]\d{9}$/.test(input);
-            const isUsername = /^[a-zA-Z0-9_]{3,20}$/.test(input);
+            const isUsername = /^[\u4e00-\u9fa5a-zA-Z0-9_]{2,20}$/.test(input);
             const isPartialPhone = /^1[3-9]?\d{0,9}$/.test(input) && input.length <= 11;
             
             let hintMessage = '';
