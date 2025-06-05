@@ -21,4 +21,4 @@ logs/
 backup_*/
 
 # 说明文档（可选，如果不想提交）
-# *.md 
+# *.md uploads/
