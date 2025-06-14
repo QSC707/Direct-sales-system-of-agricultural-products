@@ -243,6 +243,73 @@
             border-color: #007bff;
             box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
         }
+        
+        /* 批量操作确认界面样式 */
+        .batch-status-confirm-modal {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .batch-status-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #212529;
+        }
+        
+        .batch-status-content {
+            padding: 1rem;
+        }
+        
+        .batch-progress-modal {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .batch-progress-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .batch-result-modal {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .batch-result-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        /* SweetAlert2按钮样式优化 */
+        .swal2-styled.swal2-confirm {
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            border-radius: 8px;
+        }
+        
+        .swal2-styled.swal2-cancel {
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            border-radius: 8px;
+        }
+        
+        /* 进度条样式优化 */
+        .progress {
+            background-color: #f1f3f4;
+            border-radius: 10px;
+        }
+        
+        .progress-bar {
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        /* 状态徽章样式 */
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
     </style>
 </head>
 <body>
@@ -1182,7 +1249,92 @@
         let totalItems = 0;           // 总记录数
         let isLoading = false;        // 加载状态标记
         let lastSearchTerm = '';      // 上次搜索关键词
-
+        
+        /**
+         * 初始化SweetAlert2配置，修复弹窗显示问题
+         */
+        function initSweetAlert2() {
+            if (typeof Swal !== 'undefined') {
+                console.log('✅ SweetAlert2库已加载');
+                
+                // 添加CSS修复样式
+                const style = document.createElement('style');
+                style.textContent = `
+                    .swal2-container-fix {
+                        z-index: 99999 !important;
+                        position: fixed !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        right: 0 !important;
+                        bottom: 0 !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                    }
+                    .swal2-popup-fix {
+                        position: relative !important;
+                        z-index: 100000 !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            } else {
+                console.warn('⚠️ SweetAlert2库未加载');
+            }
+        }
+        
+        /**
+         * 显示SweetAlert2弹窗的安全包装函数
+         */
+        function showSwal(options) {
+            try {
+                // 确保清理任何遗留的backdrop
+                $('.swal2-backdrop').remove();
+                $('body').removeClass('swal2-shown swal2-height-auto');
+                
+                // 强制设置容器样式
+                const defaultOptions = {
+                    target: document.body,
+                    scrollbarPadding: false,
+                    customClass: {
+                        container: 'swal2-container-fix',
+                        popup: 'swal2-popup-fix'
+                    },
+                    didOpen: () => {
+                        // 确保弹窗容器正确定位
+                        const container = document.querySelector('.swal2-container');
+                        if (container) {
+                            container.style.position = 'fixed';
+                            container.style.top = '0';
+                            container.style.left = '0';
+                            container.style.right = '0';
+                            container.style.bottom = '0';
+                            container.style.zIndex = '99999';
+                            container.style.display = 'flex';
+                            container.style.alignItems = 'center';
+                            container.style.justifyContent = 'center';
+                            console.log('✅ SweetAlert2弹窗容器样式已设置');
+                        }
+                    },
+                    willClose: () => {
+                        // 清理任何遗留样式
+                        $('.swal2-backdrop').remove();
+                        $('body').removeClass('swal2-shown swal2-height-auto').css('overflow', '').css('padding-right', '');
+                    }
+                };
+                
+                return Swal.fire(Object.assign(defaultOptions, options));
+            } catch (error) {
+                console.error('SweetAlert2显示失败:', error);
+                // 如果SweetAlert2失败，使用原生确认框
+                if (options.showCancelButton) {
+                    return Promise.resolve({ isConfirmed: confirm(options.title + '\n' + (options.text || options.html || '')) });
+                } else {
+                    alert(options.title + '\n' + (options.text || options.html || ''));
+                    return Promise.resolve({ isConfirmed: true });
+                }
+            }
+        }
+        
         /**
          * 加载产品列表 - 使用后端分页API
          */
@@ -2167,6 +2319,41 @@
          */
         async function batchUpdateStatus(isActive) {
             try {
+                // 初始化SweetAlert2修复 - 确保弹窗正确显示
+                if (typeof Swal !== 'undefined') {
+                    // 清理任何遗留的弹窗
+                    $('.swal2-backdrop').remove();
+                    $('body').removeClass('swal2-shown swal2-height-auto').css('overflow', '').css('padding-right', '');
+                    
+                    // 动态添加样式修复
+                    if (!document.getElementById('swal2-fix-style')) {
+                        const style = document.createElement('style');
+                        style.id = 'swal2-fix-style';
+                        style.textContent = `
+                            .swal2-container {
+                                z-index: 99999 !important;
+                                position: fixed !important;
+                                top: 0 !important;
+                                left: 0 !important;
+                                right: 0 !important;
+                                bottom: 0 !important;
+                                display: flex !important;
+                                align-items: center !important;
+                                justify-content: center !important;
+                                padding: 10px !important;
+                            }
+                            .swal2-popup {
+                                position: relative !important;
+                                z-index: 100000 !important;
+                                max-height: 90vh !important;
+                                overflow-y: auto !important;
+                            }
+                        `;
+                        document.head.appendChild(style);
+                        console.log('✅ SweetAlert2修复样式已添加');
+                    }
+                }
+                
                 const selectedIds = getSelectedProductIds();
                 if (selectedIds.length === 0) {
                     // 使用SweetAlert2如果可用，否则使用普通alert
@@ -2186,14 +2373,47 @@
                 // 使用SweetAlert2或普通confirm确认
                 let shouldContinue = false;
                 if (typeof Swal !== 'undefined') {
+                    // 先清理任何可能存在的弹窗遗留
+                    $('.swal2-backdrop').remove();
+                    $('body').removeClass('swal2-shown swal2-height-auto').css('overflow', '').css('padding-right', '');
+                    
                     const result = await Swal.fire({
                         title: `确认批量${isActive ? '上架' : '下架'}`,
-                        text: `确定要批量${isActive ? '上架' : '下架'}选中的 ${selectedIds.length} 个产品吗？`,
+                        html: `
+                            <div class="text-center mb-3">
+                                <i class="fas ${isActive ? 'fa-arrow-up' : 'fa-arrow-down'} text-${isActive ? 'success' : 'secondary'}" style="font-size: 3rem;"></i>
+                            </div>
+                            <p class="mb-2">您即将批量${isActive ? '上架' : '下架'}以下产品：</p>
+                            <div class="alert alert-info">
+                                <strong>选中数量：</strong> ${selectedIds.length} 个产品
+                            </div>
+                            <p class="text-muted small">
+                                ${isActive ? 
+                                    '<i class="fas fa-info-circle me-1"></i>上架后的产品会在产品列表中显示，用户可以正常购买。' : 
+                                    '<i class="fas fa-info-circle me-1"></i>下架后的产品会隐藏在产品列表中，用户无法购买。'
+                                }
+                            </p>
+                        `,
                         icon: 'question',
                         showCancelButton: true,
-                        confirmButtonText: `确认${isActive ? '上架' : '下架'}`,
-                        cancelButtonText: '取消',
-                        confirmButtonColor: isActive ? '#28a745' : '#6c757d'
+                        confirmButtonText: `<i class="fas ${isActive ? 'fa-check' : 'fa-pause'} me-1"></i>确认${isActive ? '上架' : '下架'}`,
+                        cancelButtonText: '<i class="fas fa-times me-1"></i>取消',
+                        confirmButtonColor: isActive ? '#28a745' : '#6c757d',
+                        cancelButtonColor: '#dc3545',
+                        buttonsStyling: true,
+                        customClass: {
+                            popup: 'batch-status-confirm-modal',
+                            title: 'batch-status-title',
+                            htmlContainer: 'batch-status-content',
+                            confirmButton: 'btn btn-success',
+                            cancelButton: 'btn btn-secondary'
+                        },
+                        showClass: {
+                            popup: 'animate__animated animate__fadeInDown animate__faster'
+                        },
+                        hideClass: {
+                            popup: 'animate__animated animate__fadeOutUp animate__faster'
+                        }
                     });
                     shouldContinue = result.isConfirmed;
                 } else {
@@ -2212,15 +2432,32 @@
                 // 显示进度状态
                 let progressHTML = '';
                 if (typeof Swal !== 'undefined') {
-                    const $progressContainer = $('<div class="progress mt-2 mb-2"><div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div></div>');
-                    const $progressStatus = $('<div class="small text-center mb-2">正在处理：0/' + selectedIds.length + '</div>');
-                    
                     Swal.fire({
                         title: `正在${isActive ? '上架' : '下架'}产品`,
-                        html: $progressContainer[0].outerHTML + $progressStatus[0].outerHTML,
+                        html: `
+                            <div class="text-center mb-3">
+                                <i class="fas ${isActive ? 'fa-arrow-up' : 'fa-arrow-down'} text-${isActive ? 'success' : 'secondary'}" style="font-size: 2rem;"></i>
+                            </div>
+                            <div class="progress mb-3" style="height: 20px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated ${isActive ? 'bg-success' : 'bg-secondary'}" 
+                                     role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="batch-progress-status text-center">
+                                <span class="badge ${isActive ? 'bg-success' : 'bg-secondary'}">正在处理：0/${selectedIds.length}</span>
+                            </div>
+                            <div class="small text-muted text-center mt-2">
+                                请耐心等待，正在${isActive ? '上架' : '下架'}产品...
+                            </div>
+                        `,
                         allowOutsideClick: false,
+                        allowEscapeKey: false,
                         showConfirmButton: false,
-                        willOpen: () => {
+                        showCancelButton: false,
+                        customClass: {
+                            popup: 'batch-progress-modal',
+                            title: 'batch-progress-title'
+                        },
+                        didOpen: () => {
                             Swal.showLoading();
                         }
                     });
@@ -2239,10 +2476,10 @@
                         const productId = selectedIds[i];
                         
                         // 更新进度
-                        const percent = Math.round(((i) / selectedIds.length) * 100);
+                        const percent = Math.round(((i + 1) / selectedIds.length) * 100);
                         if (typeof Swal !== 'undefined') {
                             $('.progress-bar').css('width', percent + '%').attr('aria-valuenow', percent);
-                            $('.small.text-center').text('正在处理：' + (i + 1) + '/' + selectedIds.length);
+                            $('.batch-progress-status .badge').text('正在处理：' + (i + 1) + '/' + selectedIds.length);
                         } else {
                             $('#progressText').text(`正在处理：${i + 1}/${selectedIds.length} (${percent}%)`);
                         }

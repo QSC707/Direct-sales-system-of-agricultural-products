@@ -969,5 +969,211 @@ input#quantity {
 .navbar-dark .navbar-toggler-icon {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
 }
+
+/**
+ * SweetAlert2弹窗层级和位置修复 - 简约风格
+ * 修复农户商品管理批量操作弹窗显示在底部的问题
+ */
+.swal2-container {
+    z-index: 99999 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px !important;
+    /* 简约渐变背景 */
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.15), rgba(80, 200, 120, 0.15)) !important;
+    backdrop-filter: blur(8px) !important;
+}
+
+.swal2-popup {
+    position: relative !important;
+    z-index: 100000 !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    /* 简约弹窗样式 */
+    border-radius: 16px !important;
+    border: none !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    padding: 1.5rem !important;
+}
+
+/* 弹窗标题简约样式 */
+.swal2-title {
+    font-size: 1.1rem !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    margin-bottom: 1rem !important;
+    padding: 0 !important;
+}
+
+/* 弹窗内容简约样式 */
+.swal2-html-container {
+    font-size: 0.95rem !important;
+    color: #6b7280 !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    padding: 0 0 1rem 0 !important;
+}
+
+/* 按钮简约样式 */
+.swal2-actions {
+    margin: 1rem 0 0 0 !important;
+    gap: 0.5rem !important;
+}
+
+.swal2-confirm {
+    background: linear-gradient(135deg, #4ade80, #22c55e) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1.2rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3) !important;
+    transition: all 0.2s ease !important;
+}
+
+.swal2-confirm:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4) !important;
+}
+
+.swal2-cancel {
+    background: rgba(107, 114, 128, 0.1) !important;
+    border: 1px solid rgba(107, 114, 128, 0.2) !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1.2rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    color: #6b7280 !important;
+    transition: all 0.2s ease !important;
+}
+
+.swal2-cancel:hover {
+    background: rgba(107, 114, 128, 0.15) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* 确保SweetAlert2覆盖层正确显示 - 简约背景 */
+.swal2-backdrop-show {
+    background: linear-gradient(135deg, rgba(74, 144, 226, 0.2), rgba(80, 200, 120, 0.2)) !important;
+}
+
+/* 批量管理确认弹窗自定义样式 - 简约风格 */
+.batch-status-confirm-modal {
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+.batch-status-title {
+    font-size: 1.1rem !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.batch-status-content {
+    color: #6b7280 !important;
+    line-height: 1.5 !important;
+    font-size: 0.95rem !important;
+}
+
+/* 批量进度弹窗样式 - 简约风格 */
+.batch-progress-modal {
+    border-radius: 16px !important;
+    min-width: 350px !important;
+    max-width: 450px !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+.batch-progress-title {
+    font-size: 1.1rem !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+}
+
+/* 进度条简约样式 */
+.progress {
+    background-color: rgba(229, 231, 235, 0.8) !important;
+    border-radius: 8px !important;
+    height: 8px !important;
+}
+
+.progress-bar {
+    border-radius: 8px !important;
+    background: linear-gradient(90deg, #4ade80, #22c55e) !important;
+    transition: width 0.3s ease !important;
+}
+
+/* 图标简约样式 */
+.swal2-icon {
+    border: none !important;
+    margin: 0.5rem auto 1rem auto !important;
+}
+
+.swal2-icon.swal2-success {
+    color: #22c55e !important;
+}
+
+.swal2-icon.swal2-error {
+    color: #ef4444 !important;
+}
+
+.swal2-icon.swal2-warning {
+    color: #f59e0b !important;
+}
+
+.swal2-icon.swal2-info {
+    color: #3b82f6 !important;
+}
+
+/* 覆盖Bootstrap模态框的z-index，避免冲突 */
+.modal {
+    z-index: 1050 !important;
+}
+
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+/* 确保页面其他元素不会遮挡SweetAlert2 */
+.navbar,
+.navbar-fixed-top,
+header {
+    z-index: 1030 !important;
+}
+
+/* 修复可能的body滚动问题 */
+body.swal2-shown:not(.swal2-no-backdrop, .swal2-toast-shown) {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+}
+
+/* 响应式处理 */
+@media (max-width: 768px) {
+    .swal2-container {
+        padding: 5px !important;
+    }
+    
+    .batch-progress-modal {
+        min-width: 90% !important;
+        max-width: 95% !important;
+    }
+    
+    .batch-status-confirm-modal {
+        width: 95% !important;
+        margin: 0 auto !important;
+    }
+}
  
  
