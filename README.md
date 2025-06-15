@@ -1,4 +1,4 @@
-# 🌾 农产品直销管理系统 (Farm Direct Sales System)
+# 🌾 农产品直销管理系统
 
 <div align="center">
 
