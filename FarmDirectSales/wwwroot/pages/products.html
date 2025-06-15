@@ -603,9 +603,16 @@
         // 加载产品列表
         async function loadProducts() {
             try {
-                // 显示加载状态
-                document.getElementById('loading').classList.remove('d-none');
-                document.getElementById('no-products').classList.add('d-none');
+                // 显示加载状态 - 添加null检查
+                const loadingElement = document.getElementById('loading');
+                const noProductsElement = document.getElementById('no-products');
+                
+                if (loadingElement) {
+                    loadingElement.classList.remove('d-none');
+                }
+                if (noProductsElement) {
+                    noProductsElement.classList.add('d-none');
+                }
                 
                 // 获取筛选参数
                 const keyword = document.getElementById('search-input')?.value || '';
@@ -620,7 +627,26 @@
                 
                 if (keyword) params.append('keyword', keyword);
                 if (category) params.append('category', category);
-                if (sortOrder !== 'default') params.append('sortBy', sortOrder);
+                
+                // 修复排序参数映射
+                if (sortOrder !== 'default') {
+                    let sortBy = '';
+                    switch (sortOrder) {
+                        case 'price-asc':
+                            sortBy = 'priceasc';
+                            break;
+                        case 'price-desc':
+                            sortBy = 'pricedesc';
+                            break;
+                        case 'newest':
+                            sortBy = 'newest';
+                            break;
+                        default:
+                            sortBy = 'newest'; // 默认最新
+                            break;
+                    }
+                    params.append('sortBy', sortBy);
+                }
                 
                 // 生成缓存键
                 const filterKey = params.toString();
@@ -631,7 +657,9 @@
                     console.log('使用缓存数据');
                     const cachedData = productsCache[filterKey];
                     displayProducts(cachedData.products || cachedData);
-                    document.getElementById('loading').classList.add('d-none');
+                    if (loadingElement) {
+                        loadingElement.classList.add('d-none');
+                    }
                     
                     // 更新结果统计
                     updateResultStats();
@@ -668,14 +696,19 @@
                 }
                 
                 // 隐藏加载提示
-                document.getElementById('loading').classList.add('d-none');
+                if (loadingElement) {
+                    loadingElement.classList.add('d-none');
+                }
                 
             } catch (error) {
                 console.error('加载产品列表失败:', error);
                 const productListElement = document.getElementById('product-list');
+                const loadingElement = document.getElementById('loading');
+                
                 if (productListElement) {
-                    const loadingElement = document.getElementById('loading');
-                    if (loadingElement) loadingElement.classList.add('d-none');
+                    if (loadingElement) {
+                        loadingElement.classList.add('d-none');
+                    }
                     
                     productListElement.innerHTML = `
                         <div class="col-12 text-center py-4">
@@ -706,7 +739,10 @@
             const paginationContainer = document.getElementById('pagination-container');
             const noProductsElement = document.getElementById('no-products');
             
-            if (!productsContainer) return;
+            if (!productsContainer) {
+                console.warn('产品容器元素未找到');
+                return;
+            }
             
             // 如果没有产品，显示提示信息
             if (products.length === 0) {
@@ -1115,7 +1151,26 @@
             
             if (searchTerm) params.append('keyword', searchTerm);
             if (category) params.append('category', category);
-            if (sortOrder !== 'default') params.append('sortBy', sortOrder);
+            
+            // 修复排序参数映射
+            if (sortOrder !== 'default') {
+                let sortBy = '';
+                switch (sortOrder) {
+                    case 'price-asc':
+                        sortBy = 'priceasc';
+                        break;
+                    case 'price-desc':
+                        sortBy = 'pricedesc';
+                        break;
+                    case 'newest':
+                        sortBy = 'newest';
+                        break;
+                    default:
+                        sortBy = 'newest'; // 默认最新
+                        break;
+                }
+                params.append('sortBy', sortBy);
+            }
             
             // 缓存键
             const cacheKey = params.toString();
