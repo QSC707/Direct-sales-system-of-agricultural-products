@@ -9,7 +9,6 @@
 <img src="https://img.shields.io/badge/SQL%20Server-2022-red?logo=microsoftsqlserver&logoColor=white" alt="SQL Server 2022">
 <img src="https://img.shields.io/badge/Bootstrap-5-blueviolet?logo=bootstrap&logoColor=white" alt="Bootstrap 5">
 <img src="https://img.shields.io/badge/AJAX-Enabled-success?logo=javascript&logoColor=white" alt="AJAX Support">
-<img src="https://img.shields.io/badge/Security-Cookie%20Auth-green?logo=shield&logoColor=white" alt="Security - Cookie Auth">
 <img src="https://img.shields.io/badge/UI-Responsive%20Design-ff69b4?logo=html5&logoColor=white" alt="Responsive UI">
 
 </div>
