@@ -3,11 +3,17 @@
 
 <div align="center">
 
-![GitHub stars](https://img.shields.io/github/stars/QSC707/Direct-sales-system-of-agricultural-products?style=social)
-![GitHub forks](https://img.shields.io/github/forks/QSC707/Direct-sales-system-of-agricultural-products?style=social)
-![GitHub license](https://img.shields.io/github/license/QSC707/Direct-sales-system-of-agricultural-products)
-![.NET](https://img.shields.io/badge/.NET-8.0-blue)
-![SQL Server](https://img.shields.io/badge/SQL%20Server-2022-red)
+<div align="center">
+
+<img src="https://img.shields.io/badge/.NET-8.0-blue?logo=dotnet&logoColor=white" alt=".NET 8.0">
+<img src="https://img.shields.io/badge/SQL%20Server-2022-red?logo=microsoftsqlserver&logoColor=white" alt="SQL Server 2022">
+<img src="https://img.shields.io/badge/Bootstrap-5-blueviolet?logo=bootstrap&logoColor=white" alt="Bootstrap 5">
+<img src="https://img.shields.io/badge/AJAX-Enabled-success?logo=javascript&logoColor=white" alt="AJAX Support">
+<img src="https://img.shields.io/badge/Security-Cookie%20Auth-green?logo=shield&logoColor=white" alt="Security - Cookie Auth">
+<img src="https://img.shields.io/badge/UI-Responsive%20Design-ff69b4?logo=html5&logoColor=white" alt="Responsive UI">
+
+</div>
+
 
 **基于ASP.NET Core 8.0的现代化农产品直销电商平台**
 
